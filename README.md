@@ -1,2 +1,2 @@
-# sfml.rb
+# sfml3.rb
 SFML wrapped
