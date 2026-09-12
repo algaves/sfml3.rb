@@ -159,6 +159,19 @@ fabric.properties
 !.idea/codeStyles
 !.idea/runConfigurations
 
+### Agent config ###
+# Local-only agent/machine configuration
+AGENT.md
+AGENTS.md
+skills.json
+.opencode/
+.opencode
+.claude/
+.claude
+.cursor/
+.windsurf/
+.agents/
+
 ### Ruby ###
 *.gem
 *.rbc

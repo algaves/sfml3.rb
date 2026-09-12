@@ -3,9 +3,9 @@ require_relative 'lib/sfml/version'
 Gem::Specification.new do |s|
     s.name        = 'sfml'
     s.version     = SFML::VERSION
-    s.summary     = 'SFML wrappe for Ruby'
-    s.description = ''
-    s.homepage    = 'https://github.com/sfml.rb/'
+    s.summary     = 'SFML wrapper for Ruby'
+    s.description = 'Ruby bindings for SFML. Currently based on SFML 2 via CSFML; migrating to SFML 3.'
+    s.homepage    = 'https://github.com/algaves/sfml3.rb'
     
     s.authors     = ['Sealtiel Valderrama']
     s.email       = 'SealtielFreak@yandex.com'
