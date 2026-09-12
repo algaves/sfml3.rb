@@ -3,6 +3,11 @@ require_relative 'lib/sfml/version'
 
 task default: 'all'
 
+task :compile do
+  sh 'ruby ext/extconf.rb'
+  sh 'make -C ext'
+end
+
 task :uninstall do
   system "gem uninstall sfml"
 end
@@ -15,8 +20,12 @@ task :install do
   system "gem install sfml-#{SFML::VERSION}.gem"
 end
 
-task :test do
-  #system 'ruby test/hello-world.rb'
+task :test => :compile do
+  sh 'ruby -Ilib -Iext test/sfml_test.rb'
+end
+
+task :rubocop do
+  sh 'bundle exec rubocop'
 end
 
 task :all do

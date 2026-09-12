@@ -13,6 +13,8 @@ Gem::Specification.new do |s|
 
     s.required_ruby_version = '>= 2.5.0'
 
+    s.add_dependency 'rice'
+
     s.files       = Dir.glob('ext/**/*.{h,c,rb,sh}') +
                     Dir.glob('lib/**/*.{rb}') +
                     Dir.glob('test/**/*.{rb,png,otf}') +
