@@ -18,6 +18,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 * `CMakeLists.txt` rewritten into a real, buildable configuration (CLion/IDE use only — `rake compile` remains the build of record): resolves the vendored `ports/<host>` prefix, links `find_package(SFML 3 ...)` and the CSFML static archives, and links through the C++ driver, since SFML is C++.
 
 ### Changed
+* **Packaging now produces precompiled binary gems** alongside the source gem. `rake gem:native` cross-compiles for `x86_64-linux-gnu`, `x64-mingw-ucrt`, `aarch64-linux-gnu`, `x86_64-linux-musl`, `x86_64-darwin` and `arm64-darwin` inside [rake-compiler-dock](https://github.com/rake-compiler/rake-compiler-dock); `rake platforms` lists them. On a covered platform `gem install sfml3-rb` no longer needs a toolchain, CMake, or a source build at all. The source gem remains the fallback everywhere else, unchanged in behaviour.
+* The extension build moved from a hand-rolled `rake compile` (`ruby extconf.rb && make` inside `ext/`, then a manual copy) to `rake-compiler`'s `Rake::ExtensionTask`. Builds are now out of tree in `tmp/`, so `ext/` no longer accumulates 23 `.o` files, a `Makefile` and `mkmf.log` beside its sources.
+* `lib/sfml.rb` prefers `sfml/<major.minor>/sfml_ext` — the per-ABI layout binary gems use — and falls back to `sfml/sfml_ext` for a source build.
+* `ext/ports.rb` is now cross-aware: prefixes and build trees are keyed by target (`ports/<target>`) rather than by host, and a CMake toolchain file is generated per target. `SFML_TARGET` selects one; a native build is unaffected.
 * Project renamed to sfml3.rb; **migrated from SFML 2 to SFML 3** (via CSFML 3) — no longer just planned. Distro CSFML packages are frequently still 2.x and are no longer supported.
 * Native extension renamed from the bare `ext` to `sfml/sfml_ext`, matching the `sfml` gem namespace and what `rake-compiler` cross-compilation expects.
 * `event_name.c` and `keyboard.c` name tables are now indexed by named enum constant (C99 designated initializers) instead of raw ordinal position, so a future upstream reorder is a compile error rather than a silently wrong event or key name.
@@ -40,5 +44,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Known issues
 * `Circle#scale` returns the shape's position, not its scale (`ext/circle.c`).
-* Precompiled native gems are not yet in place, and `.github/workflows/publish.yaml` still builds a source-only gem with a broken `gem push` step (see `test.yaml`/`publish.yaml`).
+* Of the six binary-gem targets, only `x86_64-linux-gnu` has been verified end to end (built, installed, full suite passes). `x64-mingw-ucrt` cross-builds and links cleanly with correct PE imports but has not been run on Windows. `aarch64-linux-gnu`, `x86_64-linux-musl`, `x86_64-darwin` and `arm64-darwin` have not been built yet and are marked `experimental` in `publish.yaml`, so a failure can't hold back a release.
+* The Windows gem imports `libwinpthread-1.dll`, which RubyInstaller ships in its `ruby_builtin_dlls` directory. If that ever proves unreliable, add `-lwinpthread` to the `-Wl,-Bstatic` group in `Ports.cxx_runtime`.
+* `bundle exec rubocop` does not pass on the repository as a whole (88 offenses, mostly `Style/FrozenStringLiteralComment` and the gemspec's 4-space indentation) — this predates the packaging work and `check.yaml` has been failing on it.
 * [TODO.md](TODO.md) tracks SFML 3 → Ruby API porting coverage, module by module.
