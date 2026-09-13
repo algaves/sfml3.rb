@@ -70,7 +70,7 @@ static VALUE Event_key(VALUE self) {
 static VALUE Event_size(VALUE self) {
     sfEvent *event = Get_Event_Struct(self);
 
-    return vec2_new(event->size.height, event->size.height);
+    return vec2_new(event->size.size.x, event->size.size.y);
 }
 
 static VALUE Event_text(VALUE self) {

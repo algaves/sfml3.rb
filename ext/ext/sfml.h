@@ -1,10 +1,16 @@
 #ifndef SFML_H
 #define SFML_H
 
-#include <SFML/Graphics.h>
-#include <SFML/Window.h>
-#include <SFML/System.h>
-#include <SFML/System/Vector2.h>
-#include <SFML/Graphics/RenderStates.h>
+#include <CSFML/Config.h>
+
+#if CSFML_VERSION_MAJOR < 3
+#error "This extension requires CSFML 3. Run `rake ports` to build it, or upgrade your system CSFML."
+#endif
+
+#include <CSFML/Graphics.h>
+#include <CSFML/Window.h>
+#include <CSFML/System.h>
+#include <CSFML/System/Vector2.h>
+#include <CSFML/Graphics/RenderStates.h>
 
 #endif //SFML_H

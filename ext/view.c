@@ -50,7 +50,7 @@ static VALUE View_set_position(VALUE self, VALUE rb_position) {
     sfVector2f position = VEC2_RB2C(rb_position);
     sfVector2f size = sfView_getSize(view);
 
-    sfFloatRect rect = {position.x, position.y, size.x, size.y};
+    sfFloatRect rect = {{position.x, position.y}, {size.x, size.y}};
 
     sfView_setViewport(Get_View_Struct(self), rect);
 
@@ -85,12 +85,12 @@ static VALUE View_set_viewport(VALUE self, VALUE rb_viewport) {
 
 static VALUE View_get_position(VALUE self) {
     sfFloatRect viewport = sfView_getViewport(Get_View_Struct(self));
-    return vec2_new(viewport.top, viewport.left);
+    return vec2_new(viewport.position.x, viewport.position.y);
 }
 
 
 static VALUE View_get_rotation(VALUE self) {
-    DBL2NUM(sfView_getRotation(Get_View_Struct(self)));
+    return DBL2NUM(sfView_getRotation(Get_View_Struct(self)));
 }
 
 
