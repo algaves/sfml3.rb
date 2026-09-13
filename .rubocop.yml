@@ -1,3 +1,9 @@
 AllCops:
   TargetRubyVersion: 2.5
   NewCops: enable
+
+# mkmf drives the build through these globals ($INCFLAGS, $LDFLAGS, $libs);
+# an extconf.rb cannot set compiler flags without them.
+Style/GlobalVars:
+  Exclude:
+    - 'ext/extconf.rb'
