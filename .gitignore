@@ -172,6 +172,10 @@ skills.json
 .windsurf/
 .agents/
 
+### Graphify ###
+# Knowledge graph build output — generated, not source
+graphify-out/
+
 ### Ruby ###
 *.gem
 *.rbc
