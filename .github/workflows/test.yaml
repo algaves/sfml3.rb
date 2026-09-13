@@ -1,8 +1,8 @@
 name: Test
 
 on:
-  push:
   pull_request:
+    branches: [main]
 
 jobs:
   test:
@@ -10,12 +10,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install CSFML and build deps
+      - name: Install build deps
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y libcsfml-dev build-essential libgl1-mesa-dev libx11-dev libxrandr-dev libxcursor-dev libudev-dev libopenal-dev
+          sudo apt-get install -y cmake build-essential libfreetype-dev libx11-dev libxrandr-dev libxcursor-dev libxi-dev libudev-dev libgl1-mesa-dev
 
-      - uses: ruby/setup-ruby@v2
+      - uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.2
           gems: |
