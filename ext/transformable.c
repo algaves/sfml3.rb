@@ -17,7 +17,6 @@ static sfTransformable *Transformable_create() {
 
 static void Transformable_free(void *ptr) {
     sfTransformable_destroy((sfTransformable *) ptr);
-    free(ptr);
 }
 
 static VALUE Transformable_new(VALUE klass) {

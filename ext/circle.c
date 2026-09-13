@@ -27,7 +27,6 @@ static sfCircleShape *Circle_create(float r) {
 
 static void Circle_free(void *ptr) {
     sfCircleShape_destroy(ptr);
-    free(ptr);
 }
 
 static VALUE Circle_new(int argc, VALUE *argv, VALUE klass) {

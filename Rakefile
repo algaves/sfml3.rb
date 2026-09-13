@@ -4,8 +4,8 @@ require_relative 'lib/sfml/version'
 task default: 'all'
 
 task :compile do
-  sh 'ruby ext/extconf.rb'
-  sh 'make -C ext'
+  sh 'ruby extconf.rb', chdir: 'ext'
+  sh 'make', chdir: 'ext'
 end
 
 task :uninstall do

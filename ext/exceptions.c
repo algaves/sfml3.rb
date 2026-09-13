@@ -18,9 +18,9 @@ void raise_invalid_arguments_excepted(int expected, size_t given) {
     char msg[MSG_LENGTH];
 
     if (expected > 0) {
-        sprintf(msg, "wrong number of arguments (given %ul, expected %i)", given, expected);
+        sprintf(msg, "wrong number of arguments (given %lu, expected %i)", given, expected);
     } else {
-        sprintf(msg, "wrong number of arguments (given %ul)", given);
+        sprintf(msg, "wrong number of arguments (given %lu)", given);
     }
 
 
@@ -30,7 +30,7 @@ void raise_invalid_arguments_excepted(int expected, size_t given) {
 void raise_invalid_array_length(size_t length) {
     char msg[MSG_LENGTH];
 
-    sprintf(msg, "invalid array length, expected length of %ul", length);
+    sprintf(msg, "invalid array length, expected length of %lu", length);
 
     rb_raise(rb_eArgError, "%s", msg);
 }

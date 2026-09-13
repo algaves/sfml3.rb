@@ -40,7 +40,7 @@ void Init_Transform(VALUE rb_module) {
     rb_mTransform = rb_define_module_under(rb_module, "Transform");
 
     rb_define_module_function(rb_mTransform, "combine", Transform_combine, 2);
-    rb_define_module_function(rb_mTransform, "inverse", Transform_combine, 1);
+    rb_define_module_function(rb_mTransform, "inverse", Transform_inverse, 1);
 }
 
 VALUE Transform_MatrixToArray(float *c_matrix) {

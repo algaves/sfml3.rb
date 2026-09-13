@@ -14,7 +14,6 @@ static sfClock *Clock_create() {
 
 static void Clock_free(void *ptr) {
     sfClock_destroy(ptr);
-    free(ptr);
 }
 
 static VALUE Clock_new(VALUE klass) {

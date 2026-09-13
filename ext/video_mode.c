@@ -62,6 +62,9 @@ void Init_VideoMode(VALUE rb_module) {
     // methods
     rb_define_method(rb_cMode, "initialize", VideoMode_init, 3);
     rb_define_method(rb_cMode, "available?", VideoMode_is_available, 0);
+    rb_define_attr(rb_cMode, "width", 1, 0);
+    rb_define_attr(rb_cMode, "height", 1, 0);
+    rb_define_attr(rb_cMode, "bits", 1, 0);
 }
 
 void *Get_Mode_Struct(VALUE self) {
