@@ -176,6 +176,11 @@ skills.json
 # Knowledge graph build output — generated, not source
 graphify-out/
 
+### Ports ###
+# Vendored SFML/CSFML source tarballs and their builds, produced by `rake ports`.
+# Phase B will decide whether to commit ports/archives for hermetic builds.
+ports/
+
 ### Ruby ###
 *.gem
 *.rbc
