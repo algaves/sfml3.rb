@@ -1,1 +1,1 @@
-require 'ext'
+require 'sfml/sfml_ext'

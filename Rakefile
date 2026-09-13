@@ -6,6 +6,12 @@ task default: 'all'
 task :compile do
   sh 'ruby extconf.rb', chdir: 'ext'
   sh 'make', chdir: 'ext'
+
+  # mkmf only applies the 'sfml/' prefix on install, so mirror the installed
+  # gem layout here. That way `require 'sfml/sfml_ext'` resolves with -Ilib
+  # alone, in development and once installed.
+  mkdir_p 'lib/sfml'
+  cp 'ext/sfml_ext.so', 'lib/sfml/sfml_ext.so'
 end
 
 task :uninstall do
@@ -21,7 +27,7 @@ task :install do
 end
 
 task :test => :compile do
-  sh 'ruby -Ilib -Iext test/sfml_test.rb'
+  sh 'ruby -Ilib test/sfml_test.rb'
 end
 
 task :rubocop do

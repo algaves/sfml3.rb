@@ -181,6 +181,10 @@ graphify-out/
 # Phase B will decide whether to commit ports/archives for hermetic builds.
 ports/
 
+### Extension build artifacts ###
+ext/Makefile
+ext/mkmf.log
+
 ### Ruby ###
 *.gem
 *.rbc
