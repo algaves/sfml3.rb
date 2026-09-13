@@ -33,17 +33,3 @@ module System
     RUBY_ENGINE == 'jruby'
   end
 end
-
-def library_nofound
-  raise 'You need install lib of SFML and Box2D in your system'
-end
-
-def run_script(filename)
-  system "sh ./#{filename}"
-end
-
-module Arguments
-  def Arguments.include?(flag)
-    ARGV.include? flag
-  end
-end
