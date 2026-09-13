@@ -3,32 +3,88 @@ name: Publish
 on:
   release:
     types: [published]
+  workflow_dispatch:
 
 jobs:
-  publish:
+  source:
+    name: Source gem
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@v4
 
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.2
-          gems: |
-            bundler
+          ruby-version: '3.3'
+          bundler-cache: true
 
-      - name: Install gems
-        run: bundle install --jobs 4
+      - run: bundle exec rake gem
 
-      - name: Build gem
-        run: gem build sfml3-rb.gemspec
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gem-ruby
+          path: pkg/*.gem
 
-      - name: Publish gem
-        run: |
-          gem push sfml3-rb-*.gem \
-            -k rubygems \
-            --host https://rubygems.org \
-            ENV["RUBYGEMS_API_KEY"]
+  native:
+    name: ${{ matrix.platform }}
+    runs-on: ubuntu-latest
+    # An experimental platform failing must not hold back the release; the
+    # source gem still covers it.
+    continue-on-error: ${{ matrix.experimental || false }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: x86_64-linux-gnu
+          - platform: x64-mingw-ucrt
+          - platform: aarch64-linux-gnu
+            experimental: true
+          - platform: x86_64-linux-musl
+            experimental: true
+          - platform: x86_64-darwin
+            experimental: true
+          - platform: arm64-darwin
+            experimental: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
+      # Cross-compiles inside rake-compiler-dock; the runner's Docker provides
+      # the container and the image is pulled on first use.
+      - run: bundle exec rake gem:${{ matrix.platform }}
+
+      # Only the platform gem: `rake native:<plat> gem` re-points the shared
+      # `gem` task at the native spec but leaves the source gem in pkg/ too,
+      # and uploading that from six jobs would push it six times.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gem-${{ matrix.platform }}
+          path: pkg/*-${{ matrix.platform }}.gem
+
+  publish:
+    needs: [source, native]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: pkg
+          pattern: gem-*
+          merge-multiple: true
+
+      - name: Publish to RubyGems
         env:
-          RUBYGEMS_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
+          GEM_HOST_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
+        run: |
+          for gem in pkg/*.gem; do
+            echo "Pushing $gem"
+            gem push "$gem"
+          done
