@@ -4,8 +4,9 @@ Gem::Specification.new do |s|
     s.name        = 'sfml3-rb'
     s.version     = SFML::VERSION
     s.summary     = 'SFML wrapper for Ruby'
-    s.description = 'Ruby bindings for SFML 3 via CSFML. SFML and CSFML are downloaded and ' \
-                    'built from source at install time, so neither needs to be installed system-wide.'
+    s.description = 'Ruby bindings for SFML 3 via CSFML. Precompiled binaries are published for ' \
+                    'common platforms; elsewhere SFML and CSFML are downloaded and built from ' \
+                    'source at install time, so neither needs to be installed system-wide.'
     s.homepage    = 'https://github.com/algaves/sfml3.rb'
 
     s.authors     = ['Sealtiel Valderrama']
@@ -20,9 +21,7 @@ Gem::Specification.new do |s|
         'changelog_uri'     => 'https://github.com/algaves/sfml3.rb/blob/main/CHANGELOG.md',
     }
 
-    s.add_dependency 'rice', '~> 4.0'
-
-    s.files       = Dir.glob('ext/**/*.{h,c,rb,sh}') +
+    s.files       = Dir.glob('ext/**/*.{h,c,rb}') +
                     Dir.glob('lib/**/*.rb') +
                     ['README.md', 'LICENSE.md']
 
