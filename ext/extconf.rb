@@ -19,7 +19,7 @@ SYSTEM_LIBS = %w[csfml-graphics csfml-window csfml-system].freeze
 def use_vendored_ports
   unless System.linux?
     abort "Building the vendored SFML currently supports Linux only.\n" \
-          'Install CSFML 3 and reinstall with: gem install sfml -- --enable-system-libraries'
+          'Install CSFML 3 and reinstall with: gem install sfml3-rb -- --enable-system-libraries'
   end
 
   $INCFLAGS = "-I#{Ports::PREFIX}/include #{$INCFLAGS}"

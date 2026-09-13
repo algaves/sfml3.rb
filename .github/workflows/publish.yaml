@@ -22,11 +22,11 @@ jobs:
         run: bundle install --jobs 4
 
       - name: Build gem
-        run: gem build sfml.gemspec
+        run: gem build sfml3-rb.gemspec
 
       - name: Publish gem
         run: |
-          gem push sfml-*.gem \
+          gem push sfml3-rb-*.gem \
             -k rubygems \
             --host https://rubygems.org \
             ENV["RUBYGEMS_API_KEY"]

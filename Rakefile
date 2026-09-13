@@ -15,15 +15,15 @@ task :compile do
 end
 
 task :uninstall do
-  system "gem uninstall sfml"
+  system "gem uninstall sfml3-rb"
 end
 
 task :build do
-  system "gem build sfml.gemspec"
+  system "gem build sfml3-rb.gemspec"
 end
 
 task :install do
-  system "gem install sfml-#{SFML::VERSION}.gem"
+  system "gem install sfml3-rb-#{SFML::VERSION}.gem"
 end
 
 task :test => :compile do

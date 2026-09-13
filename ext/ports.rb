@@ -76,7 +76,7 @@ module Ports
 
     If you already have CSFML 3 installed system-wide, skip this build with:
 
-      gem install sfml -- --enable-system-libraries
+      gem install sfml3-rb -- --enable-system-libraries
   HINT
 
   module_function

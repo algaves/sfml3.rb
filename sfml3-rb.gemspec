@@ -1,7 +1,7 @@
 require_relative 'lib/sfml/version'
 
 Gem::Specification.new do |s|
-    s.name        = 'sfml'
+    s.name        = 'sfml3-rb'
     s.version     = SFML::VERSION
     s.summary     = 'SFML wrapper for Ruby'
     s.description = 'Ruby bindings for SFML 3 via CSFML. SFML and CSFML are downloaded and ' \

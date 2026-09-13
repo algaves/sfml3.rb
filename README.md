@@ -4,7 +4,7 @@ Ruby bindings for [SFML 3](https://www.sfml-dev.org/), via its C API, [CSFML](ht
 
 ## Status
 
-Bound against **CSFML 3**. `gem install sfml` downloads and builds SFML 3 and CSFML 3 from source
+Bound against **CSFML 3**. `gem install sfml3-rb` downloads and builds SFML 3 and CSFML 3 from source
 automatically — neither needs to be installed system-wide. See [TODO.md](TODO.md) for which parts of
 the SFML 3 API are ported so far, and [CHANGELOG.md](CHANGELOG.md) for what changed recently.
 
@@ -32,7 +32,7 @@ Already have CSFML 3 installed system-wide? Skip the source build entirely — s
 ## Install
 
 ```sh
-gem install sfml
+gem install sfml3-rb
 ```
 
 This builds SFML 3 and CSFML 3 from source, which takes roughly half a minute. Each installed gem
@@ -41,7 +41,7 @@ version builds its own copy; there's no build cache shared across versions.
 To link against a system CSFML 3 instead (no download, no build):
 
 ```sh
-gem install sfml -- --enable-system-libraries
+gem install sfml3-rb -- --enable-system-libraries
 ```
 
 ## Usage

@@ -12,7 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 * Unit tests (minitest) for Clock, Transformable, Circle, RenderState, VideoMode — headless, deterministic; avoid Circle#scale due to a known bug.
 * RuboCop configuration and CI integration (test, check, publish workflows).
 * Publish GitHub Action to build and upload the gem on release.
-* `ext/ports.rb`: downloads, checksum-verifies, and builds SFML 3.0.2 and CSFML 3.0.0 from source into a static, position-independent prefix. Ships inside the gem, so `gem install sfml` builds its own dependencies with no CSFML pre-installed. Shared by `rake ports` (development) and `ext/extconf.rb` (install time).
+* `ext/ports.rb`: downloads, checksum-verifies, and builds SFML 3.0.2 and CSFML 3.0.0 from source into a static, position-independent prefix. Ships inside the gem, so `gem install sfml3-rb` builds its own dependencies with no CSFML pre-installed. Shared by `rake ports` (development) and `ext/extconf.rb` (install time).
 * `ext/extconf.rb` three-way dependency resolution: `--enable-system-libraries` (or `SFML_USE_SYSTEM_LIBRARIES`) links a system CSFML 3; otherwise an existing `ports/<host>` prefix is reused, or built automatically.
 * A compile-time `CSFML_VERSION_MAJOR < 3` guard (`ext/ext/sfml.h`) and an `extconf.rb` header check, so a CSFML 2.x install fails with one actionable message instead of a wall of compiler errors.
 * `CMakeLists.txt` rewritten into a real, buildable configuration (CLion/IDE use only — `rake compile` remains the build of record): resolves the vendored `ports/<host>` prefix, links `find_package(SFML 3 ...)` and the CSFML static archives, and links through the C++ driver, since SFML is C++.
@@ -24,7 +24,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 * `Window#clear` now takes a single `[r, g, b, a]` color array, matching every other color-setting method in the API, instead of three positional numbers.
 * Removed the dead `install-package` extconf hook and its accompanying `ext/linux.sh` (empty) and `ext/msys2.sh` stubs, and the unused `run_script`/`Arguments`/`library_nofound` helpers in `ext/auxlib.rb`.
 * Removed the vendored `include/ruby/*.h` stubs and the empty `include/SFML/CSFML headers` placeholder; nothing referenced them once `CMakeLists.txt` was fixed to query the real Ruby headers.
-* `sfml.gemspec`: description now describes the self-building install rather than a still-planned migration; license changed to `0BSD`, matching `LICENSE.md`.
+* `sfml.gemspec` → `sfml3-rb.gemspec`: description now describes the self-building install rather than a still-planned migration; license changed to `0BSD`, matching `LICENSE.md`.
+* **Gem package renamed from `sfml` to `sfml3-rb`** (`gem install sfml3-rb`). `require 'sfml'` and the `SFML` Ruby module are unchanged — only the RubyGems package name moved.
 
 ### Fixed
 * Gem metadata: summary typo, empty description, incorrect homepage.
