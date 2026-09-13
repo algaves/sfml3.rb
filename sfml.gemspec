@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
 
     s.authors     = ['Sealtiel Valderrama']
     s.email       = 'SealtielFreak@yandex.com'
-    s.license     = 'LGPL-2.1-only'
+    s.license     = '0BSD'
 
     s.required_ruby_version = '>= 2.5.0'
 

@@ -24,7 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 * `Window#clear` now takes a single `[r, g, b, a]` color array, matching every other color-setting method in the API, instead of three positional numbers.
 * Removed the dead `install-package` extconf hook and its accompanying `ext/linux.sh` (empty) and `ext/msys2.sh` stubs, and the unused `run_script`/`Arguments`/`library_nofound` helpers in `ext/auxlib.rb`.
 * Removed the vendored `include/ruby/*.h` stubs and the empty `include/SFML/CSFML headers` placeholder; nothing referenced them once `CMakeLists.txt` was fixed to query the real Ruby headers.
-* `sfml.gemspec`: description now describes the self-building install rather than a still-planned migration; `LGPL-2.1` → the non-deprecated `LGPL-2.1-only` SPDX identifier.
+* `sfml.gemspec`: description now describes the self-building install rather than a still-planned migration; license changed to `0BSD`, matching `LICENSE.md`.
 
 ### Fixed
 * Gem metadata: summary typo, empty description, incorrect homepage.
