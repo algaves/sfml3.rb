@@ -1,8 +1,8 @@
 name: Test
 
 on:
-  push:
   pull_request:
+    branches: [main]
 
 jobs:
   test:
@@ -10,23 +10,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install CSFML and build deps
+      # Only the X11/udev/GL stack comes from the system. FreeType, SFML and
+      # CSFML are built from pinned, checksummed source by `rake ports`, so no
+      # libcsfml package is involved -- the distro one is still CSFML 2.x and
+      # would not work anyway.
+      - name: Install SFML build dependencies
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y libcsfml-dev build-essential libgl1-mesa-dev libx11-dev libxrandr-dev libxcursor-dev libudev-dev libopenal-dev
+          sudo apt-get install -y build-essential cmake \
+            libx11-dev libxrandr-dev libxcursor-dev libxi-dev libudev-dev libgl1-mesa-dev
 
-      - uses: ruby/setup-ruby@v2
+      - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.2
-          gems: |
-            bundler
-            rake
-            minitest
-            rubocop
-            rice
+          ruby-version: '3.3'
+          bundler-cache: true
 
-      - name: Install gems
-        run: bundle install --jobs 4
+      # Building SFML from source dominates the run time and the sources are
+      # pinned by checksum, so the recipe is the whole cache key.
+      - uses: actions/cache@v4
+        with:
+          path: ports
+          key: ports-${{ runner.os }}-${{ hashFiles('ext/ports.rb') }}
 
       - name: Run tests
         run: bundle exec rake test

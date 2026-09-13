@@ -1,8 +1,8 @@
 name: Check
 
 on:
-  push:
   pull_request:
+    branches: [main]
 
 jobs:
   check:
@@ -10,15 +10,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: ruby/setup-ruby@v2
+      - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.2
-          gems: |
-            bundler
-            rubocop
-
-      - name: Install gems
-        run: bundle install --jobs 4
+          ruby-version: '3.3'
+          bundler-cache: true
 
       - name: Run RuboCop
         run: bundle exec rubocop
+
+      - name: Check shell scripts
+        run: shellcheck script/provision.sh

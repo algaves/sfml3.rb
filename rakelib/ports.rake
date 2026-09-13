@@ -5,21 +5,21 @@ require_relative '../ext/ports'
 # there, not here.
 
 namespace :ports do
-  desc 'Download and verify the pinned SFML and CSFML source tarballs'
+  desc 'Download and verify the pinned FreeType, SFML and CSFML source tarballs'
   task :fetch do
     Ports::RECIPES.each { |recipe| Ports.fetch(recipe) }
   end
 
-  desc 'Build SFML and CSFML into ports/<host>'
+  desc 'Build FreeType, SFML and CSFML into ports/<target>'
   task :build do
     Ports.build!
   end
 
-  desc 'Remove built ports, keeping downloaded tarballs'
+  desc 'Remove built ports for the current target, keeping downloaded tarballs'
   task :clean do
-    rm_rf [Ports::BUILD, Ports::PREFIX]
+    rm_rf [Ports.build_root, Ports.prefix]
   end
 end
 
-desc 'Build the vendored SFML and CSFML dependencies'
+desc 'Build the vendored FreeType, SFML and CSFML dependencies'
 task ports: 'ports:build'

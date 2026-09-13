@@ -1,41 +1,41 @@
-require 'rake'
-require_relative 'lib/sfml/version'
+require 'rake/clean'
+require 'rake/extensiontask'
+require 'rake/testtask'
+require 'rubygems/package_task'
 
-task default: 'all'
+require_relative 'ext/ports'
 
-task :compile do
-  sh 'ruby extconf.rb', chdir: 'ext'
-  sh 'make', chdir: 'ext'
+GEMSPEC = Gem::Specification.load(File.expand_path('sfml3-rb.gemspec', __dir__))
 
-  # mkmf only applies the 'sfml/' prefix on install, so mirror the installed
-  # gem layout here. That way `require 'sfml/sfml_ext'` resolves with -Ilib
-  # alone, in development and once installed.
-  mkdir_p 'lib/sfml'
-  cp 'ext/sfml_ext.so', 'lib/sfml/sfml_ext.so'
+# Builds out of tree into tmp/ and copies the result to lib/sfml/, so `require
+# 'sfml/sfml_ext'` resolves with -Ilib alone in development and once installed.
+# Cross builds are driven from rakelib/package.rake, which runs this same task
+# inside a rake-compiler-dock container.
+Rake::ExtensionTask.new('sfml_ext', GEMSPEC) do |ext|
+  ext.ext_dir = 'ext'
+  ext.lib_dir = 'lib/sfml'
+  ext.cross_compile = true
+  ext.cross_platform = Ports::TARGETS.keys
+
+  # A binary gem never runs extconf, so the sources and the ports recipe are
+  # dead weight in it -- and shipping them would imply a build that can't happen.
+  ext.cross_compiling { |spec| spec.files.reject! { |f| f.start_with?('ext/') } }
 end
 
-task :uninstall do
-  system "gem uninstall sfml3-rb"
-end
+Gem::PackageTask.new(GEMSPEC).define
 
-task :build do
-  system "gem build sfml3-rb.gemspec"
+Rake::TestTask.new(:test) do |t|
+  t.libs << 'lib'
+  t.test_files = FileList['test/sfml_test.rb']
 end
+task test: :compile
 
-task :install do
-  system "gem install sfml3-rb-#{SFML::VERSION}.gem"
-end
-
-task :test => :compile do
-  sh 'ruby -Ilib test/sfml_test.rb'
-end
-
+desc 'Run RuboCop'
 task :rubocop do
   sh 'bundle exec rubocop'
 end
 
-task :all do
-  Rake::Task['uninstall'].invoke
-  Rake::Task['build'].invoke
-  Rake::Task['install'].invoke
-end
+CLEAN.include('tmp', 'lib/sfml/**/sfml_ext.{so,bundle,dll}')
+CLOBBER.include('pkg', 'ports/build')
+
+task default: :test
