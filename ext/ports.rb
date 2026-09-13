@@ -4,8 +4,8 @@ require 'fileutils'
 require 'open-uri'
 require 'rbconfig'
 
-# Downloads, verifies and builds SFML 3 and CSFML 3 from source into
-# ports/<host>, static and position-independent, so the extension links them
+# Downloads, verifies and builds FreeType, SFML 3 and CSFML 3 from source into
+# ports/<target>, static and position-independent, so the extension links them
 # directly and the resulting .so has no libsfml/libcsfml runtime dependency.
 #
 # This lives under ext/ rather than rakelib/ because the gemspec ships
@@ -13,36 +13,82 @@ require 'rbconfig'
 # dependencies. For the same reason it uses no Rake helpers -- Rake is not
 # guaranteed to be loaded during an extension build.
 #
-# Two entry points call it: `rake ports` (development) and ext/extconf.rb
-# (install time).
+# Three entry points call it: `rake ports` (development), ext/extconf.rb
+# (source-gem install time), and `rake gem:native` (cross-compilation inside
+# rake-compiler-dock, which exports SFML_TARGET).
 module Ports
   ROOT = File.expand_path('../ports', __dir__)
   ARCHIVES = File.join(ROOT, 'archives')
-  BUILD = File.join(ROOT, 'build')
-  PREFIX = File.join(ROOT, RbConfig::CONFIG['host'])
 
-  # CMAKE_INSTALL_LIBDIR is pinned because GNUInstallDirs otherwise picks lib64
-  # on Fedora/RHEL and lib on Debian, which would split SFML and CSFML across
-  # two directories.
-  COMMON_FLAGS = %W[
-    -DCMAKE_INSTALL_PREFIX=#{PREFIX}
-    -DCMAKE_PREFIX_PATH=#{PREFIX}
-    -DCMAKE_BUILD_TYPE=Release
-    -DBUILD_SHARED_LIBS=OFF
-    -DCMAKE_POSITION_INDEPENDENT_CODE=ON
-    -DCMAKE_INSTALL_LIBDIR=lib
-  ].freeze
+  # Cross targets, keyed by the RubyGems platform name that rake-compiler and
+  # rake-compiler-dock use for them. `triple` is the GNU host triple whose
+  # toolchain the matching rake-compiler-dock image installs as <triple>-gcc.
+  TARGETS = {
+    'x86_64-linux-gnu' => { triple: 'x86_64-linux-gnu', os: :linux, cpu: 'x86_64' },
+    'aarch64-linux-gnu' => { triple: 'aarch64-linux-gnu', os: :linux, cpu: 'aarch64' },
+    'x86_64-linux-musl' => { triple: 'x86_64-unknown-linux-musl', os: :linux, cpu: 'x86_64' },
+    'x64-mingw-ucrt' => { triple: 'x86_64-w64-mingw32', os: :windows, cpu: 'x86_64' },
+    'x86_64-darwin' => { triple: 'x86_64-apple-darwin', os: :darwin, cpu: 'x86_64' },
+    'arm64-darwin' => { triple: 'aarch64-apple-darwin', os: :darwin, cpu: 'arm64' }
+  }.freeze
 
-  # Order matters: CSFML does find_package(SFML 3 ... REQUIRED) and does not
-  # fetch SFML itself, so SFML must already be installed into PREFIX.
+  CMAKE_SYSTEM = { linux: 'Linux', windows: 'Windows', darwin: 'Darwin' }.freeze
+
+  # osxcross ships clang wrappers rather than gcc ones.
+  COMPILERS = {
+    darwin: %w[clang clang++],
+    linux: %w[gcc g++],
+    windows: %w[gcc g++]
+  }.freeze
+
+  # What the extension links on top of the static SFML/CSFML/FreeType archives.
+  # SFML resolves GL entry points through its own loader, so on Linux libGL is
+  # only needed for the handful of symbols SFML references directly.
+  SYSTEM_LIBS = {
+    linux: %w[GL X11 Xrandr Xcursor Xi udev pthread dl rt m],
+    windows: %w[opengl32 winmm gdi32 user32 advapi32 ole32],
+    darwin: %w[]
+  }.freeze
+
+  # Clang wants -framework, not -l, and SFML's macOS backend is Objective-C++.
+  FRAMEWORKS = { darwin: %w[Cocoa OpenGL IOKit Carbon], linux: [], windows: [] }.freeze
+
+  # Order matters. CSFML does find_package(SFML 3 ... REQUIRED) and does not
+  # fetch SFML itself, and SFML does find_package(Freetype REQUIRED) once
+  # SFML_USE_SYSTEM_DEPS is on -- so each has to be installed into PREFIX
+  # before the next configures.
+  #
+  # FreeType is built here rather than left to SFML because SFML's own
+  # FetchContent path clones it from git (no checksum, needs git at configure
+  # time) and then does not install the resulting archive -- which leaves
+  # libsfml-graphics-s.a with an undefined FT_Init_FreeType that only stays
+  # latent while nothing binds sf::Font. Pinning it as a port fixes both.
+  #
   # Audio and network are off because the binding wraps neither, which also
   # drops the FLAC/Ogg/Vorbis and mbedtls dependency families.
   RECIPES = [
+    {
+      name: 'freetype',
+      version: '2.13.2',
+      sha256: '1ac27e16c134a7f2ccea177faba19801131116fd682efc1f5737037c5db224b5',
+      url: 'https://download.savannah.gnu.org/releases/freetype/freetype-%<version>s.tar.gz',
+      # FreeType 2.13.2 still declares cmake_minimum_required(VERSION 3.0),
+      # which CMake 4 refuses outright. Older CMake ignores the variable.
+      flags: %w[
+        -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+        -DFT_DISABLE_ZLIB=ON
+        -DFT_DISABLE_BZIP2=ON
+        -DFT_DISABLE_PNG=ON
+        -DFT_DISABLE_HARFBUZZ=ON
+        -DFT_DISABLE_BROTLI=ON
+      ]
+    },
     {
       name: 'SFML',
       version: '3.0.2',
       sha256: '0034e05f95509e5d3fb81b1625713e06da7b068f210288ce3fd67106f8f46995',
       flags: %w[
+        -DSFML_USE_SYSTEM_DEPS=ON
         -DSFML_BUILD_AUDIO=OFF
         -DSFML_BUILD_NETWORK=OFF
         -DSFML_BUILD_EXAMPLES=OFF
@@ -68,21 +114,93 @@ module Ports
     X11/udev/OpenGL development headers. SFML links those from the system and
     they cannot be bundled.
 
-      Fedora/RHEL    sudo dnf install cmake gcc-c++ freetype-devel libX11-devel \\
+      Fedora/RHEL    sudo dnf install cmake gcc-c++ libX11-devel \\
                        libXrandr-devel libXcursor-devel libXi-devel systemd-devel libglvnd-devel
 
-      Debian/Ubuntu  sudo apt-get install cmake build-essential libfreetype-dev libx11-dev \\
+      Debian/Ubuntu  sudo apt-get install cmake build-essential libx11-dev \\
                        libxrandr-dev libxcursor-dev libxi-dev libudev-dev libgl1-mesa-dev
 
     If you already have CSFML 3 installed system-wide, skip this build with:
 
       gem install sfml3-rb -- --enable-system-libraries
+
+    A precompiled binary gem may also be available for your platform; upgrading
+    RubyGems (gem update --system) lets it be selected automatically.
   HINT
 
   module_function
 
+  # The RubyGems platform being built for. rake-compiler-dock invocations set
+  # this explicitly; a native build falls back to the host triple, which is not
+  # a TARGETS key and so uses the native toolchain and native system headers.
+  def target
+    ENV.fetch('SFML_TARGET', nil) || RbConfig::CONFIG['host']
+  end
+
+  def cross?
+    TARGETS.key?(target)
+  end
+
+  def spec
+    TARGETS.fetch(target)
+  end
+
+  # Each target gets its own prefix so a cross build never reuses the host's
+  # archives -- they are the same file names with an incompatible ABI.
+  def prefix
+    File.join(ROOT, target)
+  end
+
+  def build_root
+    File.join(ROOT, 'build', target)
+  end
+
+  def os
+    return spec[:os] if cross?
+
+    case RbConfig::CONFIG['host_os']
+    when /darwin/ then :darwin
+    when /mingw|mswin|cygwin/ then :windows
+    else :linux
+    end
+  end
+
+  def libs
+    SYSTEM_LIBS.fetch(os)
+  end
+
+  def frameworks
+    FRAMEWORKS.fetch(os)
+  end
+
+  # On Windows the CSFML and SFML headers declare every entry point
+  # __declspec(dllimport) unless told the build is static, which leaves the
+  # link hunting for __imp_-prefixed symbols that a static archive never has.
+  # Applies to any Windows build against the vendored ports, cross or native.
+  def defines
+    return [] unless os == :windows
+
+    %w[-DCSFML_STATIC -DSFML_STATIC]
+  end
+
+  # SFML is C++, but mkmf links the extension with `gcc -shared` because every
+  # source here is C -- so libstdc++ has to be named explicitly, and
+  # -static-libstdc++ does nothing, since it only redirects the -lstdc++ the
+  # driver would have added itself.
+  #
+  # For a binary gem that matters: a Windows user has no libstdc++-6.dll, and
+  # a musl one may have no libstdc++ at all. -Bstatic/-Bdynamic pins just this
+  # one library to its archive and is understood by both GNU ld and mingw's.
+  # macOS resolves C++ through the system libc++ and needs none of it.
+  def cxx_runtime
+    return [] if os == :darwin
+    return ['-lstdc++'] unless cross?
+
+    ['-Wl,-Bstatic', '-lstdc++', '-Wl,-Bdynamic']
+  end
+
   def built?
-    Dir.exist?(File.join(PREFIX, 'include', 'CSFML'))
+    Dir.exist?(File.join(prefix, 'include', 'CSFML'))
   end
 
   def build!
@@ -97,7 +215,7 @@ module Ports
   end
 
   def source_dir(recipe)
-    File.join(BUILD, "#{recipe[:name]}-#{recipe[:version]}")
+    File.join(build_root, "#{recipe[:name]}-#{recipe[:version]}")
   end
 
   def fetch(recipe)
@@ -113,8 +231,14 @@ module Ports
           "expected #{recipe[:sha256]}\nactual   #{actual}"
   end
 
+  def url_for(recipe)
+    template = recipe[:url] ||
+               "https://github.com/SFML/#{recipe[:name]}/archive/refs/tags/%<version>s.tar.gz"
+    format(template, version: recipe[:version])
+  end
+
   def download(recipe, path)
-    url = "https://github.com/SFML/#{recipe[:name]}/archive/refs/tags/#{recipe[:version]}.tar.gz"
+    url = url_for(recipe)
     puts "Downloading #{url}"
 
     FileUtils.mkdir_p(ARCHIVES)
@@ -136,17 +260,102 @@ module Ports
     FileUtils.mv(partial, path)
   end
 
+  # CMAKE_INSTALL_LIBDIR is pinned because GNUInstallDirs otherwise picks lib64
+  # on Fedora/RHEL and lib on Debian, which would split the ports across two
+  # directories that extconf would then both have to know about.
+  def common_flags
+    flags = %W[
+      -DCMAKE_INSTALL_PREFIX=#{prefix}
+      -DCMAKE_PREFIX_PATH=#{prefix}
+      -DCMAKE_BUILD_TYPE=Release
+      -DBUILD_SHARED_LIBS=OFF
+      -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+      -DCMAKE_INSTALL_LIBDIR=lib
+    ]
+    flags << "-DCMAKE_TOOLCHAIN_FILE=#{toolchain_file}" if cross?
+    flags
+  end
+
+  # The musl toolchain rake-compiler-dock builds with musl-cross-make installs
+  # its sysroot here, and build/provision.sh unpacks Alpine's X11 development
+  # files into it.
+  def musl_sysroot
+    "/usr/#{spec[:triple]}"
+  end
+
+  # osxcross keeps the macOS SDK under its target directory; the exact version
+  # tracks the rake-compiler-dock image, so find it rather than pin it.
+  def osx_sysroot
+    ENV.fetch('SFML_OSX_SYSROOT', nil) ||
+      Dir.glob('/opt/osxcross/target/SDK/MacOSX*.sdk').max ||
+      raise("No macOS SDK found under /opt/osxcross/target/SDK.\n#{TOOLCHAIN_HINT}")
+  end
+
+  # Written rather than shipped because the prefix and triple are only known at
+  # build time, and CMake needs a real file path for CMAKE_TOOLCHAIN_FILE.
+  def toolchain_file
+    path = File.join(build_root, 'toolchain.cmake')
+    return path if File.exist?(path)
+
+    FileUtils.mkdir_p(build_root)
+    File.write(path, toolchain_source)
+    path
+  end
+
+  def toolchain_source
+    cc, cxx = COMPILERS.fetch(spec[:os])
+    roots = [prefix]
+    lines = [
+      "set(CMAKE_SYSTEM_NAME #{CMAKE_SYSTEM.fetch(spec[:os])})",
+      "set(CMAKE_SYSTEM_PROCESSOR #{spec[:cpu]})",
+      "set(CMAKE_C_COMPILER #{spec[:triple]}-#{cc})",
+      "set(CMAKE_CXX_COMPILER #{spec[:triple]}-#{cxx})"
+    ]
+
+    case spec[:os]
+    when :windows
+      lines << "set(CMAKE_RC_COMPILER #{spec[:triple]}-windres)"
+    when :darwin
+      # SFML's macOS backend is Objective-C++, so the SDK has to be visible to
+      # the frameworks lookup as well as to the compiler.
+      lines << "set(CMAKE_OSX_SYSROOT #{osx_sysroot})"
+      lines << "set(CMAKE_OSX_ARCHITECTURES #{spec[:cpu]})"
+      roots << osx_sysroot
+    when :linux
+      if spec[:triple].include?('musl')
+        lines << "set(CMAKE_SYSROOT #{musl_sysroot})"
+        roots << musl_sysroot << "#{musl_sysroot}/usr"
+      else
+        # Debian multiarch: without this CMake searches /usr/lib, finds the
+        # container's own amd64 libraries and hands them to an aarch64 linker.
+        lines << "set(CMAKE_LIBRARY_ARCHITECTURE #{spec[:triple]})"
+      end
+    end
+
+    <<~CMAKE
+      #{lines.join("\n")}
+
+      # Look for headers and libraries in the target's sysroot and in our own
+      # prefix, but run build tools from the host.
+      set(CMAKE_FIND_ROOT_PATH #{roots.join(';')})
+      set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+      set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH)
+      set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE BOTH)
+      set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)
+    CMAKE
+  end
+
   def compile(recipe)
     source = source_dir(recipe)
     build = "#{source}-build"
 
     unless Dir.exist?(source)
-      FileUtils.mkdir_p(BUILD)
-      run('tar', 'xzf', tarball(recipe), '-C', BUILD)
+      FileUtils.mkdir_p(build_root)
+      run('tar', 'xzf', tarball(recipe), '-C', build_root)
     end
 
-    puts "Building #{recipe[:name]} #{recipe[:version]} into #{PREFIX}"
-    run('cmake', '-S', source, '-B', build, *COMMON_FLAGS, *recipe[:flags])
+    puts "Building #{recipe[:name]} #{recipe[:version]} for #{target}"
+    run('cmake', '-S', source, '-B', build, *common_flags, *recipe[:flags])
     run('cmake', '--build', build, '--parallel', Etc.nprocessors.to_s)
     run('cmake', '--install', build)
   end
