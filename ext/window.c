@@ -19,7 +19,7 @@
 static VALUE rb_cWindow;
 
 static sfRenderWindow *Window_create(sfVideoMode *mode, const char *title) {
-    return sfRenderWindow_create(*mode, title, sfDefaultStyle, NULL);
+    return sfRenderWindow_create(*mode, title, sfDefaultStyle, sfWindowed, NULL);
 }
 
 static void Window_free(void *ptr) {
@@ -98,7 +98,7 @@ static VALUE Window_wait_event(VALUE self, VALUE rb_event) {
         raise_invalid_argument_class(Get_Klass_Event());
     }
 
-    return BOOL2RB(sfRenderWindow_waitEvent(Get_Window_Struct(self), Get_Event_Struct(rb_event)));
+    return BOOL2RB(sfRenderWindow_waitEvent(Get_Window_Struct(self), sfTime_Zero, Get_Event_Struct(rb_event)));
 }
 
 static VALUE Window_get_position(VALUE self) {

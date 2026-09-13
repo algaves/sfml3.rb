@@ -57,6 +57,8 @@ static VALUE RenderTarget_draw(VALUE self, VALUE rb_drawable, VALUE rb_state) {
     } else {
         rb_funcall(rb_drawable, rb_intern("draw"), 2, self, rb_state);
     }
+
+    return self;
 }
 
 static VALUE RenderTarget_set_view(VALUE self, VALUE rb_view) {

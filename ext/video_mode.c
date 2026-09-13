@@ -11,8 +11,8 @@ static VALUE rb_cMode;
 static sfVideoMode *VideoMode_create(unsigned width, unsigned heigth, unsigned bitsPerPixel) {
     sfVideoMode *mode = malloc(sizeof(sfVideoMode));
 
-    mode->width = width;
-    mode->height = heigth;
+    mode->size.x = width;
+    mode->size.y = heigth;
     mode->bitsPerPixel = bitsPerPixel;
 
     return mode;

@@ -6,15 +6,15 @@
 #include <ext/sfml.h>
 #include <ext/module.h>
 
-VALUE Rect_new(float width, float height, float top, float bottom) {
+VALUE Rect_new(float x, float y, float width, float height) {
     VALUE arr;
 
     arr = rb_ary_new();
 
-    rb_ary_store(arr, 0, DBL2NUM(width));
-    rb_ary_store(arr, 1, DBL2NUM(height));
-    rb_ary_store(arr, 2, DBL2NUM(top));
-    rb_ary_store(arr, 3, DBL2NUM(bottom));
+    rb_ary_store(arr, 0, DBL2NUM(x));
+    rb_ary_store(arr, 1, DBL2NUM(y));
+    rb_ary_store(arr, 2, DBL2NUM(width));
+    rb_ary_store(arr, 3, DBL2NUM(height));
 
     return arr;
 }
