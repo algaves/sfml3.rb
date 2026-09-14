@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'mkmf'
 require_relative 'ports'
 
@@ -91,5 +93,23 @@ C
     Drop --enable-system-libraries to let the gem download and build CSFML 3 itself.
   MSG
 end
+
+# The sources live in per-subsystem directories (core/, system/, window/,
+# graphics/) but mkmf only globs the top level of $srcdir, so the list has to be
+# handed to it. Objects still land flat in the build directory: mkmf derives
+# $objs from File.basename, and make finds each source through VPATH -- which is
+# why no mkdir rules are needed for the object tree.
+#
+# That flattening also means every .c basename must be unique across the whole
+# tree. mkmf enforces it, aborting with "source files duplication", so a
+# collision fails the build loudly rather than dropping a file.
+sources = Dir.glob("#{$srcdir}/**/*.c")
+$srcs = sources
+$VPATH.concat(
+  sources.map { |file| File.dirname(file) }
+         .uniq
+         .reject { |dir| dir == $srcdir }
+         .map { |dir| dir.sub(/\A#{Regexp.escape($srcdir)}/, '$(srcdir)') }
+)
 
 create_makefile 'sfml/sfml_ext'
