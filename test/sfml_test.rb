@@ -1,6 +1,9 @@
 require 'sfml'
 require 'minitest/autorun'
 require 'stringio'
+require 'tmpdir'
+require 'fileutils'
+require 'timeout'
 
 class SfmlTest < Minitest::Test
   include SFML
@@ -422,5 +425,299 @@ class SfmlTest < Minitest::Test
 
   def test_vulkan_available_is_boolean
     assert_includes [true, false], Vulkan.available?
+  end
+
+  # --- Audio -----------------------------------------------------------------
+
+  def test_audio_enum_constants
+    assert_equal 0, SoundStatus::STOPPED
+    assert_equal 2, SoundStatus::PLAYING
+    assert_equal 0, SoundChannel::UNSPECIFIED
+    assert_kind_of Integer, SoundChannel::FRONT_LEFT
+  end
+
+  def test_sound_buffer_from_samples
+    buffer = SoundBuffer.from_samples([0, 100, -100, 0], 1, 44_100)
+
+    assert_equal 4, buffer.sample_count
+    assert_equal 44_100, buffer.sample_rate
+    assert_equal 1, buffer.channel_count
+    assert_equal [0, 100, -100, 0], buffer.samples
+    assert_equal [:mono], buffer.channel_map
+    assert_in_delta 4.0 / 44_100, buffer.duration.as_seconds, 0.0001
+  end
+
+  def test_sound_buffer_from_packed_string
+    packed = [10, -10, 20, -20].pack('s<*')
+    buffer = SoundBuffer.from_samples(packed, 1, 22_050)
+
+    assert_equal 4, buffer.sample_count
+    assert_equal [10, -10, 20, -20], buffer.samples
+  end
+
+  def test_sound_buffer_copy_and_save
+    buffer = SoundBuffer.from_samples([1, 2, 3, 4], 1, 8000)
+    copy = buffer.copy
+    assert_equal buffer.sample_count, copy.sample_count
+
+    path = File.join(Dir.tmpdir, "sfml3_rb_test_#{Process.pid}.wav")
+    begin
+      assert buffer.save_to_file(path), 'save_to_file should succeed'
+      reloaded = SoundBuffer.from_file(path)
+      assert_equal buffer.sample_count, reloaded.sample_count
+      assert_equal buffer.sample_rate, reloaded.sample_rate
+    ensure
+      FileUtils.rm_f(path)
+    end
+  end
+
+  def test_sound_buffer_from_stream
+    path = File.join(Dir.tmpdir, "sfml3_rb_stream_#{Process.pid}.wav")
+
+    begin
+      SoundBuffer.from_samples([1, 2, 3, 4, 5, 6], 1, 8000).save_to_file(path)
+      buffer = SoundBuffer.from_stream(File.open(path, 'rb'))
+      assert_equal 6, buffer.sample_count
+    ensure
+      FileUtils.rm_f(path)
+    end
+  end
+
+  def test_sound_source_cone
+    cone = SoundSourceCone.new(10, 20, 0.5)
+
+    assert_in_delta 10, cone.inner_angle, 0.001
+    assert_in_delta 20, cone.outer_angle, 0.001
+    assert_in_delta 0.5, cone.outer_gain, 0.001
+    assert_equal [10, 20, 0.5], cone.to_a
+    assert_equal cone, SoundSourceCone.new(10, 20, 0.5)
+  end
+
+  def test_listener_roundtrip
+    Listener.global_volume = 33.0
+    assert_in_delta 33.0, Listener.global_volume, 0.001
+
+    Listener.position = [1, 2, 3]
+    assert_vec_in_epsilon [1, 2, 3], Listener.position.to_a
+
+    Listener.up_vector = [0, 1, 0]
+    assert_vec_in_epsilon [0, 1, 0], Listener.up_vector.to_a
+
+    Listener.cone = [10, 20, 0.25]
+    assert_in_delta 0.25, Listener.cone.outer_gain, 0.001
+  ensure
+    Listener.global_volume = 100.0
+    Listener.position = [0, 0, 0]
+  end
+
+  def test_sound_properties
+    buffer = SoundBuffer.from_samples([0, 0, 0, 0], 1, 44_100)
+    sound = Sound.new(buffer)
+
+    sound.volume = 0.25
+    sound.pitch = 1.5
+    sound.pan = -0.5
+    sound.position = [4, 5, 6]
+    sound.cone = SoundSourceCone.new(90, 180, 0.1)
+
+    assert_in_delta 0.25, sound.volume, 0.001
+    assert_in_delta 1.5, sound.pitch, 0.001
+    assert_in_delta(-0.5, sound.pan, 0.001)
+    assert_vec_in_epsilon [4, 5, 6], sound.position.to_a
+    assert_equal :stopped, sound.status
+
+    copy = sound.copy
+    assert_in_delta 0.25, copy.volume, 0.001
+  end
+
+  def test_sound_effect_processor_assignment
+    buffer = SoundBuffer.from_samples([0, 0], 1, 44_100)
+    sound = Sound.new(buffer)
+
+    sound.effect_processor = proc { |frames, _channels| frames }
+    sound.effect_processor = nil
+    assert_kind_of Sound, sound
+  end
+
+  def test_music_from_file
+    path = File.join(Dir.tmpdir, "sfml3_rb_music_#{Process.pid}.wav")
+
+    begin
+      SoundBuffer.from_samples(Array.new(200) { |i| (i % 100) - 50 }, 2, 44_100).save_to_file(path)
+      music = Music.from_file(path)
+
+      assert_equal 2, music.channel_count
+      assert_equal 44_100, music.sample_rate
+      assert_operator music.duration.as_seconds, :>, 0
+      assert_equal :stopped, music.status
+    ensure
+      FileUtils.rm_f(path)
+    end
+  end
+
+  def test_sound_stream_subclass
+    klass = Class.new(SoundStream) do
+      def on_get_data
+        [0, 0]
+      end
+    end
+
+    stream = klass.new(1, 44_100, [:mono])
+
+    assert_equal 1, stream.channel_count
+    assert_equal 44_100, stream.sample_rate
+    assert_equal :stopped, stream.status
+  end
+
+  def test_sound_stream_requires_on_get_data
+    assert_raises(NotImplementedError) { SoundStream.new(1, 44_100, [:mono]) }
+  end
+
+  def test_sound_recorder_availability
+    assert_includes [true, false], SoundRecorder.available?
+    assert_kind_of String, SoundRecorder.default_device
+    assert_kind_of Array, SoundRecorder.available_devices
+  end
+
+  # --- Network ---------------------------------------------------------------
+
+  def test_socket_status_constants
+    assert_equal 0, SocketStatus::DONE
+    assert_equal 4, SocketStatus::ERROR
+  end
+
+  def test_ftp_and_http_enum_constants
+    assert_equal 200, HttpStatus::OK
+    assert_equal 0, HttpMethod::GET
+    assert_equal 0, FtpTransferMode::BINARY
+    assert_equal 200, FtpStatus::OK
+  end
+
+  def test_ip_address_roundtrip
+    address = IpAddress.from_string('127.0.0.1')
+
+    assert_equal '127.0.0.1', address.to_s
+    assert_equal 2_130_706_433, address.to_integer
+    assert_equal address, IpAddress.from_bytes(127, 0, 0, 1)
+    assert_equal address, IpAddress.from_integer(address.to_integer)
+    refute_equal address, IpAddress::ANY
+  end
+
+  def test_ip_address_constants
+    assert_equal '0.0.0.0', IpAddress::ANY.to_s
+    assert_equal '255.255.255.255', IpAddress::BROADCAST.to_s
+    assert_equal '127.0.0.1', IpAddress::LOCAL_HOST.to_s
+    assert_kind_of IpAddress, IpAddress.local_address
+  end
+
+  def test_packet_roundtrip
+    packet = Packet.new
+    packet.write_bool(true)
+    packet.write_int8(-8)
+    packet.write_uint8(200)
+    packet.write_int16(-32_000)
+    packet.write_uint16(60_000)
+    packet.write_int32(-2_000_000_000)
+    packet.write_uint32(4_000_000_000)
+    packet.write_int64(-9_000_000_000)
+    packet.write_uint64(18_000_000_000)
+    packet.write_float(1.5)
+    packet.write_double(2.5)
+    packet.write_string('packet payload')
+
+    copy = packet.copy
+
+    assert_equal true, copy.read_bool
+    assert_equal(-8, copy.read_int8)
+    assert_equal 200, copy.read_uint8
+    assert_equal(-32_000, copy.read_int16)
+    assert_equal 60_000, copy.read_uint16
+    assert_equal(-2_000_000_000, copy.read_int32)
+    assert_equal 4_000_000_000, copy.read_uint32
+    assert_equal(-9_000_000_000, copy.read_int64)
+    assert_equal 18_000_000_000, copy.read_uint64
+    assert_in_delta 1.5, copy.read_float, 0.0001
+    assert_in_delta 2.5, copy.read_double, 0.0001
+    assert_equal 'packet payload', copy.read_string
+  end
+
+  def test_packet_raw_data_and_append
+    packet = Packet.new
+    packet.append('abcd')
+    packet.append("\x00\x01")
+
+    assert_equal 6, packet.data_size
+    assert_equal "abcd\x00\x01".b, packet.data.b
+  end
+
+  def test_tcp_loopback
+    listener = TcpListener.new
+    assert_equal :done, listener.listen(0)
+
+    client = TcpSocket.new
+    assert_equal :done, Timeout.timeout(5) { client.connect('127.0.0.1', listener.local_port) }
+
+    connection, status = Timeout.timeout(5) { listener.accept }
+    assert_equal :done, status
+    assert_kind_of TcpSocket, connection
+
+    assert_equal :done, client.send('ping')
+    data, receive_status = Timeout.timeout(5) { connection.receive(64) }
+
+    assert_equal :done, receive_status
+    assert_equal 'ping', data
+  end
+
+  def test_udp_loopback
+    socket = UdpSocket.new
+    assert_equal :done, socket.bind(0)
+
+    port = socket.local_port
+    assert_equal :done, socket.send('pong', '127.0.0.1', port)
+
+    data, address, remote_port, status = Timeout.timeout(5) { socket.receive(64) }
+
+    assert_equal :done, status
+    assert_equal 'pong', data
+    assert_equal '127.0.0.1', address.to_s
+    assert_equal port, remote_port
+  end
+
+  def test_socket_selector_waits_for_connection
+    listener = TcpListener.new
+    listener.listen(0)
+
+    selector = SocketSelector.new
+    selector.add(listener)
+
+    # A zero timeout means "block forever" in SFML, so an explicit tiny
+    # timeout is what expresses a non-blocking poll.
+    assert_equal false, selector.wait(SFML::Time.microseconds(1))
+
+    client = TcpSocket.new
+    Timeout.timeout(5) { client.connect('127.0.0.1', listener.local_port) }
+
+    assert Timeout.timeout(5) { selector.wait(SFML::Time.seconds(2)) }
+    assert selector.tcp_listener_ready?(listener)
+
+    selector.remove(listener)
+    selector.clear
+  end
+
+  def test_http_request_configuration
+    assert_kind_of Http, Http.new
+
+    request = HttpRequest.new
+    request.method = :post
+    request.uri = '/index'
+    request.set_http_version(1, 1)
+    request.body = 'payload'
+    request.set_field('Accept', '*/*')
+
+    assert_kind_of HttpRequest, request
+  end
+
+  def test_ftp_construction
+    assert_kind_of Ftp, Ftp.new
   end
 end
