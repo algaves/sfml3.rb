@@ -47,7 +47,9 @@ Gem::Specification.new do |s|
   # Globbed rather than taken from `git ls-files`: packaging stays independent of
   # git and of the checkout's state, which matters because `rake gem` also runs
   # inside the rake-compiler-dock containers against a bind-mounted repository.
-  s.files = Dir.glob('ext/**/*.{h,c,rb}') +
+  # `inc` is included because the shared sound-source methods are generated from
+  # `ext/audio/sound_source.inc`, which the C sources #include.
+  s.files = Dir.glob('ext/**/*.{h,c,rb,inc}') +
             Dir.glob('lib/**/*.rb') +
             docs
 

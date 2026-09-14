@@ -18,10 +18,11 @@ Rake::ExtensionTask.new('sfml_ext', GEMSPEC) do |ext|
   ext.lib_dir = 'lib/sfml'
 
   # Recursive because the sources live in per-subsystem directories; the default
-  # `*.{c,cc,cpp}` would see none of them. Headers are included too: this list is
-  # only used as the rebuild prerequisites (extensiontask.rb:187), and without
-  # them editing a header rebuilds nothing.
-  ext.source_pattern = '**/*.{c,h}'
+  # `*.{c,cc,cpp}` would see none of them. Headers (and the shared `.inc`
+  # fragment) are included too: this list is only used as the rebuild
+  # prerequisites (extensiontask.rb:187), and without them editing a header
+  # rebuilds nothing.
+  ext.source_pattern = '**/*.{c,h,inc}'
   ext.cross_compile = true
   ext.cross_platform = Ports::TARGETS.keys
 

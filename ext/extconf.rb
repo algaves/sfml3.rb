@@ -20,6 +20,12 @@ $CFLAGS = "#{$CFLAGS} -Werror=deprecated-declarations" if ENV['SFML_STRICT']
 # own CMake config exports. Within the codecs, vorbisfile/vorbisenc depend on
 # vorbis, which depends on ogg, and FLAC stands alone; all of them must follow
 # sfml-audio so the linker has already seen the references.
+#
+# These are named by full path rather than -l. mkmf puts the host's -L/usr/lib64
+# ahead of the ports prefix, so a plain -lfreetype resolves to the host's shared
+# library and the built extension silently gains a runtime dependency on it. A
+# full path to the .a is used as-is by every linker (GNU ld, mingw, ld64) and
+# cannot be shadowed.
 VENDORED_LIBS = %w[
   csfml-graphics-s csfml-window-s csfml-system-s csfml-audio-s csfml-network-s
   sfml-graphics-s sfml-window-s sfml-system-s sfml-audio-s sfml-network-s
@@ -47,7 +53,8 @@ def use_vendored_ports
   # static SFML archives ahead of it.
   $libs = [
     $libs,
-    *(VENDORED_LIBS + Ports.libs).map { |l| "-l#{l}" },
+    *VENDORED_LIBS.map { |l| File.join(Ports.prefix, 'lib', "lib#{l}.a") },
+    *Ports.libs.map { |l| "-l#{l}" },
     *Ports.cxx_runtime
   ].join(' ')
 end
