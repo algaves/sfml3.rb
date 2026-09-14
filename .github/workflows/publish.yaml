@@ -64,8 +64,45 @@ jobs:
           name: gem-${{ matrix.platform }}
           path: pkg/*-${{ matrix.platform }}.gem
 
+  # No binary gem covers Ruby 2.7 or 3.0, so those users get the source gem and
+  # build SFML at install time. Prove that actually works against the gem we are
+  # about to publish, rather than trusting required_ruby_version.
+  verify-source:
+    name: Source gem on Ruby ${{ matrix.ruby }}
+    needs: source
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ['2.7.8', '3.0']
+    steps:
+      # No checkout: this job must see only what a user would -- the published
+      # gem and a bare machine.
+      - name: Install SFML build dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y build-essential cmake \
+            libx11-dev libxrandr-dev libxcursor-dev libxi-dev libudev-dev libgl1-mesa-dev
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: gem-ruby
+          path: pkg
+
+      # No bundler here on purpose: this is the path a real user takes, and it
+      # must not depend on the development toolchain.
+      - name: Install from source
+        run: gem install --no-document pkg/sfml3-rb-*.gem
+
+      - name: Smoke test
+        run: ruby -e "require 'sfml'; puts SFML::VERSION"
+
   publish:
-    needs: [source, native]
+    needs: [source, native, verify-source]
     runs-on: ubuntu-latest
     permissions:
       contents: read

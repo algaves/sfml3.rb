@@ -9,11 +9,11 @@ Gem::Specification.new do |s|
                     'source at install time, so neither needs to be installed system-wide.'
     s.homepage    = 'https://github.com/algaves/sfml3.rb'
 
-    s.authors     = ['Sealtiel Valderrama']
+    s.authors     = ['Algaves', 'Diego-Sealtiel Valderrama']
     s.email       = 'SealtielFreak@yandex.com'
     s.license     = '0BSD'
 
-    s.required_ruby_version = '>= 2.5.0'
+    s.required_ruby_version = '>= 2.7.8'
 
     s.metadata    = {
         'source_code_uri'   => 'https://github.com/algaves/sfml3.rb',

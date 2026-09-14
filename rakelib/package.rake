@@ -61,7 +61,7 @@ module CrossBuild
   def script(platform)
     <<~SH
       bash script/provision.sh #{platform} &&
-      export BUNDLE_WITHOUT=development &&
+      export BUNDLE_WITHOUT="development test" &&
       bundle install --jobs 4 &&
       SFML_TARGET=#{platform} \
         RUBY_CC_VERSION=#{RUBY_CC_VERSIONS.join(':')} \

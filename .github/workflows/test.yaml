@@ -6,7 +6,20 @@ on:
 
 jobs:
   test:
+    name: Ruby ${{ matrix.ruby }}
     runs-on: ubuntu-latest
+    # rubocop and rake-compiler-dock are host-only and rubocop's floor tracks
+    # the newest Ruby it supports, so leaving the group out is what lets the
+    # oldest matrix entry resolve at all.
+    env:
+      BUNDLE_WITHOUT: development
+    strategy:
+      fail-fast: false
+      matrix:
+        # 2.7.8 is pinned exactly because it is the floor the gemspec promises;
+        # the rest float on their minor series. 2.7 and 3.0 have no binary gem,
+        # so they are the entries that actually exercise the source build.
+        ruby: ['2.7.8', '3.0', '3.1', '3.3', '4.0']
     steps:
       - uses: actions/checkout@v4
 
@@ -22,11 +35,13 @@ jobs:
 
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.3'
+          ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
 
       # Building SFML from source dominates the run time and the sources are
-      # pinned by checksum, so the recipe is the whole cache key.
+      # pinned by checksum, so the recipe is the whole cache key. Deliberately
+      # no Ruby version in it: Ports.prefix is keyed by RbConfig's host triple,
+      # which is identical across these Rubies, so one prefix serves them all.
       - uses: actions/cache@v4
         with:
           path: ports

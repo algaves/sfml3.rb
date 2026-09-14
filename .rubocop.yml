@@ -1,6 +1,12 @@
 AllCops:
-  TargetRubyVersion: 2.5
+  TargetRubyVersion: 2.7
   NewCops: enable
+  # Build output, not source: both hold copies of lib/ and ext/ staged for
+  # packaging, so linting them double-counts every offence in the real files.
+  Exclude:
+    - 'pkg/**/*'
+    - 'tmp/**/*'
+    - 'ports/**/*'
 
 # mkmf drives the build through these globals ($INCFLAGS, $LDFLAGS, $libs);
 # an extconf.rb cannot set compiler flags without them.

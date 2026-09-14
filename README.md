@@ -24,10 +24,11 @@ already linked in — no toolchain, no build, nothing to install system-wide:
 
 Each gem carries one extension per Ruby ABI, covering Ruby 3.1 through 4.0.
 
-Anywhere else, RubyGems falls back to the source gem, which downloads and builds FreeType, SFML 3
-and CSFML 3 from pinned, checksum-verified tarballs at install time. That takes a few minutes and
-needs:
+Anywhere else — including Ruby 2.7 and 3.0, which no binary gem covers — RubyGems falls back to the
+source gem, which downloads and builds FreeType, SFML 3 and CSFML 3 from pinned, checksum-verified
+tarballs at install time. That takes a few minutes and needs:
 
+* Ruby >= 2.7.8
 * A C/C++ toolchain and CMake >= 3.22
 * On Linux, the X11/udev/OpenGL development headers SFML links against — these can't be bundled.
   On Fedora:
@@ -108,3 +109,7 @@ that and falls back to the single `lib/sfml/sfml_ext.so` a source build installs
 ## License
 
 [0BSD](LICENSE.md)
+
+---
+
+Developed by: [Algaves](www.github.com/algaves) @ 2026
