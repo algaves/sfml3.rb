@@ -69,8 +69,8 @@ endforeach ()
 
 # Globbed rather than listed by hand: the previous explicit list was a single
 # 900-character line that had already drifted from the tree.
-file(GLOB ext_sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/ext/*.c")
-file(GLOB_RECURSE ext_headers CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/ext/ext/*.h")
+file(GLOB_RECURSE ext_sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/ext/*.c")
+file(GLOB_RECURSE ext_headers CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/ext/*.h")
 
 add_library(sfml_rb MODULE ${ext_sources} ${ext_headers})
 
