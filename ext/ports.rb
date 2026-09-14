@@ -49,32 +49,88 @@ module Ports
     windows: %w[gcc g++]
   }.freeze
 
-  # What the extension links on top of the static SFML/CSFML/FreeType archives.
-  # SFML resolves GL entry points through its own loader, so on Linux libGL is
-  # only needed for the handful of symbols SFML references directly.
+  # What the extension links on top of the static SFML/CSFML/FreeType/codec
+  # archives. SFML resolves GL entry points through its own loader, so on Linux
+  # libGL is only needed for the handful of symbols SFML references directly.
+  # Network links ws2_32 on Windows; audio needs no OpenAL, because SFML 3 uses
+  # the vendored miniaudio backend and resolves ALSA/Pulse at run time via dl.
   SYSTEM_LIBS = {
     linux: %w[GL X11 Xrandr Xcursor Xi udev pthread dl rt m],
-    windows: %w[opengl32 winmm gdi32 user32 advapi32 ole32],
+    windows: %w[opengl32 winmm gdi32 user32 advapi32 ole32 ws2_32],
     darwin: %w[]
   }.freeze
 
   # Clang wants -framework, not -l, and SFML's macOS backend is Objective-C++.
-  FRAMEWORKS = { darwin: %w[Cocoa OpenGL IOKit Carbon], linux: [], windows: [] }.freeze
+  # Audio reaches CoreAudio/CoreFoundation from miniaudio, and the network
+  # stack needs nothing beyond the system libc.
+  FRAMEWORKS = {
+    darwin: %w[Cocoa OpenGL IOKit Carbon CoreFoundation CoreAudio AudioToolbox],
+    linux: [], windows: []
+  }.freeze
 
-  # Order matters. CSFML does find_package(SFML 3 ... REQUIRED) and does not
-  # fetch SFML itself, and SFML does find_package(Freetype REQUIRED) once
-  # SFML_USE_SYSTEM_DEPS is on -- so each has to be installed into PREFIX
-  # before the next configures.
+  # Order matters. The Ogg/Vorbis/FLAC codecs and FreeType must be installed
+  # before SFML configures, because SFML's find_package(Vorbis)/find_package(FLAC)
+  # run with SFML_USE_SYSTEM_DEPS=ON and must find our static archives rather
+  # than the build host's shared ones. CSFML then does find_package(SFML 3 ...)
+  # and does not fetch SFML itself.
   #
   # FreeType is built here rather than left to SFML because SFML's own
   # FetchContent path clones it from git (no checksum, needs git at configure
   # time) and then does not install the resulting archive -- which leaves
   # libsfml-graphics-s.a with an undefined FT_Init_FreeType that only stays
-  # latent while nothing binds sf::Font. Pinning it as a port fixes both.
-  #
-  # Audio and network are off because the binding wraps neither, which also
-  # drops the FLAC/Ogg/Vorbis and mbedtls dependency families.
+  # latent while nothing binds sf::Font. Pinning it as a port fixes both. The
+  # same reasoning applies to the codecs: vendoring them keeps the binary gems
+  # free of libvorbis/libFLAC/libogg runtime dependencies and makes the audio
+  # module buildable on the mingw/darwin/musl images, which ship no codec
+  # development files at all.
   RECIPES = [
+    {
+      name: 'libogg',
+      version: '1.3.5',
+      sha256: '0eb4b4b9420a0f51db142ba3f9c64b333f826532dc0f48c6410ae51f4799b664',
+      url: 'https://downloads.xiph.org/releases/ogg/libogg-%<version>s.tar.gz',
+      flags: %w[
+        -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+        -DBUILD_SHARED_LIBS=OFF
+        -DBUILD_TESTING=OFF
+        -DINSTALL_DOCS=OFF
+        -DINSTALL_CMAKE_PACKAGE_MODULE=ON
+        -DINSTALL_PKG_CONFIG_MODULE=OFF
+      ]
+    },
+    {
+      name: 'libvorbis',
+      version: '1.3.7',
+      sha256: '0e982409a9c3fc82ee06e08205b1355e5c6aa4c36bca58146ef399621b0ce5ab',
+      url: 'https://downloads.xiph.org/releases/vorbis/libvorbis-%<version>s.tar.gz',
+      flags: %w[
+        -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+        -DBUILD_SHARED_LIBS=OFF
+        -DBUILD_TESTING=OFF
+        -DINSTALL_CMAKE_PACKAGE_MODULE=ON
+      ]
+    },
+    {
+      name: 'flac',
+      version: '1.4.3',
+      sha256: '6c58e69cd22348f441b861092b825e591d0b822e106de6eb0ee4d05d27205b70',
+      url: 'https://downloads.xiph.org/releases/flac/flac-%<version>s.tar.xz',
+      ext: 'tar.xz',
+      flags: %w[
+        -DBUILD_SHARED_LIBS=OFF
+        -DBUILD_CXXLIBS=OFF
+        -DBUILD_PROGRAMS=OFF
+        -DBUILD_EXAMPLES=OFF
+        -DBUILD_TESTING=OFF
+        -DBUILD_DOCS=OFF
+        -DWITH_OGG=OFF
+        -DWITH_FORTIFY_SOURCE=OFF
+        -DWITH_STACK_PROTECTOR=OFF
+        -DINSTALL_MANPAGES=OFF
+        -DINSTALL_CMAKE_CONFIG_MODULE=ON
+        -DINSTALL_PKGCONFIG_MODULES=ON
+      ]
+    },
     {
       name: 'freetype',
       version: '2.13.2',
@@ -97,8 +153,6 @@ module Ports
       sha256: '0034e05f95509e5d3fb81b1625713e06da7b068f210288ce3fd67106f8f46995',
       flags: %w[
         -DSFML_USE_SYSTEM_DEPS=ON
-        -DSFML_BUILD_AUDIO=OFF
-        -DSFML_BUILD_NETWORK=OFF
         -DSFML_BUILD_EXAMPLES=OFF
         -DSFML_BUILD_DOC=OFF
         -DSFML_BUILD_TEST_SUITE=OFF
@@ -109,8 +163,6 @@ module Ports
       version: '3.0.0',
       sha256: '903cd4a782fb0b233f732dc5b37861b552998e93ae8f268c40bd4ce50b2e88ca',
       flags: %w[
-        -DCSFML_BUILD_AUDIO=OFF
-        -DCSFML_BUILD_NETWORK=OFF
         -DCSFML_BUILD_EXAMPLES=OFF
         -DCSFML_LINK_SFML_STATICALLY=ON
       ]
@@ -218,8 +270,11 @@ module Ports
     end
   end
 
+  # The local archive keeps a fixed <name>-<version>.<ext> name regardless of
+  # what the upstream release calls it, so recipes can point at libogg-1.3.5.tar.gz
+  # or flac-1.4.3.tar.xz without the rest of the code caring.
   def tarball(recipe)
-    File.join(ARCHIVES, "#{recipe[:name]}-#{recipe[:version]}.tar.gz")
+    File.join(ARCHIVES, "#{recipe[:name]}-#{recipe[:version]}.#{recipe[:ext] || 'tar.gz'}")
   end
 
   def source_dir(recipe)
@@ -359,7 +414,9 @@ module Ports
 
     unless Dir.exist?(source)
       FileUtils.mkdir_p(build_root)
-      run('tar', 'xzf', tarball(recipe), '-C', build_root)
+      # Plain `xf`, not `xzf`: GNU tar, bsdtar and mingw's tar all sniff the
+      # compression, which is what lets gzip and xz recipes share this path.
+      run('tar', 'xf', tarball(recipe), '-C', build_root)
     end
 
     puts "Building #{recipe[:name]} #{recipe[:version]} for #{target}"
