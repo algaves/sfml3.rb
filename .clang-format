@@ -1,0 +1,12 @@
+# House style for the C extension (see ext/ext.c's naming comment): 4-space
+# indent, same-line braces, ~100 columns. Based on LLVM, with the churny
+# parts switched off: includes stay in their hand-written grouping (CSFML
+# system headers, then project headers) and line joining is left alone, so
+# adopting this must not reformat unaffected files.
+BasedOnStyle: LLVM
+IndentWidth: 4
+ColumnLimit: 100
+PointerAlignment: Left
+AllowShortFunctionsOnASingleLine: None
+SortIncludes: false
+SortUsingDeclarations: false

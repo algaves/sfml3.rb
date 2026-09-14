@@ -16,13 +16,19 @@ static void Clock_free(void *ptr) {
     sfClock_destroy(ptr);
 }
 
+static const rb_data_type_t Clock_data_type = {
+    .wrap_struct_name = "SFML::Clock",
+    .function = {.dmark = NULL, .dfree = Clock_free, .dsize = NULL},
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY
+};
+
 static VALUE Clock_new(VALUE klass) {
     sfClock *clock;
     VALUE self;
 
     clock = Clock_create();
 
-    self = Data_Wrap_Struct(klass, 0, Clock_free, clock);
+    self = TypedData_Wrap_Struct(klass, &Clock_data_type, clock);
 
     rb_obj_call_init(self, 0, NULL);
 
@@ -56,7 +62,7 @@ void Init_Clock(VALUE rb_module) {
 
 void *Get_Clock_Struct(VALUE self) {
     sfClock *clock;
-    Data_Get_Struct(self, sfClock, clock);
+    TypedData_Get_Struct(self, sfClock, &Clock_data_type, clock);
     return clock;
 }
 

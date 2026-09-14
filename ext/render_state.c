@@ -27,6 +27,12 @@ static void RenderStates_free(void *ptr) {
     free(ptr);
 }
 
+static const rb_data_type_t RenderStates_data_type = {
+    .wrap_struct_name = "SFML::RenderState",
+    .function = {.dmark = NULL, .dfree = RenderStates_free, .dsize = NULL},
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY
+};
+
 static VALUE RenderStates_new(int argc, VALUE *argv, VALUE klass) {
     float c_matrix[MATRIX_LENGTH] = DefaultMatrix3x3();
     sfRenderStates *states;
@@ -52,7 +58,7 @@ static VALUE RenderStates_new(int argc, VALUE *argv, VALUE klass) {
     Transform_SwapMatrix(c_matrix, transform.matrix);
 
     states = RenderStates_create(transform);
-    self = Data_Wrap_Struct(klass, 0, RenderStates_free, states);
+    self = TypedData_Wrap_Struct(klass, &RenderStates_data_type, states);
 
     rb_obj_call_init(self, argc, argv);
 
@@ -96,7 +102,7 @@ void Init_RenderState(VALUE rb_module) {
 
 void *Get_RenderState_Struct(VALUE self) {
     sfRenderStates *states;
-    Data_Get_Struct(self, sfRenderStates, states);
+    TypedData_Get_Struct(self, sfRenderStates, &RenderStates_data_type, states);
     return states;
 }
 

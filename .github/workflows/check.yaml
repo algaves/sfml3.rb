@@ -19,4 +19,58 @@ jobs:
         run: bundle exec rubocop
 
       - name: Check shell scripts
-        run: shellcheck script/provision.sh
+        run: shellcheck script/provision.sh .githooks/pre-commit
+
+  # Same contract as the .githooks/pre-commit hook: only the delta has to be
+  # clean, so the tree converges file by file instead of demanding an upfront
+  # reformat of every C source.
+  clang:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The checks below diff the PR against its base.
+          fetch-depth: 0
+
+      - name: Install clang tools
+        run: sudo apt-get update -y && sudo apt-get install -y clang clang-tools
+
+      - name: Check formatting of changed C sources
+        run: |
+          files=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" -- ext/ | grep -E '\.(c|h)$' || true)
+          if [ -z "$files" ]; then echo "No C sources changed."; exit 0; fi
+          # shellcheck disable=SC2086
+          clang-format --dry-run --Werror $files
+
+      # Only the X11/udev/GL stack comes from the system (see test.yaml); the
+      # tidy step below needs it to build the ports it configures against.
+      - name: Install SFML build dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y build-essential cmake \
+            libx11-dev libxrandr-dev libxcursor-dev libxi-dev libudev-dev libgl1-mesa-dev
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
+      - uses: actions/cache@v4
+        id: ports-cache
+        with:
+          path: ports
+          key: ports-${{ runner.os }}-${{ hashFiles('ext/ports.rb') }}
+
+      # clang-tidy needs a compilation database: the vendored prefix plus a
+      # CMake configure. On a cold ports cache that means building all of SFML
+      # from scratch, so without a warm cache the step is skipped and the
+      # format check above is the whole gate.
+      - name: Run clang-tidy on changed C sources
+        if: steps.ports-cache.outputs.cache-hit == 'true'
+        run: |
+          files=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" -- ext/ | grep -E '\.c$' || true)
+          if [ -z "$files" ]; then echo "No C sources changed."; exit 0; fi
+          bundle exec rake ports
+          cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          # shellcheck disable=SC2086
+          clang-tidy -p build $files

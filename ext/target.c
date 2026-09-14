@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <ext/klass/drawable/circle.h>
 #include <ext/klass/render_state.h>
+#include <ext/exceptions.h>
 
 #include "ext/module/transform.h"
 #include "ext/klass/transformable.h"
@@ -28,6 +29,12 @@ static void RenderTarget_free(void *ptr) {
     free(ptr);
 }
 
+static const rb_data_type_t RenderTarget_data_type = {
+    .wrap_struct_name = "SFML::Target",
+    .function = {.dmark = NULL, .dfree = RenderTarget_free, .dsize = NULL},
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY
+};
+
 static VALUE RenderTarget_new(VALUE klass, VALUE rb_window) {
     VALUE self;
     Target *target;
@@ -37,7 +44,7 @@ static VALUE RenderTarget_new(VALUE klass, VALUE rb_window) {
     }
 
     target = RenderTarget_create(Get_Window_Struct(rb_window));
-    self = Data_Wrap_Struct(klass, 0, RenderTarget_free, target);
+    self = TypedData_Wrap_Struct(klass, &RenderTarget_data_type, target);
 
     VALUE argv[1] = {rb_window};
     rb_obj_call_init(self, 1, argv);
@@ -53,6 +60,12 @@ static VALUE RenderTarget_draw(VALUE self, VALUE rb_drawable, VALUE rb_state) {
     Target *target = Get_Target_Struct(self);
 
     if (rb_obj_is_kind_of(rb_drawable, Get_Klass_Circle())) {
+        // The drawable is checked just above; the state was not, which left the
+        // only unguarded unwrap of a caller-supplied object in the extension.
+        if (!rb_obj_is_kind_of(rb_state, Get_Klass_RenderState())) {
+            raise_invalid_argument_class(Get_Klass_RenderState());
+        }
+
         sfRenderWindow_drawCircleShape(target->window, Get_Circle_Struct(rb_drawable), Get_RenderState_Struct(rb_state));
     } else {
         rb_funcall(rb_drawable, rb_intern("draw"), 2, self, rb_state);
@@ -97,7 +110,7 @@ VALUE Get_Klass_Target(void) {
 
 void *Get_Target_Struct(VALUE self) {
     Target *ptr;
-    Data_Get_Struct(self, Target, ptr);
+    TypedData_Get_Struct(self, Target, &RenderTarget_data_type, ptr);
     return ptr;
 }
 

@@ -35,10 +35,14 @@ jobs:
       matrix:
         include:
           - platform: x86_64-linux-gnu
-          - platform: x64-mingw-ucrt
-          - platform: aarch64-linux-gnu
-            experimental: true
+          - platform: x86-linux-gnu
           - platform: x86_64-linux-musl
+          - platform: x86-linux-musl
+          - platform: x64-mingw-ucrt
+          # No Ruby 4.0 here: RubyInstaller publishes no 32-bit 4.0 build, so
+          # this gem stops at 3.4. rakelib/package.rake asserts that.
+          - platform: x86-mingw32
+          - platform: aarch64-linux-gnu
             experimental: true
           - platform: x86_64-darwin
             experimental: true
@@ -46,6 +50,14 @@ jobs:
             experimental: true
     steps:
       - uses: actions/checkout@v4
+
+      # Each rake-compiler-dock image is multi-GB and the runner has ~14 GB.
+      # Reclaiming the preinstalled toolchains we do not use keeps the pull and
+      # the out-of-tree build from running the disk out.
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          df -h /
 
       - uses: ruby/setup-ruby@v1
         with:
@@ -64,8 +76,46 @@ jobs:
           name: gem-${{ matrix.platform }}
           path: pkg/*-${{ matrix.platform }}.gem
 
+  # Every supported Ruby now has a binary gem, but most *platforms* still do
+  # not -- macOS, ARM, the BSDs and anything musl below 3.1 all fall back to
+  # building SFML at install time. Prove that path works against the gem we are
+  # about to publish, on the floor it claims to support.
+  verify-source:
+    name: Source gem on Ruby ${{ matrix.ruby }}
+    needs: source
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ['3.1']
+    steps:
+      # No checkout: this job must see only what a user would -- the published
+      # gem and a bare machine.
+      - name: Install SFML build dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y build-essential cmake \
+            libx11-dev libxrandr-dev libxcursor-dev libxi-dev libudev-dev libgl1-mesa-dev
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: gem-ruby
+          path: pkg
+
+      # No bundler here on purpose: this is the path a real user takes, and it
+      # must not depend on the development toolchain.
+      - name: Install from source
+        run: gem install --no-document pkg/sfml3-rb-*.gem
+
+      - name: Smoke test
+        run: ruby -e "require 'sfml'; puts SFML::VERSION"
+
   publish:
-    needs: [source, native]
+    needs: [source, native, verify-source]
     runs-on: ubuntu-latest
     permissions:
       contents: read

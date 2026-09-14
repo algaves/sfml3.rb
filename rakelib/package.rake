@@ -6,6 +6,8 @@ rescue LoadError
   return
 end
 
+require 'rubygems/package'
+
 require_relative '../ext/ports'
 
 # Cross-compilation of the binary gems. Each platform runs in its own
@@ -16,10 +18,18 @@ require_relative '../ext/ports'
 # The container needs a working Docker or Podman; rake-compiler-dock finds
 # either one. Images are large and are pulled on first use.
 module CrossBuild
-  # ABIs baked into every binary gem. All of these have to exist as cross
-  # rubies in the image -- this set is the intersection across our platforms,
-  # since the x64-mingw-ucrt image has no 3.0 cross ruby.
+  # ABIs baked into every binary gem. 3.1 is the floor because that is the
+  # oldest cross ruby the x64-mingw-ucrt image carries; the rest of the images
+  # go back to 3.0, but a uniform set keeps one RUBY_CC_VERSION for everything.
   RUBY_CC_VERSIONS = %w[3.1.7 3.2.11 3.3.11 3.4.9 4.0.2].freeze
+
+  # What each platform's gem must end up carrying. rake-compiler only *warns*
+  # when the image has no cross ruby for a requested version and carries on
+  # (extensiontask.rb:400-403), so without this check a gem missing an ABI
+  # would ship silently. Exactly one platform is legitimately short:
+  # RubyInstaller publishes no 32-bit Ruby 4.0, so x86-mingw32 stops at 3.4.
+  DEFAULT_ABIS = %w[3.1 3.2 3.3 3.4 4.0].freeze
+  EXPECTED_ABIS = { 'x86-mingw32' => %w[3.1 3.2 3.3 3.4].freeze }.freeze
 
   module_function
 
@@ -61,7 +71,7 @@ module CrossBuild
   def script(platform)
     <<~SH
       bash script/provision.sh #{platform} &&
-      export BUNDLE_WITHOUT=development &&
+      export BUNDLE_WITHOUT="development test" &&
       bundle install --jobs 4 &&
       SFML_TARGET=#{platform} \
         RUBY_CC_VERSION=#{RUBY_CC_VERSIONS.join(':')} \
@@ -92,6 +102,31 @@ module CrossBuild
     RakeCompilerDock.sh(script(platform), platform: platform,
                                           options: container_options,
                                           runas: !rootless_podman?)
+
+    verify(platform)
+  end
+
+  # The per-ABI extensions a built gem actually carries, read back out of the
+  # package rather than inferred from the RUBY_CC_VERSION we asked for.
+  def gem_abis(path)
+    Gem::Package.new(path).spec.files
+                .grep(%r{\Alib/sfml/(\d+\.\d+)/}) { Regexp.last_match(1) }
+                .uniq.sort
+  end
+
+  # Fails the build when a gem ships fewer ABIs than intended -- see EXPECTED_ABIS.
+  def verify(platform)
+    path = Dir.glob("pkg/*-#{platform}.gem").max_by { |file| File.mtime(file) }
+    raise "gem:#{platform} produced no gem in pkg/" unless path
+
+    abis = gem_abis(path)
+    expected = EXPECTED_ABIS.fetch(platform, DEFAULT_ABIS)
+    return if abis == expected
+
+    raise "#{File.basename(path)} carries ABIs #{abis.inspect}, expected #{expected.inspect}.\n" \
+          'rake-compiler skips a Ruby it has no cross ruby for instead of failing, so this ' \
+          'usually means the rake-compiler-dock image changed and RUBY_CC_VERSIONS or ' \
+          'EXPECTED_ABIS is out of date.'
   end
 end
 

@@ -22,6 +22,12 @@ static void VideoMode_free(void *ptr) {
     free(ptr);
 }
 
+static const rb_data_type_t VideoMode_data_type = {
+    .wrap_struct_name = "SFML::VideoMode",
+    .function = {.dmark = NULL, .dfree = VideoMode_free, .dsize = NULL},
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY
+};
+
 static VALUE VideoMode_new(VALUE klass, VALUE rb_width, VALUE rb_height, VALUE rb_bits) {
     VALUE self;
     sfVideoMode *ptr;
@@ -29,7 +35,7 @@ static VALUE VideoMode_new(VALUE klass, VALUE rb_width, VALUE rb_height, VALUE r
     VALUE argv[] = {rb_width, rb_height, rb_bits};
 
     ptr = VideoMode_create(NUM2INT(rb_width), NUM2INT(rb_height), NUM2INT(rb_bits));
-    self = Data_Wrap_Struct(klass, 0, VideoMode_free, ptr);
+    self = TypedData_Wrap_Struct(klass, &VideoMode_data_type, ptr);
 
     rb_obj_call_init(self, 3, argv);
 
@@ -69,7 +75,7 @@ void Init_VideoMode(VALUE rb_module) {
 
 void *Get_Mode_Struct(VALUE self) {
     sfVideoMode *ptr;
-    Data_Get_Struct(self, sfVideoMode, ptr);
+    TypedData_Get_Struct(self, sfVideoMode, &VideoMode_data_type, ptr);
     return ptr;
 }
 

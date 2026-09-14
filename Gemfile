@@ -6,10 +6,15 @@ gemspec
 gem 'rake'
 gem 'rake-compiler'
 
-# Host-only: the cross-compile containers install this Gemfile without the
-# development group, so keep anything they don't need out of the default one.
+group :test do
+  # minitest 6 requires Ruby >= 3.2, which is still above the 3.1 floor the
+  # gemspec promises -- and that floor is only meaningful if CI can test it.
+  gem 'minitest', '~> 5.0'
+end
+
+# Host-only: neither building nor testing the extension needs these, so the
+# cross-compile containers and the floor CI job leave the group out.
 group :development do
-  gem 'minitest'
   gem 'rake-compiler-dock'
   gem 'rubocop'
 end

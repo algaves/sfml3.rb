@@ -16,18 +16,25 @@ gem install sfml3-rb
 On a platform with a precompiled gem this installs a binary with FreeType, SFML 3 and CSFML 3
 already linked in — no toolchain, no build, nothing to install system-wide:
 
-| Platform | Status |
-| --- | --- |
-| `x86_64-linux-gnu` | built, installed and tested |
-| `x64-mingw-ucrt` (Windows, RubyInstaller 3.1+) | builds and links cleanly; not yet run on Windows |
-| `aarch64-linux-gnu`, `x86_64-linux-musl`, `x86_64-darwin`, `arm64-darwin` | experimental, not yet built |
+| Platform | Ruby | Status |
+| --- | --- | --- |
+| `x86_64-linux-gnu` | 3.1 – 4.0 | built, installed and tested |
+| `x86-linux-gnu` | 3.1 – 4.0 | 32-bit glibc Linux |
+| `x86_64-linux-musl` | 3.1 – 4.0 | Alpine and other musl systems |
+| `x86-linux-musl` | 3.1 – 4.0 | 32-bit musl |
+| `x64-mingw-ucrt` | 3.1 – 4.0 | 64-bit Windows, RubyInstaller 3.1+ |
+| `x86-mingw32` | 3.1 – **3.4** | 32-bit Windows |
+| `aarch64-linux-gnu`, `x86_64-darwin`, `arm64-darwin` | 3.1 – 4.0 | experimental, not yet built |
 
-Each gem carries one extension per Ruby ABI, covering Ruby 3.1 through 4.0.
+Each gem carries one extension per Ruby ABI. Two gaps come from upstream rather than from this
+project: **RubyInstaller publishes no 32-bit Ruby 4.0**, so `x86-mingw32` stops at 3.4; and 64-bit
+Windows before Ruby 3.1 used a different platform (`x64-mingw32`), which is not built.
 
-Anywhere else, RubyGems falls back to the source gem, which downloads and builds FreeType, SFML 3
-and CSFML 3 from pinned, checksum-verified tarballs at install time. That takes a few minutes and
-needs:
+Anywhere else — macOS, ARM, the BSDs — RubyGems falls back to the source gem, which downloads and
+builds FreeType, SFML 3 and CSFML 3 from pinned, checksum-verified tarballs at install time. That
+takes a few minutes and needs:
 
+* Ruby >= 3.1
 * A C/C++ toolchain and CMake >= 3.22
 * On Linux, the X11/udev/OpenGL development headers SFML links against — these can't be bundled.
   On Fedora:
@@ -82,6 +89,10 @@ rake test     # compile, then run the test suite
 rake gem      # build the source gem into pkg/
 ```
 
+`rake githooks:install` points your checkout at the committed `.githooks/` pre-commit hook, which
+lints staged Ruby with RuboCop and auto-formats staged C with clang-format (`sudo dnf install
+clang-tools-extra` on Fedora for the C side).
+
 `CMakeLists.txt` is a CLion/IDE convenience build against the same vendored `ports/` prefix — `rake`
 is the build of record.
 
@@ -108,3 +119,7 @@ that and falls back to the single `lib/sfml/sfml_ext.so` a source build installs
 ## License
 
 [0BSD](LICENSE.md)
+
+---
+
+Developed by: [Algeves](https://github.com/algaves/sfml3.rb) @ 2026

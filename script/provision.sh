@@ -46,6 +46,29 @@ ensure_cmake() {
     cmake --version | head -1
 }
 
+# No distro ships musl X11 development files, but Alpine's do exactly that and
+# apk.static can unpack them into the musl-cross-make sysroot without Alpine
+# itself being involved. Both musl targets differ only in sysroot and arch.
+provision_musl() {
+    local sysroot="$1" arch="$2"
+    local alpine="https://dl-cdn.alpinelinux.org/alpine/v3.20"
+
+    if [ ! -x /tmp/apk.static ]; then
+        curl -fsSL -o /tmp/apk.static \
+            "$alpine/main/x86_64/apk-tools-static-2.14.4-r1.apk" \
+            || { echo "could not download apk-tools-static" >&2; exit 1; }
+        tar -xzf /tmp/apk.static -C /tmp sbin/apk.static
+        sudo mv /tmp/sbin/apk.static /tmp/apk.static
+        chmod +x /tmp/apk.static
+    fi
+
+    # shellcheck disable=SC2086  # deliberate word splitting into package args
+    sudo /tmp/apk.static \
+        -X "$alpine/main" -X "$alpine/community" \
+        -U --allow-untrusted --arch "$arch" --root "$sysroot" --initdb \
+        add $X11_ALPINE
+}
+
 ensure_cmake
 
 case "$TARGET" in
@@ -73,30 +96,24 @@ EOF
     sudo apt-get install -y -qq ${X11_DEBIAN// /:arm64 }:arm64
     ;;
 
-x86_64-linux-musl)
-    # No distro ships musl X11 development files, but Alpine's do exactly that
-    # and apk.static can unpack them into the musl-cross-make sysroot without
-    # Alpine itself being involved.
-    SYSROOT="/usr/x86_64-unknown-linux-musl"
-    ALPINE="https://dl-cdn.alpinelinux.org/alpine/v3.20"
-
-    if [ ! -x /tmp/apk.static ]; then
-        curl -fsSL -o /tmp/apk.static \
-            "$ALPINE/main/x86_64/apk-tools-static-2.14.4-r1.apk" \
-            || { echo "could not download apk-tools-static" >&2; exit 1; }
-        tar -xzf /tmp/apk.static -C /tmp sbin/apk.static
-        sudo mv /tmp/sbin/apk.static /tmp/apk.static
-        chmod +x /tmp/apk.static
-    fi
-
+x86-linux-gnu)
+    # Ubuntu's amd64 archive carries i386 too, so unlike the arm64 branch this
+    # needs no extra sources list -- just the foreign architecture enabled.
+    sudo dpkg --add-architecture i386
+    sudo apt-get update -qq
     # shellcheck disable=SC2086  # deliberate word splitting into package args
-    sudo /tmp/apk.static \
-        -X "$ALPINE/main" -X "$ALPINE/community" \
-        -U --allow-untrusted --arch x86_64 --root "$SYSROOT" --initdb \
-        add $X11_ALPINE
+    sudo apt-get install -y -qq ${X11_DEBIAN// /:i386 }:i386
     ;;
 
-x64-mingw-ucrt | x86_64-darwin | arm64-darwin)
+x86_64-linux-musl)
+    provision_musl "/usr/x86_64-unknown-linux-musl" x86_64
+    ;;
+
+x86-linux-musl)
+    provision_musl "/usr/i686-unknown-linux-musl" x86
+    ;;
+
+x64-mingw-ucrt | x86-mingw32 | x86_64-darwin | arm64-darwin)
     # Nothing to do -- see the header comment.
     ;;
 

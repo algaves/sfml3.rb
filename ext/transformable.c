@@ -19,12 +19,18 @@ static void Transformable_free(void *ptr) {
     sfTransformable_destroy((sfTransformable *) ptr);
 }
 
+static const rb_data_type_t Transformable_data_type = {
+    .wrap_struct_name = "SFML::Transformable",
+    .function = {.dmark = NULL, .dfree = Transformable_free, .dsize = NULL},
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY
+};
+
 static VALUE Transformable_new(VALUE klass) {
     VALUE self;
     sfTransformable *transformable;
 
     transformable = Transformable_create();
-    self = Data_Wrap_Struct(klass, 0, Transformable_free, transformable);
+    self = TypedData_Wrap_Struct(klass, &Transformable_data_type, transformable);
 
     rb_obj_call_init(self, 0, NULL);
 
@@ -136,7 +142,7 @@ void Init_Transformable(VALUE rb_module) {
 
 void *Get_Transformable_Struct(VALUE self) {
     sfTransformable *transform;
-    Data_Get_Struct(self, sfTransformable, transform);
+    TypedData_Get_Struct(self, sfTransformable, &Transformable_data_type, transform);
     return transform;
 }
 

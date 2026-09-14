@@ -30,6 +30,8 @@
 //    Local variables     lower_case or lowerCase
 //    Global variables    g_lowerCase or g_lower_case (searchable by g_ prefix)
 
+static VALUE rb_mExt;
+
 void Init_sfml_ext(void) {
     rb_mExt = rb_define_module("SFML");
 

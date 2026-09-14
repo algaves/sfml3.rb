@@ -23,11 +23,19 @@ module Ports
   # Cross targets, keyed by the RubyGems platform name that rake-compiler and
   # rake-compiler-dock use for them. `triple` is the GNU host triple whose
   # toolchain the matching rake-compiler-dock image installs as <triple>-gcc.
+  #
+  # `multiarch` is the Debian multiarch directory name, which is only sometimes
+  # the same string as the triple: i686 compiles with i686-linux-gnu-gcc but its
+  # libraries live in /usr/lib/i386-linux-gnu. Only set it where they differ.
   TARGETS = {
     'x86_64-linux-gnu' => { triple: 'x86_64-linux-gnu', os: :linux, cpu: 'x86_64' },
+    'x86-linux-gnu' => { triple: 'i686-linux-gnu', multiarch: 'i386-linux-gnu',
+                         os: :linux, cpu: 'i686' },
     'aarch64-linux-gnu' => { triple: 'aarch64-linux-gnu', os: :linux, cpu: 'aarch64' },
     'x86_64-linux-musl' => { triple: 'x86_64-unknown-linux-musl', os: :linux, cpu: 'x86_64' },
+    'x86-linux-musl' => { triple: 'i686-unknown-linux-musl', os: :linux, cpu: 'i686' },
     'x64-mingw-ucrt' => { triple: 'x86_64-w64-mingw32', os: :windows, cpu: 'x86_64' },
+    'x86-mingw32' => { triple: 'i686-w64-mingw32', os: :windows, cpu: 'i686' },
     'x86_64-darwin' => { triple: 'x86_64-apple-darwin', os: :darwin, cpu: 'x86_64' },
     'arm64-darwin' => { triple: 'aarch64-apple-darwin', os: :darwin, cpu: 'arm64' }
   }.freeze
@@ -328,7 +336,7 @@ module Ports
       else
         # Debian multiarch: without this CMake searches /usr/lib, finds the
         # container's own amd64 libraries and hands them to an aarch64 linker.
-        lines << "set(CMAKE_LIBRARY_ARCHITECTURE #{spec[:triple]})"
+        lines << "set(CMAKE_LIBRARY_ARCHITECTURE #{spec[:multiarch] || spec[:triple]})"
       end
     end
 
