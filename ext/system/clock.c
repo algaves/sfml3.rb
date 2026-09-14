@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 
+#include "system/time.h"
 #include "system/vec2.h"
 #include "core/macros.h"
 #include "core/sfml.h"
@@ -22,11 +23,8 @@ static const rb_data_type_t Clock_data_type = {
     .flags = RUBY_TYPED_FREE_IMMEDIATELY
 };
 
-static VALUE Clock_new(VALUE klass) {
-    sfClock *clock;
+static VALUE Clock_new_from(VALUE klass, sfClock *clock) {
     VALUE self;
-
-    clock = Clock_create();
 
     self = TypedData_Wrap_Struct(klass, &Clock_data_type, clock);
 
@@ -35,16 +33,42 @@ static VALUE Clock_new(VALUE klass) {
     return self;
 }
 
+static VALUE Clock_new(VALUE klass) {
+    return Clock_new_from(klass, Clock_create());
+}
+
 static VALUE Clock_init(VALUE self) {
     return self;
 }
 
 static VALUE Clock_get_elapsed_time(VALUE self) {
-    return DBL2NUM(sfTime_asSeconds(sfClock_getElapsedTime(Get_Clock_Struct(self))));
+    return time_to_rb(sfClock_getElapsedTime(Get_Clock_Struct(self)));
 }
 
 static VALUE Clock_restart(VALUE self) {
-    return DBL2NUM(sfTime_asSeconds(sfClock_restart(Get_Clock_Struct(self))));
+    return time_to_rb(sfClock_restart(Get_Clock_Struct(self)));
+}
+
+static VALUE Clock_reset(VALUE self) {
+    return time_to_rb(sfClock_reset(Get_Clock_Struct(self)));
+}
+
+static VALUE Clock_is_running(VALUE self) {
+    return BOOL2RB(sfClock_isRunning(Get_Clock_Struct(self)));
+}
+
+static VALUE Clock_start(VALUE self) {
+    sfClock_start(Get_Clock_Struct(self));
+    return self;
+}
+
+static VALUE Clock_stop(VALUE self) {
+    sfClock_stop(Get_Clock_Struct(self));
+    return self;
+}
+
+static VALUE Clock_copy(VALUE self) {
+    return Clock_new_from(Get_Klass_Clock(), sfClock_copy(Get_Clock_Struct(self)));
 }
 
 void Init_Clock(VALUE rb_module) {
@@ -55,9 +79,14 @@ void Init_Clock(VALUE rb_module) {
     // methods
     rb_define_method(rb_cClock, "initialize", Clock_init, 0);
     rb_define_method(rb_cClock, "restart!", Clock_restart, 0);
+    rb_define_method(rb_cClock, "reset!", Clock_reset, 0);
+    rb_define_method(rb_cClock, "start!", Clock_start, 0);
+    rb_define_method(rb_cClock, "stop!", Clock_stop, 0);
+    rb_define_method(rb_cClock, "copy", Clock_copy, 0);
 
     // getters
     rb_define_method(rb_cClock, "elapsed_time", Clock_get_elapsed_time, 0);
+    rb_define_method(rb_cClock, "running?", Clock_is_running, 0);
 }
 
 void *Get_Clock_Struct(VALUE self) {
