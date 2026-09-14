@@ -1,0 +1,6 @@
+# Start small on purpose: the analyzer over the project's own headers, with
+# findings as errors. Growing this (bugprone, readability, portability) is a
+# follow-up once the baseline is green.
+Checks: '-*,clang-analyzer-*'
+WarningsAsErrors: '*'
+HeaderFilterRegex: 'ext/.*'

@@ -89,6 +89,10 @@ rake test     # compile, then run the test suite
 rake gem      # build the source gem into pkg/
 ```
 
+`rake githooks:install` points your checkout at the committed `.githooks/` pre-commit hook, which
+lints staged Ruby with RuboCop and auto-formats staged C with clang-format (`sudo dnf install
+clang-tools-extra` on Fedora for the C side).
+
 `CMakeLists.txt` is a CLion/IDE convenience build against the same vendored `ports/` prefix — `rake`
 is the build of record.
 

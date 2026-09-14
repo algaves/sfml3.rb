@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+#
+# pre-commit: lint what is being committed, not the whole tree. CI enforces
+# the repository as a whole; the hook keeps the delta clean and stays fast.
+#
+#   * staged .rb files  -> bundle exec rubocop --force-exclusion (blocks)
+#   * staged .c/.h files -> clang-format -i, then re-stage (auto-format)
+#   * staged .c files   -> clang-tidy, but only when build/compile_commands.json
+#                          exists -- generate it with
+#                          `cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON`
+#                          after `rake ports`. Skipped otherwise.
+#
+# Missing clang tools warn and let the commit through (CI's clang job is the
+# backstop); a missing RuboCop blocks, since the Ruby gate is the one every
+# checkout can satisfy. Bypass everything once with `git commit --no-verify`.
+
+set -u
+cd "$(git rev-parse --show-toplevel)" || exit 1
+
+fail=0
+
+mapfile -t ruby_files < <(git diff --cached --name-only --diff-filter=ACMR -- '*.rb' ':!ports/**' ':!tmp/**')
+if ((${#ruby_files[@]} > 0)); then
+    if bundle exec rubocop --version >/dev/null 2>&1; then
+        bundle exec rubocop --force-exclusion "${ruby_files[@]}" || fail=1
+    else
+        echo "pre-commit: RuboCop is not in this bundle (run \`bundle install\`); blocking so Ruby changes are never committed unlinted" >&2
+        fail=1
+    fi
+fi
+
+mapfile -t c_files < <(git diff --cached --name-only --diff-filter=ACMR -- '*.c' '*.h' ':!ports/**' ':!tmp/**')
+if ((${#c_files[@]} > 0)); then
+    if command -v clang-format >/dev/null 2>&1; then
+        if clang-format -i "${c_files[@]}"; then
+            git add "${c_files[@]}"
+            echo "pre-commit: clang-format applied and re-staged ${#c_files[@]} C file(s)"
+        else
+            fail=1
+        fi
+    else
+        echo "pre-commit: clang-format not found (Fedora: sudo dnf install clang-tools-extra); skipping C format check" >&2
+    fi
+
+    mapfile -t tidy_files < <(printf '%s\n' "${c_files[@]}" | grep '\.c$' || true)
+    if ((${#tidy_files[@]} > 0)); then
+        if [ -f build/compile_commands.json ]; then
+            if command -v clang-tidy >/dev/null 2>&1; then
+                clang-tidy -p build "${tidy_files[@]}" || fail=1
+            else
+                echo "pre-commit: clang-tidy not found (Fedora: sudo dnf install clang-tools-extra); skipping" >&2
+            fi
+        else
+            echo "pre-commit: no build/compile_commands.json; skipping clang-tidy" >&2
+        fi
+    fi
+fi
+
+exit $fail
