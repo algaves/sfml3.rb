@@ -3,9 +3,11 @@
 
 #include <ruby.h>
 
+#include "core/sfml.h"
+
 void Init_VideoMode(VALUE rb_module);
 
-void *Get_Mode_Struct(VALUE self);
+sfVideoMode *Get_Mode_Struct(VALUE self);
 
 VALUE Get_Klass_Mode();
 

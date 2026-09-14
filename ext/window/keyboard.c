@@ -1,8 +1,11 @@
 #include "window/keyboard.h"
 
 #include <stddef.h>
+#include <ruby.h>
 #include <string.h>
 
+#include "core/exceptions.h"
+#include "core/macros.h"
 #include "core/sfml.h"
 
 /* Indexed by sfKeyCode rather than by position: if upstream reorders or
@@ -132,4 +135,73 @@ const char *get_key_event(unsigned int key) {
     }
 
     return "";
+}
+
+static int Keyboard_key_code(VALUE rb_key) {
+    int code;
+
+    if (SYMBOL_P(rb_key)) {
+        const char *name = rb_id2name(SYM2ID(rb_key));
+
+        code = find_key(name);
+
+        if (code < 0) {
+            rb_raise(rb_eArgError, "unknown key: %s", name);
+        }
+
+        return code;
+    }
+
+    if (RB_TYPE_P(rb_key, T_STRING)) {
+        const char *name = StringValueCStr(rb_key);
+
+        code = find_key(name);
+
+        if (code < 0) {
+            rb_raise(rb_eArgError, "unknown key: %s", name);
+        }
+
+        return code;
+    }
+
+    return NUM2INT(rb_key);
+}
+
+static VALUE Keyboard_pressed_p(VALUE module, VALUE rb_key) {
+    return BOOL2RB(sfKeyboard_isKeyPressed((sfKeyCode) Keyboard_key_code(rb_key)));
+}
+
+static VALUE Keyboard_scancode_pressed_p(VALUE module, VALUE rb_scancode) {
+    return BOOL2RB(sfKeyboard_isScancodePressed((sfScancode) NUM2INT(rb_scancode)));
+}
+
+static VALUE Keyboard_localize(VALUE module, VALUE rb_scancode) {
+    return ID2SYM(rb_intern(get_key_event((unsigned int) sfKeyboard_localize((sfScancode) NUM2INT(rb_scancode)))));
+}
+
+static VALUE Keyboard_delocalize(VALUE module, VALUE rb_key) {
+    return INT2NUM(sfKeyboard_delocalize((sfKeyCode) Keyboard_key_code(rb_key)));
+}
+
+static VALUE Keyboard_description(VALUE module, VALUE rb_scancode) {
+    const char *description = sfKeyboard_getDescription((sfScancode) NUM2INT(rb_scancode));
+
+    return rb_str_new_cstr(description != NULL ? description : "");
+}
+
+static VALUE Keyboard_set_virtual_keyboard_visible(VALUE module, VALUE rb_visible) {
+    sfKeyboard_setVirtualKeyboardVisible(RTEST(rb_visible));
+    return rb_visible;
+}
+
+void Init_Keyboard(VALUE rb_module) {
+    VALUE rb_mKeyboard = rb_define_module_under(rb_module, "Keyboard");
+
+    rb_define_module_function(rb_mKeyboard, "pressed?", Keyboard_pressed_p, 1);
+    rb_define_module_function(rb_mKeyboard, "scancode_pressed?", Keyboard_scancode_pressed_p, 1);
+    rb_define_module_function(rb_mKeyboard, "localize", Keyboard_localize, 1);
+    rb_define_module_function(rb_mKeyboard, "delocalize", Keyboard_delocalize, 1);
+    rb_define_module_function(rb_mKeyboard, "description", Keyboard_description, 1);
+    rb_define_module_function(rb_mKeyboard, "virtual_keyboard_visible=",
+                              Keyboard_set_virtual_keyboard_visible, 1);
 }

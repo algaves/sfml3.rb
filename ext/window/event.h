@@ -3,9 +3,11 @@
 
 #include <ruby.h>
 
+#include "core/sfml.h"
+
 void Init_Event(VALUE rb_module);
 
-void *Get_Event_Struct(VALUE self);
+sfEvent *Get_Event_Struct(VALUE self);
 
 VALUE Get_Klass_Event();
 
