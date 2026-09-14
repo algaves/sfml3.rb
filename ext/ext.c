@@ -2,18 +2,51 @@
 #include <stdio.h>
 
 #include "core/macros.h"
+#include "system/vec2.h"
+#include "system/vec3.h"
+#include "system/time.h"
 #include "graphics/transform.h"
 #include "graphics/drawable.h"
 #include "graphics/color.h"
+#include "graphics/rect.h"
+#include "graphics/blend_mode.h"
+#include "graphics/stencil_mode.h"
+#include "graphics/image.h"
+#include "graphics/texture.h"
 #include "graphics/transformable.h"
 #include "system/clock.h"
+#include "system/sleep.h"
+#include "system/buffer.h"
+#include "system/input_stream.h"
 #include "graphics/target.h"
 #include "graphics/render_state.h"
 #include "window/event.h"
 #include "window/window.h"
+#include "window/keyboard.h"
+#include "window/mouse.h"
+#include "window/joystick.h"
+#include "window/touch.h"
+#include "window/sensor.h"
+#include "window/clipboard.h"
+#include "window/cursor.h"
+#include "window/context_settings.h"
+#include "window/context.h"
+#include "window/vulkan.h"
 #include "graphics/view.h"
 #include "window/video_mode.h"
 #include "graphics/circle.h"
+#include "graphics/rectangle.h"
+#include "graphics/polygon.h"
+#include "graphics/shape.h"
+#include "graphics/sprite.h"
+#include "graphics/vertex.h"
+#include "graphics/vertex_array.h"
+#include "graphics/vertex_buffer.h"
+#include "graphics/glyph.h"
+#include "graphics/font.h"
+#include "graphics/text.h"
+#include "graphics/render_texture.h"
+#include "graphics/shader.h"
 
 
 //  C Naming Convention:
@@ -35,6 +68,18 @@ static VALUE rb_mExt;
 void Init_sfml_ext(void) {
     rb_mExt = rb_define_module("SFML");
 
+    Init_Vector2(rb_mExt);
+    Init_Vector3(rb_mExt);
+    Init_Time(rb_mExt);
+    Init_Sleep(rb_mExt);
+    Init_Buffer(rb_mExt);
+    Init_InputStream(rb_mExt);
+    Init_Color(rb_mExt);
+    Init_Rect(rb_mExt);
+    Init_BlendMode(rb_mExt);
+    Init_StencilMode(rb_mExt);
+    Init_Image(rb_mExt);
+    Init_Texture(rb_mExt);
     Init_Drawable(rb_mExt);
     Init_Transform(rb_mExt);
     Init_Transformable(rb_mExt);
@@ -42,8 +87,30 @@ void Init_sfml_ext(void) {
     Init_Target(rb_mExt);
     Init_RenderState(rb_mExt);
     Init_Circle(rb_mExt);
+    Init_RectangleShape(rb_mExt);
+    Init_ConvexShape(rb_mExt);
+    Init_Shape(rb_mExt);
+    Init_Sprite(rb_mExt);
+    Init_Vertex(rb_mExt);
+    Init_VertexArray(rb_mExt);
+    Init_VertexBuffer(rb_mExt);
+    Init_Glyph(rb_mExt);
+    Init_Font(rb_mExt);
+    Init_Text(rb_mExt);
+    Init_RenderTexture(rb_mExt);
+    Init_Shader(rb_mExt);
     Init_Event(rb_mExt);
     Init_VideoMode(rb_mExt);
     Init_View(rb_mExt);
     Init_Window(rb_mExt);
+    Init_Keyboard(rb_mExt);
+    Init_Mouse(rb_mExt);
+    Init_Joystick(rb_mExt);
+    Init_Touch(rb_mExt);
+    Init_Sensor(rb_mExt);
+    Init_Clipboard(rb_mExt);
+    Init_Cursor(rb_mExt);
+    Init_ContextSettings(rb_mExt);
+    Init_Context(rb_mExt);
+    Init_Vulkan(rb_mExt);
 }
