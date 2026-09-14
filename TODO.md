@@ -88,32 +88,56 @@ OpenGL-based windows, events, input handling.
 
 Sounds, streaming, recording, spatialization.
 
-- [ ] **Not started — and not currently buildable.** `ext/ports.rb` builds the vendored SFML/CSFML
-      with `SFML_BUILD_AUDIO=OFF` / `CSFML_BUILD_AUDIO=OFF`. Flipping those on (and pulling in the
-      FLAC/Ogg/Vorbis dependency family they currently avoid) is a prerequisite for any class below.
-- [ ] **Listener**
-- [ ] **SoundBuffer**
-- [ ] **Sound**
-- [ ] **SoundBufferRecorder**
-- [ ] **SoundRecorder**
-- [ ] **SoundStream**
-- [ ] **Music**
-- [ ] **EffectProcessor**
+- [x] **Listener** — `SFML::Listener` (`ext/audio/listener.c`); global volume plus
+      position/direction/velocity/up-vector/cone
+- [x] **ListenerCone** / **SoundSourceCone** — `SFML::SoundSourceCone` (`ext/audio/sound_source_cone.c`)
+- [x] **SoundSource** — the shared play/pause/stop/status, pitch, pan, volume, spatialization,
+      position/direction/velocity, cone, doppler/directional-attenuation, min/max distance/gain,
+      attenuation, playing-offset and effect-processor surface, generated per class from
+      `ext/audio/sound_source.inc`
+- [x] **SoundStatus** / **SoundChannel** — `SFML::SoundStatus`, `SFML::SoundChannel`
+      (`ext/audio/audio_enums.c`)
+- [x] **SoundBuffer** — `SFML::SoundBuffer` (`ext/audio/sound_buffer.c`); loading from file, memory,
+      stream and raw samples, saving, sample access and channel map
+- [x] **Sound** — `SFML::Sound` (`ext/audio/sound.c`)
+- [x] **SoundStream** — `SFML::SoundStream` (`ext/audio/sound_stream.c`); subclass and implement
+      `#on_get_data` (and optionally `#on_seek`)
+- [x] **SoundBufferRecorder** — `SFML::SoundBufferRecorder` (`ext/audio/sound_buffer_recorder.c`)
+- [x] **SoundRecorder** — `SFML::SoundRecorder` (`ext/audio/sound_recorder.c`); subclass and
+      implement `#on_process` (and optionally `#on_start`/`#on_stop`)
+- [x] **Music** — `SFML::Music` (`ext/audio/music.c`); file, memory and stream sources, loop points
+- [x] **EffectProcessor** — `SFML::SoundSource#effect_processor=`; a Ruby proc is dispatched through
+      a bounded pool of C thunks (`ext/audio/effect_processor.c`), because `sfEffectProcessor` has
+      no `userData` to identify the source
+- [x] **Build support** — `ext/ports.rb` builds Ogg 1.3.5, Vorbis 1.3.7 and FLAC 1.4.3 as pinned,
+      static, position-independent ports (SFML 3's audio backend is miniaudio, so no OpenAL), and
+      enables `SFML_BUILD_AUDIO` / `CSFML_BUILD_AUDIO`
 
 ## Network
 
 Socket-based communication and higher-level protocols.
 
-- [ ] **Not started — and not currently buildable.** `ext/ports.rb` builds the vendored SFML/CSFML
-      with `SFML_BUILD_NETWORK=OFF` / `CSFML_BUILD_NETWORK=OFF`. Flipping those on is a prerequisite
-      for any class below.
-- [ ] **IpAddress**
-- [ ] **Packet**
-- [ ] **Socket** base / **SocketSelector**
-- [ ] **TcpSocket** / **TcpListener**
-- [ ] **UdpSocket**
-- [ ] **Http**
-- [ ] **Ftp**
+- [x] **IpAddress** — `SFML::IpAddress` (`ext/network/ip_address.c`); string/bytes/integer
+      constructors, `NONE`/`ANY`/`LOCAL_HOST`/`BROADCAST`, local and public address lookup
+- [x] **Packet** — `SFML::Packet` (`ext/network/packet.c`); raw data plus every typed reader/writer
+      (booleans, all integer widths, floats, string)
+- [x] **SocketSelector** — `SFML::SocketSelector` (`ext/network/socket_selector.c`); add/remove for
+      each socket type, wait and readiness checks
+- [x] **TcpSocket** / **TcpListener** — `SFML::TcpSocket`, `SFML::TcpListener`
+      (`ext/network/tcp_socket.c`, `ext/network/tcp_listener.c`); connect/accept, blocking control,
+      raw and packet sends/receives
+- [x] **UdpSocket** — `SFML::UdpSocket` (`ext/network/udp_socket.c`); bind/send/receive and packet
+      variants, datagram size and any-port helpers
+- [x] **Http** — `SFML::Http`, `SFML::HttpRequest`, `SFML::HttpResponse` (`ext/network/http.c`)
+- [x] **Ftp** — `SFML::Ftp`, `SFML::FtpResponse`, `SFML::FtpDirectoryResponse`,
+      `SFML::FtpListingResponse` (`ext/network/ftp.c`)
+- [x] **SocketStatus** / **HttpMethod** / **HttpStatus** / **FtpStatus** / **FtpTransferMode** —
+      enum modules (`ext/network/network_enums.c`)
+- [x] **Build support** — `ext/ports.rb` enables `SFML_BUILD_NETWORK` / `CSFML_BUILD_NETWORK`; the
+      module needs no external dependency (just `ws2_32` on Windows)
+
+Note that CSFML exposes no `sfSocket` base class, so there is nothing to bind for "Socket base" —
+only the concrete TCP/UDP sockets and the selector.
 
 ## References
 

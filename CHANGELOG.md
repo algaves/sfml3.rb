@@ -4,6 +4,52 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0]
+
+### Added
+* **Full Audio binding.** `SFML::Listener`, `SFML::SoundSourceCone`, `SFML::SoundBuffer`,
+  `SFML::Sound`, `SFML::Music`, `SFML::SoundStream`, `SFML::SoundRecorder` and
+  `SFML::SoundBufferRecorder`, plus the `SFML::SoundStatus` and `SFML::SoundChannel` enums. The
+  shared sound-source surface (play/pause/stop/status, pitch, pan, volume, spatialization,
+  position/direction/velocity, cone, doppler and attenuation factors, distance/gain bounds and
+  playing offset) is generated once from `ext/audio/sound_source.inc` for all three source classes.
+  `SoundStream` and `SoundRecorder` are subclassable through `#on_get_data`/`#on_seek` and
+  `#on_process`/`#on_start`/`#on_stop`; their callbacks re-enter Ruby under the GVL and treat an
+  exception as "stop", since they run on SFML's audio thread.
+* **Full Network binding.** `SFML::IpAddress` (string/bytes/integer constructors, `NONE`, `ANY`,
+  `LOCAL_HOST`, `BROADCAST`, local/public lookup), `SFML::Packet` (raw data plus every typed
+  reader/writer), `SFML::SocketSelector`, `SFML::TcpSocket`, `SFML::TcpListener`,
+  `SFML::UdpSocket`, `SFML::Http`/`HttpRequest`/`HttpResponse`, `SFML::Ftp` with its response,
+  directory-response and listing-response classes, and the `SocketStatus`, `HttpMethod`,
+  `HttpStatus`, `FtpStatus` and `FtpTransferMode` enums.
+* `SFML::SoundSource#effect_processor=` accepts a Ruby proc. Because `sfEffectProcessor` carries
+  no `userData` (so one C callback cannot tell which source invoked it), the binding dispatches
+  through a bounded pool of C thunks, one per active source; exceeding the pool raises.
+
+### Changed
+* The vendored CSFML/SFML archives are now linked by **full path** instead of `-l`. mkmf puts the
+  host's `-L/usr/lib64` ahead of the ports prefix, which made `-lfreetype` (and the new codec
+  libraries) resolve to the host's shared objects and silently add runtime dependencies. The
+  built extension again has no `libsfml`/`libcsfml`/`libfreetype`/`libvorbis`/`libFLAC`/`libogg`
+  shared dependency.
+
+### Build
+* `ext/ports.rb` now builds **Ogg 1.3.5, Vorbis 1.3.7 and FLAC 1.4.3** as pinned,
+  checksum-verified, static and position-independent ports, alongside FreeType. SFML 3's audio
+  backend is miniaudio, so OpenAL is not needed.
+* `SFML_BUILD_AUDIO`, `SFML_BUILD_NETWORK`, `CSFML_BUILD_AUDIO` and `CSFML_BUILD_NETWORK` are
+  enabled; `ws2_32` was added to the Windows system libraries and the CoreAudio/CoreFoundation
+  frameworks to the macOS ones. `CMakeLists.txt` finds and links the `Audio`/`Network` components.
+* Archive extraction accepts `.tar.xz` as well as `.tar.gz`, since the FLAC release ships only as
+  xz.
+
+### Known issues
+* Audio playback and capture need an audio device; the CI suite stays headless, so
+  `SoundStream#on_get_data` and `SoundRecorder` are exercised by construction and mapping only,
+  never by actually playing or capturing.
+* `Http` and `Ftp` perform real network I/O and are not exercised in CI beyond construction and
+  enum mapping.
+
 ## [0.1.1]
 
 ### Added
