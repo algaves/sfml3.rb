@@ -1,6 +1,17 @@
 require 'mkmf'
 require_relative 'ports'
 
+# Warnings are on everywhere: a user's build log is the only diagnostic anyone
+# gets when an install fails on a platform we never tested.
+$CFLAGS = "#{$CFLAGS} -Wall -Wextra -Wno-unused-parameter"
+
+# Promoting them to errors is opt-in, and CI is the only caller. An unfamiliar
+# compiler at `gem install` time will warn about things this code cannot
+# predict, and a warning must never be what stops someone installing the gem.
+# SFML_STRICT=1 is what keeps the TypedData migration from regressing: going
+# back to Data_Wrap_Struct would reintroduce a deprecation warning and fail.
+$CFLAGS = "#{$CFLAGS} -Werror=deprecated-declarations" if ENV['SFML_STRICT']
+
 # Link order matters for static archives: CSFML depends on SFML, SFML depends
 # on FreeType, and all of them depend on the target's OS libraries. This
 # mirrors the INTERFACE_LINK_LIBRARIES that SFML's own CMake config exports.

@@ -1,5 +1,5 @@
 AllCops:
-  TargetRubyVersion: 2.7
+  TargetRubyVersion: 3.1
   NewCops: enable
   # Build output, not source: both hold copies of lib/ and ext/ staged for
   # packaging, so linting them double-counts every offence in the real files.

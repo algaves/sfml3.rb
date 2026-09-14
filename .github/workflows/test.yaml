@@ -13,13 +13,16 @@ jobs:
     # oldest matrix entry resolve at all.
     env:
       BUNDLE_WITHOUT: development
+      # Turns a warning back into a build failure, so the extension cannot drift
+      # back onto deprecated APIs (notably the untyped Data_Wrap_Struct family)
+      # without CI noticing.
+      SFML_STRICT: 1
     strategy:
       fail-fast: false
       matrix:
-        # 2.7.8 is pinned exactly because it is the floor the gemspec promises;
-        # the rest float on their minor series. 2.7 and 3.0 have no binary gem,
-        # so they are the entries that actually exercise the source build.
-        ruby: ['2.7.8', '3.0', '3.1', '3.3', '4.0']
+        # Exactly the ABI set the binary gems ship, so every Ruby that can
+        # receive a precompiled gem is also proven to build from source.
+        ruby: ['3.1', '3.2', '3.3', '3.4', '4.0']
     steps:
       - uses: actions/checkout@v4
 

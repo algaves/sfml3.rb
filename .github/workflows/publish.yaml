@@ -76,9 +76,10 @@ jobs:
           name: gem-${{ matrix.platform }}
           path: pkg/*-${{ matrix.platform }}.gem
 
-  # No binary gem covers Ruby 2.7 or 3.0, so those users get the source gem and
-  # build SFML at install time. Prove that actually works against the gem we are
-  # about to publish, rather than trusting required_ruby_version.
+  # Every supported Ruby now has a binary gem, but most *platforms* still do
+  # not -- macOS, ARM, the BSDs and anything musl below 3.1 all fall back to
+  # building SFML at install time. Prove that path works against the gem we are
+  # about to publish, on the floor it claims to support.
   verify-source:
     name: Source gem on Ruby ${{ matrix.ruby }}
     needs: source
@@ -86,7 +87,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: ['2.7.8', '3.0']
+        ruby: ['3.1']
     steps:
       # No checkout: this job must see only what a user would -- the published
       # gem and a bare machine.
