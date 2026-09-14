@@ -1,5 +1,7 @@
 #include "core/exceptions.h"
 
+#include <string.h>
+
 #define MSG_LENGTH      86
 
 void raise_invalid_argument_type(const char *type) {
@@ -36,9 +38,9 @@ void raise_invalid_array_length(size_t length) {
 }
 
 void raise_method_no_implemented(const char *method) {
-    if (strlen(method) == 0) {
-        rb_raise(rb_eArgError, "%s", "method no implemented");
+    if (method != NULL && strlen(method) > 0) {
+        rb_raise(rb_eNotImpError, "method not implemented: %s", method);
     } else {
-
+        rb_raise(rb_eNotImpError, "method not implemented");
     }
 }
