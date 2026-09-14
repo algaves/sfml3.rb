@@ -20,6 +20,12 @@ static void Event_free(void *ptr) {
     free(ptr);
 }
 
+static const rb_data_type_t Event_data_type = {
+    .wrap_struct_name = "SFML::Event",
+    .function = {.dmark = NULL, .dfree = Event_free, .dsize = NULL},
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY
+};
+
 static VALUE Event_new(VALUE klass) {
     VALUE self;
     sfEvent *event;
@@ -27,7 +33,7 @@ static VALUE Event_new(VALUE klass) {
     VALUE argv[] = {};
 
     event = Event_create();
-    self = Data_Wrap_Struct(klass, 0, Event_free, event);
+    self = TypedData_Wrap_Struct(klass, &Event_data_type, event);
 
     rb_obj_call_init(self, 0, argv);
 
@@ -45,7 +51,6 @@ static VALUE Event_type(VALUE self) {
 
 static VALUE Event_key(VALUE self) {
     VALUE arr;
-    VALUE hash;
     sfEvent *event = Get_Event_Struct(self);
 
     const char *key_name = get_key_event(event->key.code);
@@ -139,7 +144,7 @@ void Init_Event(VALUE rb_module) {
 
 void *Get_Event_Struct(VALUE self) {
     sfEvent *ptr;
-    Data_Get_Struct(self, sfEvent, ptr);
+    TypedData_Get_Struct(self, sfEvent, &Event_data_type, ptr);
     return ptr;
 }
 

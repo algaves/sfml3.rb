@@ -29,6 +29,12 @@ static void Circle_free(void *ptr) {
     sfCircleShape_destroy(ptr);
 }
 
+static const rb_data_type_t Circle_data_type = {
+    .wrap_struct_name = "SFML::Circle",
+    .function = {.dmark = NULL, .dfree = Circle_free, .dsize = NULL},
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY
+};
+
 static VALUE Circle_new(int argc, VALUE *argv, VALUE klass) {
     sfCircleShape *circle;
     float radius;
@@ -46,7 +52,7 @@ static VALUE Circle_new(int argc, VALUE *argv, VALUE klass) {
 
     circle = Circle_create(radius);
 
-    self = Data_Wrap_Struct(klass, 0, Circle_free, circle);
+    self = TypedData_Wrap_Struct(klass, &Circle_data_type, circle);
 
     rb_obj_call_init(self, argc, argv);
 
@@ -145,7 +151,7 @@ static VALUE Circle_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
         raise_invalid_argument_class(Get_Klass_Target());
     }
 
-    if (!rb_obj_is_kind_of(rb_target, Get_Klass_RenderState())) {
+    if (!rb_obj_is_kind_of(rb_state, Get_Klass_RenderState())) {
         raise_invalid_argument_class(Get_Klass_RenderState());
     }
 
@@ -189,7 +195,7 @@ void Init_Circle(VALUE rb_module) {
 
 void *Get_Circle_Struct(VALUE self) {
     sfCircleShape *ptr;
-    Data_Get_Struct(self, sfCircleShape, ptr);
+    TypedData_Get_Struct(self, sfCircleShape, &Circle_data_type, ptr);
     return ptr;
 }
 

@@ -20,6 +20,12 @@ static void View_free(void *ptr) {
     sfView_destroy(ptr);
 }
 
+static const rb_data_type_t View_data_type = {
+    .wrap_struct_name = "SFML::View",
+    .function = {.dmark = NULL, .dfree = View_free, .dsize = NULL},
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY
+};
+
 static VALUE View_new_from(VALUE klass, sfView *c_view) {
     VALUE self;
     sfView *view;
@@ -30,7 +36,7 @@ static VALUE View_new_from(VALUE klass, sfView *c_view) {
         view = View_create();
     }
 
-    self = Data_Wrap_Struct(klass, 0, View_free, view);
+    self = TypedData_Wrap_Struct(klass, &View_data_type, view);
 
     rb_obj_call_init(self, 0, NULL);
 
@@ -157,7 +163,7 @@ void Init_View(VALUE rb_module) {
 
 void *Get_View_Struct(VALUE self) {
     sfView *ptr;
-    Data_Get_Struct(self, sfView, ptr);
+    TypedData_Get_Struct(self, sfView, &View_data_type, ptr);
     return ptr;
 }
 

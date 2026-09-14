@@ -26,6 +26,12 @@ static void Window_free(void *ptr) {
     sfRenderWindow_destroy((sfRenderWindow *) ptr);
 }
 
+static const rb_data_type_t Window_data_type = {
+    .wrap_struct_name = "SFML::Window",
+    .function = {.dmark = NULL, .dfree = Window_free, .dsize = NULL},
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY
+};
+
 static VALUE Window_new(int argc, VALUE *argv, VALUE klass) {
     VALUE self, rb_video_mode, rb_title;
     sfRenderWindow *window;
@@ -43,7 +49,7 @@ static VALUE Window_new(int argc, VALUE *argv, VALUE klass) {
     }
 
     window = Window_create(Get_Mode_Struct(rb_video_mode), RSTRING_PTR(rb_title));
-    self = Data_Wrap_Struct(klass, 0, Window_free, window);
+    self = TypedData_Wrap_Struct(klass, &Window_data_type, window);
 
     rb_obj_call_init(self, argc, argv);
 
@@ -265,7 +271,7 @@ void Init_Window(VALUE rb_module) {
 
 void *Get_Window_Struct(VALUE self) {
     sfRenderWindow *ptr;
-    Data_Get_Struct(self, sfRenderWindow, ptr);
+    TypedData_Get_Struct(self, sfRenderWindow, &Window_data_type, ptr);
     return ptr;
 }
 
