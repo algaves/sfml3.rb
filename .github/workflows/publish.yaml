@@ -35,10 +35,14 @@ jobs:
       matrix:
         include:
           - platform: x86_64-linux-gnu
-          - platform: x64-mingw-ucrt
-          - platform: aarch64-linux-gnu
-            experimental: true
+          - platform: x86-linux-gnu
           - platform: x86_64-linux-musl
+          - platform: x86-linux-musl
+          - platform: x64-mingw-ucrt
+          # No Ruby 4.0 here: RubyInstaller publishes no 32-bit 4.0 build, so
+          # this gem stops at 3.4. rakelib/package.rake asserts that.
+          - platform: x86-mingw32
+          - platform: aarch64-linux-gnu
             experimental: true
           - platform: x86_64-darwin
             experimental: true
@@ -46,6 +50,14 @@ jobs:
             experimental: true
     steps:
       - uses: actions/checkout@v4
+
+      # Each rake-compiler-dock image is multi-GB and the runner has ~14 GB.
+      # Reclaiming the preinstalled toolchains we do not use keeps the pull and
+      # the out-of-tree build from running the disk out.
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          df -h /
 
       - uses: ruby/setup-ruby@v1
         with:
