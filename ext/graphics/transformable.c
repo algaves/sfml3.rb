@@ -124,19 +124,20 @@ void Init_Transformable(VALUE rb_module) {
     rb_define_method(rb_cTransformable, "initialize", Transformable_init, 0);
 
     rb_define_method(rb_cTransformable, "position=", Transformable_set_position, 1);
-    rb_define_method(rb_cTransformable, "angle=", Transformable_set_rotation, 1);
+    rb_define_method(rb_cTransformable, "rotation=", Transformable_set_rotation, 1);
     rb_define_method(rb_cTransformable, "scale=", Transformable_set_scale, 1);
     rb_define_method(rb_cTransformable, "origin=", Transformable_set_origin, 1);
 
     rb_define_method(rb_cTransformable, "position", Transformable_get_position, 0);
-    rb_define_method(rb_cTransformable, "angle", Transformable_get_rotation, 0);
+    rb_define_method(rb_cTransformable, "rotation", Transformable_get_rotation, 0);
     rb_define_method(rb_cTransformable, "scale", Transformable_get_scale, 0);
     rb_define_method(rb_cTransformable, "origin", Transformable_get_origin, 0);
 
     rb_define_method(rb_cTransformable, "move", Transformable_move, 1);
     rb_define_method(rb_cTransformable, "rotate", Transformable_rotate, 1);
-    rb_define_method(rb_cTransformable, "escalate", Transformable_scale, 1);
+    rb_define_method(rb_cTransformable, "scale!", Transformable_scale, 1);
 
+    rb_define_method(rb_cTransformable, "transform", Transformable_get_matrix, 0);
     rb_define_method(rb_cTransformable, "matrix", Transformable_get_matrix, 0);
 }
 

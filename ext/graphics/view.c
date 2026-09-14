@@ -51,19 +51,6 @@ static VALUE View_init(VALUE self) {
     return self;
 }
 
-static VALUE View_set_position(VALUE self, VALUE rb_position) {
-    sfView *view = Get_View_Struct(self);
-    sfVector2f position = VEC2_RB2C(rb_position);
-    sfVector2f size = sfView_getSize(view);
-
-    sfFloatRect rect = {{position.x, position.y}, {size.x, size.y}};
-
-    sfView_setViewport(Get_View_Struct(self), rect);
-
-    return self;
-}
-
-
 static VALUE View_set_rotation(VALUE self, VALUE rb_rotation) {
     sfView_setRotation(Get_View_Struct(self), NUM2DBL(rb_rotation));
     return self;
@@ -71,7 +58,7 @@ static VALUE View_set_rotation(VALUE self, VALUE rb_rotation) {
 
 
 static VALUE View_set_size(VALUE self, VALUE rb_scale) {
-    sfView_setSize(Get_View_Struct(self), vec2f_new_from_ruby(rb_scale));
+    sfView_setSize(Get_View_Struct(self), vec2f_from_rb(rb_scale));
     return self;
 }
 
@@ -89,24 +76,18 @@ static VALUE View_set_viewport(VALUE self, VALUE rb_viewport) {
     return self;
 }
 
-static VALUE View_get_position(VALUE self) {
-    sfFloatRect viewport = sfView_getViewport(Get_View_Struct(self));
-    return vec2_new(viewport.position.x, viewport.position.y);
-}
-
-
 static VALUE View_get_rotation(VALUE self) {
     return DBL2NUM(sfView_getRotation(Get_View_Struct(self)));
 }
 
 
 static VALUE View_get_size(VALUE self) {
-    return vec2f_new_from_c(sfView_getSize(Get_View_Struct(self)));
+    return vec2f_to_rb(sfView_getSize(Get_View_Struct(self)));
 }
 
 
 static VALUE View_get_center(VALUE self) {
-    return vec2f_new_from_c(sfView_getCenter(Get_View_Struct(self)));
+    return vec2f_to_rb(sfView_getCenter(Get_View_Struct(self)));
 }
 
 static VALUE View_get_viewport(VALUE self) {
@@ -114,7 +95,7 @@ static VALUE View_get_viewport(VALUE self) {
 }
 
 static VALUE View_move(VALUE self, VALUE rb_move) {
-    sfView_move(Get_View_Struct(self), vec2f_new_from_ruby(rb_move));
+    sfView_move(Get_View_Struct(self), vec2f_from_rb(rb_move));
     return self;
 }
 
@@ -147,15 +128,13 @@ void Init_View(VALUE rb_module) {
     rb_define_method(rb_cView, "copy", View_copy, 0);
 
     // setters
-    rb_define_method(rb_cView, "position=", View_set_position, 1);
-    rb_define_method(rb_cView, "angle=", View_set_rotation, 1);
+    rb_define_method(rb_cView, "rotation=", View_set_rotation, 1);
     rb_define_method(rb_cView, "size=", View_set_size, 1);
     rb_define_method(rb_cView, "center=", View_set_center, 1);
     rb_define_method(rb_cView, "viewport=", View_set_viewport, 1);
 
     // getters
-    rb_define_method(rb_cView, "position", View_get_position, 0);
-    rb_define_method(rb_cView, "angle", View_get_rotation, 0);
+    rb_define_method(rb_cView, "rotation", View_get_rotation, 0);
     rb_define_method(rb_cView, "size", View_get_size, 0);
     rb_define_method(rb_cView, "center", View_get_center, 0);
     rb_define_method(rb_cView, "viewport", View_get_viewport, 0);
