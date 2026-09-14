@@ -122,4 +122,4 @@ that and falls back to the single `lib/sfml/sfml_ext.so` a source build installs
 
 ---
 
-Developed by: [Algeves](https://github.com/algaves/sfml3.rb) @ 2026
+Developed by: [Algaves](https://github.com/algaves/sfml3.rb) @ 2026
