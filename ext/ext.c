@@ -1,19 +1,19 @@
 #include <ruby.h>
 #include <stdio.h>
 
-#include "ext/module.h"
-#include "ext/module/transform.h"
-#include "ext/module/drawable/drawable.h"
-#include "ext/klass/color.h"
-#include "ext/klass/transformable.h"
-#include <ext/klass/clock.h>
-#include <ext/klass/target.h>
-#include "ext/klass/render_state.h"
-#include "ext/klass/event.h"
-#include "ext/klass/window.h"
-#include "ext/klass/view.h"
-#include "ext/klass/video_mode.h"
-#include "ext/klass/drawable/circle.h"
+#include "core/macros.h"
+#include "graphics/transform.h"
+#include "graphics/drawable.h"
+#include "graphics/color.h"
+#include "graphics/transformable.h"
+#include "system/clock.h"
+#include "graphics/target.h"
+#include "graphics/render_state.h"
+#include "window/event.h"
+#include "window/window.h"
+#include "graphics/view.h"
+#include "window/video_mode.h"
+#include "graphics/circle.h"
 
 
 //  C Naming Convention:

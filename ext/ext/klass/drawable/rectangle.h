@@ -1,4 +1,0 @@
-#ifndef SFML_RB_RECTANGLE_H
-#define SFML_RB_RECTANGLE_H
-
-#endif //SFML_RB_RECTANGLE_H
