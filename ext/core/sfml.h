@@ -9,6 +9,8 @@
 
 #include <CSFML/Graphics.h>
 #include <CSFML/Window.h>
+#include <CSFML/Audio.h>
+#include <CSFML/Network.h>
 #include <CSFML/System.h>
 #include <CSFML/System/Vector2.h>
 #include <CSFML/Graphics/RenderStates.h>

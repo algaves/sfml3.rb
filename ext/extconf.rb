@@ -15,15 +15,22 @@ $CFLAGS = "#{$CFLAGS} -Wall -Wextra -Wno-unused-parameter"
 $CFLAGS = "#{$CFLAGS} -Werror=deprecated-declarations" if ENV['SFML_STRICT']
 
 # Link order matters for static archives: CSFML depends on SFML, SFML depends
-# on FreeType, and all of them depend on the target's OS libraries. This
-# mirrors the INTERFACE_LINK_LIBRARIES that SFML's own CMake config exports.
+# on FreeType and the Ogg/Vorbis/FLAC codecs, and all of them depend on the
+# target's OS libraries. This mirrors the INTERFACE_LINK_LIBRARIES that SFML's
+# own CMake config exports. Within the codecs, vorbisfile/vorbisenc depend on
+# vorbis, which depends on ogg, and FLAC stands alone; all of them must follow
+# sfml-audio so the linker has already seen the references.
 VENDORED_LIBS = %w[
-  csfml-graphics-s csfml-window-s csfml-system-s
-  sfml-graphics-s sfml-window-s sfml-system-s
+  csfml-graphics-s csfml-window-s csfml-system-s csfml-audio-s csfml-network-s
+  sfml-graphics-s sfml-window-s sfml-system-s sfml-audio-s sfml-network-s
   freetype
+  vorbisfile vorbisenc vorbis ogg
+  FLAC
 ].freeze
 
-SYSTEM_CSFML_LIBS = %w[csfml-graphics csfml-window csfml-system].freeze
+SYSTEM_CSFML_LIBS = %w[
+  csfml-graphics csfml-window csfml-system csfml-audio csfml-network
+].freeze
 
 def use_vendored_ports
   $INCFLAGS = "-I#{Ports.prefix}/include #{$INCFLAGS}"
