@@ -47,6 +47,25 @@
 #include "graphics/text.h"
 #include "graphics/render_texture.h"
 #include "graphics/shader.h"
+#include "audio/effect_processor.h"
+#include "audio/audio_enums.h"
+#include "audio/sound_source_cone.h"
+#include "audio/listener.h"
+#include "audio/sound_buffer.h"
+#include "audio/sound.h"
+#include "audio/music.h"
+#include "audio/sound_stream.h"
+#include "audio/sound_buffer_recorder.h"
+#include "audio/sound_recorder.h"
+#include "network/network_enums.h"
+#include "network/ip_address.h"
+#include "network/packet.h"
+#include "network/tcp_socket.h"
+#include "network/tcp_listener.h"
+#include "network/udp_socket.h"
+#include "network/socket_selector.h"
+#include "network/http.h"
+#include "network/ftp.h"
 
 
 //  C Naming Convention:
@@ -113,4 +132,25 @@ void Init_sfml_ext(void) {
     Init_ContextSettings(rb_mExt);
     Init_Context(rb_mExt);
     Init_Vulkan(rb_mExt);
+
+    Init_EffectProcessor();
+    Init_AudioEnums(rb_mExt);
+    Init_SoundSourceCone(rb_mExt);
+    Init_Listener(rb_mExt);
+    Init_SoundBuffer(rb_mExt);
+    Init_Sound(rb_mExt);
+    Init_Music(rb_mExt);
+    Init_SoundStream(rb_mExt);
+    Init_SoundBufferRecorder(rb_mExt);
+    Init_SoundRecorder(rb_mExt);
+
+    Init_NetworkEnums(rb_mExt);
+    Init_IpAddress(rb_mExt);
+    Init_Packet(rb_mExt);
+    Init_TcpSocket(rb_mExt);
+    Init_TcpListener(rb_mExt);
+    Init_UdpSocket(rb_mExt);
+    Init_SocketSelector(rb_mExt);
+    Init_Http(rb_mExt);
+    Init_Ftp(rb_mExt);
 }
