@@ -7,7 +7,7 @@
 void raise_invalid_argument_type(const char *type) {
     char msg[MSG_LENGTH];
 
-    sprintf(msg, "invalid argument, expected a %s object", type);
+    snprintf(msg, MSG_LENGTH, "invalid argument, expected a %s object", type);
 
     rb_raise(rb_eArgError, "%s", msg);
 }
@@ -20,9 +20,9 @@ void raise_invalid_arguments_excepted(int expected, size_t given) {
     char msg[MSG_LENGTH];
 
     if (expected > 0) {
-        sprintf(msg, "wrong number of arguments (given %lu, expected %i)", given, expected);
+        snprintf(msg, MSG_LENGTH, "wrong number of arguments (given %lu, expected %i)", given, expected);
     } else {
-        sprintf(msg, "wrong number of arguments (given %lu)", given);
+        snprintf(msg, MSG_LENGTH, "wrong number of arguments (given %lu)", given);
     }
 
 
@@ -32,7 +32,7 @@ void raise_invalid_arguments_excepted(int expected, size_t given) {
 void raise_invalid_array_length(size_t length) {
     char msg[MSG_LENGTH];
 
-    sprintf(msg, "invalid array length, expected length of %lu", length);
+    snprintf(msg, MSG_LENGTH, "invalid array length, expected length of %lu", length);
 
     rb_raise(rb_eArgError, "%s", msg);
 }
