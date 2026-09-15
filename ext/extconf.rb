@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'mkmf'
 require_relative 'ports'
 
@@ -13,15 +15,28 @@ $CFLAGS = "#{$CFLAGS} -Wall -Wextra -Wno-unused-parameter"
 $CFLAGS = "#{$CFLAGS} -Werror=deprecated-declarations" if ENV['SFML_STRICT']
 
 # Link order matters for static archives: CSFML depends on SFML, SFML depends
-# on FreeType, and all of them depend on the target's OS libraries. This
-# mirrors the INTERFACE_LINK_LIBRARIES that SFML's own CMake config exports.
+# on FreeType and the Ogg/Vorbis/FLAC codecs, and all of them depend on the
+# target's OS libraries. This mirrors the INTERFACE_LINK_LIBRARIES that SFML's
+# own CMake config exports. Within the codecs, vorbisfile/vorbisenc depend on
+# vorbis, which depends on ogg, and FLAC stands alone; all of them must follow
+# sfml-audio so the linker has already seen the references.
+#
+# These are named by full path rather than -l. mkmf puts the host's -L/usr/lib64
+# ahead of the ports prefix, so a plain -lfreetype resolves to the host's shared
+# library and the built extension silently gains a runtime dependency on it. A
+# full path to the .a is used as-is by every linker (GNU ld, mingw, ld64) and
+# cannot be shadowed.
 VENDORED_LIBS = %w[
-  csfml-graphics-s csfml-window-s csfml-system-s
-  sfml-graphics-s sfml-window-s sfml-system-s
+  csfml-graphics-s csfml-window-s csfml-system-s csfml-audio-s csfml-network-s
+  sfml-graphics-s sfml-window-s sfml-system-s sfml-audio-s sfml-network-s
   freetype
+  vorbisfile vorbisenc vorbis ogg
+  FLAC
 ].freeze
 
-SYSTEM_CSFML_LIBS = %w[csfml-graphics csfml-window csfml-system].freeze
+SYSTEM_CSFML_LIBS = %w[
+  csfml-graphics csfml-window csfml-system csfml-audio csfml-network
+].freeze
 
 def use_vendored_ports
   $INCFLAGS = "-I#{Ports.prefix}/include #{$INCFLAGS}"
@@ -38,7 +53,8 @@ def use_vendored_ports
   # static SFML archives ahead of it.
   $libs = [
     $libs,
-    *(VENDORED_LIBS + Ports.libs).map { |l| "-l#{l}" },
+    *VENDORED_LIBS.map { |l| File.join(Ports.prefix, 'lib', "lib#{l}.a") },
+    *Ports.libs.map { |l| "-l#{l}" },
     *Ports.cxx_runtime
   ].join(' ')
 end
@@ -91,5 +107,23 @@ C
     Drop --enable-system-libraries to let the gem download and build CSFML 3 itself.
   MSG
 end
+
+# The sources live in per-subsystem directories (core/, system/, window/,
+# graphics/) but mkmf only globs the top level of $srcdir, so the list has to be
+# handed to it. Objects still land flat in the build directory: mkmf derives
+# $objs from File.basename, and make finds each source through VPATH -- which is
+# why no mkdir rules are needed for the object tree.
+#
+# That flattening also means every .c basename must be unique across the whole
+# tree. mkmf enforces it, aborting with "source files duplication", so a
+# collision fails the build loudly rather than dropping a file.
+sources = Dir.glob("#{$srcdir}/**/*.c")
+$srcs = sources
+$VPATH.concat(
+  sources.map { |file| File.dirname(file) }
+         .uniq
+         .reject { |dir| dir == $srcdir }
+         .map { |dir| dir.sub(/\A#{Regexp.escape($srcdir)}/, '$(srcdir)') }
+)
 
 create_makefile 'sfml/sfml_ext'

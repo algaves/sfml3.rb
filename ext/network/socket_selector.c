@@ -1,0 +1,142 @@
+#include "network/socket_selector.h"
+
+#include <ruby.h>
+#include <stdlib.h>
+
+#include "core/exceptions.h"
+#include "core/macros.h"
+#include "network/tcp_listener.h"
+#include "network/tcp_socket.h"
+#include "network/udp_socket.h"
+#include "system/time.h"
+
+typedef struct {
+    sfSocketSelector *handle;
+} SocketSelector;
+
+static VALUE rb_cSocketSelector;
+
+static void SocketSelector_free(void *ptr) {
+    SocketSelector *selector = ptr;
+
+    sfSocketSelector_destroy(selector->handle);
+    free(selector);
+}
+
+static const rb_data_type_t SocketSelector_data_type = {
+    .wrap_struct_name = "SFML::SocketSelector",
+    .function = {.dmark = NULL, .dfree = SocketSelector_free, .dsize = NULL},
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY
+};
+
+static VALUE SocketSelector_wrap(VALUE klass, sfSocketSelector *handle) {
+    SocketSelector *ptr;
+
+    if (handle == NULL) {
+        rb_raise(rb_eRuntimeError, "failed to create socket selector");
+    }
+
+    ptr = malloc(sizeof(SocketSelector));
+    ptr->handle = handle;
+
+    return TypedData_Wrap_Struct(klass, &SocketSelector_data_type, ptr);
+}
+
+static VALUE SocketSelector_new(VALUE klass) {
+    return SocketSelector_wrap(klass, sfSocketSelector_create());
+}
+
+static VALUE SocketSelector_copy(VALUE self) {
+    return SocketSelector_wrap(Get_Klass_SocketSelector(),
+                               sfSocketSelector_copy(Get_SocketSelector_Struct(self)));
+}
+
+static VALUE SocketSelector_add(VALUE self, VALUE rb_socket) {
+    sfSocketSelector *selector = Get_SocketSelector_Struct(self);
+
+    if (rb_obj_is_kind_of(rb_socket, Get_Klass_TcpListener())) {
+        sfSocketSelector_addTcpListener(selector, Get_TcpListener_Struct(rb_socket));
+    } else if (rb_obj_is_kind_of(rb_socket, Get_Klass_TcpSocket())) {
+        sfSocketSelector_addTcpSocket(selector, Get_TcpSocket_Struct(rb_socket));
+    } else if (rb_obj_is_kind_of(rb_socket, Get_Klass_UdpSocket())) {
+        sfSocketSelector_addUdpSocket(selector, Get_UdpSocket_Struct(rb_socket));
+    } else {
+        rb_raise(rb_eTypeError, "expected an SFML::TcpListener, TcpSocket or UdpSocket");
+    }
+
+    return self;
+}
+
+static VALUE SocketSelector_remove(VALUE self, VALUE rb_socket) {
+    sfSocketSelector *selector = Get_SocketSelector_Struct(self);
+
+    if (rb_obj_is_kind_of(rb_socket, Get_Klass_TcpListener())) {
+        sfSocketSelector_removeTcpListener(selector, Get_TcpListener_Struct(rb_socket));
+    } else if (rb_obj_is_kind_of(rb_socket, Get_Klass_TcpSocket())) {
+        sfSocketSelector_removeTcpSocket(selector, Get_TcpSocket_Struct(rb_socket));
+    } else if (rb_obj_is_kind_of(rb_socket, Get_Klass_UdpSocket())) {
+        sfSocketSelector_removeUdpSocket(selector, Get_UdpSocket_Struct(rb_socket));
+    } else {
+        rb_raise(rb_eTypeError, "expected an SFML::TcpListener, TcpSocket or UdpSocket");
+    }
+
+    return self;
+}
+
+static VALUE SocketSelector_clear(VALUE self) {
+    sfSocketSelector_clear(Get_SocketSelector_Struct(self));
+    return self;
+}
+
+static VALUE SocketSelector_wait(int argc, VALUE *argv, VALUE self) {
+    VALUE rb_timeout;
+    sfTime timeout = sfTime_Zero;
+
+    rb_scan_args(argc, argv, "01", &rb_timeout);
+
+    if (!NIL_P(rb_timeout)) {
+        timeout = time_from_rb(rb_timeout);
+    }
+
+    return BOOL2RB(sfSocketSelector_wait(Get_SocketSelector_Struct(self), timeout));
+}
+
+static VALUE SocketSelector_tcp_listener_ready(VALUE self, VALUE rb_socket) {
+    return BOOL2RB(sfSocketSelector_isTcpListenerReady(Get_SocketSelector_Struct(self),
+                                                       Get_TcpListener_Struct(rb_socket)));
+}
+
+static VALUE SocketSelector_tcp_socket_ready(VALUE self, VALUE rb_socket) {
+    return BOOL2RB(
+        sfSocketSelector_isTcpSocketReady(Get_SocketSelector_Struct(self), Get_TcpSocket_Struct(rb_socket)));
+}
+
+static VALUE SocketSelector_udp_socket_ready(VALUE self, VALUE rb_socket) {
+    return BOOL2RB(
+        sfSocketSelector_isUdpSocketReady(Get_SocketSelector_Struct(self), Get_UdpSocket_Struct(rb_socket)));
+}
+
+void Init_SocketSelector(VALUE rb_module) {
+    rb_cSocketSelector = rb_define_class_under(rb_module, "SocketSelector", rb_cObject);
+
+    rb_define_singleton_method(rb_cSocketSelector, "new", SocketSelector_new, 0);
+
+    rb_define_method(rb_cSocketSelector, "copy", SocketSelector_copy, 0);
+    rb_define_method(rb_cSocketSelector, "add", SocketSelector_add, 1);
+    rb_define_method(rb_cSocketSelector, "remove", SocketSelector_remove, 1);
+    rb_define_method(rb_cSocketSelector, "clear", SocketSelector_clear, 0);
+    rb_define_method(rb_cSocketSelector, "wait", SocketSelector_wait, -1);
+    rb_define_method(rb_cSocketSelector, "tcp_listener_ready?", SocketSelector_tcp_listener_ready, 1);
+    rb_define_method(rb_cSocketSelector, "tcp_socket_ready?", SocketSelector_tcp_socket_ready, 1);
+    rb_define_method(rb_cSocketSelector, "udp_socket_ready?", SocketSelector_udp_socket_ready, 1);
+}
+
+VALUE Get_Klass_SocketSelector(void) {
+    return rb_cSocketSelector;
+}
+
+void *Get_SocketSelector_Struct(VALUE self) {
+    SocketSelector *ptr;
+    TypedData_Get_Struct(self, SocketSelector, &SocketSelector_data_type, ptr);
+    return ptr->handle;
+}

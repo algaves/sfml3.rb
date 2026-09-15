@@ -4,8 +4,8 @@ Ruby bindings for [SFML 3](https://www.sfml-dev.org/), via its C API, [CSFML](ht
 
 ## Status
 
-Bound against **CSFML 3**. See [TODO.md](TODO.md) for which parts of the SFML 3 API are ported so
-far, and [CHANGELOG.md](CHANGELOG.md) for what changed recently.
+Latest release: **0.2.0**. Bound against **CSFML 3**. See [TODO.md](TODO.md) for which parts of the
+SFML 3 API are ported so far, and [CHANGELOG.md](CHANGELOG.md) for what changed recently.
 
 ## Install
 
@@ -96,6 +96,13 @@ clang-tools-extra` on Fedora for the C side).
 `CMakeLists.txt` is a CLion/IDE convenience build against the same vendored `ports/` prefix — `rake`
 is the build of record.
 
+The C extension under `ext/` mirrors SFML's own subsystems, with each binding's `.c` and `.h`
+side by side: `core/` (CSFML umbrella header, macros, exceptions), `system/` (Clock, Vector2),
+`window/` (Window, Event, VideoMode, Keyboard) and `graphics/` (shapes, Color, Transform, View,
+RenderState, Target). Includes are subsystem-relative, e.g. `#include "graphics/circle.h"`.
+Note that mkmf flattens object files to their basenames, so every `.c` filename has to stay
+unique across the whole tree.
+
 ### Building the binary gems
 
 Cross-compilation runs in [rake-compiler-dock](https://github.com/rake-compiler/rake-compiler-dock),
@@ -122,4 +129,4 @@ that and falls back to the single `lib/sfml/sfml_ext.so` a source build installs
 
 ---
 
-Developed by: [Algeves](https://github.com/algaves/sfml3.rb) @ 2026
+Developed by: [Algaves](https://github.com/algaves/sfml3.rb) @ 2026

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 begin
   require 'rake_compiler_dock'
 rescue LoadError
@@ -87,11 +89,20 @@ module CrossBuild
     #         changed the compiler flags, so objects survive a reconfigure.
     #   pkg/  Gem::PackageTask stages into a directory and treats it as one
     #         file prerequisite; a directory's mtime says nothing about its
-    #         contents, so an old staging directory is silently repacked.
+    #         contents, so an old staging directory is reused as-is. A file
+    #         added to the gemspec since then is never linked in, and the build
+    #         dies on spec validation with "... are not files" about files that
+    #         plainly exist.
+    #
+    # Every staging directory goes, not just this platform's: `rake
+    # native:<platform> gem` also runs the shared source-gem task, so a stale
+    # pkg/<name>-<version>/ fails the cross build just as readily. Built .gem
+    # files are left alone; only directories are regenerable staging.
     #
     # Neither costs anything in CI, which always starts from a fresh checkout.
     # The vendored ports are untouched -- they live in ports/, keyed by target.
-    FileUtils.rm_rf(Dir.glob("pkg/*-#{platform}") + ["tmp/#{platform}"])
+    staging = Dir.glob('pkg/*').select { |path| File.directory?(path) }
+    FileUtils.rm_rf(staging + ["tmp/#{platform}"])
 
     # rake-compiler-dock's `runas` wrapper drops to an unprivileged user so the
     # files it writes are owned by the invoking user -- right for Docker, wrong

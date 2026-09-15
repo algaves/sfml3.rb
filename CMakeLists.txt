@@ -55,9 +55,9 @@ list(APPEND CMAKE_PREFIX_PATH "${PORTS_PREFIX}")
 # `rake ports` builds SFML with BUILD_SHARED_LIBS=OFF, and SFMLConfig refuses to
 # resolve a static install unless it is told to look for one.
 set(SFML_STATIC_LIBRARIES ON)
-find_package(SFML 3 COMPONENTS Graphics Window System REQUIRED)
+find_package(SFML 3 COMPONENTS Graphics Window System Audio Network REQUIRED)
 
-foreach (module graphics window system)
+foreach (module graphics window system audio network)
     find_library(CSFML_${module}_LIBRARY
             NAMES csfml-${module}-s csfml-${module}
             PATHS "${PORTS_PREFIX}/lib"
@@ -69,8 +69,8 @@ endforeach ()
 
 # Globbed rather than listed by hand: the previous explicit list was a single
 # 900-character line that had already drifted from the tree.
-file(GLOB ext_sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/ext/*.c")
-file(GLOB_RECURSE ext_headers CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/ext/ext/*.h")
+file(GLOB_RECURSE ext_sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/ext/*.c")
+file(GLOB_RECURSE ext_headers CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/ext/*.h")
 
 add_library(sfml_rb MODULE ${ext_sources} ${ext_headers})
 
@@ -94,4 +94,6 @@ target_link_libraries(sfml_rb PRIVATE
         SFML::Graphics
         SFML::Window
         SFML::System
+        SFML::Audio
+        SFML::Network
 )

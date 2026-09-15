@@ -1,0 +1,12 @@
+#ifndef SFML_RB_WINDOW_KEYBOARD_H
+#define SFML_RB_WINDOW_KEYBOARD_H
+
+#include <ruby.h>
+
+void Init_Keyboard(VALUE rb_module);
+
+int find_key(const char *name);
+
+const char *get_key_event(unsigned int key);
+
+#endif //SFML_RB_WINDOW_KEYBOARD_H

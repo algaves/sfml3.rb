@@ -1,0 +1,218 @@
+#include "system/time.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "core/exceptions.h"
+#include "core/macros.h"
+
+typedef struct {
+    sfTime time;
+} Time;
+
+static VALUE rb_cSFTime;
+
+static void Time_free(void *ptr) {
+    free(ptr);
+}
+
+static const rb_data_type_t Time_data_type = {
+    .wrap_struct_name = "SFML::Time",
+    .function = {.dmark = NULL, .dfree = Time_free, .dsize = NULL},
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY
+};
+
+static VALUE Time_wrap(sfTime time) {
+    Time *ptr = malloc(sizeof(Time));
+
+    ptr->time = time;
+
+    return TypedData_Wrap_Struct(rb_cSFTime, &Time_data_type, ptr);
+}
+
+static VALUE Time_new(int argc, VALUE *argv, VALUE klass) {
+    VALUE self;
+    Time *ptr;
+    sfTime time = sfTime_Zero;
+
+    if (argc == 1 && rb_obj_is_kind_of(argv[0], rb_cSFTime)) {
+        time = ((Time *) Get_Time_Struct(argv[0]))->time;
+    } else if (argc == 1 && RB_INTEGER_TYPE_P(argv[0])) {
+        time = sfMicroseconds((int64_t) NUM2LL(argv[0]));
+    } else if (argc == 1) {
+        time = sfSeconds((float) NUM2DBL(argv[0]));
+    } else if (argc != 0) {
+        raise_invalid_arguments_excepted(1, argc);
+    }
+
+    ptr = malloc(sizeof(Time));
+    ptr->time = time;
+
+    self = TypedData_Wrap_Struct(klass, &Time_data_type, ptr);
+
+    return self;
+}
+
+static VALUE Time_seconds(VALUE klass, VALUE rb_seconds) {
+    return Time_wrap(sfSeconds((float) NUM2DBL(rb_seconds)));
+}
+
+static VALUE Time_milliseconds(VALUE klass, VALUE rb_milliseconds) {
+    return Time_wrap(sfMilliseconds((int32_t) NUM2INT(rb_milliseconds)));
+}
+
+static VALUE Time_microseconds(VALUE klass, VALUE rb_microseconds) {
+    return Time_wrap(sfMicroseconds((int64_t) NUM2LL(rb_microseconds)));
+}
+
+static VALUE Time_zero(VALUE klass) {
+    return Time_wrap(sfTime_Zero);
+}
+
+static VALUE Time_as_seconds(VALUE self) {
+    return DBL2NUM(sfTime_asSeconds(((Time *) Get_Time_Struct(self))->time));
+}
+
+static VALUE Time_as_milliseconds(VALUE self) {
+    return INT2NUM(sfTime_asMilliseconds(((Time *) Get_Time_Struct(self))->time));
+}
+
+static VALUE Time_as_microseconds(VALUE self) {
+    return LL2NUM(sfTime_asMicroseconds(((Time *) Get_Time_Struct(self))->time));
+}
+
+static VALUE Time_to_f(VALUE self) {
+    return Time_as_seconds(self);
+}
+
+static VALUE Time_to_i(VALUE self) {
+    return Time_as_microseconds(self);
+}
+
+static VALUE Time_add(VALUE self, VALUE rb_other) {
+    sfTime a = ((Time *) Get_Time_Struct(self))->time;
+    sfTime b = time_from_rb(rb_other);
+
+    return Time_wrap(sfMicroseconds(sfTime_asMicroseconds(a) + sfTime_asMicroseconds(b)));
+}
+
+static VALUE Time_sub(VALUE self, VALUE rb_other) {
+    sfTime a = ((Time *) Get_Time_Struct(self))->time;
+    sfTime b = time_from_rb(rb_other);
+
+    return Time_wrap(sfMicroseconds(sfTime_asMicroseconds(a) - sfTime_asMicroseconds(b)));
+}
+
+static VALUE Time_mul(VALUE self, VALUE rb_scalar) {
+    sfTime a = ((Time *) Get_Time_Struct(self))->time;
+
+    return Time_wrap(sfMicroseconds((int64_t) (sfTime_asMicroseconds(a) * NUM2DBL(rb_scalar))));
+}
+
+static VALUE Time_div(VALUE self, VALUE rb_other) {
+    sfTime a = ((Time *) Get_Time_Struct(self))->time;
+
+    if (rb_obj_is_kind_of(rb_other, rb_cSFTime)) {
+        int64_t b = sfTime_asMicroseconds(((Time *) Get_Time_Struct(rb_other))->time);
+
+        if (b == 0) {
+            rb_raise(rb_eZeroDivError, "divided by 0");
+        }
+
+        return DBL2NUM((double) sfTime_asMicroseconds(a) / (double) b);
+    }
+
+    return Time_wrap(sfMicroseconds((int64_t) (sfTime_asMicroseconds(a) / NUM2DBL(rb_other))));
+}
+
+static VALUE Time_cmp(VALUE self, VALUE rb_other) {
+    sfTime a = ((Time *) Get_Time_Struct(self))->time;
+    sfTime b = time_from_rb(rb_other);
+    int64_t micro_a = sfTime_asMicroseconds(a);
+    int64_t micro_b = sfTime_asMicroseconds(b);
+
+    if (micro_a < micro_b) {
+        return INT2NUM(-1);
+    }
+
+    if (micro_a > micro_b) {
+        return INT2NUM(1);
+    }
+
+    return INT2NUM(0);
+}
+
+static VALUE Time_eql(VALUE self, VALUE rb_other) {
+    if (!rb_obj_is_kind_of(rb_other, rb_cSFTime)) {
+        return Qfalse;
+    }
+
+    return BOOL2RB(sfTime_asMicroseconds(((Time *) Get_Time_Struct(self))->time) ==
+                   sfTime_asMicroseconds(((Time *) Get_Time_Struct(rb_other))->time));
+}
+
+static VALUE Time_to_s(VALUE self) {
+    char buffer[64];
+
+    snprintf(buffer, sizeof(buffer), "%g s", sfTime_asSeconds(((Time *) Get_Time_Struct(self))->time));
+
+    return rb_str_new2(buffer);
+}
+
+void Init_Time(VALUE rb_module) {
+    rb_cSFTime = rb_define_class_under(rb_module, "Time", rb_cObject);
+
+    rb_include_module(rb_cSFTime, rb_mComparable);
+
+    rb_define_singleton_method(rb_cSFTime, "new", Time_new, -1);
+    rb_define_singleton_method(rb_cSFTime, "seconds", Time_seconds, 1);
+    rb_define_singleton_method(rb_cSFTime, "milliseconds", Time_milliseconds, 1);
+    rb_define_singleton_method(rb_cSFTime, "microseconds", Time_microseconds, 1);
+    rb_define_singleton_method(rb_cSFTime, "zero", Time_zero, 0);
+
+    rb_define_method(rb_cSFTime, "as_seconds", Time_as_seconds, 0);
+    rb_define_method(rb_cSFTime, "as_milliseconds", Time_as_milliseconds, 0);
+    rb_define_method(rb_cSFTime, "as_microseconds", Time_as_microseconds, 0);
+    rb_define_method(rb_cSFTime, "to_f", Time_to_f, 0);
+    rb_define_method(rb_cSFTime, "to_i", Time_to_i, 0);
+
+    rb_define_method(rb_cSFTime, "+", Time_add, 1);
+    rb_define_method(rb_cSFTime, "-", Time_sub, 1);
+    rb_define_method(rb_cSFTime, "*", Time_mul, 1);
+    rb_define_method(rb_cSFTime, "/", Time_div, 1);
+    rb_define_method(rb_cSFTime, "<=>", Time_cmp, 1);
+    rb_define_method(rb_cSFTime, "==", Time_eql, 1);
+    rb_define_method(rb_cSFTime, "to_s", Time_to_s, 0);
+}
+
+VALUE Get_Klass_Time(void) {
+    return rb_cSFTime;
+}
+
+void *Get_Time_Struct(VALUE self) {
+    Time *ptr;
+    TypedData_Get_Struct(self, Time, &Time_data_type, ptr);
+    return ptr;
+}
+
+sfTime time_from_rb(VALUE rb_time) {
+    if (rb_obj_is_kind_of(rb_time, rb_cSFTime)) {
+        return ((Time *) Get_Time_Struct(rb_time))->time;
+    }
+
+    if (RB_INTEGER_TYPE_P(rb_time)) {
+        return sfMicroseconds((int64_t) NUM2LL(rb_time));
+    }
+
+    if (RB_FLOAT_TYPE_P(rb_time) || RB_TYPE_P(rb_time, T_RATIONAL)) {
+        return sfSeconds((float) NUM2DBL(rb_time));
+    }
+
+    raise_invalid_argument_class(rb_cSFTime);
+
+    return sfTime_Zero;
+}
+
+VALUE time_to_rb(sfTime c_time) {
+    return Time_wrap(c_time);
+}
