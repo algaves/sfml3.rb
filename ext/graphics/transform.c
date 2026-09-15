@@ -5,6 +5,7 @@
 
 #include "system/vec2.h"
 #include "graphics/rect.h"
+#include "core/exceptions.h"
 #include "core/macros.h"
 #include "core/sfml.h"
 
@@ -68,7 +69,7 @@ void Transform_ArrayToMatrix(VALUE rb_matrix, float *c_matrix) {
     }
 
     if (rb_array_len(rb_matrix) != MATRIX_LENGTH) {
-        return;
+        raise_invalid_array_length(MATRIX_LENGTH);
     }
 
     for (i = 0; i < MATRIX_LENGTH; i++) {
