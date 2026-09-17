@@ -13,3 +13,19 @@ AllCops:
 Style/GlobalVars:
   Exclude:
     - 'ext/extconf.rb'
+
+# Test methods legitimately run long: a round-trip check is a linear sequence of
+# assertions, and splitting one into helpers to satisfy a line count makes the
+# failure harder to read, not the test better. The single test class is the
+# minitest convention.
+Metrics/AbcSize:
+  Exclude:
+    - 'test/**/*'
+
+Metrics/MethodLength:
+  Exclude:
+    - 'test/**/*'
+
+Metrics/ClassLength:
+  Exclude:
+    - 'test/**/*'

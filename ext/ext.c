@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "core/macros.h"
+#include "core/foreign_thread.h"
 #include "system/vec2.h"
 #include "system/vec3.h"
 #include "system/time.h"
@@ -67,7 +68,6 @@
 #include "network/http.h"
 #include "network/ftp.h"
 
-
 //  C Naming Convention:
 //
 //    Struct              TitleCase
@@ -86,6 +86,8 @@ static VALUE rb_mExt;
 
 void Init_sfml_ext(void) {
     rb_mExt = rb_define_module("SFML");
+
+    Init_ForeignThread();
 
     Init_Vector2(rb_mExt);
     Init_Vector3(rb_mExt);

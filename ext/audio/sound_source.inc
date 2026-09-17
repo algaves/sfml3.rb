@@ -7,6 +7,8 @@
    The wrapper structs all begin with a SoundSource prefix, so the handle and
    the effect-processor slot are reachable without knowing the concrete type. */
 
+#include <ruby/thread.h>
+
 #include "audio/sound_source.h"
 #include "audio/audio_enums.h"
 #include "audio/effect_processor.h"
@@ -28,8 +30,20 @@ static VALUE SS_METHOD(pause)(VALUE self) {
     return self;
 }
 
+/* stop() blocks until any in-flight audio-thread callback for this source
+   finishes (SFML's AudioDevice::waitForReadingComplete()). If that callback
+   is itself waiting on the foreign-thread worker (e.g. an effect processor
+   or SoundStream#on_get_data), holding the GVL here for the whole wait would
+   deadlock: worker needs the GVL, we are blocked holding it waiting for the
+   very callback the worker is servicing. Releasing the GVL around the call
+   breaks the cycle. */
+static void *SS_METHOD(stop_without_gvl)(void *handle) {
+    SS_FN(stop)(handle);
+    return NULL;
+}
+
 static VALUE SS_METHOD(stop)(VALUE self) {
-    SS_FN(stop)(SS_HANDLE(self));
+    rb_thread_call_without_gvl(SS_METHOD(stop_without_gvl), SS_HANDLE(self), RUBY_UBF_IO, NULL);
     return self;
 }
 

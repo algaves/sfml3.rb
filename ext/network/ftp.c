@@ -4,24 +4,25 @@
 #include <stdlib.h>
 
 #include "core/macros.h"
+#include "core/unicode.h"
 #include "network/ip_address.h"
 #include "network/network_enums.h"
 #include "system/time.h"
 
 typedef struct {
-    sfFtp *handle;
+    sfFtp* handle;
 } Ftp;
 
 typedef struct {
-    sfFtpResponse *handle;
+    sfFtpResponse* handle;
 } FtpResponse;
 
 typedef struct {
-    sfFtpDirectoryResponse *handle;
+    sfFtpDirectoryResponse* handle;
 } FtpDirectoryResponse;
 
 typedef struct {
-    sfFtpListingResponse *handle;
+    sfFtpListingResponse* handle;
 } FtpListingResponse;
 
 static VALUE rb_cFtp;
@@ -29,29 +30,29 @@ static VALUE rb_cFtpResponse;
 static VALUE rb_cFtpDirectoryResponse;
 static VALUE rb_cFtpListingResponse;
 
-static void Ftp_free(void *ptr) {
-    Ftp *ftp = ptr;
+static void Ftp_free(void* ptr) {
+    Ftp* ftp = ptr;
 
     sfFtp_destroy(ftp->handle);
     free(ftp);
 }
 
-static void FtpResponse_free(void *ptr) {
-    FtpResponse *response = ptr;
+static void FtpResponse_free(void* ptr) {
+    FtpResponse* response = ptr;
 
     sfFtpResponse_destroy(response->handle);
     free(response);
 }
 
-static void FtpDirectoryResponse_free(void *ptr) {
-    FtpDirectoryResponse *response = ptr;
+static void FtpDirectoryResponse_free(void* ptr) {
+    FtpDirectoryResponse* response = ptr;
 
     sfFtpDirectoryResponse_destroy(response->handle);
     free(response);
 }
 
-static void FtpListingResponse_free(void *ptr) {
-    FtpListingResponse *response = ptr;
+static void FtpListingResponse_free(void* ptr) {
+    FtpListingResponse* response = ptr;
 
     sfFtpListingResponse_destroy(response->handle);
     free(response);
@@ -60,29 +61,25 @@ static void FtpListingResponse_free(void *ptr) {
 static const rb_data_type_t Ftp_data_type = {
     .wrap_struct_name = "SFML::Ftp",
     .function = {.dmark = NULL, .dfree = Ftp_free, .dsize = NULL},
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY
-};
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
 static const rb_data_type_t FtpResponse_data_type = {
     .wrap_struct_name = "SFML::FtpResponse",
     .function = {.dmark = NULL, .dfree = FtpResponse_free, .dsize = NULL},
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY
-};
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
 static const rb_data_type_t FtpDirectoryResponse_data_type = {
     .wrap_struct_name = "SFML::FtpDirectoryResponse",
     .function = {.dmark = NULL, .dfree = FtpDirectoryResponse_free, .dsize = NULL},
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY
-};
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
 static const rb_data_type_t FtpListingResponse_data_type = {
     .wrap_struct_name = "SFML::FtpListingResponse",
     .function = {.dmark = NULL, .dfree = FtpListingResponse_free, .dsize = NULL},
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY
-};
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
-static VALUE Ftp_wrap(sfFtp *handle) {
-    Ftp *ptr;
+static VALUE Ftp_wrap(sfFtp* handle) {
+    Ftp* ptr;
 
     if (handle == NULL) {
         rb_raise(rb_eRuntimeError, "failed to create FTP client");
@@ -94,8 +91,8 @@ static VALUE Ftp_wrap(sfFtp *handle) {
     return TypedData_Wrap_Struct(rb_cFtp, &Ftp_data_type, ptr);
 }
 
-static VALUE FtpResponse_wrap(sfFtpResponse *handle) {
-    FtpResponse *ptr;
+static VALUE FtpResponse_wrap(sfFtpResponse* handle) {
+    FtpResponse* ptr;
 
     if (handle == NULL) {
         rb_raise(rb_eRuntimeError, "FTP request failed");
@@ -107,8 +104,8 @@ static VALUE FtpResponse_wrap(sfFtpResponse *handle) {
     return TypedData_Wrap_Struct(rb_cFtpResponse, &FtpResponse_data_type, ptr);
 }
 
-static VALUE FtpDirectoryResponse_wrap(sfFtpDirectoryResponse *handle) {
-    FtpDirectoryResponse *ptr;
+static VALUE FtpDirectoryResponse_wrap(sfFtpDirectoryResponse* handle) {
+    FtpDirectoryResponse* ptr;
 
     if (handle == NULL) {
         rb_raise(rb_eRuntimeError, "FTP request failed");
@@ -120,8 +117,8 @@ static VALUE FtpDirectoryResponse_wrap(sfFtpDirectoryResponse *handle) {
     return TypedData_Wrap_Struct(rb_cFtpDirectoryResponse, &FtpDirectoryResponse_data_type, ptr);
 }
 
-static VALUE FtpListingResponse_wrap(sfFtpListingResponse *handle) {
-    FtpListingResponse *ptr;
+static VALUE FtpListingResponse_wrap(sfFtpListingResponse* handle) {
+    FtpListingResponse* ptr;
 
     if (handle == NULL) {
         rb_raise(rb_eRuntimeError, "FTP request failed");
@@ -137,7 +134,7 @@ static VALUE Ftp_new(VALUE klass) {
     return Ftp_wrap(sfFtp_create());
 }
 
-static VALUE Ftp_connect(int argc, VALUE *argv, VALUE self) {
+static VALUE Ftp_connect(int argc, VALUE* argv, VALUE self) {
     VALUE rb_address, rb_port, rb_timeout;
     sfTime timeout = sfTime_Zero;
     unsigned short port = 21;
@@ -145,16 +142,15 @@ static VALUE Ftp_connect(int argc, VALUE *argv, VALUE self) {
     rb_scan_args(argc, argv, "12", &rb_address, &rb_port, &rb_timeout);
 
     if (!NIL_P(rb_port)) {
-        port = (unsigned short) NUM2INT(rb_port);
+        port = (unsigned short)NUM2INT(rb_port);
     }
 
     if (!NIL_P(rb_timeout)) {
         timeout = time_from_rb(rb_timeout);
     }
 
-    return FtpResponse_wrap(sfFtp_connect(Get_Ftp_Struct(self),
-                                          ip_address_from_rb(rb_address, sfIpAddress_None), port,
-                                          timeout));
+    return FtpResponse_wrap(sfFtp_connect(
+        Get_Ftp_Struct(self), ip_address_from_rb(rb_address, sfIpAddress_None), port, timeout));
 }
 
 static VALUE Ftp_login_anonymous(VALUE self) {
@@ -178,13 +174,13 @@ static VALUE Ftp_working_directory(VALUE self) {
     return FtpDirectoryResponse_wrap(sfFtp_getWorkingDirectory(Get_Ftp_Struct(self)));
 }
 
-static VALUE Ftp_directory_listing(int argc, VALUE *argv, VALUE self) {
+static VALUE Ftp_directory_listing(int argc, VALUE* argv, VALUE self) {
     VALUE rb_directory;
 
     rb_scan_args(argc, argv, "01", &rb_directory);
 
-    return FtpListingResponse_wrap(
-        sfFtp_getDirectoryListing(Get_Ftp_Struct(self), NIL_P(rb_directory) ? NULL : StringValueCStr(rb_directory)));
+    return FtpListingResponse_wrap(sfFtp_getDirectoryListing(
+        Get_Ftp_Struct(self), NIL_P(rb_directory) ? NULL : StringValueCStr(rb_directory)));
 }
 
 static VALUE Ftp_change_directory(VALUE self, VALUE rb_directory) {
@@ -213,7 +209,7 @@ static VALUE Ftp_delete_file(VALUE self, VALUE rb_name) {
     return FtpResponse_wrap(sfFtp_deleteFile(Get_Ftp_Struct(self), StringValueCStr(rb_name)));
 }
 
-static VALUE Ftp_download(int argc, VALUE *argv, VALUE self) {
+static VALUE Ftp_download(int argc, VALUE* argv, VALUE self) {
     VALUE rb_remote, rb_local, rb_mode;
     sfFtpTransferMode mode = sfFtpBinary;
 
@@ -227,7 +223,7 @@ static VALUE Ftp_download(int argc, VALUE *argv, VALUE self) {
                                            StringValueCStr(rb_local), mode));
 }
 
-static VALUE Ftp_upload(int argc, VALUE *argv, VALUE self) {
+static VALUE Ftp_upload(int argc, VALUE* argv, VALUE self) {
     VALUE rb_local, rb_remote, rb_mode, rb_append;
     sfFtpTransferMode mode = sfFtpBinary;
     bool append = false;
@@ -246,13 +242,14 @@ static VALUE Ftp_upload(int argc, VALUE *argv, VALUE self) {
                                          StringValueCStr(rb_remote), mode, append));
 }
 
-static VALUE Ftp_send_command(int argc, VALUE *argv, VALUE self) {
+static VALUE Ftp_send_command(int argc, VALUE* argv, VALUE self) {
     VALUE rb_command, rb_parameter;
 
     rb_scan_args(argc, argv, "11", &rb_command, &rb_parameter);
 
-    return FtpResponse_wrap(sfFtp_sendCommand(Get_Ftp_Struct(self), StringValueCStr(rb_command),
-                                              NIL_P(rb_parameter) ? NULL : StringValueCStr(rb_parameter)));
+    return FtpResponse_wrap(
+        sfFtp_sendCommand(Get_Ftp_Struct(self), StringValueCStr(rb_command),
+                          NIL_P(rb_parameter) ? NULL : StringValueCStr(rb_parameter)));
 }
 
 static VALUE FtpResponse_ok(VALUE self) {
@@ -264,7 +261,8 @@ static VALUE FtpResponse_status(VALUE self) {
 }
 
 static VALUE FtpResponse_status_name(VALUE self) {
-    return ID2SYM(rb_intern(ftp_status_name(sfFtpResponse_getStatus(Get_FtpResponse_Struct(self)))));
+    return ID2SYM(
+        rb_intern(ftp_status_name(sfFtpResponse_getStatus(Get_FtpResponse_Struct(self)))));
 }
 
 static VALUE FtpResponse_message(VALUE self) {
@@ -285,11 +283,15 @@ static VALUE FtpDirectoryResponse_status_name(VALUE self) {
 }
 
 static VALUE FtpDirectoryResponse_message(VALUE self) {
-    return rb_str_new_cstr(sfFtpDirectoryResponse_getMessage(Get_FtpDirectoryResponse_Struct(self)));
+    return rb_str_new_cstr(
+        sfFtpDirectoryResponse_getMessage(Get_FtpDirectoryResponse_Struct(self)));
 }
 
+/* Through the UTF-32 entry point, so a path with non-ASCII characters survives
+   the trip; the plain getter re-encodes it through the C locale. */
 static VALUE FtpDirectoryResponse_directory(VALUE self) {
-    return rb_str_new_cstr(sfFtpDirectoryResponse_getDirectory(Get_FtpDirectoryResponse_Struct(self)));
+    return utf32_to_rb(
+        sfFtpDirectoryResponse_getDirectoryUnicode(Get_FtpDirectoryResponse_Struct(self)));
 }
 
 static VALUE FtpListingResponse_ok(VALUE self) {
@@ -315,7 +317,7 @@ static VALUE FtpListingResponse_count(VALUE self) {
 
 static VALUE FtpListingResponse_name(VALUE self, VALUE rb_index) {
     return rb_str_new_cstr(sfFtpListingResponse_getName(Get_FtpListingResponse_Struct(self),
-                                                        (size_t) NUM2SIZET(rb_index)));
+                                                        (size_t)NUM2SIZET(rb_index)));
 }
 
 void Init_Ftp(VALUE rb_module) {
@@ -378,26 +380,26 @@ VALUE Get_Klass_FtpListingResponse(void) {
     return rb_cFtpListingResponse;
 }
 
-void *Get_Ftp_Struct(VALUE self) {
-    Ftp *ptr;
+void* Get_Ftp_Struct(VALUE self) {
+    Ftp* ptr;
     TypedData_Get_Struct(self, Ftp, &Ftp_data_type, ptr);
     return ptr->handle;
 }
 
-void *Get_FtpResponse_Struct(VALUE self) {
-    FtpResponse *ptr;
+void* Get_FtpResponse_Struct(VALUE self) {
+    FtpResponse* ptr;
     TypedData_Get_Struct(self, FtpResponse, &FtpResponse_data_type, ptr);
     return ptr->handle;
 }
 
-void *Get_FtpDirectoryResponse_Struct(VALUE self) {
-    FtpDirectoryResponse *ptr;
+void* Get_FtpDirectoryResponse_Struct(VALUE self) {
+    FtpDirectoryResponse* ptr;
     TypedData_Get_Struct(self, FtpDirectoryResponse, &FtpDirectoryResponse_data_type, ptr);
     return ptr->handle;
 }
 
-void *Get_FtpListingResponse_Struct(VALUE self) {
-    FtpListingResponse *ptr;
+void* Get_FtpListingResponse_Struct(VALUE self) {
+    FtpListingResponse* ptr;
     TypedData_Get_Struct(self, FtpListingResponse, &FtpListingResponse_data_type, ptr);
     return ptr->handle;
 }

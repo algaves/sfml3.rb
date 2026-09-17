@@ -15,6 +15,24 @@ struct form *is* bound (`SFML::InputStream`). `Sftp` is also out of scope: it wa
 Status legend: `[x]` bound and tested · `[~]` compiled but not exposed to Ruby, or exposed as an
 internal helper only · `[ ]` not started.
 
+**Coverage is tracked per function, not per class.** Every `sf*` entry point in
+`ports/<target>/include/CSFML` is accounted for: bound, or listed in "Deliberately unbound" at the
+bottom. Re-derive the list with:
+
+```sh
+grep -rhoE '\bsf[A-Za-z0-9_]+\s*\(' ports/<target>/include/CSFML --include='*.h' \
+  | tr -d ' (' | sort -u > /tmp/api.txt
+grep -rhoE '\bsf[A-Za-z0-9_]+' ext --include='*.c' --include='*.h' --include='*.inc' \
+  | sort -u > /tmp/used.txt
+comm -23 /tmp/api.txt /tmp/used.txt
+```
+
+Mind the false positives: functions reached through token paste (`sfSound_*`, `sfMusic_*`,
+`sfSoundStream_*` from `ext/audio/sound_source.inc`; `sfPacket_read*`/`write*` from the macro in
+`ext/network/packet.c`; the shared `sfRenderWindow_*`/`sfRenderTexture_*` render-target methods
+from `ext/graphics/render_target.inc`) never appear literally in the sources and so show up as
+"missing" every time.
+
 ## System
 
 Base module: time, vectors, clocks, streams.
@@ -56,28 +74,43 @@ OpenGL-based windows, events, input handling.
 
 2D rendering: shapes, sprites, text, render targets.
 
-- [x] **Transform** — `SFML::Transform` (`ext/graphics/transform.c`)
-- [x] **Transformable** — `SFML::Transformable` (`ext/graphics/transformable.c`)
+- [x] **Transform** — `SFML::Transform` (`ext/graphics/transform.c`); a class wrapping
+      `sfTransform` by value. `identity`/`IDENTITY` (frozen), `from_a`, `to_a`/`matrix` (3x3),
+      `gl_matrix` (the 16-float 4x4 for `glLoadMatrixf`), `==`, `translate!`, `rotate!`, `scale!`
+      (both taking an optional centre), non-mutating `translate`/`rotate`/`scale`,
+      `transform_point`, `transform_rect`, `combine!`, `*`, `inverse`, `copy`. The old module
+      functions `Transform.combine`/`Transform.inverse` remain, Array-in/Array-out. Every class
+      that exposes `#transform` still returns a plain 9-element Array, and anything that *takes*
+      a transform accepts either form
+- [x] **Transformable** — `SFML::Transformable` (`ext/graphics/transformable.c`); including
+      `inverse_transform` and `copy`
 - [x] **Drawable** — `SFML::Drawable` mixin (`ext/graphics/drawable.c`)
 - [x] **RenderStates** — `SFML::RenderState` (`ext/graphics/render_state.c`); blend mode, stencil
       mode, coordinate type, texture, shader and transform are all settable
-- [x] **RenderTarget** — `SFML::Target` (`ext/graphics/target.c`); dispatches to `sfRenderWindow_*`
-      or `sfRenderTexture_*`
+- [x] **RenderTarget** — `SFML::Target` (`ext/graphics/target.c`) dispatches to `sfRenderWindow_*`
+      or `sfRenderTexture_*` at runtime for `Drawable#draw`. The methods each concrete target owns
+      directly — `map_pixel_to_coords`, `map_coords_to_pixel`, `push_gl_states`, `pop_gl_states`,
+      `reset_gl_states`, `draw_primitives`, `draw_vertex_buffer_range`, `clear_stencil`,
+      `clear_color_and_stencil`, `viewport`, `scissor`, `srgb?` — are generated once for both
+      `Window` and `RenderTexture` from `ext/graphics/render_target.inc`
 - [x] **RenderWindow** — folded into `SFML::Window` (see Window module above)
 - [x] **RenderTexture** — `SFML::RenderTexture` (`ext/graphics/render_texture.c`)
-- [x] **View** — `SFML::View` (`ext/graphics/view.c`)
+- [x] **View** — `SFML::View` (`ext/graphics/view.c`); including `View.from_rect` and
+      `scissor`/`scissor=`
 - [x] **CircleShape** — `SFML::Circle` (`ext/graphics/circle.c`)
 - [x] **RectangleShape** — `SFML::RectangleShape` (`ext/graphics/rectangle.c`)
 - [x] **ConvexShape** — `SFML::ConvexShape` (`ext/graphics/polygon.c`)
 - [x] **Shape** — `SFML::Shape` (`ext/graphics/shape.c`); subclass and define `point_count`/`point`
 - [x] **Sprite** — `SFML::Sprite` (`ext/graphics/sprite.c`)
-- [x] **Texture** — `SFML::Texture` (`ext/graphics/texture.c`)
+- [x] **Texture** — `SFML::Texture` (`ext/graphics/texture.c`); every constructor in both linear
+      and sRGB form, plus `resize`/`resize_srgb` and `swap`
 - [x] **Image** — `SFML::Image` (`ext/graphics/image.c`)
 - [x] **Font** — `SFML::Font` (`ext/graphics/font.c`)
-- [x] **Text** — `SFML::Text` (`ext/graphics/text.c`)
+- [x] **Text** — `SFML::Text` (`ext/graphics/text.c`); `#string` goes through the UTF-32 entry
+      points, so non-ASCII round-trips exactly
 - [x] **Glyph** — `SFML::Glyph` (`ext/graphics/glyph.c`)
 - [x] **Shader** — `SFML::Shader` (`ext/graphics/shader.c`); scalar/vector/color/int/bool/matrix
-      uniforms plus a generic `uniform=`
+      uniforms, all six array uniforms (float, vec2-4, mat3, mat4), plus a generic `uniform=`
 - [x] **Color** — `SFML::Color` (`ext/graphics/color.c`)
 - [x] **Rect** — `SFML::Rect` (`ext/graphics/rect.c`); `sfFloatRect` and `sfIntRect`
 - [x] **BlendMode** — `SFML::BlendMode` (`ext/graphics/blend_mode.c`)
@@ -138,6 +171,23 @@ Socket-based communication and higher-level protocols.
 
 Note that CSFML exposes no `sfSocket` base class, so there is nothing to bind for "Socket base" —
 only the concrete TCP/UDP sockets and the selector.
+
+## Deliberately unbound
+
+These CSFML entry points have no Ruby surface on purpose. Listed so a coverage diff can be read
+without re-deriving the reasoning each time.
+
+| Symbols | Why |
+| --- | --- |
+| `sfWindow_*`, `sfWindowBase_*` (~55 functions) | `SFML::Window` wraps `sfRenderWindow`, which subsumes both a plain window and a base window. |
+| `sfMouse_*WindowBase`, `sfTouch_getPositionWindowBase` | Superseded by the `*RenderWindow` forms, which need no downcast. |
+| `sfRenderWindow_create`, `sfText_getString`/`setString`, `sfRenderWindow_setTitle`, `sfFtpDirectoryResponse_getDirectory` | Superseded by their `*Unicode` counterparts; the narrow forms decode through the C locale and mangle non-ASCII. |
+| `sfColor_add`/`subtract`/`modulate`/`fromRGB`/`fromRGBA`/`fromInteger`/`toInteger`, `sfIntRect_contains`/`intersects` | Reimplemented directly in C in `color.c` / `rect.c`; the Ruby methods exist. |
+| `sfSprite_getTexture`, `sfText_getFont`, `sf*Shape_getTexture` | The Ruby getters return the cached wrapper object. CSFML returns a non-owning pointer, so re-wrapping it would hand Ruby an object it must not free. |
+| `sfShape_getPoint`, `sfShape_getPointCount` | `SFML::Shape` reads these from the Ruby subclass, which is where they are defined. |
+| `sfTexture_updateFromWindow` | `Texture#update_from_window` uses `sfTexture_updateFromRenderWindow`, since `SFML::Window` is a render window. |
+| `sfFree` | CSFML's allocator hook; nothing in a Ruby binding should call it. |
+| `sfGlslVec4_fromsfColor`, `sfGlslIvec4_fromsfColor` | Documentation-only helpers; `Shader#set_color` does the conversion. |
 
 ## References
 

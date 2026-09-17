@@ -10,34 +10,48 @@
 #include "audio/effect_processor.h"
 #include "audio/sound_source.h"
 #include "core/exceptions.h"
+#include "core/foreign_thread.h"
 #include "system/time.h"
 
+#define SOUND_STREAM_CALLBACK_TIMEOUT_MS 50
+
 /* A subclassable stream. SFML calls the two C callbacks from its audio thread,
-   which does not hold the GVL, so each callback re-enters Ruby through
-   rb_thread_call_with_gvl and reports an exception as "stop the stream" rather
-   than unwinding into the audio engine. The sample buffer lives in the wrapper
-   and is reused across callbacks, because SFML keeps the pointer it is handed
-   until the next onGetData. */
+   which was never created by Ruby, so calling back into Ruby directly (e.g.
+   via rb_thread_call_with_gvl) is a fatal VM error - only a genuine Ruby
+   thread may reacquire the GVL that way. Each callback instead hands off to
+   the shared foreign-thread worker (core/foreign_thread.h) and reports a
+   timeout or exception as "stop the stream" rather than unwinding into the
+   audio engine. The sample buffer lives in the wrapper and is reused across
+   callbacks, because SFML keeps the pointer it is handed until the next
+   onGetData. */
 typedef struct {
     SoundSource source;
     VALUE rb_self;
-    int16_t *samples;
+    int16_t* samples;
     size_t samples_capacity;
 } SoundStream;
 
 static VALUE rb_cSoundStream;
 
-static void SoundStream_mark(void *ptr) {
-    SoundStream *stream = ptr;
+static void SoundStream_mark(void* ptr) {
+    SoundStream* stream = ptr;
 
     rb_gc_mark(stream->rb_self);
 }
 
-static void SoundStream_free(void *ptr) {
-    SoundStream *stream = ptr;
+/* sfSoundStream_destroy() can block waiting on the audio thread, the same as
+   Sound_free/SS_METHOD(stop); release the GVL for the same reason. */
+static void* SoundStream_destroy_without_gvl(void* handle) {
+    sfSoundStream_destroy(handle);
+    return NULL;
+}
+
+static void SoundStream_free(void* ptr) {
+    SoundStream* stream = ptr;
 
     effect_processor_release(stream->source.effect_slot);
-    sfSoundStream_destroy(stream->source.handle);
+    rb_thread_call_without_gvl(SoundStream_destroy_without_gvl, stream->source.handle, RUBY_UBF_IO,
+                               NULL);
     free(stream->samples);
     free(stream);
 }
@@ -45,27 +59,27 @@ static void SoundStream_free(void *ptr) {
 static const rb_data_type_t SoundStream_data_type = {
     .wrap_struct_name = "SFML::SoundStream",
     .function = {.dmark = SoundStream_mark, .dfree = SoundStream_free, .dsize = NULL},
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY
-};
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
 /* Expands the stream's sample buffer if needed, then copies either a packed
    String of int16 or an Array of Integers into it. Returns the sample count. */
-static size_t SoundStream_store_samples(SoundStream *stream, VALUE rb_samples) {
+static size_t SoundStream_store_samples(SoundStream* stream, VALUE rb_samples) {
     size_t count;
 
     if (RB_TYPE_P(rb_samples, T_STRING)) {
-        size_t bytes = (size_t) RSTRING_LEN(rb_samples);
+        size_t bytes = (size_t)RSTRING_LEN(rb_samples);
 
         count = bytes / sizeof(int16_t);
     } else if (RB_TYPE_P(rb_samples, T_ARRAY)) {
-        count = (size_t) RARRAY_LEN(rb_samples);
+        count = (size_t)RARRAY_LEN(rb_samples);
     } else {
-        rb_raise(rb_eTypeError, "on_get_data must return an Array of samples, a packed String, or nil");
+        rb_raise(rb_eTypeError,
+                 "on_get_data must return an Array of samples, a packed String, or nil");
         return 0;
     }
 
     if (count > stream->samples_capacity) {
-        int16_t *grown = realloc(stream->samples, count * sizeof(int16_t));
+        int16_t* grown = realloc(stream->samples, count * sizeof(int16_t));
 
         if (grown == NULL) {
             rb_raise(rb_eNoMemError, "could not grow sound stream buffer");
@@ -76,12 +90,17 @@ static size_t SoundStream_store_samples(SoundStream *stream, VALUE rb_samples) {
     }
 
     if (RB_TYPE_P(rb_samples, T_STRING)) {
-        memcpy(stream->samples, RSTRING_PTR(rb_samples), count * sizeof(int16_t));
+        const int16_t* src = (const int16_t*)RSTRING_PTR(rb_samples);
+        size_t i;
+
+        for (i = 0; i < count; i++) {
+            stream->samples[i] = src[i];
+        }
     } else {
         size_t i;
 
         for (i = 0; i < count; i++) {
-            stream->samples[i] = (int16_t) NUM2INT(rb_ary_entry(rb_samples, (long) i));
+            stream->samples[i] = (int16_t)NUM2INT(rb_ary_entry(rb_samples, (long)i));
         }
     }
 
@@ -89,13 +108,13 @@ static size_t SoundStream_store_samples(SoundStream *stream, VALUE rb_samples) {
 }
 
 typedef struct {
-    SoundStream *stream;
-    sfSoundStreamChunk *chunk;
+    SoundStream* stream;
+    sfSoundStreamChunk* chunk;
     int ok;
 } GetDataContext;
 
 static VALUE SoundStream_get_data_body(VALUE raw) {
-    GetDataContext *ctx = (GetDataContext *) raw;
+    GetDataContext* ctx = (GetDataContext*)raw;
     VALUE result = rb_funcall(ctx->stream->rb_self, rb_intern("on_get_data"), 0);
 
     if (NIL_P(result) || result == Qfalse) {
@@ -103,76 +122,74 @@ static VALUE SoundStream_get_data_body(VALUE raw) {
         return Qnil;
     }
 
-    ctx->chunk->sampleCount = (unsigned int) SoundStream_store_samples(ctx->stream, result);
+    ctx->chunk->sampleCount = (unsigned int)SoundStream_store_samples(ctx->stream, result);
     ctx->chunk->samples = ctx->stream->samples;
     ctx->ok = 1;
 
     return Qnil;
 }
 
-static void *SoundStream_get_data_gvl(void *raw) {
+static void SoundStream_get_data_run(void* raw) {
     int state = 0;
 
-    rb_protect(SoundStream_get_data_body, (VALUE) raw, &state);
+    rb_protect(SoundStream_get_data_body, (VALUE)raw, &state);
 
     if (state) {
         rb_set_errinfo(Qnil);
-        ((GetDataContext *) raw)->ok = 0;
+        ((GetDataContext*)raw)->ok = 0;
     }
-
-    return NULL;
 }
 
-static bool SoundStream_on_get_data(sfSoundStreamChunk *chunk, void *userData) {
-    SoundStream *stream = userData;
+static bool SoundStream_on_get_data(sfSoundStreamChunk* chunk, void* userData) {
+    SoundStream* stream = userData;
     GetDataContext ctx = {.stream = stream, .chunk = chunk, .ok = 0};
 
-    rb_thread_call_with_gvl(SoundStream_get_data_gvl, &ctx);
+    /* On timeout ctx.ok stays 0, which reports "no data" below - the same
+       fallback already used for a raised exception. */
+    run_on_ruby_thread(SoundStream_get_data_run, &ctx, SOUND_STREAM_CALLBACK_TIMEOUT_MS);
 
     return ctx.ok ? true : false;
 }
 
 typedef struct {
-    SoundStream *stream;
+    SoundStream* stream;
     sfTime time;
 } SeekContext;
 
 static VALUE SoundStream_seek_body(VALUE raw) {
-    SeekContext *ctx = (SeekContext *) raw;
+    SeekContext* ctx = (SeekContext*)raw;
 
     rb_funcall(ctx->stream->rb_self, rb_intern("on_seek"), 1, time_to_rb(ctx->time));
 
     return Qnil;
 }
 
-static void *SoundStream_seek_gvl(void *raw) {
+static void SoundStream_seek_run(void* raw) {
     int state = 0;
 
-    rb_protect(SoundStream_seek_body, (VALUE) raw, &state);
+    rb_protect(SoundStream_seek_body, (VALUE)raw, &state);
 
     if (state) {
         rb_set_errinfo(Qnil);
     }
-
-    return NULL;
 }
 
-static void SoundStream_on_seek(sfTime time, void *userData) {
-    SoundStream *stream = userData;
+static void SoundStream_on_seek(sfTime time, void* userData) {
+    SoundStream* stream = userData;
     SeekContext ctx = {.stream = stream, .time = time};
 
     if (!rb_respond_to(stream->rb_self, rb_intern("on_seek"))) {
         return;
     }
 
-    rb_thread_call_with_gvl(SoundStream_seek_gvl, &ctx);
+    run_on_ruby_thread(SoundStream_seek_run, &ctx, SOUND_STREAM_CALLBACK_TIMEOUT_MS);
 }
 
-static VALUE SoundStream_new(int argc, VALUE *argv, VALUE klass) {
+static VALUE SoundStream_new(int argc, VALUE* argv, VALUE klass) {
     VALUE rb_channel_count, rb_sample_rate, rb_channel_map;
-    sfSoundChannel *channel_map = NULL;
+    sfSoundChannel* channel_map = NULL;
     size_t channel_map_size = 0;
-    SoundStream *ptr;
+    SoundStream* ptr;
     VALUE self;
     long i;
 
@@ -183,10 +200,10 @@ static VALUE SoundStream_new(int argc, VALUE *argv, VALUE klass) {
             rb_raise(rb_eArgError, "channel map must be an Array");
         }
 
-        channel_map_size = (size_t) RARRAY_LEN(rb_channel_map);
+        channel_map_size = (size_t)RARRAY_LEN(rb_channel_map);
         channel_map = malloc(sizeof(sfSoundChannel) * channel_map_size);
 
-        for (i = 0; i < (long) channel_map_size; i++) {
+        for (i = 0; i < (long)channel_map_size; i++) {
             channel_map[i] = sound_channel_from_rb(rb_ary_entry(rb_channel_map, i));
         }
     }
@@ -208,10 +225,9 @@ static VALUE SoundStream_new(int argc, VALUE *argv, VALUE klass) {
         rb_raise(rb_eNotImpError, "subclass must define #on_get_data");
     }
 
-    ptr->source.handle = sfSoundStream_create(SoundStream_on_get_data, SoundStream_on_seek,
-                                              (unsigned int) NUM2INT(rb_channel_count),
-                                              (unsigned int) NUM2INT(rb_sample_rate), channel_map,
-                                              channel_map_size, ptr);
+    ptr->source.handle = sfSoundStream_create(
+        SoundStream_on_get_data, SoundStream_on_seek, (unsigned int)NUM2INT(rb_channel_count),
+        (unsigned int)NUM2INT(rb_sample_rate), channel_map, channel_map_size, ptr);
 
     free(channel_map);
 
@@ -232,7 +248,7 @@ static VALUE SoundStream_sample_rate(VALUE self) {
 
 static VALUE SoundStream_channel_map(VALUE self) {
     size_t count = 0;
-    sfSoundChannel *map = sfSoundStream_getChannelMap(Get_SoundStream_Struct(self), &count);
+    sfSoundChannel* map = sfSoundStream_getChannelMap(Get_SoundStream_Struct(self), &count);
     VALUE rb_array;
     size_t i;
 
@@ -240,7 +256,7 @@ static VALUE SoundStream_channel_map(VALUE self) {
         return rb_ary_new();
     }
 
-    rb_array = rb_ary_new_capa((long) count);
+    rb_array = rb_ary_new_capa((long)count);
 
     for (i = 0; i < count; i++) {
         rb_ary_push(rb_array, ID2SYM(rb_intern(sound_channel_name(map[i]))));
@@ -271,8 +287,8 @@ VALUE Get_Klass_SoundStream(void) {
     return rb_cSoundStream;
 }
 
-void *Get_SoundStream_Struct(VALUE self) {
-    SoundStream *ptr;
+void* Get_SoundStream_Struct(VALUE self) {
+    SoundStream* ptr;
     TypedData_Get_Struct(self, SoundStream, &SoundStream_data_type, ptr);
     return ptr->source.handle;
 }

@@ -14,19 +14,18 @@
 
 static VALUE rb_cVertexBuffer;
 
-static const char *usage_names[] = {"stream", "dynamic", "static"};
+static const char* usage_names[] = {"stream", "dynamic", "static"};
 
-static void VertexBuffer_free(void *ptr) {
+static void VertexBuffer_free(void* ptr) {
     sfVertexBuffer_destroy(ptr);
 }
 
 static const rb_data_type_t VertexBuffer_data_type = {
     .wrap_struct_name = "SFML::VertexBuffer",
     .function = {.dmark = NULL, .dfree = VertexBuffer_free, .dsize = NULL},
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY
-};
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
-static VALUE VertexBuffer_wrap(VALUE klass, sfVertexBuffer *buffer) {
+static VALUE VertexBuffer_wrap(VALUE klass, sfVertexBuffer* buffer) {
     if (buffer == NULL) {
         rb_raise(rb_eRuntimeError, "failed to create vertex buffer");
     }
@@ -34,8 +33,8 @@ static VALUE VertexBuffer_wrap(VALUE klass, sfVertexBuffer *buffer) {
     return TypedData_Wrap_Struct(klass, &VertexBuffer_data_type, buffer);
 }
 
-static sfVertexBuffer *Get_VertexBuffer_Struct(VALUE self) {
-    sfVertexBuffer *ptr;
+sfVertexBuffer* Get_VertexBuffer_Struct(VALUE self) {
+    sfVertexBuffer* ptr;
     TypedData_Get_Struct(self, sfVertexBuffer, &VertexBuffer_data_type, ptr);
     return ptr;
 }
@@ -44,15 +43,15 @@ static sfVertexBufferUsage usage_from_rb(VALUE rb_usage) {
     size_t i;
 
     if (RB_INTEGER_TYPE_P(rb_usage)) {
-        return (sfVertexBufferUsage) NUM2INT(rb_usage);
+        return (sfVertexBufferUsage)NUM2INT(rb_usage);
     }
 
     if (SYMBOL_P(rb_usage)) {
-        const char *name = rb_id2name(SYM2ID(rb_usage));
+        const char* name = rb_id2name(SYM2ID(rb_usage));
 
         for (i = 0; i < 3; i++) {
             if (strcmp(name, usage_names[i]) == 0) {
-                return (sfVertexBufferUsage) i;
+                return (sfVertexBufferUsage)i;
             }
         }
     }
@@ -61,7 +60,7 @@ static sfVertexBufferUsage usage_from_rb(VALUE rb_usage) {
     return sfVertexBufferStatic;
 }
 
-static VALUE VertexBuffer_new(int argc, VALUE *argv, VALUE klass) {
+static VALUE VertexBuffer_new(int argc, VALUE* argv, VALUE klass) {
     VALUE rb_count, rb_primitive, rb_usage;
     size_t count = 0;
     sfPrimitiveType primitive = sfPoints;
@@ -70,7 +69,7 @@ static VALUE VertexBuffer_new(int argc, VALUE *argv, VALUE klass) {
     rb_scan_args(argc, argv, "03", &rb_count, &rb_primitive, &rb_usage);
 
     if (!NIL_P(rb_count)) {
-        count = (size_t) NUM2SIZET(rb_count);
+        count = (size_t)NUM2SIZET(rb_count);
     }
 
     if (!NIL_P(rb_primitive)) {
@@ -85,35 +84,31 @@ static VALUE VertexBuffer_new(int argc, VALUE *argv, VALUE klass) {
 }
 
 static VALUE VertexBuffer_copy(VALUE self) {
-    return VertexBuffer_wrap(Get_Klass_VertexBuffer(), sfVertexBuffer_copy(Get_VertexBuffer_Struct(self)));
+    return VertexBuffer_wrap(Get_Klass_VertexBuffer(),
+                             sfVertexBuffer_copy(Get_VertexBuffer_Struct(self)));
 }
 
 static VALUE VertexBuffer_get_vertex_count(VALUE self) {
     return SIZET2NUM(sfVertexBuffer_getVertexCount(Get_VertexBuffer_Struct(self)));
 }
 
-static VALUE VertexBuffer_update(int argc, VALUE *argv, VALUE self) {
+static VALUE VertexBuffer_update(int argc, VALUE* argv, VALUE self) {
     VALUE rb_vertices, rb_offset;
     unsigned int offset = 0;
-    long count;
-    sfVertex *vertices;
+    size_t count;
+    sfVertex* vertices;
     bool result;
 
     rb_scan_args(argc, argv, "11", &rb_vertices, &rb_offset);
 
     if (!NIL_P(rb_offset)) {
-        offset = (unsigned int) NUM2UINT(rb_offset);
+        offset = (unsigned int)NUM2UINT(rb_offset);
     }
 
-    Check_Type(rb_vertices, T_ARRAY);
-    count = RARRAY_LEN(rb_vertices);
-    vertices = ALLOC_N(sfVertex, count);
+    vertices = vertices_from_rb(rb_vertices, &count);
 
-    for (long i = 0; i < count; i++) {
-        vertices[i] = vertex_from_rb(rb_ary_entry(rb_vertices, i));
-    }
-
-    result = sfVertexBuffer_update(Get_VertexBuffer_Struct(self), vertices, (unsigned int) count, offset);
+    result =
+        sfVertexBuffer_update(Get_VertexBuffer_Struct(self), vertices, (unsigned int)count, offset);
 
     xfree(vertices);
 
@@ -126,11 +121,24 @@ static VALUE VertexBuffer_update_from(VALUE self, VALUE rb_other) {
     }
 
     return BOOL2RB(sfVertexBuffer_updateFromVertexBuffer(Get_VertexBuffer_Struct(self),
-                                                        Get_VertexBuffer_Struct(rb_other)));
+                                                         Get_VertexBuffer_Struct(rb_other)));
+}
+
+/* Exchanges the two buffers' contents in place, so anything already holding
+   either object sees the swap. */
+static VALUE VertexBuffer_swap(VALUE self, VALUE rb_other) {
+    if (!rb_obj_is_kind_of(rb_other, rb_cVertexBuffer)) {
+        raise_invalid_argument_class(rb_cVertexBuffer);
+    }
+
+    sfVertexBuffer_swap(Get_VertexBuffer_Struct(self), Get_VertexBuffer_Struct(rb_other));
+
+    return self;
 }
 
 static VALUE VertexBuffer_get_primitive_type(VALUE self) {
-    return ID2SYM(rb_intern(primitive_type_name(sfVertexBuffer_getPrimitiveType(Get_VertexBuffer_Struct(self)))));
+    return ID2SYM(rb_intern(
+        primitive_type_name(sfVertexBuffer_getPrimitiveType(Get_VertexBuffer_Struct(self)))));
 }
 
 static VALUE VertexBuffer_set_primitive_type(VALUE self, VALUE rb_type) {
@@ -169,8 +177,9 @@ static VALUE VertexBuffer_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
         raise_invalid_argument_class(Get_Klass_RenderState());
     }
 
-    TARGET_DRAW(Get_Target_Struct(rb_target), sfRenderWindow_drawVertexBuffer, sfRenderTexture_drawVertexBuffer,
-                Get_VertexBuffer_Struct(self), Get_RenderState_Struct(rb_state));
+    TARGET_DRAW(Get_Target_Struct(rb_target), sfRenderWindow_drawVertexBuffer,
+                sfRenderTexture_drawVertexBuffer, Get_VertexBuffer_Struct(self),
+                Get_RenderState_Struct(rb_state));
 
     return Qnil;
 }
@@ -187,6 +196,7 @@ void Init_VertexBuffer(VALUE rb_module) {
     rb_define_method(rb_cVertexBuffer, "vertex_count", VertexBuffer_get_vertex_count, 0);
     rb_define_method(rb_cVertexBuffer, "update", VertexBuffer_update, -1);
     rb_define_method(rb_cVertexBuffer, "update_from", VertexBuffer_update_from, 1);
+    rb_define_method(rb_cVertexBuffer, "swap", VertexBuffer_swap, 1);
     rb_define_method(rb_cVertexBuffer, "primitive", VertexBuffer_get_primitive_type, 0);
     rb_define_method(rb_cVertexBuffer, "primitive=", VertexBuffer_set_primitive_type, 1);
     rb_define_method(rb_cVertexBuffer, "usage", VertexBuffer_get_usage, 0);

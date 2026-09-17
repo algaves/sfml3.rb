@@ -11,23 +11,22 @@
 
 static VALUE rb_cTransformable;
 
-static sfTransformable *Transformable_create() {
+static sfTransformable* Transformable_create() {
     return sfTransformable_create();
 }
 
-static void Transformable_free(void *ptr) {
-    sfTransformable_destroy((sfTransformable *) ptr);
+static void Transformable_free(void* ptr) {
+    sfTransformable_destroy((sfTransformable*)ptr);
 }
 
 static const rb_data_type_t Transformable_data_type = {
     .wrap_struct_name = "SFML::Transformable",
     .function = {.dmark = NULL, .dfree = Transformable_free, .dsize = NULL},
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY
-};
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
 static VALUE Transformable_new(VALUE klass) {
     VALUE self;
-    sfTransformable *transformable;
+    sfTransformable* transformable;
 
     transformable = Transformable_create();
     self = TypedData_Wrap_Struct(klass, &Transformable_data_type, transformable);
@@ -111,10 +110,25 @@ static VALUE Transformable_scale(VALUE self, VALUE rb_scale) {
 }
 
 static VALUE Transformable_get_matrix(VALUE self) {
-    sfTransformable *transformable = Get_Transformable_Struct(self);
+    sfTransformable* transformable = Get_Transformable_Struct(self);
     sfTransform transform = sfTransformable_getTransform(transformable);
 
     return Transform_MatrixToArray(transform.matrix);
+}
+
+static VALUE Transformable_get_inverse_matrix(VALUE self) {
+    sfTransform transform = sfTransformable_getInverseTransform(Get_Transformable_Struct(self));
+
+    return Transform_MatrixToArray(transform.matrix);
+}
+
+static VALUE Transformable_copy(VALUE self) {
+    sfTransformable* copy = sfTransformable_copy(Get_Transformable_Struct(self));
+    VALUE other = TypedData_Wrap_Struct(rb_cTransformable, &Transformable_data_type, copy);
+
+    rb_obj_call_init(other, 0, NULL);
+
+    return other;
 }
 
 void Init_Transformable(VALUE rb_module) {
@@ -139,10 +153,13 @@ void Init_Transformable(VALUE rb_module) {
 
     rb_define_method(rb_cTransformable, "transform", Transformable_get_matrix, 0);
     rb_define_method(rb_cTransformable, "matrix", Transformable_get_matrix, 0);
+    rb_define_method(rb_cTransformable, "inverse_transform", Transformable_get_inverse_matrix, 0);
+
+    rb_define_method(rb_cTransformable, "copy", Transformable_copy, 0);
 }
 
-void *Get_Transformable_Struct(VALUE self) {
-    sfTransformable *transform;
+void* Get_Transformable_Struct(VALUE self) {
+    sfTransformable* transform;
     TypedData_Get_Struct(self, sfTransformable, &Transformable_data_type, transform);
     return transform;
 }

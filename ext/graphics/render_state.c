@@ -23,25 +23,24 @@ typedef struct {
 
 static VALUE rb_cRenderState;
 
-static void RenderStates_mark(void *ptr) {
-    RenderStates *states = ptr;
+static void RenderStates_mark(void* ptr) {
+    RenderStates* states = ptr;
 
     rb_gc_mark(states->rb_texture);
     rb_gc_mark(states->rb_shader);
 }
 
-static void RenderStates_free(void *ptr) {
+static void RenderStates_free(void* ptr) {
     free(ptr);
 }
 
 static const rb_data_type_t RenderStates_data_type = {
     .wrap_struct_name = "SFML::RenderState",
     .function = {.dmark = RenderStates_mark, .dfree = RenderStates_free, .dsize = NULL},
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY
-};
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
-static RenderStates *RenderStates_create(void) {
-    RenderStates *states = malloc(sizeof(RenderStates));
+static RenderStates* RenderStates_create(void) {
+    RenderStates* states = malloc(sizeof(RenderStates));
 
     /* Copy the defaults rather than filling fields by hand: CSFML 2 left the
        struct smaller, and spelling fields out is how stencilMode and
@@ -53,12 +52,12 @@ static RenderStates *RenderStates_create(void) {
     return states;
 }
 
-static VALUE RenderStates_wrap(VALUE klass, RenderStates *states) {
+static VALUE RenderStates_wrap(VALUE klass, RenderStates* states) {
     return TypedData_Wrap_Struct(klass, &RenderStates_data_type, states);
 }
 
-static VALUE RenderStates_new(int argc, VALUE *argv, VALUE klass) {
-    RenderStates *states;
+static VALUE RenderStates_new(int argc, VALUE* argv, VALUE klass) {
+    RenderStates* states;
     VALUE self;
 
     if (argc > 1) {
@@ -68,7 +67,7 @@ static VALUE RenderStates_new(int argc, VALUE *argv, VALUE klass) {
     states = RenderStates_create();
 
     if (argc == 1) {
-        Transform_SwapMatrix(Transform_ArrayToTransform(argv[0]).matrix, states->c.transform.matrix);
+        states->c.transform = Transform_ArrayToTransform(argv[0]);
     }
 
     self = RenderStates_wrap(klass, states);
@@ -77,9 +76,9 @@ static VALUE RenderStates_new(int argc, VALUE *argv, VALUE klass) {
 }
 
 static VALUE RenderStates_set_transform(VALUE self, VALUE rb_matrix) {
-    sfRenderStates *states = Get_RenderState_Struct(self);
+    sfRenderStates* states = Get_RenderState_Struct(self);
 
-    Transform_SwapMatrix(Transform_ArrayToTransform(rb_matrix).matrix, states->transform.matrix);
+    states->transform = Transform_ArrayToTransform(rb_matrix);
 
     return self;
 }
@@ -116,8 +115,8 @@ static VALUE RenderStates_set_coordinate_type(VALUE self, VALUE rb_type) {
 }
 
 /* sfRenderStates is the first member, so its address is the wrapper's. */
-static RenderStates *Get_RenderStates_Wrapper(VALUE self) {
-    return (RenderStates *) Get_RenderState_Struct(self);
+static RenderStates* Get_RenderStates_Wrapper(VALUE self) {
+    return (RenderStates*)Get_RenderState_Struct(self);
 }
 
 static VALUE RenderStates_get_texture(VALUE self) {
@@ -125,7 +124,7 @@ static VALUE RenderStates_get_texture(VALUE self) {
 }
 
 static VALUE RenderStates_set_texture(VALUE self, VALUE rb_texture) {
-    RenderStates *states = Get_RenderStates_Wrapper(self);
+    RenderStates* states = Get_RenderStates_Wrapper(self);
 
     if (NIL_P(rb_texture)) {
         states->rb_texture = Qnil;
@@ -148,7 +147,7 @@ static VALUE RenderStates_get_shader(VALUE self) {
 }
 
 static VALUE RenderStates_set_shader(VALUE self, VALUE rb_shader) {
-    RenderStates *states = Get_RenderStates_Wrapper(self);
+    RenderStates* states = Get_RenderStates_Wrapper(self);
 
     if (NIL_P(rb_shader)) {
         states->rb_shader = Qnil;
@@ -190,8 +189,8 @@ void Init_RenderState(VALUE rb_module) {
     rb_define_method(rb_cRenderState, "shader", RenderStates_get_shader, 0);
 }
 
-sfRenderStates *Get_RenderState_Struct(VALUE self) {
-    RenderStates *states;
+sfRenderStates* Get_RenderState_Struct(VALUE self) {
+    RenderStates* states;
     TypedData_Get_Struct(self, RenderStates, &RenderStates_data_type, states);
     return &states->c;
 }

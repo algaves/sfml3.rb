@@ -13,17 +13,16 @@
 
 static VALUE rb_cShader;
 
-static void Shader_free(void *ptr) {
+static void Shader_free(void* ptr) {
     sfShader_destroy(ptr);
 }
 
 static const rb_data_type_t Shader_data_type = {
     .wrap_struct_name = "SFML::Shader",
     .function = {.dmark = NULL, .dfree = Shader_free, .dsize = NULL},
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY
-};
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
-static VALUE Shader_wrap(VALUE klass, sfShader *shader) {
+static VALUE Shader_wrap(VALUE klass, sfShader* shader) {
     if (shader == NULL) {
         rb_raise(rb_eRuntimeError, "failed to create shader");
     }
@@ -32,7 +31,7 @@ static VALUE Shader_wrap(VALUE klass, sfShader *shader) {
 }
 
 /* NULL skips a stage, mirroring CSFML. */
-static const char *Shader_optional_cstr(VALUE rb_value) {
+static const char* Shader_optional_cstr(VALUE rb_value) {
     if (NIL_P(rb_value)) {
         return NULL;
     }
@@ -40,7 +39,7 @@ static const char *Shader_optional_cstr(VALUE rb_value) {
     return StringValueCStr(rb_value);
 }
 
-static VALUE Shader_from_file(int argc, VALUE *argv, VALUE klass) {
+static VALUE Shader_from_file(int argc, VALUE* argv, VALUE klass) {
     VALUE rb_vertex, rb_fragment, rb_geometry;
 
     rb_scan_args(argc, argv, "12", &rb_vertex, &rb_fragment, &rb_geometry);
@@ -50,7 +49,7 @@ static VALUE Shader_from_file(int argc, VALUE *argv, VALUE klass) {
                                                       Shader_optional_cstr(rb_fragment)));
 }
 
-static VALUE Shader_from_memory(int argc, VALUE *argv, VALUE klass) {
+static VALUE Shader_from_memory(int argc, VALUE* argv, VALUE klass) {
     VALUE rb_vertex, rb_fragment, rb_geometry;
 
     rb_scan_args(argc, argv, "12", &rb_vertex, &rb_fragment, &rb_geometry);
@@ -60,12 +59,12 @@ static VALUE Shader_from_memory(int argc, VALUE *argv, VALUE klass) {
                                                         Shader_optional_cstr(rb_fragment)));
 }
 
-static VALUE Shader_from_stream(int argc, VALUE *argv, VALUE klass) {
+static VALUE Shader_from_stream(int argc, VALUE* argv, VALUE klass) {
     VALUE rb_vertex, rb_fragment, rb_geometry;
     VALUE holder_vertex = Qnil, holder_fragment = Qnil, holder_geometry = Qnil;
-    sfInputStream *vertex = NULL;
-    sfInputStream *fragment = NULL;
-    sfInputStream *geometry = NULL;
+    sfInputStream* vertex = NULL;
+    sfInputStream* fragment = NULL;
+    sfInputStream* geometry = NULL;
 
     rb_scan_args(argc, argv, "12", &rb_vertex, &rb_fragment, &rb_geometry);
 
@@ -81,9 +80,9 @@ static VALUE Shader_from_stream(int argc, VALUE *argv, VALUE klass) {
         geometry = input_stream_from_rb(rb_geometry, &holder_geometry);
     }
 
-    (void) holder_vertex;
-    (void) holder_fragment;
-    (void) holder_geometry;
+    (void)holder_vertex;
+    (void)holder_fragment;
+    (void)holder_geometry;
 
     return Shader_wrap(klass, sfShader_createFromStream(vertex, geometry, fragment));
 }
@@ -105,8 +104,8 @@ static VALUE Shader_is_geometry_available(VALUE klass) {
     return BOOL2RB(sfShader_isGeometryAvailable());
 }
 
-static void Shader_name(VALUE rb_name, char *buffer, size_t length) {
-    const char *name = StringValueCStr(rb_name);
+static void Shader_name(VALUE rb_name, char* buffer, size_t length) {
+    const char* name = StringValueCStr(rb_name);
 
     snprintf(buffer, length, "%s", name);
 }
@@ -115,7 +114,7 @@ static VALUE Shader_set_float(VALUE self, VALUE rb_name, VALUE rb_x) {
     char name[256];
 
     Shader_name(rb_name, name, sizeof(name));
-    sfShader_setFloatUniform((sfShader *) Get_Shader_Struct(self), name, NUM2DBL(rb_x));
+    sfShader_setFloatUniform((sfShader*)Get_Shader_Struct(self), name, NUM2DBL(rb_x));
 
     return self;
 }
@@ -124,7 +123,7 @@ static VALUE Shader_set_int(VALUE self, VALUE rb_name, VALUE rb_x) {
     char name[256];
 
     Shader_name(rb_name, name, sizeof(name));
-    sfShader_setIntUniform((sfShader *) Get_Shader_Struct(self), name, NUM2INT(rb_x));
+    sfShader_setIntUniform((sfShader*)Get_Shader_Struct(self), name, NUM2INT(rb_x));
 
     return self;
 }
@@ -133,7 +132,7 @@ static VALUE Shader_set_bool(VALUE self, VALUE rb_name, VALUE rb_x) {
     char name[256];
 
     Shader_name(rb_name, name, sizeof(name));
-    sfShader_setBoolUniform((sfShader *) Get_Shader_Struct(self), name, RTEST(rb_x));
+    sfShader_setBoolUniform((sfShader*)Get_Shader_Struct(self), name, RTEST(rb_x));
 
     return self;
 }
@@ -142,7 +141,7 @@ static VALUE Shader_set_color(VALUE self, VALUE rb_name, VALUE rb_color) {
     char name[256];
 
     Shader_name(rb_name, name, sizeof(name));
-    sfShader_setColorUniform((sfShader *) Get_Shader_Struct(self), name, color_from_rb(rb_color));
+    sfShader_setColorUniform((sfShader*)Get_Shader_Struct(self), name, color_from_rb(rb_color));
 
     return self;
 }
@@ -151,7 +150,7 @@ static VALUE Shader_set_int_color(VALUE self, VALUE rb_name, VALUE rb_color) {
     char name[256];
 
     Shader_name(rb_name, name, sizeof(name));
-    sfShader_setIntColorUniform((sfShader *) Get_Shader_Struct(self), name, color_from_rb(rb_color));
+    sfShader_setIntColorUniform((sfShader*)Get_Shader_Struct(self), name, color_from_rb(rb_color));
 
     return self;
 }
@@ -160,7 +159,7 @@ static VALUE Shader_set_vec2(VALUE self, VALUE rb_name, VALUE rb_vector) {
     char name[256];
 
     Shader_name(rb_name, name, sizeof(name));
-    sfShader_setVec2Uniform((sfShader *) Get_Shader_Struct(self), name, vec2f_from_rb(rb_vector));
+    sfShader_setVec2Uniform((sfShader*)Get_Shader_Struct(self), name, vec2f_from_rb(rb_vector));
 
     return self;
 }
@@ -169,17 +168,16 @@ static VALUE Shader_set_vec3(VALUE self, VALUE rb_name, VALUE rb_vector) {
     char name[256];
 
     Shader_name(rb_name, name, sizeof(name));
-    sfShader_setVec3Uniform((sfShader *) Get_Shader_Struct(self), name, vec3f_from_rb(rb_vector));
+    sfShader_setVec3Uniform((sfShader*)Get_Shader_Struct(self), name, vec3f_from_rb(rb_vector));
 
     return self;
 }
 
-static VALUE Shader_set_vec4(VALUE self, VALUE rb_name, VALUE rb_vector) {
-    char name[256];
+/* Element converters shared by the scalar setters below and by the *_array
+   setters, which need the same conversion once per element. */
+static sfGlslVec4 glsl_vec4_from_rb(VALUE rb_vector) {
     VALUE array = rb_convert_type(rb_vector, T_ARRAY, "Array", "to_ary");
     sfGlslVec4 vector;
-
-    Shader_name(rb_name, name, sizeof(name));
 
     if (RARRAY_LEN(array) < 4) {
         raise_invalid_array_length(4);
@@ -190,7 +188,48 @@ static VALUE Shader_set_vec4(VALUE self, VALUE rb_name, VALUE rb_vector) {
     vector.z = NUM2DBL(rb_ary_entry(array, 2));
     vector.w = NUM2DBL(rb_ary_entry(array, 3));
 
-    sfShader_setVec4Uniform((sfShader *) Get_Shader_Struct(self), name, vector);
+    return vector;
+}
+
+static sfGlslMat3 glsl_mat3_from_rb(VALUE rb_matrix) {
+    VALUE array = rb_convert_type(rb_matrix, T_ARRAY, "Array", "to_ary");
+    sfGlslMat3 matrix;
+    long i;
+
+    if (RARRAY_LEN(array) < 9) {
+        raise_invalid_array_length(9);
+    }
+
+    for (i = 0; i < 9; i++) {
+        matrix.array[i] = NUM2DBL(rb_ary_entry(array, i));
+    }
+
+    return matrix;
+}
+
+static sfGlslMat4 glsl_mat4_from_rb(VALUE rb_matrix) {
+    VALUE array = rb_convert_type(rb_matrix, T_ARRAY, "Array", "to_ary");
+    sfGlslMat4 matrix;
+    long i;
+
+    if (RARRAY_LEN(array) < 16) {
+        raise_invalid_array_length(16);
+    }
+
+    for (i = 0; i < 16; i++) {
+        matrix.array[i] = NUM2DBL(rb_ary_entry(array, i));
+    }
+
+    return matrix;
+}
+
+static VALUE Shader_set_vec4(VALUE self, VALUE rb_name, VALUE rb_vector) {
+    char name[256];
+    sfGlslVec4 vector = glsl_vec4_from_rb(rb_vector);
+
+    Shader_name(rb_name, name, sizeof(name));
+
+    sfShader_setVec4Uniform((sfShader*)Get_Shader_Struct(self), name, vector);
 
     return self;
 }
@@ -200,7 +239,8 @@ static VALUE Shader_set_ivec2(VALUE self, VALUE rb_name, VALUE rb_vector) {
     sfVector2f vec = vec2f_from_rb(rb_vector);
 
     Shader_name(rb_name, name, sizeof(name));
-    sfShader_setIvec2Uniform((sfShader *) Get_Shader_Struct(self), name, (sfGlslIvec2) {(int) vec.x, (int) vec.y});
+    sfShader_setIvec2Uniform((sfShader*)Get_Shader_Struct(self), name,
+                             (sfGlslIvec2){(int)vec.x, (int)vec.y});
 
     return self;
 }
@@ -220,7 +260,7 @@ static VALUE Shader_set_ivec3(VALUE self, VALUE rb_name, VALUE rb_vector) {
     vector.y = NUM2INT(rb_ary_entry(array, 1));
     vector.z = NUM2INT(rb_ary_entry(array, 2));
 
-    sfShader_setIvec3Uniform((sfShader *) Get_Shader_Struct(self), name, vector);
+    sfShader_setIvec3Uniform((sfShader*)Get_Shader_Struct(self), name, vector);
 
     return self;
 }
@@ -241,7 +281,7 @@ static VALUE Shader_set_ivec4(VALUE self, VALUE rb_name, VALUE rb_vector) {
     vector.z = NUM2INT(rb_ary_entry(array, 2));
     vector.w = NUM2INT(rb_ary_entry(array, 3));
 
-    sfShader_setIvec4Uniform((sfShader *) Get_Shader_Struct(self), name, vector);
+    sfShader_setIvec4Uniform((sfShader*)Get_Shader_Struct(self), name, vector);
 
     return self;
 }
@@ -256,8 +296,9 @@ static VALUE Shader_set_bvec2(VALUE self, VALUE rb_name, VALUE rb_vector) {
         raise_invalid_array_length(2);
     }
 
-    sfShader_setBvec2Uniform((sfShader *) Get_Shader_Struct(self), name,
-                             (sfGlslBvec2) {RTEST(rb_ary_entry(array, 0)), RTEST(rb_ary_entry(array, 1))});
+    sfShader_setBvec2Uniform(
+        (sfShader*)Get_Shader_Struct(self), name,
+        (sfGlslBvec2){RTEST(rb_ary_entry(array, 0)), RTEST(rb_ary_entry(array, 1))});
 
     return self;
 }
@@ -272,9 +313,10 @@ static VALUE Shader_set_bvec3(VALUE self, VALUE rb_name, VALUE rb_vector) {
         raise_invalid_array_length(3);
     }
 
-    sfShader_setBvec3Uniform((sfShader *) Get_Shader_Struct(self), name,
-                             (sfGlslBvec3) {RTEST(rb_ary_entry(array, 0)), RTEST(rb_ary_entry(array, 1)),
-                                            RTEST(rb_ary_entry(array, 2))});
+    sfShader_setBvec3Uniform((sfShader*)Get_Shader_Struct(self), name,
+                             (sfGlslBvec3){RTEST(rb_ary_entry(array, 0)),
+                                           RTEST(rb_ary_entry(array, 1)),
+                                           RTEST(rb_ary_entry(array, 2))});
 
     return self;
 }
@@ -289,109 +331,77 @@ static VALUE Shader_set_bvec4(VALUE self, VALUE rb_name, VALUE rb_vector) {
         raise_invalid_array_length(4);
     }
 
-    sfShader_setBvec4Uniform((sfShader *) Get_Shader_Struct(self), name,
-                             (sfGlslBvec4) {RTEST(rb_ary_entry(array, 0)), RTEST(rb_ary_entry(array, 1)),
-                                            RTEST(rb_ary_entry(array, 2)), RTEST(rb_ary_entry(array, 3))});
+    sfShader_setBvec4Uniform(
+        (sfShader*)Get_Shader_Struct(self), name,
+        (sfGlslBvec4){RTEST(rb_ary_entry(array, 0)), RTEST(rb_ary_entry(array, 1)),
+                      RTEST(rb_ary_entry(array, 2)), RTEST(rb_ary_entry(array, 3))});
 
     return self;
 }
 
 static VALUE Shader_set_mat3(VALUE self, VALUE rb_name, VALUE rb_matrix) {
     char name[256];
-    VALUE array = rb_convert_type(rb_matrix, T_ARRAY, "Array", "to_ary");
-    sfGlslMat3 matrix;
+    sfGlslMat3 matrix = glsl_mat3_from_rb(rb_matrix);
 
     Shader_name(rb_name, name, sizeof(name));
 
-    if (RARRAY_LEN(array) < 9) {
-        raise_invalid_array_length(9);
-    }
-
-    for (long i = 0; i < 9; i++) {
-        matrix.array[i] = NUM2DBL(rb_ary_entry(array, i));
-    }
-
-    sfShader_setMat3Uniform((sfShader *) Get_Shader_Struct(self), name, &matrix);
+    sfShader_setMat3Uniform((sfShader*)Get_Shader_Struct(self), name, &matrix);
 
     return self;
 }
 
 static VALUE Shader_set_mat4(VALUE self, VALUE rb_name, VALUE rb_matrix) {
     char name[256];
-    VALUE array = rb_convert_type(rb_matrix, T_ARRAY, "Array", "to_ary");
-    sfGlslMat4 matrix;
+    sfGlslMat4 matrix = glsl_mat4_from_rb(rb_matrix);
 
     Shader_name(rb_name, name, sizeof(name));
 
-    if (RARRAY_LEN(array) < 16) {
-        raise_invalid_array_length(16);
-    }
-
-    for (long i = 0; i < 16; i++) {
-        matrix.array[i] = NUM2DBL(rb_ary_entry(array, i));
-    }
-
-    sfShader_setMat4Uniform((sfShader *) Get_Shader_Struct(self), name, &matrix);
+    sfShader_setMat4Uniform((sfShader*)Get_Shader_Struct(self), name, &matrix);
 
     return self;
 }
 
-static VALUE Shader_set_float_array(VALUE self, VALUE rb_name, VALUE rb_values) {
-    char name[256];
-    VALUE array = rb_convert_type(rb_values, T_ARRAY, "Array", "to_ary");
-    long count = RARRAY_LEN(array);
-    float *values = ALLOC_N(float, count);
+/* The six array setters differ only in element type, converter and CSFML
+   entry point, so they are generated rather than written out six times.
 
-    Shader_name(rb_name, name, sizeof(name));
-
-    for (long i = 0; i < count; i++) {
-        values[i] = NUM2DBL(rb_ary_entry(array, i));
+   ALLOCV_N, not ALLOC_N: the converter runs per element and can raise (a bad
+   element, a short vector), and ALLOCV's buffer is owned by a temporary VALUE
+   that Ruby frees while unwinding. The hand-written versions this replaced
+   leaked the buffer on that path. */
+#define SHADER_ARRAY_UNIFORM(suffix, c_type, converter, sf_setter)                                 \
+    static VALUE Shader_set_##suffix##_array(VALUE self, VALUE rb_name, VALUE rb_values) {         \
+        char name[256];                                                                            \
+        VALUE array = rb_convert_type(rb_values, T_ARRAY, "Array", "to_ary");                      \
+        VALUE buffer;                                                                              \
+        long count = RARRAY_LEN(array);                                                            \
+        long i;                                                                                    \
+        c_type* values = ALLOCV_N(c_type, buffer, count);                                          \
+                                                                                                   \
+        Shader_name(rb_name, name, sizeof(name));                                                  \
+                                                                                                   \
+        for (i = 0; i < count; i++) {                                                              \
+            values[i] = converter(rb_ary_entry(array, i));                                         \
+        }                                                                                          \
+                                                                                                   \
+        sf_setter((sfShader*)Get_Shader_Struct(self), name, values, (size_t)count);                \
+                                                                                                   \
+        ALLOCV_END(buffer);                                                                        \
+                                                                                                   \
+        return self;                                                                               \
     }
 
-    sfShader_setFloatUniformArray((sfShader *) Get_Shader_Struct(self), name, values, (size_t) count);
-
-    xfree(values);
-
-    return self;
+static float shader_float_from_rb(VALUE rb_value) {
+    return (float)NUM2DBL(rb_value);
 }
 
-static VALUE Shader_set_vec2_array(VALUE self, VALUE rb_name, VALUE rb_values) {
-    char name[256];
-    VALUE array = rb_convert_type(rb_values, T_ARRAY, "Array", "to_ary");
-    long count = RARRAY_LEN(array);
-    sfGlslVec2 *values = ALLOC_N(sfGlslVec2, count);
+SHADER_ARRAY_UNIFORM(float, float, shader_float_from_rb, sfShader_setFloatUniformArray)
+SHADER_ARRAY_UNIFORM(vec2, sfGlslVec2, vec2f_from_rb, sfShader_setVec2UniformArray)
+SHADER_ARRAY_UNIFORM(vec3, sfGlslVec3, vec3f_from_rb, sfShader_setVec3UniformArray)
+SHADER_ARRAY_UNIFORM(vec4, sfGlslVec4, glsl_vec4_from_rb, sfShader_setVec4UniformArray)
+SHADER_ARRAY_UNIFORM(mat3, sfGlslMat3, glsl_mat3_from_rb, sfShader_setMat3UniformArray)
+SHADER_ARRAY_UNIFORM(mat4, sfGlslMat4, glsl_mat4_from_rb, sfShader_setMat4UniformArray)
 
-    Shader_name(rb_name, name, sizeof(name));
-
-    for (long i = 0; i < count; i++) {
-        values[i] = vec2f_from_rb(rb_ary_entry(array, i));
-    }
-
-    sfShader_setVec2UniformArray((sfShader *) Get_Shader_Struct(self), name, values, (size_t) count);
-
-    xfree(values);
-
-    return self;
-}
-
-static VALUE Shader_set_vec3_array(VALUE self, VALUE rb_name, VALUE rb_values) {
-    char name[256];
-    VALUE array = rb_convert_type(rb_values, T_ARRAY, "Array", "to_ary");
-    long count = RARRAY_LEN(array);
-    sfGlslVec3 *values = ALLOC_N(sfGlslVec3, count);
-
-    Shader_name(rb_name, name, sizeof(name));
-
-    for (long i = 0; i < count; i++) {
-        values[i] = vec3f_from_rb(rb_ary_entry(array, i));
-    }
-
-    sfShader_setVec3UniformArray((sfShader *) Get_Shader_Struct(self), name, values, (size_t) count);
-
-    xfree(values);
-
-    return self;
-}
+#undef SHADER_ARRAY_UNIFORM
 
 static VALUE Shader_set_texture(VALUE self, VALUE rb_name, VALUE rb_texture) {
     char name[256];
@@ -399,7 +409,7 @@ static VALUE Shader_set_texture(VALUE self, VALUE rb_name, VALUE rb_texture) {
     Shader_name(rb_name, name, sizeof(name));
 
     if (NIL_P(rb_texture)) {
-        sfShader_setTextureUniform((sfShader *) Get_Shader_Struct(self), name, NULL);
+        sfShader_setTextureUniform((sfShader*)Get_Shader_Struct(self), name, NULL);
         return rb_texture;
     }
 
@@ -407,7 +417,8 @@ static VALUE Shader_set_texture(VALUE self, VALUE rb_name, VALUE rb_texture) {
         raise_invalid_argument_class(Get_Klass_Texture());
     }
 
-    sfShader_setTextureUniform((sfShader *) Get_Shader_Struct(self), name, Get_Texture_Struct(rb_texture));
+    sfShader_setTextureUniform((sfShader*)Get_Shader_Struct(self), name,
+                               Get_Texture_Struct(rb_texture));
 
     return rb_texture;
 }
@@ -416,7 +427,7 @@ static VALUE Shader_set_current_texture(VALUE self, VALUE rb_name) {
     char name[256];
 
     Shader_name(rb_name, name, sizeof(name));
-    sfShader_setCurrentTextureUniform((sfShader *) Get_Shader_Struct(self), name);
+    sfShader_setCurrentTextureUniform((sfShader*)Get_Shader_Struct(self), name);
 
     return self;
 }
@@ -509,6 +520,9 @@ void Init_Shader(VALUE rb_module) {
     rb_define_method(rb_cShader, "set_float_array", Shader_set_float_array, 2);
     rb_define_method(rb_cShader, "set_vec2_array", Shader_set_vec2_array, 2);
     rb_define_method(rb_cShader, "set_vec3_array", Shader_set_vec3_array, 2);
+    rb_define_method(rb_cShader, "set_vec4_array", Shader_set_vec4_array, 2);
+    rb_define_method(rb_cShader, "set_mat3_array", Shader_set_mat3_array, 2);
+    rb_define_method(rb_cShader, "set_mat4_array", Shader_set_mat4_array, 2);
     rb_define_method(rb_cShader, "set_texture", Shader_set_texture, 2);
     rb_define_method(rb_cShader, "set_current_texture", Shader_set_current_texture, 1);
     rb_define_method(rb_cShader, "set_uniform", Shader_set_uniform, 2);
@@ -519,8 +533,8 @@ VALUE Get_Klass_Shader(void) {
     return rb_cShader;
 }
 
-const sfShader *Get_Shader_Struct(VALUE self) {
-    sfShader *ptr;
+const sfShader* Get_Shader_Struct(VALUE self) {
+    sfShader* ptr;
     TypedData_Get_Struct(self, sfShader, &Shader_data_type, ptr);
     return ptr;
 }

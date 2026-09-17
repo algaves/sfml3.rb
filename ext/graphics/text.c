@@ -14,41 +14,41 @@
 #include "system/vec2.h"
 #include "core/exceptions.h"
 #include "core/macros.h"
+#include "core/unicode.h"
 
 typedef struct {
-    sfText *text;
+    sfText* text;
     VALUE rb_font;
 } Text;
 
 static VALUE rb_cText;
 
-static void Text_mark(void *ptr) {
-    rb_gc_mark(((Text *) ptr)->rb_font);
+static void Text_mark(void* ptr) {
+    rb_gc_mark(((Text*)ptr)->rb_font);
 }
 
-static void Text_free(void *ptr) {
-    sfText_destroy(((Text *) ptr)->text);
+static void Text_free(void* ptr) {
+    sfText_destroy(((Text*)ptr)->text);
     free(ptr);
 }
 
 static const rb_data_type_t Text_data_type = {
     .wrap_struct_name = "SFML::Text",
     .function = {.dmark = Text_mark, .dfree = Text_free, .dsize = NULL},
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY
-};
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
-static Text *Get_Text(VALUE self) {
-    Text *ptr;
+static Text* Get_Text(VALUE self) {
+    Text* ptr;
     TypedData_Get_Struct(self, Text, &Text_data_type, ptr);
     return ptr;
 }
 
-static sfText *Get_Text_Struct(VALUE self) {
+static sfText* Get_Text_Struct(VALUE self) {
     return Get_Text(self)->text;
 }
 
-static VALUE Text_wrap(VALUE klass, sfText *text) {
-    Text *ptr;
+static VALUE Text_wrap(VALUE klass, sfText* text) {
+    Text* ptr;
 
     if (text == NULL) {
         rb_raise(rb_eRuntimeError, "failed to create text");
@@ -61,9 +61,9 @@ static VALUE Text_wrap(VALUE klass, sfText *text) {
     return TypedData_Wrap_Struct(klass, &Text_data_type, ptr);
 }
 
-static VALUE Text_new(int argc, VALUE *argv, VALUE klass) {
+static VALUE Text_new(int argc, VALUE* argv, VALUE klass) {
     VALUE rb_font, rb_string, rb_size, self;
-    Text *ptr;
+    Text* ptr;
 
     rb_scan_args(argc, argv, "03", &rb_font, &rb_string, &rb_size);
 
@@ -87,16 +87,16 @@ static VALUE Text_new(int argc, VALUE *argv, VALUE klass) {
     }
 
     if (!NIL_P(rb_size)) {
-        sfText_setCharacterSize(ptr->text, (unsigned int) NUM2UINT(rb_size));
+        sfText_setCharacterSize(ptr->text, (unsigned int)NUM2UINT(rb_size));
     }
 
     return self;
 }
 
 static VALUE Text_copy(VALUE self) {
-    Text *ptr = Get_Text(self);
+    Text* ptr = Get_Text(self);
     VALUE copy = Text_wrap(Get_Klass_Text(), sfText_copy(ptr->text));
-    Text *copy_ptr = Get_Text(copy);
+    Text* copy_ptr = Get_Text(copy);
 
     copy_ptr->rb_font = ptr->rb_font;
 
@@ -104,7 +104,7 @@ static VALUE Text_copy(VALUE self) {
 }
 
 static VALUE Text_set_font(VALUE self, VALUE rb_font) {
-    Text *ptr = Get_Text(self);
+    Text* ptr = Get_Text(self);
 
     if (NIL_P(rb_font)) {
         ptr->rb_font = Qnil;
@@ -126,19 +126,24 @@ static VALUE Text_get_font(VALUE self) {
     return Get_Text(self)->rb_font;
 }
 
+/* Through the UTF-32 entry points, not sfText_setString: that one decodes the
+   bytes with the C locale and mangles anything outside ASCII. */
 static VALUE Text_set_string(VALUE self, VALUE rb_string) {
-    sfText_setString(Get_Text_Struct(self), StringValueCStr(rb_string));
+    VALUE buffer = utf32_from_rb(rb_string);
+
+    sfText_setUnicodeString(Get_Text_Struct(self), UTF32_PTR(buffer));
+
+    RB_GC_GUARD(buffer);
+
     return rb_string;
 }
 
 static VALUE Text_get_string(VALUE self) {
-    const char *string = sfText_getString(Get_Text_Struct(self));
-
-    return rb_str_new_cstr(string != NULL ? string : "");
+    return utf32_to_rb(sfText_getUnicodeString(Get_Text_Struct(self)));
 }
 
 static VALUE Text_set_character_size(VALUE self, VALUE rb_size) {
-    sfText_setCharacterSize(Get_Text_Struct(self), (unsigned int) NUM2UINT(rb_size));
+    sfText_setCharacterSize(Get_Text_Struct(self), (unsigned int)NUM2UINT(rb_size));
     return rb_size;
 }
 
@@ -260,7 +265,7 @@ static VALUE Text_get_inverse_transform(VALUE self) {
 }
 
 static VALUE Text_find_character_pos(VALUE self, VALUE rb_index) {
-    return vec2f_to_rb(sfText_findCharacterPos(Get_Text_Struct(self), (size_t) NUM2SIZET(rb_index)));
+    return vec2f_to_rb(sfText_findCharacterPos(Get_Text_Struct(self), (size_t)NUM2SIZET(rb_index)));
 }
 
 static VALUE Text_get_local_bounds(VALUE self) {

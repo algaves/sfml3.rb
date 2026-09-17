@@ -4,6 +4,59 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+* **`SFML::Transform` is now a class**, wrapping `sfTransform` by value. It previously exposed
+  only `combine` and `inverse` as module functions over plain 9-element Arrays, leaving 11 of
+  CSFML's 13 transform functions unbound: you could read a matrix out of a `Sprite` but not build
+  one, apply one to a point, or compose one. It now has `Transform.identity` / `IDENTITY`,
+  `Transform.from_a`, `#to_a`/`#matrix`, `#gl_matrix`, `#==`, `#translate!`, `#rotate!`,
+  `#scale!` (the last two taking an optional centre), non-mutating `#translate`/`#rotate`/
+  `#scale`, `#transform_point`, `#transform_rect`, `#combine!`, `#*`, `#inverse` and `#copy`.
+* **`map_pixel_to_coords` and `map_coords_to_pixel` on both render targets.** The screen-to-world
+  conversion behind every click-to-select interaction; without it a zoomed, rotated or
+  viewport-shifted `View` could not be hit-tested from Ruby at all.
+* **`SFML::Window` gained the render-target methods only `RenderTexture` had**: `clear_stencil`,
+  `clear_color_and_stencil`, `viewport`, `scissor` and `srgb?`. Both classes also gained
+  `push_gl_states`, `pop_gl_states`, `reset_gl_states`, `draw_primitives` and
+  `draw_vertex_buffer_range`. The shared surface is generated once from
+  `ext/graphics/render_target.inc`, the same way `ext/audio/sound_source.inc` already serves the
+  three sound sources.
+* `SFML::View.from_rect`, `View#scissor` and `View#scissor=`.
+* `SFML::Transformable#inverse_transform` and `#copy` — every subclass (`Sprite`, `Text`,
+  `Circle`, `RectangleShape`, `ConvexShape`, `Shape`) already had both.
+* `SFML::Texture.srgb`, `.srgb_from_stream`, `.srgb_from_image`, `Texture#resize_srgb` and
+  `Texture#swap`.
+* `SFML::Shader#set_vec4_array`, `#set_mat3_array` and `#set_mat4_array`, completing the array
+  uniforms alongside the existing float/vec2/vec3 forms.
+* `SFML::Circle#point_count=`, `SFML::VertexBuffer#swap`, `SFML::Window.from_handle` and
+  `SFML::Window#create_vulkan_surface`.
+
+### Fixed
+* **Non-ASCII text and window titles were mangled.** `Text#string=`, `Window#title=`, window
+  creation and `FtpDirectoryResponse#directory` passed UTF-8 bytes to CSFML's `const char*`
+  entry points, which hand them to `sf::String`'s narrow-character constructor and decode them
+  with the C locale: `"héllo"` came back as `U+0068 U+FFFFFFFF U+FFFFFFFF U+006C U+006C U+006F`.
+  All four now go through the UTF-32 entry points and round-trip exactly, including astral-plane
+  characters. The converters live in `ext/core/unicode.c`.
+* **`Mouse.position`, `Mouse.position=` and `Touch.position` reinterpret-cast `sfRenderWindow*`
+  to `sfWindowBase*`**, relying on the base being at offset 0 — true of CSFML 3.0.0's layout but
+  not guaranteed by it. They now call `sfMouse_getPositionRenderWindow`,
+  `sfMouse_setPositionRenderWindow` and `sfTouch_getPositionRenderWindow`, which CSFML ships for
+  exactly this reason. Ruby-visible behaviour is unchanged.
+* `Shader#set_float_array`, `#set_vec2_array` and `#set_vec3_array` leaked their conversion
+  buffer if an element raised part-way through. All six array setters are now generated from one
+  macro built on `ALLOCV_N`, whose buffer Ruby frees while unwinding.
+* `VertexBuffer#update` had the same leak; it now shares `vertices_from_rb`, which validates
+  every element before allocating anything.
+
+### Changed
+* `Window` is created through `sfRenderWindow_createUnicode` rather than `sfRenderWindow_create`,
+  so a title given at construction is subject to the same UTF-8 fix as `#title=`.
+* `RenderTexture#viewport` and `#scissor` now take the view as an *optional* argument; omitting
+  it means the target's current view, matching CSFML's `NULL`.
+
 ## [0.2.0]
 
 ### Added
