@@ -4,7 +4,7 @@ Ruby bindings for [SFML 3](https://www.sfml-dev.org/), via its C API, [CSFML](ht
 
 ## Status
 
-Latest release: **0.2.0**. Bound against **CSFML 3**. See [TODO.md](TODO.md) for which parts of the
+Latest release: **0.2.1**. Bound against **CSFML 3**. See [TODO.md](TODO.md) for which parts of the
 SFML 3 API are ported so far, and [CHANGELOG.md](CHANGELOG.md) for what changed recently.
 
 ## Install
