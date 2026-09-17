@@ -8,7 +8,9 @@
 #include "core/macros.h"
 #include "core/sfml.h"
 
-static const sfWindowBase *Touch_relative_window(VALUE rb_window) {
+/* nil means desktop-relative. CSFML gives sfRenderWindow its own entry point,
+   so a window argument never has to be cast down to sfWindowBase. */
+static const sfRenderWindow* Touch_relative_window(VALUE rb_window) {
     if (NIL_P(rb_window)) {
         return NULL;
     }
@@ -17,21 +19,26 @@ static const sfWindowBase *Touch_relative_window(VALUE rb_window) {
         raise_invalid_argument_class(Get_Klass_Window());
     }
 
-    return (const sfWindowBase *) Get_Window_Struct(rb_window);
+    return Get_Window_Struct(rb_window);
 }
 
 static VALUE Touch_is_down(VALUE module, VALUE rb_finger) {
     return BOOL2RB(sfTouch_isDown(NUM2UINT(rb_finger)));
 }
 
-static VALUE Touch_get_position(int argc, VALUE *argv, VALUE module) {
+static VALUE Touch_get_position(int argc, VALUE* argv, VALUE module) {
     VALUE rb_finger, rb_window;
     sfVector2i position;
 
     rb_scan_args(argc, argv, "11", &rb_finger, &rb_window);
-    position = sfTouch_getPositionWindowBase(NUM2UINT(rb_finger), Touch_relative_window(rb_window));
+    if (NIL_P(rb_window)) {
+        position = sfTouch_getPosition(NUM2UINT(rb_finger), NULL);
+    } else {
+        position =
+            sfTouch_getPositionRenderWindow(NUM2UINT(rb_finger), Touch_relative_window(rb_window));
+    }
 
-    return vec2f_to_rb((sfVector2f) {(float) position.x, (float) position.y});
+    return vec2f_to_rb((sfVector2f){(float)position.x, (float)position.y});
 }
 
 void Init_Touch(VALUE rb_module) {

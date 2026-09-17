@@ -9,8 +9,9 @@
 #include "core/macros.h"
 #include "core/sfml.h"
 
-/* Our Window wraps sfRenderWindow, whose base is sfWindowBase at offset 0. */
-static const sfWindowBase *Mouse_relative_window(VALUE rb_window) {
+/* nil means desktop-relative. CSFML gives sfRenderWindow its own entry points,
+   so a window argument never has to be cast down to sfWindowBase. */
+static const sfRenderWindow* Mouse_relative_window(VALUE rb_window) {
     if (NIL_P(rb_window)) {
         return NULL;
     }
@@ -19,28 +20,37 @@ static const sfWindowBase *Mouse_relative_window(VALUE rb_window) {
         raise_invalid_argument_class(Get_Klass_Window());
     }
 
-    return (const sfWindowBase *) Get_Window_Struct(rb_window);
+    return Get_Window_Struct(rb_window);
 }
 
 static VALUE Mouse_is_button_pressed(VALUE module, VALUE rb_button) {
     return BOOL2RB(sfMouse_isButtonPressed(mouse_button_from_rb(rb_button)));
 }
 
-static VALUE Mouse_get_position(int argc, VALUE *argv, VALUE module) {
+static VALUE Mouse_get_position(int argc, VALUE* argv, VALUE module) {
     VALUE rb_window;
     sfVector2i position;
 
     rb_scan_args(argc, argv, "01", &rb_window);
-    position = sfMouse_getPositionWindowBase(Mouse_relative_window(rb_window));
+    if (NIL_P(rb_window)) {
+        position = sfMouse_getPosition(NULL);
+    } else {
+        position = sfMouse_getPositionRenderWindow(Mouse_relative_window(rb_window));
+    }
 
-    return vec2f_to_rb((sfVector2f) {(float) position.x, (float) position.y});
+    return vec2f_to_rb((sfVector2f){(float)position.x, (float)position.y});
 }
 
-static VALUE Mouse_set_position(int argc, VALUE *argv, VALUE module) {
+static VALUE Mouse_set_position(int argc, VALUE* argv, VALUE module) {
     VALUE rb_position, rb_window;
 
     rb_scan_args(argc, argv, "11", &rb_position, &rb_window);
-    sfMouse_setPositionWindowBase(vec2i_from_rb(rb_position), Mouse_relative_window(rb_window));
+    if (NIL_P(rb_window)) {
+        sfMouse_setPosition(vec2i_from_rb(rb_position), NULL);
+    } else {
+        sfMouse_setPositionRenderWindow(vec2i_from_rb(rb_position),
+                                        Mouse_relative_window(rb_window));
+    }
 
     return rb_position;
 }

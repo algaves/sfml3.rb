@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'sfml'
 require 'minitest/autorun'
 require 'stringio'
@@ -12,6 +14,31 @@ class SfmlTest < Minitest::Test
     expected.zip(actual).each do |e, a|
       assert_in_epsilon e, a, epsilon
     end
+  end
+
+  # assert_in_epsilon is relative, so it can never accept a near-zero result
+  # against an exact 0 -- which is most of any transform matrix. Matrices are
+  # compared with an absolute tolerance instead.
+  def assert_matrix_in_delta(expected, actual, delta = 1e-5)
+    assert_equal expected.length, actual.length
+    expected.zip(actual).each_with_index do |(e, a), i|
+      assert_in_delta e, a, delta, "element #{i}"
+    end
+  end
+
+  # Text needs a real font file and CI images do not all ship one, so every
+  # font-dependent test skips rather than fails when none is found.
+  def system_font_path
+    candidates = [
+      '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+      '/usr/share/fonts/dejavu-sans-fonts/DejaVuSans.ttf',
+      '/usr/share/fonts/google-noto/NotoSans-Regular.ttf',
+      '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
+      '/Library/Fonts/Arial.ttf'
+    ]
+
+    candidates.find { |path| File.exist?(path) } ||
+      Dir.glob('/usr/share/fonts/**/*.ttf').first
   end
 
   # Clock
@@ -193,6 +220,29 @@ class SfmlTest < Minitest::Test
     assert_equal matrix, t.matrix
   end
 
+  def test_transformable_inverse_transform
+    t = Transformable.new
+    t.position = [10, 20]
+
+    inverse = t.inverse_transform
+    assert_equal 9, inverse.length
+    # The inverse must undo the transform, which is what makes it usable for
+    # turning a world point back into local space.
+    assert_matrix_in_delta Transform.identity.to_a,
+                           (Transform.from_a(t.transform) * Transform.from_a(inverse)).to_a
+  end
+
+  def test_transformable_copy_is_independent
+    t = Transformable.new
+    t.position = [3, 4]
+
+    copy = t.copy
+    assert_vec_in_epsilon [3, 4], copy.position
+
+    copy.position = [9, 9]
+    assert_vec_in_epsilon [3, 4], t.position
+  end
+
   # Circle
   def test_circle_default_radius
     c = Circle.new
@@ -226,6 +276,12 @@ class SfmlTest < Minitest::Test
     assert_in_epsilon 33, c.rotation, 0.01
   end
 
+  def test_circle_point_count_setter
+    c = Circle.new 10
+    c.point_count = 8
+    assert_equal 8, c.point_count
+  end
+
   # RenderState
   def test_renderstate_default_matrix_length
     rs = RenderState.new
@@ -239,6 +295,132 @@ class SfmlTest < Minitest::Test
     rs.transform = [1, 0, 0, 0, 1, 0, 0, 0, 1]
     assert_vec_in_epsilon [1, 0, 0, 0, 1, 0, 0, 0, 1], rs.transform
     assert_equal rs.transform, rs.matrix
+  end
+
+  # Transform
+  def test_transform_identity
+    assert_equal [1, 0, 0, 0, 1, 0, 0, 0, 1], Transform.identity.to_a
+    assert_equal Transform.identity, Transform::IDENTITY
+  end
+
+  def test_transform_identity_constant_is_frozen
+    # A shared constant that mutators could edit would silently corrupt every
+    # later use of it.
+    assert Transform::IDENTITY.frozen?
+    assert_raises(FrozenError) { Transform::IDENTITY.translate! [1, 1] }
+    assert_equal [1, 0, 0, 0, 1, 0, 0, 0, 1], Transform::IDENTITY.to_a
+  end
+
+  def test_transform_from_a_roundtrip
+    t = Transform.identity.translate!([4, 9]).rotate!(30)
+    assert_equal t, Transform.from_a(t.to_a)
+    assert_equal t.to_a, Transform.new(*t.to_a).to_a
+  end
+
+  def test_transform_translate
+    t = Transform.identity.translate!([10, 20])
+    assert_matrix_in_delta [1, 0, 10, 0, 1, 20, 0, 0, 1], t.to_a
+    assert_vec_in_epsilon [11, 22], t.transform_point([1, 2])
+  end
+
+  def test_transform_scale_with_center
+    # Scaling about (1, 1) leaves that point where it is.
+    t = Transform.identity.scale!([2, 3], [1, 1])
+    assert_vec_in_epsilon [1, 1], t.transform_point([1, 1])
+    assert_vec_in_epsilon [3, 4], t.transform_point([2, 2])
+  end
+
+  def test_transform_rotate_quarter_turn
+    point = Transform.identity.rotate!(90).transform_point([1, 0])
+    assert_in_delta 0, point.x, 0.0001
+    assert_in_delta 1, point.y, 0.0001
+  end
+
+  def test_transform_mutators_chain_and_return_self
+    t = Transform.identity
+    assert_same t, t.translate!([1, 1])
+    assert_same t, t.rotate!(10)
+    assert_same t, t.scale!([2, 2])
+  end
+
+  def test_transform_non_bang_forms_do_not_mutate
+    t = Transform.identity
+    moved = t.translate([5, 5])
+    assert_equal Transform.identity, t
+    refute_equal t, moved
+  end
+
+  def test_transform_inverse_cancels_itself
+    t = Transform.identity.translate!([7, -3]).rotate!(25).scale!([2, 4])
+    assert_matrix_in_delta Transform.identity.to_a, (t * t.inverse).to_a
+  end
+
+  def test_transform_transform_rect
+    rect = Transform.identity.translate!([10, 10]).transform_rect([0, 0, 4, 6])
+    assert_matrix_in_delta [10, 10, 4, 6], rect.to_a
+  end
+
+  def test_transform_gl_matrix_is_4x4
+    # Distinct from #to_a: sfTransform_getMatrix fills the 16-float OpenGL form.
+    matrix = Transform.identity.gl_matrix
+    assert_equal 16, matrix.length
+    assert_equal 9, Transform.identity.to_a.length
+  end
+
+  def test_transform_module_functions_still_take_and_return_arrays
+    # Transform was a module before it was a class; both entry points stay
+    # Array-in/Array-out so existing callers keep working.
+    identity = [1, 0, 0, 0, 1, 0, 0, 0, 1]
+    moved = [1, 0, 5, 0, 1, 0, 0, 0, 1]
+
+    combined = Transform.combine(identity, moved)
+    assert_kind_of Array, combined
+    assert_matrix_in_delta moved, combined
+    assert_matrix_in_delta identity, Transform.inverse(identity)
+  end
+
+  def test_renderstate_accepts_transform_and_array
+    rs = RenderState.new
+    t = Transform.identity.translate!([3, 4])
+
+    rs.transform = t
+    assert_matrix_in_delta t.to_a, rs.transform
+
+    rs.transform = [1, 0, 0, 0, 1, 0, 0, 0, 1]
+    assert_matrix_in_delta [1, 0, 0, 0, 1, 0, 0, 0, 1], rs.transform
+  end
+
+  # View -- safe headless: sfView is plain data and opens no GL context, unlike
+  # Window/Texture/RenderTexture.
+  def test_view_from_rect
+    # The rect is the visible area, so its centre is the view's centre.
+    view = View.from_rect [0, 0, 100, 50]
+    assert_vec_in_epsilon [50, 25], view.center
+    assert_vec_in_epsilon [100, 50], view.size
+  end
+
+  def test_view_scissor_roundtrip
+    view = View.new
+    assert_vec_in_epsilon [0, 0, 1, 1], view.scissor.to_a
+
+    view.scissor = [0.25, 0.25, 0.5, 0.5]
+    assert_vec_in_epsilon [0.25, 0.25, 0.5, 0.5], view.scissor.to_a
+  end
+
+  # Text
+  def test_text_string_roundtrips_non_ascii
+    path = system_font_path
+    skip 'no system font available' unless path
+
+    text = Text.new Font.from_file(path)
+
+    # Goes through sfText_setUnicodeString: the plain char* entry point decodes
+    # the bytes with the C locale and turns each non-ASCII byte into U+FFFFFFFF.
+    ['hello', 'héllo', '日本語', 'emoji 🎮', ''].each do |string|
+      text.string = string
+      assert_equal string, text.string
+      assert_equal Encoding::UTF_8, text.string.encoding
+    end
   end
 
   # VideoMode
@@ -323,7 +505,7 @@ class SfmlTest < Minitest::Test
   def test_keyboard_key_mapping
     assert_equal 0, Keyboard.delocalize(:a)
     assert_equal :e, Keyboard.localize(4)
-    assert_equal 0, Keyboard.delocalize("a")
+    assert_equal 0, Keyboard.delocalize('a')
   end
 
   def test_keyboard_unknown_key

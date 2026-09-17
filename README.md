@@ -97,11 +97,19 @@ clang-tools-extra` on Fedora for the C side).
 is the build of record.
 
 The C extension under `ext/` mirrors SFML's own subsystems, with each binding's `.c` and `.h`
-side by side: `core/` (CSFML umbrella header, macros, exceptions), `system/` (Clock, Vector2),
-`window/` (Window, Event, VideoMode, Keyboard) and `graphics/` (shapes, Color, Transform, View,
-RenderState, Target). Includes are subsystem-relative, e.g. `#include "graphics/circle.h"`.
+side by side: `core/` (CSFML umbrella header, macros, exceptions, UTF-32 conversion),
+`system/` (Clock, Time, vectors, streams), `window/` (Window, Event, VideoMode, and the input
+devices), `graphics/` (shapes, Color, Transform, View, Texture, Text, Shader, the render targets),
+`audio/` and `network/`. Includes are subsystem-relative, e.g. `#include "graphics/circle.h"`.
+
+Two `.inc` files hold method bodies shared by several classes and are included once per class with
+a different macro prefix: `audio/sound_source.inc` (Sound, Music, SoundStream) and
+`graphics/render_target.inc` (Window, RenderTexture).
+
 Note that mkmf flattens object files to their basenames, so every `.c` filename has to stay
-unique across the whole tree.
+unique across the whole tree — and that `$srcs` is baked into the generated Makefile, so after
+adding a `.c` file run `touch ext/extconf.rb && rake compile` (or `rake clean compile`), otherwise
+it is silently left out of the link.
 
 ### Building the binary gems
 

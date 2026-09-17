@@ -3,8 +3,12 @@
 
 #include <ruby.h>
 
+#include "core/sfml.h"
+
 void Init_VertexBuffer(VALUE rb_module);
 
 VALUE Get_Klass_VertexBuffer(void);
 
-#endif //SFML_RB_GRAPHICS_VERTEX_BUFFER_H
+sfVertexBuffer* Get_VertexBuffer_Struct(VALUE self);
+
+#endif // SFML_RB_GRAPHICS_VERTEX_BUFFER_H

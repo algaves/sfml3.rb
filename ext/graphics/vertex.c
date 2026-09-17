@@ -14,25 +14,24 @@ typedef struct {
 
 static VALUE rb_cVertex;
 
-static void Vertex_free(void *ptr) {
+static void Vertex_free(void* ptr) {
     free(ptr);
 }
 
 static const rb_data_type_t Vertex_data_type = {
     .wrap_struct_name = "SFML::Vertex",
     .function = {.dmark = NULL, .dfree = Vertex_free, .dsize = NULL},
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY
-};
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
 static VALUE Vertex_wrap(sfVertex vertex) {
-    Vertex *ptr = malloc(sizeof(Vertex));
+    Vertex* ptr = malloc(sizeof(Vertex));
 
     ptr->vertex = vertex;
 
     return TypedData_Wrap_Struct(rb_cVertex, &Vertex_data_type, ptr);
 }
 
-static VALUE Vertex_new(int argc, VALUE *argv, VALUE klass) {
+static VALUE Vertex_new(int argc, VALUE* argv, VALUE klass) {
     VALUE rb_position, rb_color, rb_tex_coords;
     sfVertex vertex = {{0, 0}, {255, 255, 255, 255}, {0, 0}};
 
@@ -54,47 +53,47 @@ static VALUE Vertex_new(int argc, VALUE *argv, VALUE klass) {
 }
 
 static VALUE Vertex_get_position(VALUE self) {
-    return vec2f_to_rb(((Vertex *) Get_Vertex_Struct(self))->vertex.position);
+    return vec2f_to_rb(((Vertex*)Get_Vertex_Struct(self))->vertex.position);
 }
 
 static VALUE Vertex_set_position(VALUE self, VALUE rb_position) {
-    ((Vertex *) Get_Vertex_Struct(self))->vertex.position = vec2f_from_rb(rb_position);
+    ((Vertex*)Get_Vertex_Struct(self))->vertex.position = vec2f_from_rb(rb_position);
     return rb_position;
 }
 
 static VALUE Vertex_get_color(VALUE self) {
-    return color_to_rb(((Vertex *) Get_Vertex_Struct(self))->vertex.color);
+    return color_to_rb(((Vertex*)Get_Vertex_Struct(self))->vertex.color);
 }
 
 static VALUE Vertex_set_color(VALUE self, VALUE rb_color) {
-    ((Vertex *) Get_Vertex_Struct(self))->vertex.color = color_from_rb(rb_color);
+    ((Vertex*)Get_Vertex_Struct(self))->vertex.color = color_from_rb(rb_color);
     return rb_color;
 }
 
 static VALUE Vertex_get_tex_coords(VALUE self) {
-    return vec2f_to_rb(((Vertex *) Get_Vertex_Struct(self))->vertex.texCoords);
+    return vec2f_to_rb(((Vertex*)Get_Vertex_Struct(self))->vertex.texCoords);
 }
 
 static VALUE Vertex_set_tex_coords(VALUE self, VALUE rb_tex_coords) {
-    ((Vertex *) Get_Vertex_Struct(self))->vertex.texCoords = vec2f_from_rb(rb_tex_coords);
+    ((Vertex*)Get_Vertex_Struct(self))->vertex.texCoords = vec2f_from_rb(rb_tex_coords);
     return rb_tex_coords;
 }
 
 static VALUE Vertex_to_a(VALUE self) {
-    Vertex *v = Get_Vertex_Struct(self);
+    Vertex* v = Get_Vertex_Struct(self);
 
     return rb_ary_new_from_args(2, vec2f_to_rb(v->vertex.position), color_to_rb(v->vertex.color));
 }
 
 static VALUE Vertex_eql(VALUE self, VALUE rb_other) {
-    sfVertex a = ((Vertex *) Get_Vertex_Struct(self))->vertex;
+    sfVertex a = ((Vertex*)Get_Vertex_Struct(self))->vertex;
     sfVertex b;
 
     if (!rb_obj_is_kind_of(rb_other, rb_cVertex)) {
         return Qfalse;
     }
 
-    b = ((Vertex *) Get_Vertex_Struct(rb_other))->vertex;
+    b = ((Vertex*)Get_Vertex_Struct(rb_other))->vertex;
 
     return BOOL2RB(a.position.x == b.position.x && a.position.y == b.position.y &&
                    a.color.r == b.color.r && a.color.g == b.color.g && a.color.b == b.color.b &&
@@ -121,15 +120,15 @@ VALUE Get_Klass_Vertex(void) {
     return rb_cVertex;
 }
 
-void *Get_Vertex_Struct(VALUE self) {
-    Vertex *ptr;
+void* Get_Vertex_Struct(VALUE self) {
+    Vertex* ptr;
     TypedData_Get_Struct(self, Vertex, &Vertex_data_type, ptr);
     return ptr;
 }
 
 sfVertex vertex_from_rb(VALUE rb_vertex) {
     if (rb_obj_is_kind_of(rb_vertex, rb_cVertex)) {
-        return ((Vertex *) Get_Vertex_Struct(rb_vertex))->vertex;
+        return ((Vertex*)Get_Vertex_Struct(rb_vertex))->vertex;
     }
 
     if (RB_TYPE_P(rb_vertex, T_ARRAY)) {
@@ -138,9 +137,43 @@ sfVertex vertex_from_rb(VALUE rb_vertex) {
 
     raise_invalid_argument_class(rb_cVertex);
 
-    return (sfVertex) {{0, 0}, {0, 0, 0, 0}, {0, 0}};
+    return (sfVertex){{0, 0}, {0, 0, 0, 0}, {0, 0}};
 }
 
 VALUE vertex_to_rb(sfVertex c_vertex) {
     return Vertex_wrap(c_vertex);
+}
+
+sfVertex* vertices_from_rb(VALUE rb_vertices, size_t* count) {
+    VALUE normalized;
+    sfVertex* vertices;
+    long i, len;
+
+    Check_Type(rb_vertices, T_ARRAY);
+
+    len = RARRAY_LEN(rb_vertices);
+    normalized = rb_ary_new_capa(len);
+
+    /* Normalize -- and so raise on a bad element -- before allocating anything:
+       vertex_from_rb builds a Vertex out of a plain Array and can raise, and a
+       raise after ALLOC_N would leak the buffer. */
+    for (i = 0; i < len; i++) {
+        VALUE entry = rb_ary_entry(rb_vertices, i);
+
+        if (!rb_obj_is_kind_of(entry, rb_cVertex)) {
+            entry = rb_funcall(rb_cVertex, rb_intern("new"), 1, entry);
+        }
+
+        rb_ary_push(normalized, entry);
+    }
+
+    vertices = ALLOC_N(sfVertex, len);
+
+    for (i = 0; i < len; i++) {
+        vertices[i] = vertex_from_rb(rb_ary_entry(normalized, i));
+    }
+
+    *count = (size_t)len;
+
+    return vertices;
 }
