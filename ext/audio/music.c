@@ -1,6 +1,7 @@
 #include "audio/music.h"
 
 #include <ruby.h>
+#include <ruby/thread.h>
 #include <stdlib.h>
 
 #include "audio/audio_enums.h"
@@ -22,17 +23,25 @@ typedef struct {
 
 static VALUE rb_cMusic;
 
-static void Music_mark(void *ptr) {
-    Music *music = ptr;
+static void Music_mark(void* ptr) {
+    Music* music = ptr;
 
     rb_gc_mark(music->rb_stream);
 }
 
-static void Music_free(void *ptr) {
-    Music *music = ptr;
+/* sfMusic_destroy() calls Music::~Music(), which explicitly calls stop() and
+   can block waiting on the audio thread; release the GVL for the same reason
+   as Sound_free/SS_METHOD(stop). */
+static void* Music_destroy_without_gvl(void* handle) {
+    sfMusic_destroy(handle);
+    return NULL;
+}
+
+static void Music_free(void* ptr) {
+    Music* music = ptr;
 
     effect_processor_release(music->source.effect_slot);
-    sfMusic_destroy(music->source.handle);
+    rb_thread_call_without_gvl(Music_destroy_without_gvl, music->source.handle, RUBY_UBF_IO, NULL);
     rb_gc_unregister_address(&music->rb_stream);
     free(music);
 }
@@ -40,11 +49,10 @@ static void Music_free(void *ptr) {
 static const rb_data_type_t Music_data_type = {
     .wrap_struct_name = "SFML::Music",
     .function = {.dmark = Music_mark, .dfree = Music_free, .dsize = NULL},
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY
-};
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
-static VALUE Music_wrap(VALUE klass, sfMusic *handle, VALUE rb_stream) {
-    Music *ptr;
+static VALUE Music_wrap(VALUE klass, sfMusic* handle, VALUE rb_stream) {
+    Music* ptr;
 
     if (handle == NULL) {
         rb_raise(rb_eRuntimeError, "failed to create music");
@@ -67,14 +75,13 @@ static VALUE Music_from_file(VALUE klass, VALUE rb_path) {
 static VALUE Music_from_memory(VALUE klass, VALUE rb_data) {
     StringValue(rb_data);
 
-    return Music_wrap(klass,
-                      sfMusic_createFromMemory(RSTRING_PTR(rb_data), (size_t) RSTRING_LEN(rb_data)),
-                      Qnil);
+    return Music_wrap(
+        klass, sfMusic_createFromMemory(RSTRING_PTR(rb_data), (size_t)RSTRING_LEN(rb_data)), Qnil);
 }
 
 static VALUE Music_from_stream(VALUE klass, VALUE rb_stream) {
     VALUE holder = Qnil;
-    sfInputStream *stream = input_stream_from_rb(rb_stream, &holder);
+    sfInputStream* stream = input_stream_from_rb(rb_stream, &holder);
 
     return Music_wrap(klass, sfMusic_createFromStream(stream), holder);
 }
@@ -93,7 +100,7 @@ static VALUE Music_sample_rate(VALUE self) {
 
 static VALUE Music_channel_map(VALUE self) {
     size_t count = 0;
-    const sfSoundChannel *map = sfMusic_getChannelMap(Get_Music_Struct(self), &count);
+    const sfSoundChannel* map = sfMusic_getChannelMap(Get_Music_Struct(self), &count);
     VALUE rb_array;
     size_t i;
 
@@ -101,7 +108,7 @@ static VALUE Music_channel_map(VALUE self) {
         return rb_ary_new();
     }
 
-    rb_array = rb_ary_new_capa((long) count);
+    rb_array = rb_ary_new_capa((long)count);
 
     for (i = 0; i < count; i++) {
         rb_ary_push(rb_array, ID2SYM(rb_intern(sound_channel_name(map[i]))));
@@ -160,8 +167,8 @@ VALUE Get_Klass_Music(void) {
     return rb_cMusic;
 }
 
-void *Get_Music_Struct(VALUE self) {
-    Music *ptr;
+void* Get_Music_Struct(VALUE self) {
+    Music* ptr;
     TypedData_Get_Struct(self, Music, &Music_data_type, ptr);
     return ptr->source.handle;
 }

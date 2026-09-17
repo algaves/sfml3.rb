@@ -1,6 +1,7 @@
 #include "audio/sound.h"
 
 #include <ruby.h>
+#include <ruby/thread.h>
 #include <stdlib.h>
 
 #include "audio/effect_processor.h"
@@ -15,28 +16,35 @@ typedef struct {
 
 static VALUE rb_cSound;
 
-static void Sound_mark(void *ptr) {
-    Sound *sound = ptr;
+static void Sound_mark(void* ptr) {
+    Sound* sound = ptr;
 
     rb_gc_mark(sound->rb_buffer);
 }
 
-static void Sound_free(void *ptr) {
-    Sound *sound = ptr;
+/* sfSound_destroy() calls Sound::stop(), which can block waiting on the audio
+   thread (see the matching comment on SS_METHOD(stop) in sound_source.inc);
+   release the GVL for the same reason. */
+static void* Sound_destroy_without_gvl(void* handle) {
+    sfSound_destroy(handle);
+    return NULL;
+}
+
+static void Sound_free(void* ptr) {
+    Sound* sound = ptr;
 
     effect_processor_release(sound->source.effect_slot);
-    sfSound_destroy(sound->source.handle);
+    rb_thread_call_without_gvl(Sound_destroy_without_gvl, sound->source.handle, RUBY_UBF_IO, NULL);
     free(sound);
 }
 
 static const rb_data_type_t Sound_data_type = {
     .wrap_struct_name = "SFML::Sound",
     .function = {.dmark = Sound_mark, .dfree = Sound_free, .dsize = NULL},
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY
-};
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
-static VALUE Sound_wrap(VALUE klass, sfSound *handle, VALUE rb_buffer) {
-    Sound *ptr;
+static VALUE Sound_wrap(VALUE klass, sfSound* handle, VALUE rb_buffer) {
+    Sound* ptr;
 
     if (handle == NULL) {
         rb_raise(rb_eRuntimeError, "failed to create sound");
@@ -59,24 +67,44 @@ static VALUE Sound_new(VALUE klass, VALUE rb_buffer) {
 }
 
 static VALUE Sound_copy(VALUE self) {
-    Sound *sound = (Sound *) Get_Sound_Struct(self);
+    Sound* sound = (Sound*)Get_Sound_Struct(self);
 
-    return Sound_wrap(Get_Klass_Sound(),
-                      sfSound_copy((const sfSound *) sound->source.handle), sound->rb_buffer);
+    return Sound_wrap(Get_Klass_Sound(), sfSound_copy((const sfSound*)sound->source.handle),
+                      sound->rb_buffer);
 }
 
 static VALUE Sound_get_buffer(VALUE self) {
-    return ((Sound *) Get_Sound_Struct(self))->rb_buffer;
+    return ((Sound*)Get_Sound_Struct(self))->rb_buffer;
+}
+
+typedef struct {
+    sfSound* handle;
+    const sfSoundBuffer* buffer;
+} SoundSetBufferArgs;
+
+/* sfSound_setBuffer() calls Sound::stop() when a buffer is already attached,
+   which can block waiting on the audio thread; release the GVL for the same
+   reason as Sound_free/SS_METHOD(stop). */
+static void* Sound_set_buffer_without_gvl(void* raw) {
+    SoundSetBufferArgs* args = raw;
+
+    sfSound_setBuffer(args->handle, args->buffer);
+
+    return NULL;
 }
 
 static VALUE Sound_set_buffer(VALUE self, VALUE rb_buffer) {
-    Sound *sound = (Sound *) Get_Sound_Struct(self);
+    Sound* sound = (Sound*)Get_Sound_Struct(self);
+    SoundSetBufferArgs args;
 
     if (!rb_obj_is_kind_of(rb_buffer, Get_Klass_SoundBuffer())) {
         raise_invalid_argument_class(Get_Klass_SoundBuffer());
     }
 
-    sfSound_setBuffer(sound->source.handle, Get_SoundBuffer_Struct(rb_buffer));
+    args.handle = sound->source.handle;
+    args.buffer = Get_SoundBuffer_Struct(rb_buffer);
+
+    rb_thread_call_without_gvl(Sound_set_buffer_without_gvl, &args, RUBY_UBF_IO, NULL);
     sound->rb_buffer = rb_buffer;
 
     return rb_buffer;
@@ -104,8 +132,8 @@ VALUE Get_Klass_Sound(void) {
     return rb_cSound;
 }
 
-void *Get_Sound_Struct(VALUE self) {
-    Sound *ptr;
+void* Get_Sound_Struct(VALUE self) {
+    Sound* ptr;
     TypedData_Get_Struct(self, Sound, &Sound_data_type, ptr);
     return ptr;
 }
