@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative '../ext/ports'
 
 # Thin wrapper: the real implementation lives in ext/ports.rb so that it ships

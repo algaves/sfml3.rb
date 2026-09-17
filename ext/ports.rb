@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'digest'
 require 'etc'
 require 'fileutils'
@@ -169,7 +171,7 @@ module Ports
     }
   ].freeze
 
-  TOOLCHAIN_HINT = <<~HINT.freeze
+  TOOLCHAIN_HINT = <<~HINT
     Building SFML from source needs CMake >= 3.22, a C++17 compiler, and the
     X11/udev/OpenGL development headers. SFML links those from the system and
     they cannot be bundled.

@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.2.1]
+
 ### Added
 * **`SFML::Transform` is now a class**, wrapping `sfTransform` by value. It previously exposed
   only `combine` and `inverse` as module functions over plain 9-element Arrays, leaving 11 of
@@ -50,6 +52,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   macro built on `ALLOCV_N`, whose buffer Ruby frees while unwinding.
 * `VertexBuffer#update` had the same leak; it now shares `vertices_from_rb`, which validates
   every element before allocating anything.
+* **Audio-thread callbacks re-entered the VM from a foreign native thread.** The
+  `SoundStream#on_get_data` / `#on_seek` callbacks and the effect processor run on SFML's audio
+  thread, which Ruby never created; calling back into Ruby from it (`rb_thread_call_with_gvl`) is
+  a fatal VM error. Each now hands off to one shared Ruby-owned worker
+  (`ext/core/foreign_thread.c`). `SoundSource#stop`, `Sound#buffer=` and the `Sound` / `Music` /
+  `SoundStream` destructors release the GVL while they wait on the audio thread, and a processor
+  that times out degrades to a full buffer of silence rather than stalling playback.
 
 ### Changed
 * `Window` is created through `sfRenderWindow_createUnicode` rather than `sfRenderWindow_create`,

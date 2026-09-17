@@ -37,7 +37,8 @@ Gem::Specification.new do |s|
     'source_code_uri' => 'https://github.com/algaves/sfml3.rb',
     'bug_tracker_uri' => 'https://github.com/algaves/sfml3.rb/issues',
     'changelog_uri' => 'https://github.com/algaves/sfml3.rb/blob/main/CHANGELOG.md',
-    'documentation_uri' => 'https://rubydoc.info/gems/sfml3-rb'
+    'documentation_uri' => 'https://rubydoc.info/gems/sfml3-rb',
+    'rubygems_mfa_required' => 'true'
   }
 
   # TODO.md ships because it is the module-by-module record of what is actually

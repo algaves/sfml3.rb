@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'sfml'
 include SFML
 
@@ -9,13 +11,13 @@ transformable = Transformable.new
 
 1000.times do
   state = RenderState.new
-  
+
   1000.times do
     transformable.move random_vec2(100, 100)
     transformable.rotate rand(-90..90)
 
     state.matrix = transformable.matrix
-    
+
     # puts "Transform position: #{transformable.position}"
     # puts "Transform angle: #{transformable.angle}"
   end
@@ -25,4 +27,4 @@ transformable = Transformable.new
   sleep 0.0025
 end
 
-puts "Ok!"
+puts 'Ok!'
