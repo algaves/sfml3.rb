@@ -33,6 +33,12 @@ static const rb_data_type_t Window_data_type = {
     .function = {.dmark = NULL, .dfree = Window_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
+/* call-seq:
+ *   Window.new(video_mode, title, style = :default, state = :windowed, settings = nil) -> Window
+ *
+ * @return [Window]
+ * @raise [RuntimeError] if window creation fails
+ */
 static VALUE Window_new(int argc, VALUE* argv, VALUE klass) {
     VALUE self, rb_video_mode, rb_title, rb_style, rb_state, rb_settings, title_buffer;
     sfWindowState state = sfWindowed;
@@ -80,6 +86,12 @@ static VALUE Window_new(int argc, VALUE* argv, VALUE klass) {
    Window#native_handle returns, or one obtained from a GUI toolkit. The window
    is not owned by the toolkit afterwards: destroying it stays the toolkit's
    job, and closing the Ruby object only tears down the render context. */
+/* call-seq:
+ *   Window.from_handle(handle, settings = nil) -> Window
+ *
+ * @return [Window]
+ * @raise [RuntimeError] if window creation fails
+ */
 static VALUE Window_s_from_handle(int argc, VALUE* argv, VALUE klass) {
     VALUE self, rb_handle, rb_settings;
     sfContextSettings settings;
@@ -111,15 +123,29 @@ static VALUE Window_init(int argc, VALUE* argv, VALUE self) {
     return self;
 }
 
+/* call-seq: is_open? -> true or false
+ *
+ * @return [Boolean]
+ */
 static VALUE Window_is_open(VALUE self) {
     return BOOL2RB(sfRenderWindow_isOpen(Get_Window_Struct(self)));
 }
 
+/* call-seq: close! -> self
+ *
+ * @return [self]
+ */
 static VALUE Window_close(VALUE self) {
     sfRenderWindow_close(Get_Window_Struct(self));
     return self;
 }
 
+/* call-seq:
+ *   clear(color = Color::BLACK) -> self
+ *
+ * @return [self]
+ * @raise [ArgumentError] if given more than one argument
+ */
 static VALUE Window_clear(int argc, VALUE* argv, VALUE self) {
     sfColor color = sfBlack;
 
@@ -137,11 +163,26 @@ static VALUE Window_clear(int argc, VALUE* argv, VALUE self) {
     return self;
 }
 
+/* call-seq: display -> self
+ *
+ * Presents everything drawn since the last call to the screen.
+ *
+ * @return [self]
+ */
 static VALUE Window_display(VALUE self) {
     sfRenderWindow_display(Get_Window_Struct(self));
     return self;
 }
 
+/* call-seq:
+ *   poll_event!(event) -> true or false
+ *
+ * Pops the next pending event from the queue into +event+, if any, without
+ * blocking.
+ *
+ * @return [Boolean] whether an event was popped
+ * @raise [ArgumentError] if +event+ is not an Event
+ */
 static VALUE Window_poll_event(VALUE self, VALUE rb_event) {
     if (!rb_obj_is_kind_of(rb_event, Get_Klass_Event())) {
         raise_invalid_argument_class(Get_Klass_Event());
@@ -150,6 +191,14 @@ static VALUE Window_poll_event(VALUE self, VALUE rb_event) {
     return BOOL2RB(sfRenderWindow_pollEvent(Get_Window_Struct(self), Get_Event_Struct(rb_event)));
 }
 
+/* call-seq:
+ *   wait_event!(event) -> true or false
+ *
+ * Blocks until an event is available and pops it into +event+.
+ *
+ * @return [Boolean] whether an event was popped
+ * @raise [ArgumentError] if +event+ is not an Event
+ */
 static VALUE Window_wait_event(VALUE self, VALUE rb_event) {
     if (!rb_obj_is_kind_of(rb_event, Get_Klass_Event())) {
         raise_invalid_argument_class(Get_Klass_Event());
@@ -159,29 +208,59 @@ static VALUE Window_wait_event(VALUE self, VALUE rb_event) {
         sfRenderWindow_waitEvent(Get_Window_Struct(self), sfTime_Zero, Get_Event_Struct(rb_event)));
 }
 
+/* call-seq: position -> Vector2
+ *
+ * @return [Vector2] the window's position, in desktop coordinates
+ */
 static VALUE Window_get_position(VALUE self) {
     return VEC2_C2RB(sfRenderWindow_getPosition(Get_Window_Struct(self)));
 }
 
+/* call-seq:
+ *   position=(value) -> value
+ *
+ * @return [Vector2] +value+
+ */
 static VALUE Window_set_position(VALUE self, VALUE rb_arr) {
     sfRenderWindow_setPosition(Get_Window_Struct(self), vec2i_new_from_ruby(rb_arr));
     return self;
 }
 
+/* call-seq:
+ *   frame_rate=(value) -> self
+ *
+ * Limits the framerate to +value+ frames per second; 0 disables the limit.
+ *
+ * @return [self]
+ */
 static VALUE Window_set_frame_rate(VALUE self, VALUE rb_limit) {
     sfRenderWindow_setFramerateLimit(Get_Window_Struct(self), NUM2INT(rb_limit));
     return self;
 }
 
+/* call-seq:
+ *   size=(value) -> self
+ *
+ * @return [self]
+ */
 static VALUE Window_set_size(VALUE self, VALUE rb_size) {
     sfRenderWindow_setSize(Get_Window_Struct(self), vec2u_from_rb(rb_size));
     return self;
 }
 
+/* call-seq: size -> Vector2
+ *
+ * @return [Vector2] the client area size, in pixels
+ */
 static VALUE Window_get_size(VALUE self) {
     return VEC2_C2RB(sfRenderWindow_getSize(Get_Window_Struct(self)));
 }
 
+/* call-seq:
+ *   minimum_size=(value) -> value
+ *
+ * @return [Vector2] +value+
+ */
 static VALUE Window_set_minimum_size(VALUE self, VALUE rb_size) {
     sfVector2u size = vec2u_from_rb(rb_size);
 
@@ -190,6 +269,11 @@ static VALUE Window_set_minimum_size(VALUE self, VALUE rb_size) {
     return rb_size;
 }
 
+/* call-seq:
+ *   maximum_size=(value) -> value
+ *
+ * @return [Vector2] +value+
+ */
 static VALUE Window_set_maximum_size(VALUE self, VALUE rb_size) {
     sfVector2u size = vec2u_from_rb(rb_size);
 
@@ -198,10 +282,22 @@ static VALUE Window_set_maximum_size(VALUE self, VALUE rb_size) {
     return rb_size;
 }
 
+/* call-seq:
+ *   active=(value) -> true or false
+ *
+ * Activates or deactivates this window's OpenGL context as the current one
+ * on the calling thread.
+ *
+ * @return [Boolean] whether activation succeeded
+ */
 static VALUE Window_set_active(VALUE self, VALUE rb_active) {
     return BOOL2RB(sfRenderWindow_setActive(Get_Window_Struct(self), RTEST(rb_active)));
 }
 
+/* call-seq: native_handle -> Integer
+ *
+ * @return [Integer] the OS-specific window handle
+ */
 static VALUE Window_get_native_handle(VALUE self) {
     return ULL2NUM(
         (unsigned long long)(uintptr_t)sfRenderWindow_getNativeHandle(Get_Window_Struct(self)));
@@ -211,6 +307,11 @@ static VALUE Window_get_native_handle(VALUE self) {
    SFML::Vulkan.function already returns one -- there is no Vulkan object model
    here to wrap them in. Returns the new VkSurfaceKHR, or nil if creation
    failed. */
+/* call-seq:
+ *   create_vulkan_surface(instance, allocator = nil) -> Integer or nil
+ *
+ * @return [Integer, nil] the new +VkSurfaceKHR+, or +nil+ if creation failed
+ */
 static VALUE Window_create_vulkan_surface(int argc, VALUE* argv, VALUE self) {
     VALUE rb_instance, rb_allocator;
     VkInstance instance;
@@ -233,6 +334,14 @@ static VALUE Window_create_vulkan_surface(int argc, VALUE* argv, VALUE self) {
     return ULL2NUM((unsigned long long)(uintptr_t)surface);
 }
 
+/* call-seq:
+ *   set_icon(size, pixels) -> pixels
+ *
+ * Sets the window's icon from RGBA32 pixel data (+width * height * 4+
+ * bytes, row-major, top-to-bottom).
+ *
+ * @return [String] +pixels+
+ */
 static VALUE Window_set_icon(VALUE self, VALUE rb_size, VALUE rb_pixels) {
     StringValue(rb_pixels);
 
@@ -242,12 +351,22 @@ static VALUE Window_set_icon(VALUE self, VALUE rb_size, VALUE rb_pixels) {
     return rb_pixels;
 }
 
+/* call-seq: settings -> ContextSettings
+ *
+ * @return [ContextSettings] the settings this window's context was created
+ *   with
+ */
 static VALUE Window_get_settings(VALUE self) {
     return context_settings_to_rb(sfRenderWindow_getSettings(Get_Window_Struct(self)));
 }
 
 /* Through the UTF-32 entry point: sfRenderWindow_setTitle decodes the bytes
    with the C locale and mangles anything outside ASCII. */
+/* call-seq:
+ *   title=(value) -> self
+ *
+ * @return [self]
+ */
 static VALUE Window_set_title(VALUE self, VALUE rb_title) {
     VALUE buffer = utf32_from_rb(rb_title);
 
@@ -258,26 +377,57 @@ static VALUE Window_set_title(VALUE self, VALUE rb_title) {
     return self;
 }
 
+/* call-seq:
+ *   visible=(value) -> self
+ *
+ * @return [self]
+ */
 static VALUE Window_set_visible(VALUE self, VALUE rb_visible) {
     sfRenderWindow_setVisible(Get_Window_Struct(self), RTEST(rb_visible));
     return self;
 }
 
+/* call-seq:
+ *   vertical_sync_enabled=(value) -> self
+ *
+ * @return [self]
+ */
 static VALUE Window_set_vertical_sync_enabled(VALUE self, VALUE rb_enable) {
     sfRenderWindow_setVerticalSyncEnabled(Get_Window_Struct(self), RTEST(rb_enable));
     return self;
 }
 
+/* call-seq:
+ *   cursor_visible=(value) -> self
+ *
+ * @return [self]
+ */
 static VALUE Window_set_mouse_cursor_visible(VALUE self, VALUE rb_visible) {
     sfRenderWindow_setMouseCursorVisible(Get_Window_Struct(self), RTEST(rb_visible));
     return self;
 }
 
+/* call-seq:
+ *   cursor_grabbed=(value) -> self
+ *
+ * Confines or releases the mouse cursor to the window's client area.
+ *
+ * @return [self]
+ */
 static VALUE Window_set_mouse_cursor_grabbed(VALUE self, VALUE rb_grabbed) {
     sfRenderWindow_setMouseCursorGrabbed(Get_Window_Struct(self), RTEST(rb_grabbed));
     return self;
 }
 
+/* call-seq:
+ *   cursor=(value) -> value
+ *
+ * Sets the window's mouse cursor. +value+ may be +nil+ to restore the
+ * default system cursor.
+ *
+ * @return [Cursor, nil] +value+
+ * @raise [ArgumentError] if +value+ is neither a Cursor nor +nil+
+ */
 static VALUE Window_set_mouse_cursor(VALUE self, VALUE rb_cursor) {
     if (NIL_P(rb_cursor)) {
         sfRenderWindow_setMouseCursor(Get_Window_Struct(self), NULL);
@@ -293,25 +443,52 @@ static VALUE Window_set_mouse_cursor(VALUE self, VALUE rb_cursor) {
     return rb_cursor;
 }
 
+/* call-seq:
+ *   key_repeat_enabled=(value) -> self
+ *
+ * @return [self]
+ */
 static VALUE Window_set_key_repeat_enabled(VALUE self, VALUE rb_enabled) {
     sfRenderWindow_setKeyRepeatEnabled(Get_Window_Struct(self), RTEST(rb_enabled));
     return self;
 }
 
+/* call-seq:
+ *   joystick_threshold=(value) -> value
+ *
+ * Sets the minimum change in a joystick axis's position required to
+ * generate a +"joystick-moved"+ event.
+ *
+ * @return [Float] +value+
+ */
 static VALUE Window_set_joystick_threshold(VALUE self, VALUE rb_threshold) {
     sfRenderWindow_setJoystickThreshold(Get_Window_Struct(self), NUM2DBL(rb_threshold));
     return rb_threshold;
 }
 
+/* call-seq: request_focus -> self
+ *
+ * @return [self]
+ */
 static VALUE Window_request_focus(VALUE self) {
     sfRenderWindow_requestFocus(Get_Window_Struct(self));
     return self;
 }
 
+/* call-seq: focus? -> true or false
+ *
+ * @return [Boolean]
+ */
 static VALUE Window_has_focus(VALUE self) {
     return BOOL2RB(sfRenderWindow_hasFocus(Get_Window_Struct(self)));
 }
 
+/* call-seq:
+ *   draw(drawable, state = nil) -> self
+ *
+ * @return [self]
+ * @raise [ArgumentError] if given no arguments or more than 2
+ */
 static VALUE Window_draw(int argc, VALUE* argv, VALUE self) {
     VALUE rb_drawable, rb_state;
 
@@ -327,6 +504,12 @@ static VALUE Window_draw(int argc, VALUE* argv, VALUE self) {
     return self;
 }
 
+/* call-seq:
+ *   view=(value) -> self
+ *
+ * @return [self]
+ * @raise [ArgumentError] if +value+ is not a View
+ */
 static VALUE Window_set_view(VALUE self, VALUE rb_view) {
     if (!rb_obj_is_kind_of(rb_view, Get_Klass_View())) {
         rb_raise(rb_eArgError, "invalid object, expected a View object");
@@ -337,10 +520,18 @@ static VALUE Window_set_view(VALUE self, VALUE rb_view) {
     return self;
 }
 
+/* call-seq: view -> View
+ *
+ * @return [View] a copy of the window's currently active view
+ */
 static VALUE Window_get_view(VALUE self) {
     return Get_Casting_View(sfView_copy(sfRenderWindow_getView(Get_Window_Struct(self))));
 }
 
+/* call-seq: default_view -> View
+ *
+ * @return [View] a copy of the window's default view
+ */
 static VALUE Window_get_default_view(VALUE self) {
     return Get_Casting_View(sfView_copy((sfRenderWindow_getDefaultView(Get_Window_Struct(self)))));
 }
@@ -353,8 +544,40 @@ static VALUE Window_get_default_view(VALUE self) {
 #undef RT_METHOD
 #undef RT_HANDLE
 
-void Init_Window(VALUE rb_module) {
-    rb_cWindow = rb_define_class_under(rb_module, "Window", rb_cObject);
+/* Document-class: SFML::Window
+ * An OS window with an OpenGL context attached, and (through the methods
+ * below) a render target you can draw to.
+ *
+ * @!method srgb?
+ *   @return [Boolean]
+ * @!method clear_stencil(value)
+ *   @return [self]
+ * @!method clear_color_and_stencil(color, stencil)
+ *   @return [self]
+ * @!method viewport(view = nil)
+ *   @return [Rect] the current viewport in pixels; +view+ defaults to the target's current view
+ * @!method scissor(view = nil)
+ *   @return [Rect] the current scissor rectangle in pixels; +view+ defaults to the target's current
+ * view
+ * @!method map_pixel_to_coords(point, view = nil)
+ *   Converts a pixel position to world coordinates, using the inverse of the view transform.
+ *   @return [Vector2]
+ * @!method map_coords_to_pixel(point, view = nil)
+ *   Converts a world position to pixel coordinates.
+ *   @return [Vector2]
+ * @!method push_gl_states
+ *   @return [self]
+ * @!method pop_gl_states
+ *   @return [self]
+ * @!method reset_gl_states
+ *   @return [self]
+ * @!method draw_primitives(vertices, primitive, state = nil)
+ *   @return [self]
+ * @!method draw_vertex_buffer_range(buffer, first, count, state = nil)
+ *   @return [self]
+ */
+void Init_Window(VALUE rb_mSFML) {
+    rb_cWindow = rb_define_class_under(rb_mSFML, "Window", rb_cObject);
 
     rb_define_singleton_method(rb_cWindow, "new", Window_new, -1);
     rb_define_singleton_method(rb_cWindow, "from_handle", Window_s_from_handle, -1);

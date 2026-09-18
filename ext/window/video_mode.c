@@ -9,8 +9,8 @@
 
 static VALUE rb_cMode;
 
-static sfVideoMode *VideoMode_alloc(unsigned width, unsigned height, unsigned bits, int *created) {
-    sfVideoMode *mode = malloc(sizeof(sfVideoMode));
+static sfVideoMode* VideoMode_alloc(unsigned width, unsigned height, unsigned bits, int* created) {
+    sfVideoMode* mode = malloc(sizeof(sfVideoMode));
 
     if (created != NULL) {
         *created = 1;
@@ -23,18 +23,17 @@ static sfVideoMode *VideoMode_alloc(unsigned width, unsigned height, unsigned bi
     return mode;
 }
 
-static void VideoMode_free(void *ptr) {
+static void VideoMode_free(void* ptr) {
     free(ptr);
 }
 
 static const rb_data_type_t VideoMode_data_type = {
     .wrap_struct_name = "SFML::VideoMode",
     .function = {.dmark = NULL, .dfree = VideoMode_free, .dsize = NULL},
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY
-};
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
 static VALUE VideoMode_from_c(sfVideoMode mode) {
-    sfVideoMode *ptr = VideoMode_alloc(mode.size.x, mode.size.y, mode.bitsPerPixel, NULL);
+    sfVideoMode* ptr = VideoMode_alloc(mode.size.x, mode.size.y, mode.bitsPerPixel, NULL);
     VALUE self = TypedData_Wrap_Struct(rb_cMode, &VideoMode_data_type, ptr);
 
     rb_iv_set(self, "@width", UINT2NUM(mode.size.x));
@@ -44,20 +43,30 @@ static VALUE VideoMode_from_c(sfVideoMode mode) {
     return self;
 }
 
+/* call-seq:
+ *   VideoMode.new(width, height, bits_per_pixel) -> VideoMode
+ *
+ * @return [VideoMode]
+ */
 static VALUE VideoMode_new(VALUE klass, VALUE rb_width, VALUE rb_height, VALUE rb_bits) {
     VALUE self;
     VALUE argv[] = {rb_width, rb_height, rb_bits};
 
-    self = VideoMode_from_c((sfVideoMode) {
-        {(unsigned) NUM2UINT(rb_width), (unsigned) NUM2UINT(rb_height)},
-        (unsigned) NUM2UINT(rb_bits)
-    });
+    self = VideoMode_from_c(
+        (sfVideoMode){{(unsigned)NUM2UINT(rb_width), (unsigned)NUM2UINT(rb_height)},
+                      (unsigned)NUM2UINT(rb_bits)});
 
     rb_obj_call_init(self, 3, argv);
 
     return self;
 }
 
+/* call-seq: initialize(width, height, bits) -> self
+ *
+ * @private Sets the ivars backing the #width/#height/#bits readers; called
+ *   internally by .new.
+ * @return [self]
+ */
 static VALUE VideoMode_init(VALUE self, VALUE rb_width, VALUE rb_height, VALUE rb_bits) {
     rb_iv_set(self, "@width", rb_width);
     rb_iv_set(self, "@height", rb_height);
@@ -66,14 +75,23 @@ static VALUE VideoMode_init(VALUE self, VALUE rb_width, VALUE rb_height, VALUE r
     return self;
 }
 
+/* call-seq: desktop_mode -> VideoMode
+ *
+ * @return [VideoMode] the current desktop video mode
+ */
 static VALUE VideoMode_desktop_mode(VALUE klass) {
     return VideoMode_from_c(sfVideoMode_getDesktopMode());
 }
 
+/* call-seq: fullscreen_modes -> Array<VideoMode>
+ *
+ * @return [Array<VideoMode>] all video modes supported in fullscreen mode,
+ *   sorted from best to worst
+ */
 static VALUE VideoMode_fullscreen_modes(VALUE klass) {
     size_t count = 0;
-    const sfVideoMode *modes = sfVideoMode_getFullscreenModes(&count);
-    VALUE array = rb_ary_new_capa((long) count);
+    const sfVideoMode* modes = sfVideoMode_getFullscreenModes(&count);
+    VALUE array = rb_ary_new_capa((long)count);
 
     for (size_t i = 0; i < count; i++) {
         rb_ary_push(array, VideoMode_from_c(modes[i]));
@@ -82,16 +100,30 @@ static VALUE VideoMode_fullscreen_modes(VALUE klass) {
     return array;
 }
 
+/* call-seq: valid? -> true or false
+ *
+ * @return [Boolean] whether this mode is valid for fullscreen use on the
+ *   current desktop
+ */
 static VALUE VideoMode_is_available(VALUE self) {
     return BOOL2RB(sfVideoMode_isValid(*Get_Mode_Struct(self)));
 }
 
+/* call-seq: size -> Vector2
+ *
+ * @return [Vector2] +width+ and +height+ as a vector
+ */
 static VALUE VideoMode_get_size(VALUE self) {
-    sfVideoMode *mode = Get_Mode_Struct(self);
+    sfVideoMode* mode = Get_Mode_Struct(self);
 
-    return vec2f_to_rb((sfVector2f) {(float) mode->size.x, (float) mode->size.y});
+    return vec2f_to_rb((sfVector2f){(float)mode->size.x, (float)mode->size.y});
 }
 
+/* call-seq:
+ *   self == other -> true or false
+ *
+ * @return [Boolean]
+ */
 static VALUE VideoMode_eql(VALUE self, VALUE rb_other) {
     sfVideoMode a = *Get_Mode_Struct(self);
     sfVideoMode b;
@@ -102,11 +134,29 @@ static VALUE VideoMode_eql(VALUE self, VALUE rb_other) {
 
     b = *Get_Mode_Struct(rb_other);
 
-    return BOOL2RB(a.size.x == b.size.x && a.size.y == b.size.y && a.bitsPerPixel == b.bitsPerPixel);
+    return BOOL2RB(a.size.x == b.size.x && a.size.y == b.size.y &&
+                   a.bitsPerPixel == b.bitsPerPixel);
 }
 
-void Init_VideoMode(VALUE rb_module) {
-    rb_cMode = rb_define_class_under(rb_module, "VideoMode", rb_cObject);
+/* Document-class: SFML::VideoMode
+ * A width/height/bits-per-pixel triple describing a display mode, as used
+ * for fullscreen windows.
+ *
+ * The +width+/+height+/+bits+ accessors below are declared with
+ * +rb_define_attr+ rather than +rb_define_method+; YARD's C parser cannot
+ * handle that declaration form (a confirmed YARD bug), so they are
+ * documented here instead of above their (nonexistent, ivar-backed)
+ * definitions.
+ *
+ * @!attribute [r] width
+ *   @return [Integer] width in pixels
+ * @!attribute [r] height
+ *   @return [Integer] height in pixels
+ * @!attribute [r] bits
+ *   @return [Integer] bits per pixel
+ */
+void Init_VideoMode(VALUE rb_mSFML) {
+    rb_cMode = rb_define_class_under(rb_mSFML, "VideoMode", rb_cObject);
 
     rb_define_singleton_method(rb_cMode, "new", VideoMode_new, 3);
     rb_define_singleton_method(rb_cMode, "desktop_mode", VideoMode_desktop_mode, 0);
@@ -122,8 +172,8 @@ void Init_VideoMode(VALUE rb_module) {
     rb_define_attr(rb_cMode, "bits", 1, 0);
 }
 
-sfVideoMode *Get_Mode_Struct(VALUE self) {
-    sfVideoMode *ptr;
+sfVideoMode* Get_Mode_Struct(VALUE self) {
+    sfVideoMode* ptr;
     TypedData_Get_Struct(self, sfVideoMode, &VideoMode_data_type, ptr);
     return ptr;
 }

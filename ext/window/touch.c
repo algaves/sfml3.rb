@@ -22,10 +22,21 @@ static const sfRenderWindow* Touch_relative_window(VALUE rb_window) {
     return Get_Window_Struct(rb_window);
 }
 
+/* call-seq:
+ *   down?(finger) -> true or false
+ *
+ * @return [Boolean] whether touch point +finger+ is currently down
+ */
 static VALUE Touch_is_down(VALUE module, VALUE rb_finger) {
     return BOOL2RB(sfTouch_isDown(NUM2UINT(rb_finger)));
 }
 
+/* call-seq:
+ *   position(finger, window = nil) -> Vector2
+ *
+ * @return [Vector2] the position of touch point +finger+, in desktop
+ *   coordinates, or relative to +window+'s client area when given
+ */
 static VALUE Touch_get_position(int argc, VALUE* argv, VALUE module) {
     VALUE rb_finger, rb_window;
     sfVector2i position;
@@ -41,8 +52,11 @@ static VALUE Touch_get_position(int argc, VALUE* argv, VALUE module) {
     return vec2f_to_rb((sfVector2f){(float)position.x, (float)position.y});
 }
 
-void Init_Touch(VALUE rb_module) {
-    VALUE rb_mTouch = rb_define_module_under(rb_module, "Touch");
+/* Document-module: SFML::Touch
+ * Real-time touch-screen state.
+ */
+void Init_Touch(VALUE rb_mSFML) {
+    VALUE rb_mTouch = rb_define_module_under(rb_mSFML, "Touch");
 
     rb_define_module_function(rb_mTouch, "down?", Touch_is_down, 1);
     rb_define_module_function(rb_mTouch, "position", Touch_get_position, -1);
