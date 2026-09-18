@@ -338,6 +338,15 @@ module Ports
       -DCMAKE_INSTALL_LIBDIR=lib
     ]
     flags << "-DCMAKE_TOOLCHAIN_FILE=#{toolchain_file}" if cross?
+
+    # SFML 3.0.2 defaults CMAKE_OSX_DEPLOYMENT_TARGET to 13.0 in its own
+    # CMakeLists.txt, but the macOS SDK osxcross ships in the
+    # rake-compiler-dock image is 11.1, and osxcross refuses a target newer
+    # than its SDK ("targeted macOS version must be <= 11.1.0"). Pass it as a
+    # -D rather than writing it into the toolchain file because SFML's
+    # sfml_set_option() only supplies its default when the variable is not
+    # already defined -- a command-line cache entry always is.
+    flags << '-DCMAKE_OSX_DEPLOYMENT_TARGET=11.0' if os == :darwin
     flags
   end
 
