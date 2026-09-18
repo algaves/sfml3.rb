@@ -140,7 +140,7 @@ that and falls back to the single `lib/sfml/sfml_ext.so` a source build installs
 
 ## License
 
-[0BSD](LICENSE.md)
+This project is licensed under the BSD Zero Clause License (0BSD) - see the [LICENSE](LICENSE.md) file for details.
 
 ---
 
