@@ -58,6 +58,12 @@ static VALUE Sound_wrap(VALUE klass, sfSound* handle, VALUE rb_buffer) {
     return TypedData_Wrap_Struct(klass, &Sound_data_type, ptr);
 }
 
+/* call-seq:
+ *   Sound.new(buffer) -> Sound
+ *
+ * @return [Sound]
+ * @raise [ArgumentError] if +buffer+ is not a SoundBuffer
+ */
 static VALUE Sound_new(VALUE klass, VALUE rb_buffer) {
     if (!rb_obj_is_kind_of(rb_buffer, Get_Klass_SoundBuffer())) {
         raise_invalid_argument_class(Get_Klass_SoundBuffer());
@@ -66,6 +72,10 @@ static VALUE Sound_new(VALUE klass, VALUE rb_buffer) {
     return Sound_wrap(klass, sfSound_create(Get_SoundBuffer_Struct(rb_buffer)), rb_buffer);
 }
 
+/* call-seq: copy -> Sound
+ *
+ * @return [Sound] an independent copy that shares the same SoundBuffer
+ */
 static VALUE Sound_copy(VALUE self) {
     Sound* sound = (Sound*)Get_Sound_Struct(self);
 
@@ -73,6 +83,10 @@ static VALUE Sound_copy(VALUE self) {
                       sound->rb_buffer);
 }
 
+/* call-seq: buffer -> SoundBuffer
+ *
+ * @return [SoundBuffer] the buffer currently attached to this sound
+ */
 static VALUE Sound_get_buffer(VALUE self) {
     return ((Sound*)Get_Sound_Struct(self))->rb_buffer;
 }
@@ -93,6 +107,16 @@ static void* Sound_set_buffer_without_gvl(void* raw) {
     return NULL;
 }
 
+/* call-seq:
+ *   buffer=(value) -> SoundBuffer
+ *
+ * Attaches a new SoundBuffer. If a buffer is already attached and the sound
+ * is playing, it is stopped first, which may briefly block the calling
+ * thread (see #stop).
+ *
+ * @return [SoundBuffer] +value+
+ * @raise [ArgumentError] if +value+ is not a SoundBuffer
+ */
 static VALUE Sound_set_buffer(VALUE self, VALUE rb_buffer) {
     Sound* sound = (Sound*)Get_Sound_Struct(self);
     SoundSetBufferArgs args;
@@ -116,8 +140,99 @@ static VALUE Sound_set_buffer(VALUE self, VALUE rb_buffer) {
 #undef SS_FN
 #undef SS_METHOD
 
-void Init_Sound(VALUE rb_module) {
-    rb_cSound = rb_define_class_under(rb_module, "Sound", rb_cObject);
+/* Document-class: SFML::Sound
+ * A sound playing directly from a SoundBuffer held fully in memory. Suited
+ * to short effects; for long files prefer Music, which streams instead.
+ *
+ * @!method play
+ *   @return [self]
+ * @!method pause
+ *   @return [self]
+ * @!method stop
+ *   Stops playback and rewinds to the beginning. May briefly block the
+ *   calling thread if an audio-thread callback for this source is in
+ *   flight.
+ *   @return [self]
+ * @!method status
+ *   @return [Symbol] one of +:stopped+, +:paused+, +:playing+
+ * @!method looping?
+ *   @return [Boolean]
+ * @!method looping=(value)
+ *   @return [Boolean]
+ * @!method pitch
+ *   @return [Float]
+ * @!method pitch=(value)
+ *   @return [Float]
+ * @!method pan
+ *   @return [Float] stereo pan, -1 (left) to 1 (right)
+ * @!method pan=(value)
+ *   @return [Float]
+ * @!method volume
+ *   @return [Float] 0 to 100
+ * @!method volume=(value)
+ *   @return [Float]
+ * @!method spatialization_enabled?
+ *   @return [Boolean]
+ * @!method spatialization_enabled=(value)
+ *   @return [Boolean]
+ * @!method position
+ *   @return [Vector3]
+ * @!method position=(value)
+ *   @return [Vector3]
+ * @!method direction
+ *   @return [Vector3]
+ * @!method direction=(value)
+ *   @return [Vector3]
+ * @!method velocity
+ *   @return [Vector3]
+ * @!method velocity=(value)
+ *   @return [Vector3]
+ * @!method cone
+ *   @return [SoundSourceCone]
+ * @!method cone=(value)
+ *   @return [SoundSourceCone]
+ * @!method doppler_factor
+ *   @return [Float]
+ * @!method doppler_factor=(value)
+ *   @return [Float]
+ * @!method directional_attenuation_factor
+ *   @return [Float]
+ * @!method directional_attenuation_factor=(value)
+ *   @return [Float]
+ * @!method relative_to_listener?
+ *   @return [Boolean]
+ * @!method relative_to_listener=(value)
+ *   @return [Boolean]
+ * @!method min_distance
+ *   @return [Float]
+ * @!method min_distance=(value)
+ *   @return [Float]
+ * @!method max_distance
+ *   @return [Float]
+ * @!method max_distance=(value)
+ *   @return [Float]
+ * @!method min_gain
+ *   @return [Float]
+ * @!method min_gain=(value)
+ *   @return [Float]
+ * @!method max_gain
+ *   @return [Float]
+ * @!method max_gain=(value)
+ *   @return [Float]
+ * @!method attenuation
+ *   @return [Float]
+ * @!method attenuation=(value)
+ *   @return [Float]
+ * @!method playing_offset
+ *   @return [Time]
+ * @!method playing_offset=(value)
+ *   @return [Time]
+ * @!method effect_processor=(proc)
+ *   Installs a Proc that post-processes this source's audio in real time.
+ *   @return [Proc] +proc+
+ */
+void Init_Sound(VALUE rb_mSFML) {
+    rb_cSound = rb_define_class_under(rb_mSFML, "Sound", rb_cObject);
 
     rb_define_singleton_method(rb_cSound, "new", Sound_new, 1);
 
