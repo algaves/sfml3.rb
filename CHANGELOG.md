@@ -6,6 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+* **Full YARD API documentation and RBS type signatures**, covering every
+  bound class, module, method and constant. Doc comments live in-place in
+  the `ext/**/*.c` sources (YARD's C parser, the same convention RDoc uses),
+  so they're published automatically to
+  [rubydoc.info](https://rubydoc.info/gems/sfml3-rb) on release; `rake yard`
+  builds them locally into `doc/`. `sig/**/*.rbs` ships in the gem alongside
+  the extension sources, for IDE completion (Solargraph, RubyMine) and
+  static type-checking (Sorbet, Steep). Run `rake rbs` to validate the
+  signatures.
+
+## [0.2.2]
+
+### Fixed
+* **The macOS binary gems now build.** SFML 3.0.2 defaults
+  `CMAKE_OSX_DEPLOYMENT_TARGET` to 13.0, but the osxcross SDK in the
+  rake-compiler-dock image is 11.1 and rejects a newer target, so both Darwin
+  builds aborted while configuring SFML. The ports toolchain now pins the
+  deployment target to macOS 11.0, which is the floor Apple Silicon requires
+  anyway.
+
 ## [0.2.1]
 
 ### Added
