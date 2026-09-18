@@ -1,0 +1,17 @@
+module SFML
+  class SoundRecorder
+    def self.new: () -> SoundRecorder
+    def self.available?: () -> bool
+    def self.available_devices: () -> Array[String]
+    def self.default_device: () -> String
+
+    def start: (Integer sample_rate) -> bool
+    def stop: () -> self
+    def sample_rate: () -> Integer
+    def device: () -> String
+    def device=: (String value) -> bool
+    def channel_count: () -> Integer
+    def channel_count=: (Integer value) -> Integer
+    def channel_map: () -> Array[Symbol]
+  end
+end

@@ -50,8 +50,14 @@ Gem::Specification.new do |s|
   # inside the rake-compiler-dock containers against a bind-mounted repository.
   # `inc` is included because the shared sound-source methods are generated from
   # `ext/audio/sound_source.inc`, which the C sources #include.
+  #
+  # `sig/**/*.rbs` are RBS type signatures for the same API the ext/ comments
+  # document; they apply regardless of how the extension was built, so unlike
+  # `ext/**`, they aren't stripped from binary gems (see Rakefile's
+  # `cross_compiling` hook).
   s.files = Dir.glob('ext/**/*.{h,c,rb,inc}') +
             Dir.glob('lib/**/*.rb') +
+            Dir.glob('sig/**/*.rbs') +
             docs
 
   s.extra_rdoc_files = docs

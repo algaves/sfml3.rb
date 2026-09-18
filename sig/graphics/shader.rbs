@@ -1,0 +1,39 @@
+module SFML
+  class Shader
+    def self.from_file: (String vertex, ?String? fragment, ?String? geometry) -> Shader
+    def self.from_memory: (String? vertex, ?String? fragment, ?String? geometry) -> Shader
+    def self.from_stream: (untyped vertex, ?untyped fragment, ?untyped geometry) -> Shader
+    def self.available?: () -> bool
+    def self.geometry_available?: () -> bool
+
+    def native_handle: () -> Integer
+    def bind: () -> self
+
+    def set_float: (String name, Float x) -> self
+    def set_int: (String name, Integer x) -> self
+    def set_bool: (String name, bool x) -> self
+    def set_color: (String name, untyped color) -> self
+    def set_int_color: (String name, untyped color) -> self
+    def set_vec2: (String name, untyped vector) -> self
+    def set_vec3: (String name, untyped vector) -> self
+    def set_vec4: (String name, Array[Float] vector) -> self
+    def set_ivec2: (String name, untyped vector) -> self
+    def set_ivec3: (String name, Array[Integer] vector) -> self
+    def set_ivec4: (String name, Array[Integer] vector) -> self
+    def set_bvec2: (String name, Array[bool] vector) -> self
+    def set_bvec3: (String name, Array[bool] vector) -> self
+    def set_bvec4: (String name, Array[bool] vector) -> self
+    def set_mat3: (String name, Array[Float] matrix) -> self
+    def set_mat4: (String name, Array[Float] matrix) -> self
+    def set_float_array: (String name, Array[Float] values) -> self
+    def set_vec2_array: (String name, Array[untyped] values) -> self
+    def set_vec3_array: (String name, Array[untyped] values) -> self
+    def set_vec4_array: (String name, Array[untyped] values) -> self
+    def set_mat3_array: (String name, Array[untyped] values) -> self
+    def set_mat4_array: (String name, Array[untyped] values) -> self
+    def set_texture: (String name, untyped texture) -> untyped
+    def set_current_texture: (String name) -> self
+    def set_uniform: (String name, untyped value) -> self
+    def uniform=: (String name, untyped value) -> self
+  end
+end

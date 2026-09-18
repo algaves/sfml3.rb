@@ -1,0 +1,8 @@
+module SFML
+  module Clipboard
+    def self.string: () -> String
+    def self.string=: (String value) -> String
+    def self.unicode_string: () -> String
+    def self.unicode_string=: (String value) -> String
+  end
+end

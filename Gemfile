@@ -18,5 +18,7 @@ end
 # cross-compile containers and the floor CI job leave the group out.
 group :development do
   gem 'rake-compiler-dock'
+  gem 'rbs'
   gem 'rubocop'
+  gem 'yard'
 end

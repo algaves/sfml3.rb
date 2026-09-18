@@ -1,0 +1,39 @@
+module SFML
+  class Color
+    def self.new: () -> Color
+                 | (Integer r, Integer g, Integer b, ?Integer a) -> Color
+                 | (Array[Integer] rgb_or_rgba) -> Color
+                 | (Integer packed) -> Color
+                 | (Color other) -> Color
+    def self.from_rgb: (Integer rgb) -> Color
+    def self.from_rgba: (Integer rgba) -> Color
+    def self.from_integer: (Integer rgba) -> Color
+
+    def r: () -> Integer
+    def r=: (Integer value) -> Integer
+    def g: () -> Integer
+    def g=: (Integer value) -> Integer
+    def b: () -> Integer
+    def b=: (Integer value) -> Integer
+    def a: () -> Integer
+    def a=: (Integer value) -> Integer
+    def to_i: () -> Integer
+    def to_a: () -> [Integer, Integer, Integer, Integer]
+    def to_ary: () -> [Integer, Integer, Integer, Integer]
+    def ==: (untyped other) -> bool
+    def +: (Color | Array[Integer] | Integer other) -> Color
+    def -: (Color | Array[Integer] | Integer other) -> Color
+    def *: (Color | Array[Integer] | Integer other) -> Color
+    def to_s: () -> String
+
+    BLACK: Color
+    WHITE: Color
+    RED: Color
+    GREEN: Color
+    BLUE: Color
+    YELLOW: Color
+    MAGENTA: Color
+    CYAN: Color
+    TRANSPARENT: Color
+  end
+end

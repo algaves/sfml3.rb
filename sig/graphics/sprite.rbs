@@ -1,0 +1,34 @@
+module SFML
+  class Sprite
+    def self.new: () -> Sprite
+                 | (Texture texture) -> Sprite
+
+    def copy: () -> Sprite
+
+    def texture: () -> (Texture | nil)
+    def texture_rect: () -> untyped
+    def color: () -> untyped
+    def position: () -> Vector2
+    def rotation: () -> Float
+    def scale: () -> Vector2
+    def origin: () -> Vector2
+    def transform: () -> Array[Float]
+    def inverse_transform: () -> Array[Float]
+    def matrix: () -> Array[Float]
+    def local_bounds: () -> untyped
+    def global_bounds: () -> untyped
+
+    def texture=: (Texture? value) -> (Texture | nil)
+    def texture_rect=: (untyped value) -> untyped
+    def color=: (untyped value) -> untyped
+    def position=: (Vector2 value) -> Vector2
+    def rotation=: (Float value) -> Float
+    def scale=: (Vector2 value) -> Vector2
+    def origin=: (Vector2 value) -> Vector2
+
+    def move: (Vector2 offset) -> self
+    def rotate: (Float angle) -> self
+    def scale!: (Vector2 factors) -> self
+    def draw: (untyped target, untyped state) -> nil
+  end
+end

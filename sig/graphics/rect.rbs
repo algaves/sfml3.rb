@@ -1,0 +1,33 @@
+module SFML
+  class Rect
+    include Enumerable[Float]
+
+    def self.new: () -> Rect
+                 | (Float left, Float top) -> Rect
+                 | (Float left, Float top, Float width, Float height) -> Rect
+                 | (Array[Float] left_top_width_height) -> Rect
+                 | (Rect other) -> Rect
+
+    def left: () -> Float
+    def left=: (Float value) -> Float
+    def top: () -> Float
+    def top=: (Float value) -> Float
+    def width: () -> Float
+    def width=: (Float value) -> Float
+    def height: () -> Float
+    def height=: (Float value) -> Float
+    def position: () -> Vector2
+    def position=: (Vector2 | Array[Float] value) -> Vector2
+    def size: () -> Vector2
+    def size=: (Vector2 | Array[Float] value) -> Vector2
+    def contains?: (Vector2 | Array[Float] point) -> bool
+                  | (Float x, Float y) -> bool
+    def intersects?: (Rect other) -> bool
+    def intersection: (Rect other) -> (Rect | nil)
+    def to_a: () -> [Float, Float, Float, Float]
+    def to_ary: () -> [Float, Float, Float, Float]
+    def each: () { (Float) -> void } -> self
+    def ==: (untyped other) -> bool
+    def to_s: () -> String
+  end
+end

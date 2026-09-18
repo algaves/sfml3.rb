@@ -1,0 +1,27 @@
+module SFML
+  class Http
+    def self.new: () -> Http
+
+    def set_host: (String host, ?Integer port) -> self
+    def send_request: (HttpRequest request, ?Time timeout) -> HttpResponse
+  end
+
+  class HttpRequest
+    def self.new: () -> HttpRequest
+
+    def set_field: (String field, String value) -> String
+    def method=: (Symbol | Integer value) -> (Symbol | Integer)
+    def uri=: (String value) -> String
+    def set_http_version: (Integer major, Integer minor) -> [Integer, Integer]
+    def body=: (String value) -> String
+  end
+
+  class HttpResponse
+    def field: (String name) -> String?
+    def status: () -> Integer
+    def status_name: () -> Symbol
+    def major_version: () -> Integer
+    def minor_version: () -> Integer
+    def body: () -> String
+  end
+end

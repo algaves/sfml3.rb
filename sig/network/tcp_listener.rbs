@@ -1,0 +1,13 @@
+module SFML
+  class TcpListener
+    def self.new: () -> TcpListener
+    def self.any_port: () -> Integer
+
+    def blocking?: () -> bool
+    def blocking=: (bool value) -> bool
+    def local_port: () -> Integer
+    def listen: (Integer port, ?IpAddress address) -> Symbol
+    def close: () -> self
+    def accept: () -> [TcpSocket?, Symbol]
+  end
+end

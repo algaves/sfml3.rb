@@ -1,0 +1,17 @@
+module SFML
+  class Vertex
+    def self.new: () -> Vertex
+                 | (Vector2 position) -> Vertex
+                 | (Vector2 position, untyped color) -> Vertex
+                 | (Vector2 position, untyped color, Vector2 tex_coords) -> Vertex
+
+    def position: () -> Vector2
+    def position=: (Vector2 value) -> Vector2
+    def color: () -> untyped
+    def color=: (untyped value) -> untyped
+    def tex_coords: () -> Vector2
+    def tex_coords=: (Vector2 value) -> Vector2
+    def to_a: () -> [Vector2, untyped]
+    def ==: (untyped other) -> bool
+  end
+end

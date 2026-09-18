@@ -1,0 +1,51 @@
+module SFML
+  class Sound
+    def self.new: (SoundBuffer buffer) -> Sound
+
+    def copy: () -> Sound
+    def buffer: () -> SoundBuffer
+    def buffer=: (SoundBuffer value) -> SoundBuffer
+
+    def play: () -> self
+    def pause: () -> self
+    def stop: () -> self
+    def status: () -> (:stopped | :paused | :playing)
+    def looping?: () -> bool
+    def looping=: (bool value) -> bool
+    def pitch: () -> Float
+    def pitch=: (Float value) -> Float
+    def pan: () -> Float
+    def pan=: (Float value) -> Float
+    def volume: () -> Float
+    def volume=: (Float value) -> Float
+    def spatialization_enabled?: () -> bool
+    def spatialization_enabled=: (bool value) -> bool
+    def position: () -> Vector3
+    def position=: (Vector3 value) -> Vector3
+    def direction: () -> Vector3
+    def direction=: (Vector3 value) -> Vector3
+    def velocity: () -> Vector3
+    def velocity=: (Vector3 value) -> Vector3
+    def cone: () -> SoundSourceCone
+    def cone=: (SoundSourceCone value) -> SoundSourceCone
+    def doppler_factor: () -> Float
+    def doppler_factor=: (Float value) -> Float
+    def directional_attenuation_factor: () -> Float
+    def directional_attenuation_factor=: (Float value) -> Float
+    def relative_to_listener?: () -> bool
+    def relative_to_listener=: (bool value) -> bool
+    def min_distance: () -> Float
+    def min_distance=: (Float value) -> Float
+    def max_distance: () -> Float
+    def max_distance=: (Float value) -> Float
+    def min_gain: () -> Float
+    def min_gain=: (Float value) -> Float
+    def max_gain: () -> Float
+    def max_gain=: (Float value) -> Float
+    def attenuation: () -> Float
+    def attenuation=: (Float value) -> Float
+    def playing_offset: () -> Time
+    def playing_offset=: (Time value) -> Time
+    def effect_processor=: (Proc proc) -> Proc
+  end
+end

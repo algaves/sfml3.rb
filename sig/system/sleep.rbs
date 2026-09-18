@@ -1,0 +1,3 @@
+module SFML
+  def self.sleep: (Time | Numeric duration) -> (Time | Numeric)
+end

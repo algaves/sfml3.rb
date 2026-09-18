@@ -1,0 +1,22 @@
+module SFML
+  class Image
+    def self.new: (Vector2 | Array[Integer] size) -> Image
+    def self.from_color: (Vector2 | Array[Integer] size, Color color) -> Image
+    def self.from_pixels: (Vector2 | Array[Integer] size, String pixels) -> Image
+    def self.from_file: (String path) -> Image
+    def self.from_memory: (String data) -> Image
+    def self.from_stream: (untyped stream) -> Image
+
+    def copy: () -> Image
+    def size: () -> Vector2
+    def save_to_file: (String path) -> bool
+    def save_to_memory: (?String format) -> (Buffer | nil)
+    def create_mask_from_color: (Color color, Integer alpha) -> self
+    def copy_image: (Image source, Vector2 | Array[Integer] dest, ?Rect source_rect, ?bool apply_alpha) -> bool
+    def pixel: (Integer x, Integer y) -> Color
+    def set_pixel: (Integer x, Integer y, Color color) -> self
+    def pixels: () -> String
+    def flip_horizontally!: () -> self
+    def flip_vertically!: () -> self
+  end
+end

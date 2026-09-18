@@ -1,0 +1,18 @@
+module SFML
+  class StencilMode
+    def self.new: () -> StencilMode
+                 | (Symbol | Integer comparison, Symbol | Integer update_operation, Integer reference, Integer mask, bool stencil_only) -> StencilMode
+
+    def comparison: () -> Symbol
+    def comparison=: (Symbol | Integer value) -> (Symbol | Integer)
+    def update_operation: () -> Symbol
+    def update_operation=: (Symbol | Integer value) -> (Symbol | Integer)
+    def reference: () -> Integer
+    def reference=: (Integer value) -> Integer
+    def mask: () -> Integer
+    def mask=: (Integer value) -> Integer
+    def stencil_only: () -> bool
+    def stencil_only=: (bool value) -> bool
+    def ==: (untyped other) -> bool
+  end
+end

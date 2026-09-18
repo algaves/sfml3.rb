@@ -1,0 +1,34 @@
+module SFML
+  class Texture
+    def self.new: (Vector2 size) -> Texture
+    def self.srgb: (Vector2 size) -> Texture
+    def self.from_file: (String path, ?untyped area) -> Texture
+    def self.srgb_from_file: (String path, ?untyped area) -> Texture
+    def self.from_memory: (String data, ?untyped area) -> Texture
+    def self.srgb_from_memory: (String data, ?untyped area) -> Texture
+    def self.from_stream: (untyped stream, ?untyped area) -> Texture
+    def self.srgb_from_stream: (untyped stream, ?untyped area) -> Texture
+    def self.from_image: (untyped image, ?untyped area) -> Texture
+    def self.srgb_from_image: (untyped image, ?untyped area) -> Texture
+    def self.maximum_size: () -> Integer
+
+    def copy: () -> Texture
+    def size: () -> Vector2
+    def resize: (Vector2 size) -> bool
+    def resize_srgb: (Vector2 size) -> bool
+    def swap: (Texture other) -> self
+    def copy_to_image: () -> untyped
+    def update_from_pixels: (String pixels, Vector2 size, Vector2 offset) -> self
+    def update_from_image: (untyped image, Vector2 offset) -> self
+    def update_from_texture: (Texture source, Vector2 offset) -> self
+    def update_from_window: (untyped window, Vector2 offset) -> self
+    def smooth=: (bool value) -> bool
+    def smooth?: () -> bool
+    def srgb?: () -> bool
+    def repeated=: (bool value) -> bool
+    def repeated?: () -> bool
+    def generate_mipmap: () -> bool
+    def native_handle: () -> Integer
+    def bind: (?untyped coordinate_type) -> self
+  end
+end

@@ -1,0 +1,16 @@
+module SFML
+  module Listener
+    def self.global_volume: () -> Float
+    def self.global_volume=: (Float value) -> Float
+    def self.position: () -> Vector3
+    def self.position=: (Vector3 value) -> Vector3
+    def self.direction: () -> Vector3
+    def self.direction=: (Vector3 value) -> Vector3
+    def self.velocity: () -> Vector3
+    def self.velocity=: (Vector3 value) -> Vector3
+    def self.up_vector: () -> Vector3
+    def self.up_vector=: (Vector3 value) -> Vector3
+    def self.cone: () -> SoundSourceCone
+    def self.cone=: (SoundSourceCone value) -> SoundSourceCone
+  end
+end

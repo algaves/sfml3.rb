@@ -1,0 +1,48 @@
+module SFML
+  class Text
+    def self.new: () -> Text
+                 | (untyped font) -> Text
+                 | (untyped font, String string) -> Text
+                 | (untyped font, String string, Integer character_size) -> Text
+
+    def copy: () -> Text
+    def font: () -> untyped
+    def string: () -> String
+    def character_size: () -> Integer
+    def style: () -> Integer
+    def fill_color: () -> untyped
+    def outline_color: () -> untyped
+    def outline_thickness: () -> Float
+    def letter_spacing: () -> Float
+    def line_spacing: () -> Float
+    def position: () -> Vector2
+    def rotation: () -> Float
+    def scale: () -> Vector2
+    def origin: () -> Vector2
+    def transform: () -> Array[Float]
+    def inverse_transform: () -> Array[Float]
+    def matrix: () -> Array[Float]
+    def find_character_pos: (Integer index) -> Vector2
+    def local_bounds: () -> untyped
+    def global_bounds: () -> untyped
+
+    def font=: (untyped value) -> untyped
+    def string=: (String value) -> String
+    def character_size=: (Integer value) -> Integer
+    def style=: (Integer | Symbol value) -> (Integer | Symbol)
+    def fill_color=: (untyped value) -> untyped
+    def outline_color=: (untyped value) -> untyped
+    def outline_thickness=: (Float value) -> Float
+    def letter_spacing=: (Float value) -> Float
+    def line_spacing=: (Float value) -> Float
+    def position=: (Vector2 value) -> Vector2
+    def rotation=: (Float value) -> Float
+    def scale=: (Vector2 value) -> Vector2
+    def origin=: (Vector2 value) -> Vector2
+
+    def move: (Vector2 offset) -> self
+    def rotate: (Float angle) -> self
+    def scale!: (Vector2 factors) -> self
+    def draw: (untyped target, untyped state) -> nil
+  end
+end
