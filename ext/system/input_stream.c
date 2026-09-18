@@ -60,7 +60,13 @@ static VALUE InputStream_read_body(VALUE v) {
     }
 
     if (length > 0) {
-        memcpy(ctx->data, RSTRING_PTR(str), (size_t) length);
+        const unsigned char* src = (const unsigned char*)RSTRING_PTR(str);
+        unsigned char* dest = ctx->data;
+        long i;
+
+        for (i = 0; i < length; i++) {
+            dest[i] = src[i];
+        }
     }
 
     ctx->result = (int64_t) length;
