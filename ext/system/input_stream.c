@@ -16,21 +16,20 @@ typedef struct {
 
 static VALUE rb_cInputStream;
 
-static void InputStream_mark(void *ptr) {
-    InputStream *stream = ptr;
+static void InputStream_mark(void* ptr) {
+    InputStream* stream = ptr;
 
     rb_gc_mark(stream->rb_io);
 }
 
-static void InputStream_free(void *ptr) {
+static void InputStream_free(void* ptr) {
     free(ptr);
 }
 
 static const rb_data_type_t InputStream_data_type = {
     .wrap_struct_name = "SFML::InputStream",
     .function = {.dmark = InputStream_mark, .dfree = InputStream_free, .dsize = NULL},
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY
-};
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
 /* Callbacks run from C++ (SFML), so a Ruby exception must never unwind through
    those frames. Each body runs under rb_protect and reports failure as a
@@ -38,12 +37,12 @@ static const rb_data_type_t InputStream_data_type = {
 typedef struct {
     VALUE io;
     size_t size;
-    void *data;
+    void* data;
     int64_t result;
 } ReadContext;
 
 static VALUE InputStream_read_body(VALUE v) {
-    ReadContext *ctx = (ReadContext *) v;
+    ReadContext* ctx = (ReadContext*)v;
     VALUE str = rb_funcall(ctx->io, rb_intern("read"), 1, SIZET2NUM(ctx->size));
 
     if (NIL_P(str)) {
@@ -55,8 +54,8 @@ static VALUE InputStream_read_body(VALUE v) {
 
     long length = RSTRING_LEN(str);
 
-    if ((size_t) length > ctx->size) {
-        length = (long) ctx->size;
+    if ((size_t)length > ctx->size) {
+        length = (long)ctx->size;
     }
 
     if (length > 0) {
@@ -69,17 +68,17 @@ static VALUE InputStream_read_body(VALUE v) {
         }
     }
 
-    ctx->result = (int64_t) length;
+    ctx->result = (int64_t)length;
 
     return Qnil;
 }
 
-static int64_t InputStream_read(void *data, size_t size, void *userData) {
-    InputStream *stream = userData;
+static int64_t InputStream_read(void* data, size_t size, void* userData) {
+    InputStream* stream = userData;
     ReadContext ctx = {.io = stream->rb_io, .size = size, .data = data, .result = -1};
     int state = 0;
 
-    rb_protect(InputStream_read_body, (VALUE) &ctx, &state);
+    rb_protect(InputStream_read_body, (VALUE)&ctx, &state);
 
     if (state) {
         rb_set_errinfo(Qnil);
@@ -96,20 +95,20 @@ typedef struct {
 } SeekContext;
 
 static VALUE InputStream_seek_body(VALUE v) {
-    SeekContext *ctx = (SeekContext *) v;
+    SeekContext* ctx = (SeekContext*)v;
 
     rb_funcall(ctx->io, rb_intern("seek"), 2, SIZET2NUM(ctx->position), INT2NUM(SEEK_SET));
-    ctx->result = (int64_t) ctx->position;
+    ctx->result = (int64_t)ctx->position;
 
     return Qnil;
 }
 
-static int64_t InputStream_seek(size_t position, void *userData) {
-    InputStream *stream = userData;
+static int64_t InputStream_seek(size_t position, void* userData) {
+    InputStream* stream = userData;
     SeekContext ctx = {.io = stream->rb_io, .position = position, .result = -1};
     int state = 0;
 
-    rb_protect(InputStream_seek_body, (VALUE) &ctx, &state);
+    rb_protect(InputStream_seek_body, (VALUE)&ctx, &state);
 
     if (state) {
         rb_set_errinfo(Qnil);
@@ -120,7 +119,7 @@ static int64_t InputStream_seek(size_t position, void *userData) {
 }
 
 static VALUE InputStream_tell_body(VALUE v) {
-    VALUE io = (VALUE) v;
+    VALUE io = (VALUE)v;
 
     if (rb_respond_to(io, rb_intern("tell"))) {
         return rb_funcall(io, rb_intern("tell"), 0);
@@ -129,8 +128,8 @@ static VALUE InputStream_tell_body(VALUE v) {
     return rb_funcall(io, rb_intern("pos"), 0);
 }
 
-static int64_t InputStream_tell(void *userData) {
-    InputStream *stream = userData;
+static int64_t InputStream_tell(void* userData) {
+    InputStream* stream = userData;
     int state = 0;
     VALUE result = rb_protect(InputStream_tell_body, stream->rb_io, &state);
 
@@ -143,7 +142,7 @@ static int64_t InputStream_tell(void *userData) {
 }
 
 static VALUE InputStream_get_size_body(VALUE v) {
-    VALUE io = (VALUE) v;
+    VALUE io = (VALUE)v;
 
     if (rb_respond_to(io, rb_intern("size"))) {
         return rb_funcall(io, rb_intern("size"), 0);
@@ -152,8 +151,8 @@ static VALUE InputStream_get_size_body(VALUE v) {
     return rb_funcall(io, rb_intern("length"), 0);
 }
 
-static int64_t InputStream_get_size(void *userData) {
-    InputStream *stream = userData;
+static int64_t InputStream_get_size(void* userData) {
+    InputStream* stream = userData;
     int state = 0;
     VALUE result = rb_protect(InputStream_get_size_body, stream->rb_io, &state);
 
@@ -165,9 +164,19 @@ static int64_t InputStream_get_size(void *userData) {
     return NUM2LL(result);
 }
 
+/* call-seq:
+ *   InputStream.new(io) -> InputStream
+ *
+ * Wraps a Ruby object that responds to +#read+ (and ideally +#seek+/+#tell+
+ * or +#pos+, and +#size+ or +#length+) so it can be passed anywhere the
+ * library accepts a stream-based data source.
+ *
+ * @return [InputStream]
+ * @raise [ArgumentError] if +io+ does not respond to +#read+
+ */
 static VALUE InputStream_new(VALUE klass, VALUE rb_io) {
     VALUE self;
-    InputStream *stream;
+    InputStream* stream;
 
     if (!rb_respond_to(rb_io, rb_intern("read"))) {
         rb_raise(rb_eArgError, "stream object must respond to #read");
@@ -187,12 +196,21 @@ static VALUE InputStream_new(VALUE klass, VALUE rb_io) {
     return self;
 }
 
+/* call-seq: io -> Object
+ *
+ * @return [Object] the wrapped IO-like object
+ */
 static VALUE InputStream_get_io(VALUE self) {
-    return ((InputStream *) Get_InputStream_Struct(self))->rb_io;
+    return ((InputStream*)Get_InputStream_Struct(self))->rb_io;
 }
 
-void Init_InputStream(VALUE rb_module) {
-    rb_cInputStream = rb_define_class_under(rb_module, "InputStream", rb_cObject);
+/* Document-class: SFML::InputStream
+ * Adapts any Ruby object that responds to +#read+ into the stream interface
+ * SFML's loaders expect, so resources can be loaded from something other
+ * than a filesystem path (e.g. an in-memory StringIO, or a custom source).
+ */
+void Init_InputStream(VALUE rb_mSFML) {
+    rb_cInputStream = rb_define_class_under(rb_mSFML, "InputStream", rb_cObject);
 
     rb_define_singleton_method(rb_cInputStream, "new", InputStream_new, 1);
 
@@ -203,8 +221,8 @@ VALUE Get_Klass_InputStream(void) {
     return rb_cInputStream;
 }
 
-sfInputStream *Get_InputStream_Struct(VALUE self) {
-    InputStream *ptr;
+sfInputStream* Get_InputStream_Struct(VALUE self) {
+    InputStream* ptr;
     TypedData_Get_Struct(self, InputStream, &InputStream_data_type, ptr);
     return &ptr->stream;
 }
@@ -213,7 +231,7 @@ int InputStream_is_stream(VALUE rb_stream) {
     return rb_obj_is_kind_of(rb_stream, rb_cInputStream) ? 1 : 0;
 }
 
-sfInputStream *input_stream_from_rb(VALUE rb_stream, VALUE *holder) {
+sfInputStream* input_stream_from_rb(VALUE rb_stream, VALUE* holder) {
     if (InputStream_is_stream(rb_stream)) {
         return Get_InputStream_Struct(rb_stream);
     }
