@@ -137,7 +137,12 @@ static VALUE SoundBuffer_from_samples(int argc, VALUE *argv, VALUE klass) {
         samples = malloc(bytes > 0 ? bytes : 1);
 
         if (bytes > 0) {
-            memcpy(samples, RSTRING_PTR(rb_samples), bytes);
+            const int16_t* src = (const int16_t*)RSTRING_PTR(rb_samples);
+            size_t i;
+
+            for (i = 0; i < sample_count; i++) {
+                samples[i] = src[i];
+            }
         }
     } else if (RB_TYPE_P(rb_samples, T_ARRAY)) {
         long i;
