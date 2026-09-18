@@ -60,6 +60,11 @@ static VALUE Vector3_new(int argc, VALUE* argv, VALUE klass) {
     }
 
     ptr = malloc(sizeof(Vector3));
+
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate vector");
+    }
+
     ptr->vec.x = x;
     ptr->vec.y = y;
     ptr->vec.z = z;
@@ -311,6 +316,10 @@ sfVector3f vec3f_from_rb(VALUE rb_vec) {
 
 VALUE vec3f_to_rb(sfVector3f c_vec) {
     Vector3* ptr = malloc(sizeof(Vector3));
+
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate vector");
+    }
 
     ptr->vec = c_vec;
 

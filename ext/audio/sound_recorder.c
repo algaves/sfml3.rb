@@ -1,18 +1,27 @@
 #include "audio/sound_recorder.h"
 
 #include <ruby.h>
-#include <ruby/thread.h>
 #include <stdint.h>
 #include <stdlib.h>
 
 #include "audio/audio_enums.h"
+#include "core/foreign_thread.h"
 #include "core/macros.h"
 
-/* A subclassable recorder. The capture callbacks arrive on SFML's audio
-   thread, so each re-enters Ruby through rb_thread_call_with_gvl and treats an
-   exception as "stop capturing" instead of unwinding into the audio engine.
-   A subclass only has to implement #on_process; #on_start and #on_stop are
-   optional and default to continuing. */
+/* A subclassable recorder. The capture callbacks arrive on SFML's capture
+   thread -- a real OS thread never created by Ruby, exactly like the audio
+   playback thread effect_processor.c/sound_stream.c are built to handle --
+   so re-entering Ruby directly (e.g. via rb_thread_call_with_gvl, as this
+   file previously did for #on_process, or via rb_protect with no GVL
+   handling at all, as it previously did for #on_start/#on_stop) is a fatal
+   VM error. Every callback here instead posts its work to the shared
+   foreign-thread worker (core/foreign_thread.h), the same mechanism the
+   other two files use, and treats an exception as "stop capturing" rather
+   than unwinding into the audio engine. A subclass only has to implement
+   #on_process; #on_start and #on_stop are optional and default to
+   continuing. */
+
+#define SOUND_RECORDER_JOB_TIMEOUT_MS 50
 typedef struct {
     VALUE rb_self;
     sfSoundRecorder* handle;
@@ -52,16 +61,22 @@ static VALUE SoundRecorder_invoke_body(VALUE raw) {
     return rb_funcall(ctx->self, ctx->method, 0);
 }
 
-/* Calls a zero-argument Ruby method, swallowing any exception it raises. */
-static void SoundRecorder_invoke(VALUE self, ID method) {
-    InvokeContext ctx = {.self = self, .method = method};
+/* Runs on the shared foreign-thread worker, which holds the GVL. */
+static void SoundRecorder_invoke_run(void* raw) {
     int state = 0;
 
-    rb_protect(SoundRecorder_invoke_body, (VALUE)&ctx, &state);
+    rb_protect(SoundRecorder_invoke_body, (VALUE)raw, &state);
 
     if (state) {
         rb_set_errinfo(Qnil);
     }
+}
+
+/* Calls a zero-argument Ruby method, swallowing any exception it raises. */
+static void SoundRecorder_invoke(VALUE self, ID method) {
+    InvokeContext ctx = {.self = self, .method = method};
+
+    run_on_ruby_thread(SoundRecorder_invoke_run, &ctx, SOUND_RECORDER_JOB_TIMEOUT_MS);
 }
 
 static bool SoundRecorder_on_start(void* userData) {
@@ -97,7 +112,8 @@ static VALUE SoundRecorder_process_body(VALUE raw) {
     return Qnil;
 }
 
-static void* SoundRecorder_process_gvl(void* raw) {
+/* Runs on the shared foreign-thread worker, which holds the GVL. */
+static void SoundRecorder_process_run(void* raw) {
     int state = 0;
 
     rb_protect(SoundRecorder_process_body, (VALUE)raw, &state);
@@ -106,8 +122,6 @@ static void* SoundRecorder_process_gvl(void* raw) {
         rb_set_errinfo(Qnil);
         ((ProcessContext*)raw)->ok = 0;
     }
-
-    return NULL;
 }
 
 static bool SoundRecorder_on_process(const int16_t* samples, size_t sample_count, void* userData) {
@@ -115,7 +129,13 @@ static bool SoundRecorder_on_process(const int16_t* samples, size_t sample_count
     ProcessContext ctx = {
         .recorder = recorder, .samples = samples, .sample_count = sample_count, .ok = 0};
 
-    rb_thread_call_with_gvl(SoundRecorder_process_gvl, &ctx);
+    if (!run_on_ruby_thread(SoundRecorder_process_run, &ctx, SOUND_RECORDER_JOB_TIMEOUT_MS)) {
+        /* Timed out before the worker even claimed the job (e.g. GVL
+           contention): drop this one chunk rather than block the capture
+           thread indefinitely, but keep recording rather than aborting the
+           whole session over one missed callback. */
+        return true;
+    }
 
     return ctx.ok ? true : false;
 }

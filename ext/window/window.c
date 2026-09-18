@@ -19,19 +19,49 @@
 
 static VALUE rb_cWindow;
 
+/* sfRenderWindow_setMouseCursor requires the Cursor to stay alive for as
+   long as it's in use by the window (CSFML/SFML docs), so the wrapper needs
+   a place to retain it -- and therefore a dmark, unlike a bare pointer. */
+typedef struct {
+    sfRenderWindow* window;
+    VALUE rb_cursor;
+} Window;
+
 static sfRenderWindow* Window_create(sfVideoMode* mode, const sfChar32* title, uint32_t style,
                                      sfWindowState state, const sfContextSettings* settings) {
     return sfRenderWindow_createUnicode(*mode, title, style, state, settings);
 }
 
+static void Window_mark(void* ptr) {
+    Window* window = ptr;
+
+    rb_gc_mark(window->rb_cursor);
+}
+
 static void Window_free(void* ptr) {
-    sfRenderWindow_destroy((sfRenderWindow*)ptr);
+    Window* window = ptr;
+
+    sfRenderWindow_destroy(window->window);
+    free(window);
 }
 
 static const rb_data_type_t Window_data_type = {
     .wrap_struct_name = "SFML::Window",
-    .function = {.dmark = NULL, .dfree = Window_free, .dsize = NULL},
+    .function = {.dmark = Window_mark, .dfree = Window_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
+
+static VALUE Window_wrap(VALUE klass, sfRenderWindow* c_window) {
+    Window* window = malloc(sizeof(Window));
+
+    if (window == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate window");
+    }
+
+    window->window = c_window;
+    window->rb_cursor = Qnil;
+
+    return TypedData_Wrap_Struct(klass, &Window_data_type, window);
+}
 
 /* call-seq:
  *   Window.new(video_mode, title, style = :default, state = :windowed, settings = nil) -> Window
@@ -75,7 +105,7 @@ static VALUE Window_new(int argc, VALUE* argv, VALUE klass) {
         rb_raise(rb_eRuntimeError, "failed to create window");
     }
 
-    self = TypedData_Wrap_Struct(klass, &Window_data_type, window);
+    self = Window_wrap(klass, window);
 
     rb_obj_call_init(self, argc, argv);
 
@@ -112,7 +142,7 @@ static VALUE Window_s_from_handle(int argc, VALUE* argv, VALUE klass) {
         rb_raise(rb_eRuntimeError, "failed to create window from handle");
     }
 
-    self = TypedData_Wrap_Struct(klass, &Window_data_type, window);
+    self = Window_wrap(klass, window);
 
     rb_obj_call_init(self, 0, NULL);
 
@@ -341,12 +371,19 @@ static VALUE Window_create_vulkan_surface(int argc, VALUE* argv, VALUE self) {
  * bytes, row-major, top-to-bottom).
  *
  * @return [String] +pixels+
+ * @raise [ArgumentError] if +pixels+ is shorter than required
  */
 static VALUE Window_set_icon(VALUE self, VALUE rb_size, VALUE rb_pixels) {
+    sfVector2u size = vec2u_from_rb(rb_size);
+    size_t expected = (size_t)size.x * size.y * 4;
+
     StringValue(rb_pixels);
 
-    sfRenderWindow_setIcon(Get_Window_Struct(self), vec2u_from_rb(rb_size),
-                           (const uint8_t*)RSTRING_PTR(rb_pixels));
+    if ((size_t)RSTRING_LEN(rb_pixels) < expected) {
+        rb_raise(rb_eArgError, "pixel data too short: expected %zu bytes", expected);
+    }
+
+    sfRenderWindow_setIcon(Get_Window_Struct(self), size, (const uint8_t*)RSTRING_PTR(rb_pixels));
 
     return rb_pixels;
 }
@@ -422,23 +459,27 @@ static VALUE Window_set_mouse_cursor_grabbed(VALUE self, VALUE rb_grabbed) {
 /* call-seq:
  *   cursor=(value) -> value
  *
- * Sets the window's mouse cursor. +value+ may be +nil+ to restore the
- * default system cursor.
+ * Sets the window's mouse cursor. CSFML has no way to clear it back to a
+ * system default once set (its C API unconditionally dereferences the
+ * cursor pointer, so passing it NULL crashes the process rather than
+ * clearing it), so unlike most other assignment-style methods here, +nil+
+ * is not accepted.
  *
- * @return [Cursor, nil] +value+
- * @raise [ArgumentError] if +value+ is neither a Cursor nor +nil+
+ * @return [Cursor] +value+
+ * @raise [ArgumentError] if +value+ is not a Cursor
  */
 static VALUE Window_set_mouse_cursor(VALUE self, VALUE rb_cursor) {
-    if (NIL_P(rb_cursor)) {
-        sfRenderWindow_setMouseCursor(Get_Window_Struct(self), NULL);
-        return rb_cursor;
-    }
+    Window* window;
+    TypedData_Get_Struct(self, Window, &Window_data_type, window);
 
     if (!rb_obj_is_kind_of(rb_cursor, Get_Klass_Cursor())) {
         raise_invalid_argument_class(Get_Klass_Cursor());
     }
 
-    sfRenderWindow_setMouseCursor(Get_Window_Struct(self), Get_Cursor_Struct(rb_cursor));
+    sfRenderWindow_setMouseCursor(window->window, Get_Cursor_Struct(rb_cursor));
+    /* Keep the Cursor alive for as long as the window may use it -- see the
+       Window_mark comment above. */
+    window->rb_cursor = rb_cursor;
 
     return rb_cursor;
 }
@@ -627,9 +668,9 @@ void Init_Window(VALUE rb_mSFML) {
 }
 
 void* Get_Window_Struct(VALUE self) {
-    sfRenderWindow* ptr;
-    TypedData_Get_Struct(self, sfRenderWindow, &Window_data_type, ptr);
-    return ptr;
+    Window* ptr;
+    TypedData_Get_Struct(self, Window, &Window_data_type, ptr);
+    return ptr->window;
 }
 
 VALUE Get_Klass_Window() {

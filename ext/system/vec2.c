@@ -57,6 +57,11 @@ static VALUE Vector2_new(int argc, VALUE* argv, VALUE klass) {
     }
 
     ptr = malloc(sizeof(Vector2));
+
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate vector");
+    }
+
     ptr->vec.x = x;
     ptr->vec.y = y;
 
@@ -303,6 +308,10 @@ sfVector2u vec2u_from_rb(VALUE rb_vec) {
 
 VALUE vec2f_to_rb(sfVector2f c_vec) {
     Vector2* ptr = malloc(sizeof(Vector2));
+
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate vector");
+    }
 
     ptr->vec = c_vec;
 

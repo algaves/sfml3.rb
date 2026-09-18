@@ -176,6 +176,7 @@ static VALUE BlendMode_get_alpha_equation(VALUE self) {
  * @return [Symbol] +value+
  */
 static VALUE BlendMode_set_color_src_factor(VALUE self, VALUE rb_value) {
+    rb_check_frozen(self);
     ((BlendMode*)Get_BlendMode_Struct(self))->mode.colorSrcFactor = factor_from_rb(rb_value);
     return rb_value;
 }
@@ -186,6 +187,7 @@ static VALUE BlendMode_set_color_src_factor(VALUE self, VALUE rb_value) {
  * @return [Symbol] +value+
  */
 static VALUE BlendMode_set_color_dst_factor(VALUE self, VALUE rb_value) {
+    rb_check_frozen(self);
     ((BlendMode*)Get_BlendMode_Struct(self))->mode.colorDstFactor = factor_from_rb(rb_value);
     return rb_value;
 }
@@ -196,6 +198,7 @@ static VALUE BlendMode_set_color_dst_factor(VALUE self, VALUE rb_value) {
  * @return [Symbol] +value+
  */
 static VALUE BlendMode_set_color_equation(VALUE self, VALUE rb_value) {
+    rb_check_frozen(self);
     ((BlendMode*)Get_BlendMode_Struct(self))->mode.colorEquation = equation_from_rb(rb_value);
     return rb_value;
 }
@@ -206,6 +209,7 @@ static VALUE BlendMode_set_color_equation(VALUE self, VALUE rb_value) {
  * @return [Symbol] +value+
  */
 static VALUE BlendMode_set_alpha_src_factor(VALUE self, VALUE rb_value) {
+    rb_check_frozen(self);
     ((BlendMode*)Get_BlendMode_Struct(self))->mode.alphaSrcFactor = factor_from_rb(rb_value);
     return rb_value;
 }
@@ -216,6 +220,7 @@ static VALUE BlendMode_set_alpha_src_factor(VALUE self, VALUE rb_value) {
  * @return [Symbol] +value+
  */
 static VALUE BlendMode_set_alpha_dst_factor(VALUE self, VALUE rb_value) {
+    rb_check_frozen(self);
     ((BlendMode*)Get_BlendMode_Struct(self))->mode.alphaDstFactor = factor_from_rb(rb_value);
     return rb_value;
 }
@@ -226,6 +231,7 @@ static VALUE BlendMode_set_alpha_dst_factor(VALUE self, VALUE rb_value) {
  * @return [Symbol] +value+
  */
 static VALUE BlendMode_set_alpha_equation(VALUE self, VALUE rb_value) {
+    rb_check_frozen(self);
     ((BlendMode*)Get_BlendMode_Struct(self))->mode.alphaEquation = equation_from_rb(rb_value);
     return rb_value;
 }
@@ -292,30 +298,30 @@ void Init_BlendMode(VALUE rb_mSFML) {
 
     /* No blending: source pixels overwrite destination pixels unchanged
      * (One, Zero, Add for both the color and alpha channels). */
-    rb_define_const(rb_cBlendMode, "NONE", BlendMode_wrap(sfBlendNone));
+    rb_define_const(rb_cBlendMode, "NONE", rb_obj_freeze(BlendMode_wrap(sfBlendNone)));
 
     /* Standard alpha blending: the source is blended over the destination
      * using the source alpha (SrcAlpha, OneMinusSrcAlpha, Add for color;
      * One, OneMinusSrcAlpha, Add for alpha). The default blend mode. */
-    rb_define_const(rb_cBlendMode, "ALPHA", BlendMode_wrap(sfBlendAlpha));
+    rb_define_const(rb_cBlendMode, "ALPHA", rb_obj_freeze(BlendMode_wrap(sfBlendAlpha)));
 
     /* Additive blending: the source color, scaled by its alpha, is added to
      * the destination (SrcAlpha, One, Add for color; One, One, Add for
      * alpha). */
-    rb_define_const(rb_cBlendMode, "ADD", BlendMode_wrap(sfBlendAdd));
+    rb_define_const(rb_cBlendMode, "ADD", rb_obj_freeze(BlendMode_wrap(sfBlendAdd)));
 
     /* Multiplicative blending: source and destination colors are multiplied
      * together (DstColor, Zero, Add for both the color and alpha
      * channels). */
-    rb_define_const(rb_cBlendMode, "MULTIPLY", BlendMode_wrap(sfBlendMultiply));
+    rb_define_const(rb_cBlendMode, "MULTIPLY", rb_obj_freeze(BlendMode_wrap(sfBlendMultiply)));
 
     /* Component-wise minimum of the source and destination colors (One,
      * One, Min for both the color and alpha channels). */
-    rb_define_const(rb_cBlendMode, "MIN", BlendMode_wrap(sfBlendMin));
+    rb_define_const(rb_cBlendMode, "MIN", rb_obj_freeze(BlendMode_wrap(sfBlendMin)));
 
     /* Component-wise maximum of the source and destination colors (One,
      * One, Max for both the color and alpha channels). */
-    rb_define_const(rb_cBlendMode, "MAX", BlendMode_wrap(sfBlendMax));
+    rb_define_const(rb_cBlendMode, "MAX", rb_obj_freeze(BlendMode_wrap(sfBlendMax)));
 }
 
 VALUE Get_Klass_BlendMode(void) {

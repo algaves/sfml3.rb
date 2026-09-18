@@ -15,7 +15,13 @@
 static VALUE rb_cEvent;
 
 static sfEvent* Event_create() {
-    return malloc(sizeof(sfEvent));
+    sfEvent* event = malloc(sizeof(sfEvent));
+
+    if (event == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate event");
+    }
+
+    return event;
 }
 
 static void Event_free(void* ptr) {

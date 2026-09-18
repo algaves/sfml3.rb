@@ -33,13 +33,21 @@ static VALUE Cursor_wrap(sfCursor* cursor) {
  * row-major, top-to-bottom).
  *
  * @return [Cursor]
+ * @raise [ArgumentError] if +pixels+ is shorter than required
  * @raise [RuntimeError] if cursor creation fails
  */
 static VALUE Cursor_from_pixels(VALUE klass, VALUE rb_pixels, VALUE rb_size, VALUE rb_hotspot) {
+    sfVector2u size = vec2u_from_rb(rb_size);
+    size_t expected = (size_t)size.x * size.y * 4;
+
     StringValue(rb_pixels);
 
-    return Cursor_wrap(sfCursor_createFromPixels(
-        (const uint8_t*)RSTRING_PTR(rb_pixels), vec2u_from_rb(rb_size), vec2u_from_rb(rb_hotspot)));
+    if ((size_t)RSTRING_LEN(rb_pixels) < expected) {
+        rb_raise(rb_eArgError, "pixel data too short: expected %zu bytes", expected);
+    }
+
+    return Cursor_wrap(sfCursor_createFromPixels((const uint8_t*)RSTRING_PTR(rb_pixels), size,
+                                                 vec2u_from_rb(rb_hotspot)));
 }
 
 /* call-seq:

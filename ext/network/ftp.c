@@ -488,10 +488,18 @@ static VALUE FtpListingResponse_count(VALUE self) {
  *   name(index) -> String
  *
  * @return [String] the filename at +index+ in the listing
+ * @raise [IndexError] if +index+ is out of range
  */
 static VALUE FtpListingResponse_name(VALUE self, VALUE rb_index) {
-    return rb_str_new_cstr(sfFtpListingResponse_getName(Get_FtpListingResponse_Struct(self),
-                                                        (size_t)NUM2SIZET(rb_index)));
+    void* response = Get_FtpListingResponse_Struct(self);
+    size_t index = (size_t)NUM2SIZET(rb_index);
+    size_t count = sfFtpListingResponse_getCount(response);
+
+    if (index >= count) {
+        rb_raise(rb_eIndexError, "index %zu outside of listing size %zu", index, count);
+    }
+
+    return rb_str_new_cstr(sfFtpListingResponse_getName(response, index));
 }
 
 /* Document-class: SFML::Ftp

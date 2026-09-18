@@ -191,13 +191,15 @@ void Init_IpAddress(VALUE rb_mSFML) {
     rb_define_method(rb_cIpAddress, "eql?", IpAddress_eql, 1);
 
     /* An invalid/unspecified address. */
-    rb_define_const(rb_cIpAddress, "NONE", ip_address_to_rb(sfIpAddress_None));
+    rb_define_const(rb_cIpAddress, "NONE", rb_obj_freeze(ip_address_to_rb(sfIpAddress_None)));
     /* Any address, 0.0.0.0, e.g. to bind a listener to all network interfaces. */
-    rb_define_const(rb_cIpAddress, "ANY", ip_address_to_rb(sfIpAddress_Any));
+    rb_define_const(rb_cIpAddress, "ANY", rb_obj_freeze(ip_address_to_rb(sfIpAddress_Any)));
     /* The local host address, 127.0.0.1. */
-    rb_define_const(rb_cIpAddress, "LOCAL_HOST", ip_address_to_rb(sfIpAddress_LocalHost));
+    rb_define_const(rb_cIpAddress, "LOCAL_HOST",
+                    rb_obj_freeze(ip_address_to_rb(sfIpAddress_LocalHost)));
     /* The broadcast address, 255.255.255.255. */
-    rb_define_const(rb_cIpAddress, "BROADCAST", ip_address_to_rb(sfIpAddress_Broadcast));
+    rb_define_const(rb_cIpAddress, "BROADCAST",
+                    rb_obj_freeze(ip_address_to_rb(sfIpAddress_Broadcast)));
 }
 
 VALUE Get_Klass_IpAddress(void) {

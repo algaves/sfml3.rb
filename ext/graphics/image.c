@@ -1,6 +1,7 @@
 #include "graphics/image.h"
 
 #include <ruby.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 #include "graphics/color.h"
@@ -66,8 +67,19 @@ static VALUE Image_from_color(VALUE klass, VALUE rb_size, VALUE rb_color) {
  */
 static VALUE Image_from_pixels(VALUE klass, VALUE rb_size, VALUE rb_pixels) {
     sfVector2u size = vec2u_from_rb(rb_size);
-    size_t expected = (size_t)size.x * size.y * 4;
+    size_t expected;
     sfImage* image;
+
+    /* size.x * size.y * 4 as a bare size_t multiplication can wrap on the
+       32-bit targets this gem ships, e.g. size.x = size.y = 32768: the true
+       product overflows to 0, which would then pass the length check below
+       for any input (even an empty string) and hand CSFML a declared size
+       far larger than the buffer actually backing it. Check before
+       multiplying rather than after. */
+    if (size.x != 0 && size.y > (SIZE_MAX / 4) / size.x) {
+        rb_raise(rb_eArgError, "image dimensions too large");
+    }
+    expected = (size_t)size.x * size.y * 4;
 
     StringValue(rb_pixels);
 

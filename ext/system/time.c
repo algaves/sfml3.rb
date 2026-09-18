@@ -24,6 +24,10 @@ static const rb_data_type_t Time_data_type = {
 static VALUE Time_wrap(sfTime time) {
     Time* ptr = malloc(sizeof(Time));
 
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate time");
+    }
+
     ptr->time = time;
 
     return TypedData_Wrap_Struct(rb_cSFTime, &Time_data_type, ptr);
@@ -58,6 +62,11 @@ static VALUE Time_new(int argc, VALUE* argv, VALUE klass) {
     }
 
     ptr = malloc(sizeof(Time));
+
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate time");
+    }
+
     ptr->time = time;
 
     self = TypedData_Wrap_Struct(klass, &Time_data_type, ptr);

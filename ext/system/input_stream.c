@@ -118,50 +118,76 @@ static int64_t InputStream_seek(size_t position, void* userData) {
     return ctx.result;
 }
 
-static VALUE InputStream_tell_body(VALUE v) {
-    VALUE io = (VALUE)v;
+typedef struct {
+    VALUE io;
+    int64_t result;
+} Int64Context;
 
-    if (rb_respond_to(io, rb_intern("tell"))) {
-        return rb_funcall(io, rb_intern("tell"), 0);
+/* NUM2LL is done here, inside the rb_protect-called body, rather than after
+   rb_protect returns: if the IO's #tell/#pos/#size/#length returns something
+   that doesn't convert cleanly to a C integer (a String, nil, a Bignum too
+   large for int64_t, a #to_int that itself raises), NUM2LL raises directly --
+   and unprotected, that exception would unwind straight through CSFML's (and
+   possibly SFML's C++) stack frames, exactly what rb_protect exists to
+   prevent here. */
+static VALUE InputStream_tell_body(VALUE v) {
+    Int64Context* ctx = (Int64Context*)v;
+    VALUE result;
+
+    if (rb_respond_to(ctx->io, rb_intern("tell"))) {
+        result = rb_funcall(ctx->io, rb_intern("tell"), 0);
+    } else {
+        result = rb_funcall(ctx->io, rb_intern("pos"), 0);
     }
 
-    return rb_funcall(io, rb_intern("pos"), 0);
+    ctx->result = NUM2LL(result);
+
+    return Qnil;
 }
 
 static int64_t InputStream_tell(void* userData) {
     InputStream* stream = userData;
+    Int64Context ctx = {.io = stream->rb_io, .result = -1};
     int state = 0;
-    VALUE result = rb_protect(InputStream_tell_body, stream->rb_io, &state);
+
+    rb_protect(InputStream_tell_body, (VALUE)&ctx, &state);
 
     if (state) {
         rb_set_errinfo(Qnil);
         return -1;
     }
 
-    return NUM2LL(result);
+    return ctx.result;
 }
 
 static VALUE InputStream_get_size_body(VALUE v) {
-    VALUE io = (VALUE)v;
+    Int64Context* ctx = (Int64Context*)v;
+    VALUE result;
 
-    if (rb_respond_to(io, rb_intern("size"))) {
-        return rb_funcall(io, rb_intern("size"), 0);
+    if (rb_respond_to(ctx->io, rb_intern("size"))) {
+        result = rb_funcall(ctx->io, rb_intern("size"), 0);
+    } else {
+        result = rb_funcall(ctx->io, rb_intern("length"), 0);
     }
 
-    return rb_funcall(io, rb_intern("length"), 0);
+    ctx->result = NUM2LL(result);
+
+    return Qnil;
 }
 
 static int64_t InputStream_get_size(void* userData) {
     InputStream* stream = userData;
+    Int64Context ctx = {.io = stream->rb_io, .result = -1};
     int state = 0;
-    VALUE result = rb_protect(InputStream_get_size_body, stream->rb_io, &state);
+
+    rb_protect(InputStream_get_size_body, (VALUE)&ctx, &state);
 
     if (state) {
         rb_set_errinfo(Qnil);
         return -1;
     }
 
-    return NUM2LL(result);
+    return ctx.result;
 }
 
 /* call-seq:

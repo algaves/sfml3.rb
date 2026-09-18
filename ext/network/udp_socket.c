@@ -173,6 +173,10 @@ static VALUE UdpSocket_receive(int argc, VALUE* argv, VALUE self) {
 
     buffer = malloc((size_t)max_length);
 
+    if (buffer == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate receive buffer");
+    }
+
     status = sfUdpSocket_receive(Get_UdpSocket_Struct(self), buffer, (size_t)max_length, &received,
                                  &remote_address, &remote_port);
 

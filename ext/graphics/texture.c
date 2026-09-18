@@ -1,6 +1,7 @@
 #include "graphics/texture.h"
 
 #include <ruby.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -359,10 +360,21 @@ static VALUE Texture_update_from_pixels(VALUE self, VALUE rb_pixels, VALUE rb_si
                                         VALUE rb_offset) {
     sfVector2u size = vec2u_from_rb(rb_size);
     sfVector2u offset = vec2u_from_rb(rb_offset);
+    size_t expected;
+
+    /* size.x * size.y * 4 as a bare size_t multiplication can wrap on the
+       32-bit targets this gem ships; check before multiplying rather than
+       after so a wrapped-to-near-zero "expected" can't slip a too-short
+       buffer past the length check below (see the identical fix in
+       graphics/image.c). */
+    if (size.x != 0 && size.y > (SIZE_MAX / 4) / size.x) {
+        rb_raise(rb_eArgError, "texture dimensions too large");
+    }
+    expected = (size_t)size.x * size.y * 4;
 
     StringValue(rb_pixels);
 
-    if ((size_t)RSTRING_LEN(rb_pixels) < (size_t)size.x * size.y * 4) {
+    if ((size_t)RSTRING_LEN(rb_pixels) < expected) {
         rb_raise(rb_eArgError, "pixel data too short");
     }
 

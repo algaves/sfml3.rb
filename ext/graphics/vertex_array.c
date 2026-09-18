@@ -63,24 +63,38 @@ static VALUE VertexArray_get_vertex_count(VALUE self) {
     return SIZET2NUM(sfVertexArray_getVertexCount(Get_VertexArray_Struct(self)));
 }
 
+static size_t VertexArray_check_index(VALUE self, VALUE rb_index) {
+    void* array = Get_VertexArray_Struct(self);
+    size_t index = (size_t)NUM2SIZET(rb_index);
+    size_t count = sfVertexArray_getVertexCount(array);
+
+    if (index >= count) {
+        rb_raise(rb_eIndexError, "index %zu outside of vertex count %zu", index, count);
+    }
+
+    return index;
+}
+
 /* call-seq:
  *   vertex(index) -> Vertex
  *
  * @return [Vertex] a copy of the vertex at +index+
+ * @raise [IndexError] if +index+ is out of range
  */
 static VALUE VertexArray_get_vertex(VALUE self, VALUE rb_index) {
-    return vertex_to_rb(
-        *sfVertexArray_getVertex(Get_VertexArray_Struct(self), (size_t)NUM2SIZET(rb_index)));
+    return vertex_to_rb(*sfVertexArray_getVertex(Get_VertexArray_Struct(self),
+                                                 VertexArray_check_index(self, rb_index)));
 }
 
 /* call-seq:
  *   set_vertex(index, vertex) -> Vertex
  *
  * @return [Vertex] +vertex+
+ * @raise [IndexError] if +index+ is out of range
  */
 static VALUE VertexArray_set_vertex(VALUE self, VALUE rb_index, VALUE rb_vertex) {
-    *sfVertexArray_getVertex(Get_VertexArray_Struct(self), (size_t)NUM2SIZET(rb_index)) =
-        vertex_from_rb(rb_vertex);
+    *sfVertexArray_getVertex(Get_VertexArray_Struct(self),
+                             VertexArray_check_index(self, rb_index)) = vertex_from_rb(rb_vertex);
     return rb_vertex;
 }
 

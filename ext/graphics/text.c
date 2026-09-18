@@ -62,27 +62,30 @@ static VALUE Text_wrap(VALUE klass, sfText* text) {
 }
 
 /* call-seq:
- *   Text.new                              -> Text
  *   Text.new(font)                        -> Text
  *   Text.new(font, string)                -> Text
  *   Text.new(font, string, character_size) -> Text
  *
+ * CSFML requires a font at creation time -- its C API unconditionally
+ * dereferences a NULL font argument rather than tolerating one, so unlike
+ * most other constructors here, the font is not optional.
+ *
  * @return [Text]
- * @raise [TypeError] if +font+ is given and is not a Font
+ * @raise [ArgumentError] if +font+ is not a Font
  */
 static VALUE Text_new(int argc, VALUE* argv, VALUE klass) {
     VALUE rb_font, rb_string, rb_size, self;
     Text* ptr;
 
-    rb_scan_args(argc, argv, "03", &rb_font, &rb_string, &rb_size);
+    rb_scan_args(argc, argv, "12", &rb_font, &rb_string, &rb_size);
 
-    if (!NIL_P(rb_font) && !rb_obj_is_kind_of(rb_font, Get_Klass_Font())) {
+    if (!rb_obj_is_kind_of(rb_font, Get_Klass_Font())) {
         raise_invalid_argument_class(Get_Klass_Font());
     }
 
     ptr = malloc(sizeof(Text));
-    ptr->text = sfText_create(NIL_P(rb_font) ? NULL : Get_Font_Struct(rb_font));
-    ptr->rb_font = NIL_P(rb_font) ? Qnil : rb_font;
+    ptr->text = sfText_create(Get_Font_Struct(rb_font));
+    ptr->rb_font = rb_font;
 
     if (ptr->text == NULL) {
         free(ptr);

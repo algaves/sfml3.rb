@@ -33,8 +33,14 @@ static void* Sound_destroy_without_gvl(void* handle) {
 static void Sound_free(void* ptr) {
     Sound* sound = ptr;
 
-    effect_processor_release(sound->source.effect_slot);
+    /* Destroy (which blocks until CSFML guarantees no in-flight audio-thread
+       callback still references this source) before releasing the effect
+       slot, not after: releasing first opens a window where another Ruby
+       thread's effect_processor_acquire could reuse the slot number for an
+       unrelated new source while this source's callback might still be
+       executing against it. */
     rb_thread_call_without_gvl(Sound_destroy_without_gvl, sound->source.handle, RUBY_UBF_IO, NULL);
+    effect_processor_release(sound->source.effect_slot);
     free(sound);
 }
 

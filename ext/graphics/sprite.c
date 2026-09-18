@@ -60,25 +60,26 @@ static VALUE Sprite_wrap(VALUE klass, sfSprite* sprite) {
 }
 
 /* call-seq:
- *   Sprite.new          -> Sprite
  *   Sprite.new(texture) -> Sprite
  *
+ * CSFML requires a texture at creation time -- its C API unconditionally
+ * dereferences a NULL texture argument rather than tolerating one, so unlike
+ * most other constructors here, the texture is not optional.
+ *
  * @return [Sprite]
- * @raise [TypeError] if +texture+ is given and is not a Texture
+ * @raise [ArgumentError] if +texture+ is not a Texture
  */
-static VALUE Sprite_new(int argc, VALUE* argv, VALUE klass) {
-    VALUE rb_texture, self;
+static VALUE Sprite_new(VALUE klass, VALUE rb_texture) {
+    VALUE self;
     Sprite* ptr;
 
-    rb_scan_args(argc, argv, "01", &rb_texture);
-
-    if (!NIL_P(rb_texture) && !rb_obj_is_kind_of(rb_texture, Get_Klass_Texture())) {
+    if (!rb_obj_is_kind_of(rb_texture, Get_Klass_Texture())) {
         raise_invalid_argument_class(Get_Klass_Texture());
     }
 
     ptr = malloc(sizeof(Sprite));
-    ptr->sprite = sfSprite_create(NIL_P(rb_texture) ? NULL : Get_Texture_Struct(rb_texture));
-    ptr->rb_texture = NIL_P(rb_texture) ? Qnil : rb_texture;
+    ptr->sprite = sfSprite_create(Get_Texture_Struct(rb_texture));
+    ptr->rb_texture = rb_texture;
 
     self = TypedData_Wrap_Struct(klass, &Sprite_data_type, ptr);
 
@@ -352,7 +353,7 @@ void Init_Sprite(VALUE rb_mSFML) {
 
     rb_include_module(rb_cSprite, Get_Module_Drawable());
 
-    rb_define_singleton_method(rb_cSprite, "new", Sprite_new, -1);
+    rb_define_singleton_method(rb_cSprite, "new", Sprite_new, 1);
 
     rb_define_method(rb_cSprite, "copy", Sprite_copy, 0);
 

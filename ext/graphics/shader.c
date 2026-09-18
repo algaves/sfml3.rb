@@ -13,21 +13,49 @@
 
 static VALUE rb_cShader;
 
+/* SFML's Shader::setUniform(name, const Texture&) stores a pointer to the
+   texture internally and re-binds it at draw/bind time, so (per SFML's own
+   docs) the caller must keep every Texture passed to #set_texture alive for
+   as long as the shader might use it -- hence the retaining Hash and the
+   dmark this needs, unlike a bare pointer wrap. */
+typedef struct {
+    sfShader* shader;
+    VALUE rb_textures;
+} Shader;
+
+static void Shader_mark(void* ptr) {
+    rb_gc_mark(((Shader*)ptr)->rb_textures);
+}
+
 static void Shader_free(void* ptr) {
-    sfShader_destroy(ptr);
+    Shader* wrapper = ptr;
+
+    sfShader_destroy(wrapper->shader);
+    free(wrapper);
 }
 
 static const rb_data_type_t Shader_data_type = {
     .wrap_struct_name = "SFML::Shader",
-    .function = {.dmark = NULL, .dfree = Shader_free, .dsize = NULL},
+    .function = {.dmark = Shader_mark, .dfree = Shader_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
-static VALUE Shader_wrap(VALUE klass, sfShader* shader) {
-    if (shader == NULL) {
+static VALUE Shader_wrap(VALUE klass, sfShader* c_shader) {
+    Shader* wrapper;
+
+    if (c_shader == NULL) {
         rb_raise(rb_eRuntimeError, "failed to create shader");
     }
 
-    return TypedData_Wrap_Struct(klass, &Shader_data_type, shader);
+    wrapper = malloc(sizeof(Shader));
+
+    if (wrapper == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate shader");
+    }
+
+    wrapper->shader = c_shader;
+    wrapper->rb_textures = rb_hash_new();
+
+    return TypedData_Wrap_Struct(klass, &Shader_data_type, wrapper);
 }
 
 /* NULL skips a stage, mirroring CSFML. */
@@ -568,27 +596,30 @@ SHADER_ARRAY_UNIFORM(mat4, sfGlslMat4, glsl_mat4_from_rb, sfShader_setMat4Unifor
 
 /* Document-method: SFML::Shader#set_texture
  * call-seq:
- *   set_texture(name, texture) -> Texture or nil
+ *   set_texture(name, texture) -> Texture
  *
- * @return [Texture, nil] +texture+
- * @raise [TypeError] if +texture+ is neither nil nor a Texture
+ * SFML keeps and re-binds a pointer to +texture+ internally (rather than
+ * copying it) for as long as the shader may use it; this binding keeps a
+ * reference alongside it so the Texture can't be GC'd out from under the
+ * shader. CSFML's C API unconditionally dereferences the texture argument,
+ * so unlike most other uniform setters here, +nil+ is not accepted.
+ *
+ * @return [Texture] +texture+
+ * @raise [ArgumentError] if +texture+ is not a Texture
  */
 static VALUE Shader_set_texture(VALUE self, VALUE rb_name, VALUE rb_texture) {
+    Shader* wrapper;
     char name[256];
 
+    TypedData_Get_Struct(self, Shader, &Shader_data_type, wrapper);
     Shader_name(rb_name, name, sizeof(name));
-
-    if (NIL_P(rb_texture)) {
-        sfShader_setTextureUniform((sfShader*)Get_Shader_Struct(self), name, NULL);
-        return rb_texture;
-    }
 
     if (!rb_obj_is_kind_of(rb_texture, Get_Klass_Texture())) {
         raise_invalid_argument_class(Get_Klass_Texture());
     }
 
-    sfShader_setTextureUniform((sfShader*)Get_Shader_Struct(self), name,
-                               Get_Texture_Struct(rb_texture));
+    sfShader_setTextureUniform(wrapper->shader, name, Get_Texture_Struct(rb_texture));
+    rb_hash_aset(wrapper->rb_textures, rb_str_new_cstr(name), rb_texture);
 
     return rb_texture;
 }
@@ -748,7 +779,7 @@ VALUE Get_Klass_Shader(void) {
 }
 
 const sfShader* Get_Shader_Struct(VALUE self) {
-    sfShader* ptr;
-    TypedData_Get_Struct(self, sfShader, &Shader_data_type, ptr);
-    return ptr;
+    Shader* ptr;
+    TypedData_Get_Struct(self, Shader, &Shader_data_type, ptr);
+    return ptr->shader;
 }

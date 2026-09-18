@@ -124,6 +124,27 @@ static void SoundBuffer_default_channel_map(unsigned int channel_count, sfSoundC
     }
 }
 
+typedef struct {
+    sfSoundChannel* channel_map;
+    VALUE rb_channel_map;
+    unsigned int channel_count;
+} ChannelMapFillContext;
+
+/* sound_channel_from_rb raises ArgumentError on an unrecognized entry; run
+   through rb_protect so the caller can free the samples/channel_map buffers
+   (already allocated by this point) before that exception propagates,
+   instead of leaking them. */
+static VALUE SoundBuffer_fill_channel_map(VALUE raw) {
+    ChannelMapFillContext* ctx = (ChannelMapFillContext*)raw;
+    long i;
+
+    for (i = 0; i < (long)ctx->channel_count; i++) {
+        ctx->channel_map[i] = sound_channel_from_rb(rb_ary_entry(ctx->rb_channel_map, i));
+    }
+
+    return Qnil;
+}
+
 /* Copies the samples into a contiguous int16 buffer: an Array is converted
    element by element, and a String's packed int16 samples are copied out of
    the (possibly unaligned) Ruby storage. The channel map, when given, is
@@ -157,6 +178,18 @@ static VALUE SoundBuffer_from_samples(int argc, VALUE* argv, VALUE klass) {
 
     if (channel_count == 0) {
         rb_raise(rb_eArgError, "channel count must be positive");
+    }
+
+    /* channel_map's malloc below (sizeof(sfSoundChannel) * channel_count) can
+       wrap on the 32-bit targets this gem ships if channel_count is large
+       enough, allocating far less than the subsequent write loop assumes.
+       Check before any allocation happens, so there's nothing to clean up on
+       the raise path. (Written with channel_count as the divisor, not
+       compared directly against a constant bound, so this isn't optimized
+       away as tautological on 64-bit hosts where it can't actually trigger
+       -- it still does real work on the 32-bit targets.) */
+    if (SIZE_MAX / channel_count < sizeof(sfSoundChannel)) {
+        rb_raise(rb_eArgError, "channel count too large");
     }
 
     if (RB_TYPE_P(rb_samples, T_STRING)) {
@@ -196,7 +229,10 @@ static VALUE SoundBuffer_from_samples(int argc, VALUE* argv, VALUE klass) {
     if (NIL_P(rb_channel_map)) {
         SoundBuffer_default_channel_map(channel_count, channel_map);
     } else {
-        long i;
+        ChannelMapFillContext ctx = {.channel_map = channel_map,
+                                     .rb_channel_map = rb_channel_map,
+                                     .channel_count = channel_count};
+        int state = 0;
 
         if (!RB_TYPE_P(rb_channel_map, T_ARRAY) ||
             (unsigned long)RARRAY_LEN(rb_channel_map) != channel_count) {
@@ -205,8 +241,12 @@ static VALUE SoundBuffer_from_samples(int argc, VALUE* argv, VALUE klass) {
             rb_raise(rb_eArgError, "channel map must have exactly one entry per channel");
         }
 
-        for (i = 0; i < (long)channel_count; i++) {
-            channel_map[i] = sound_channel_from_rb(rb_ary_entry(rb_channel_map, i));
+        rb_protect(SoundBuffer_fill_channel_map, (VALUE)&ctx, &state);
+
+        if (state) {
+            free(samples);
+            free(channel_map);
+            rb_jump_tag(state);
         }
     }
 

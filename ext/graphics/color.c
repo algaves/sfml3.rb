@@ -161,6 +161,7 @@ static VALUE Color_get_a(VALUE self) {
  * @return [Integer] +value+
  */
 static VALUE Color_set_r(VALUE self, VALUE rb_value) {
+    rb_check_frozen(self);
     ((Color*)Get_Color_Struct(self))->color.r = clamp_channel(NUM2INT(rb_value));
     return rb_value;
 }
@@ -173,6 +174,7 @@ static VALUE Color_set_r(VALUE self, VALUE rb_value) {
  * @return [Integer] +value+
  */
 static VALUE Color_set_g(VALUE self, VALUE rb_value) {
+    rb_check_frozen(self);
     ((Color*)Get_Color_Struct(self))->color.g = clamp_channel(NUM2INT(rb_value));
     return rb_value;
 }
@@ -185,6 +187,7 @@ static VALUE Color_set_g(VALUE self, VALUE rb_value) {
  * @return [Integer] +value+
  */
 static VALUE Color_set_b(VALUE self, VALUE rb_value) {
+    rb_check_frozen(self);
     ((Color*)Get_Color_Struct(self))->color.b = clamp_channel(NUM2INT(rb_value));
     return rb_value;
 }
@@ -197,6 +200,7 @@ static VALUE Color_set_b(VALUE self, VALUE rb_value) {
  * @return [Integer] +value+
  */
 static VALUE Color_set_a(VALUE self, VALUE rb_value) {
+    rb_check_frozen(self);
     ((Color*)Get_Color_Struct(self))->color.a = clamp_channel(NUM2INT(rb_value));
     return rb_value;
 }
@@ -343,31 +347,31 @@ void Init_Color(VALUE rb_mSFML) {
     rb_define_method(rb_cColor, "to_s", Color_to_s, 0);
 
     /* Opaque black, RGBA(0, 0, 0, 255). */
-    rb_define_const(rb_cColor, "BLACK", Color_wrap(sfBlack));
+    rb_define_const(rb_cColor, "BLACK", rb_obj_freeze(Color_wrap(sfBlack)));
 
     /* Opaque white, RGBA(255, 255, 255, 255). */
-    rb_define_const(rb_cColor, "WHITE", Color_wrap(sfWhite));
+    rb_define_const(rb_cColor, "WHITE", rb_obj_freeze(Color_wrap(sfWhite)));
 
     /* Opaque red, RGBA(255, 0, 0, 255). */
-    rb_define_const(rb_cColor, "RED", Color_wrap(sfRed));
+    rb_define_const(rb_cColor, "RED", rb_obj_freeze(Color_wrap(sfRed)));
 
     /* Opaque green, RGBA(0, 255, 0, 255). */
-    rb_define_const(rb_cColor, "GREEN", Color_wrap(sfGreen));
+    rb_define_const(rb_cColor, "GREEN", rb_obj_freeze(Color_wrap(sfGreen)));
 
     /* Opaque blue, RGBA(0, 0, 255, 255). */
-    rb_define_const(rb_cColor, "BLUE", Color_wrap(sfBlue));
+    rb_define_const(rb_cColor, "BLUE", rb_obj_freeze(Color_wrap(sfBlue)));
 
     /* Opaque yellow, RGBA(255, 255, 0, 255). */
-    rb_define_const(rb_cColor, "YELLOW", Color_wrap(sfYellow));
+    rb_define_const(rb_cColor, "YELLOW", rb_obj_freeze(Color_wrap(sfYellow)));
 
     /* Opaque magenta, RGBA(255, 0, 255, 255). */
-    rb_define_const(rb_cColor, "MAGENTA", Color_wrap(sfMagenta));
+    rb_define_const(rb_cColor, "MAGENTA", rb_obj_freeze(Color_wrap(sfMagenta)));
 
     /* Opaque cyan, RGBA(0, 255, 255, 255). */
-    rb_define_const(rb_cColor, "CYAN", Color_wrap(sfCyan));
+    rb_define_const(rb_cColor, "CYAN", rb_obj_freeze(Color_wrap(sfCyan)));
 
     /* Fully transparent black, RGBA(0, 0, 0, 0). */
-    rb_define_const(rb_cColor, "TRANSPARENT", Color_wrap(sfTransparent));
+    rb_define_const(rb_cColor, "TRANSPARENT", rb_obj_freeze(Color_wrap(sfTransparent)));
 }
 
 VALUE Get_Klass_Color(void) {

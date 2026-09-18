@@ -12,6 +12,10 @@ static VALUE rb_cMode;
 static sfVideoMode* VideoMode_alloc(unsigned width, unsigned height, unsigned bits, int* created) {
     sfVideoMode* mode = malloc(sizeof(sfVideoMode));
 
+    if (mode == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate video mode");
+    }
+
     if (created != NULL) {
         *created = 1;
     }

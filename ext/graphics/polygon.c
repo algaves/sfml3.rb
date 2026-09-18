@@ -113,21 +113,35 @@ static VALUE ConvexShape_set_point_count(VALUE self, VALUE rb_count) {
     return rb_count;
 }
 
+static size_t ConvexShape_check_index(VALUE self, VALUE rb_index) {
+    void* shape = Get_ConvexShape_Struct(self);
+    size_t index = (size_t)NUM2SIZET(rb_index);
+    size_t count = sfConvexShape_getPointCount(shape);
+
+    if (index >= count) {
+        rb_raise(rb_eIndexError, "index %zu outside of point count %zu", index, count);
+    }
+
+    return index;
+}
+
 /* call-seq: point(index) -> Vector2
  *
  * @return [Vector2] the local position of the point at +index+
+ * @raise [IndexError] if +index+ is out of range
  */
 static VALUE ConvexShape_get_point(VALUE self, VALUE rb_index) {
-    return vec2f_to_rb(
-        sfConvexShape_getPoint(Get_ConvexShape_Struct(self), (size_t)NUM2SIZET(rb_index)));
+    return vec2f_to_rb(sfConvexShape_getPoint(Get_ConvexShape_Struct(self),
+                                              ConvexShape_check_index(self, rb_index)));
 }
 
 /* call-seq: set_point(index, point) -> Vector2
  *
  * @return [Vector2] +point+
+ * @raise [IndexError] if +index+ is out of range
  */
 static VALUE ConvexShape_set_point(VALUE self, VALUE rb_index, VALUE rb_point) {
-    sfConvexShape_setPoint(Get_ConvexShape_Struct(self), (size_t)NUM2SIZET(rb_index),
+    sfConvexShape_setPoint(Get_ConvexShape_Struct(self), ConvexShape_check_index(self, rb_index),
                            vec2f_from_rb(rb_point));
     return rb_point;
 }

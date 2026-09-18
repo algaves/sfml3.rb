@@ -40,8 +40,11 @@ static void* Music_destroy_without_gvl(void* handle) {
 static void Music_free(void* ptr) {
     Music* music = ptr;
 
-    effect_processor_release(music->source.effect_slot);
+    /* Destroy (which blocks until CSFML guarantees no in-flight audio-thread
+       callback still references this source) before releasing the effect
+       slot, not after -- see the matching comment in sound.c's Sound_free. */
     rb_thread_call_without_gvl(Music_destroy_without_gvl, music->source.handle, RUBY_UBF_IO, NULL);
+    effect_processor_release(music->source.effect_slot);
     rb_gc_unregister_address(&music->rb_stream);
     free(music);
 }

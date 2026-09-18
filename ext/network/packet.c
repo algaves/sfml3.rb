@@ -7,11 +7,6 @@
 #include "core/exceptions.h"
 #include "core/macros.h"
 
-/* Strings are NUL-terminated on the wire and carry no length, so readString
-   has to be handed a buffer. This bounds a single read; longer strings are
-   still read correctly by CSFML, they just cannot be returned safely. */
-#define PACKET_STRING_BUFFER 4096
-
 typedef struct {
     sfPacket* packet;
 } Packet;
@@ -170,18 +165,35 @@ PACKET_WRITER(double, Double, NUM2DBL)
  * call-seq: read_string -> String
  *
  * Reads a NUL-terminated string previously written with #write_string.
- * Strings longer than 4095 bytes are truncated.
  *
  * @return [String]
  */
 static VALUE Packet_read_string(VALUE self) {
-    char buffer[PACKET_STRING_BUFFER];
+    void* packet = Get_Packet_Struct(self);
+    /* sfPacket_readString has no destination-length parameter: CSFML's C++
+       side bounds the string it extracts by the packet's own remaining
+       unread data, but then copies that (unbounded, from the caller's point
+       of view) string into whatever buffer it's given -- a fixed-size stack
+       buffer here would be a stack overflow for a packet holding a longer
+       string (e.g. one received from the network). The extracted string can
+       never exceed the packet's remaining data size, so sizing the buffer to
+       that is always sufficient. */
+    size_t remaining = sfPacket_getDataSize(packet) - sfPacket_getReadPosition(packet);
+    char* buffer = malloc(remaining + 1);
+    VALUE result;
+
+    if (buffer == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate read buffer");
+    }
 
     buffer[0] = '\0';
-    sfPacket_readString(Get_Packet_Struct(self), buffer);
-    buffer[PACKET_STRING_BUFFER - 1] = '\0';
+    sfPacket_readString(packet, buffer);
+    buffer[remaining] = '\0';
 
-    return rb_str_new_cstr(buffer);
+    result = rb_str_new_cstr(buffer);
+    free(buffer);
+
+    return result;
 }
 
 /* call-seq:

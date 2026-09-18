@@ -25,6 +25,10 @@ static const rb_data_type_t Clock_data_type = {
 static VALUE Clock_new_from(VALUE klass, sfClock* clock) {
     VALUE self;
 
+    if (clock == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate clock");
+    }
+
     self = TypedData_Wrap_Struct(klass, &Clock_data_type, clock);
 
     rb_obj_call_init(self, 0, NULL);

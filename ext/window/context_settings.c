@@ -25,6 +25,10 @@ static const rb_data_type_t ContextSettings_data_type = {
 static VALUE ContextSettings_wrap(sfContextSettings settings) {
     ContextSettings* ptr = malloc(sizeof(ContextSettings));
 
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate context settings");
+    }
+
     ptr->settings = settings;
 
     return TypedData_Wrap_Struct(rb_cContextSettings, &ContextSettings_data_type, ptr);
@@ -114,6 +118,7 @@ static VALUE ContextSettings_new(int argc, VALUE* argv, VALUE klass) {
         return UINT2NUM(((ContextSettings*)Get_ContextSettings_Struct(self))->settings.field);     \
     }                                                                                              \
     static VALUE ContextSettings_set_##name(VALUE self, VALUE rb_value) {                          \
+        rb_check_frozen(self);                                                                     \
         ((ContextSettings*)Get_ContextSettings_Struct(self))->settings.field =                     \
             (unsigned int)NUM2UINT(rb_value);                                                      \
         return rb_value;                                                                           \
@@ -163,6 +168,8 @@ static VALUE ContextSettings_set_attribute_flags(VALUE self, VALUE rb_value) {
     ContextSettings* settings = Get_ContextSettings_Struct(self);
     uint32_t flags = 0;
 
+    rb_check_frozen(self);
+
     if (RB_INTEGER_TYPE_P(rb_value)) {
         flags = (uint32_t)NUM2UINT(rb_value);
     } else {
@@ -199,6 +206,7 @@ static VALUE ContextSettings_get_srgb(VALUE self) {
  * @return [Boolean] +value+
  */
 static VALUE ContextSettings_set_srgb(VALUE self, VALUE rb_value) {
+    rb_check_frozen(self);
     ((ContextSettings*)Get_ContextSettings_Struct(self))->settings.sRgbCapable = RTEST(rb_value);
     return rb_value;
 }
