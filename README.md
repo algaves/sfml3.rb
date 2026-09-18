@@ -1,5 +1,12 @@
 # sfml3.rb
 
+![Ruby](https://img.shields.io/badge/ruby-3.1%2B-red?style=flat-square)
+![GitHub Last Commit](https://img.shields.io/github/last-commit/algaves/sfml3.rb.svg?style=flat-square)
+![Gem Version](https://img.shields.io/gem/v/sfml3-rb?style=flat-square)
+![Gem Downloads (for latest version)](https://img.shields.io/gem/dtv/sfml3-rb?style=flat-square)
+![Gem download rank](https://img.shields.io/gem/rt/sfml3-rb?style=flat-square)
+![License](https://img.shields.io/badge/license-0BSD-green?style=flat-square)
+
 Ruby bindings for [SFML 3](https://www.sfml-dev.org/), via its C API, [CSFML](https://github.com/SFML/CSFML).
 
 ## Status
