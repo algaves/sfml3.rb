@@ -42,12 +42,25 @@ static VALUE View_new_from(VALUE klass, sfView* c_view) {
     return self;
 }
 
+/* call-seq:
+ *   View.new -> View
+ *
+ * Creates a default view covering the (0, 0) - (1000, 1000) region.
+ *
+ * @return [View]
+ */
 static VALUE View_new(VALUE klass) {
     return View_new_from(klass, NULL);
 }
 
 /* The rect is the visible area: position is the top-left corner, not the
    centre, which is what distinguishes this from new + center=/size=. */
+/* call-seq:
+ *   View.from_rect(rect) -> View
+ *
+ * @return [View] a view whose visible area is +rect+ (position is the
+ *   top-left corner)
+ */
 static VALUE View_s_from_rect(VALUE klass, VALUE rb_rect) {
     return View_new_from(klass, sfView_createFromRect(rect_from_rb(rb_rect)));
 }
@@ -56,22 +69,45 @@ static VALUE View_init(VALUE self) {
     return self;
 }
 
+/* call-seq:
+ *   rotation=(value) -> self
+ *
+ * @return [self]
+ */
 static VALUE View_set_rotation(VALUE self, VALUE rb_rotation) {
     sfView_setRotation(Get_View_Struct(self), NUM2DBL(rb_rotation));
     return self;
 }
 
+/* call-seq:
+ *   size=(value) -> self
+ *
+ * @return [self]
+ */
 static VALUE View_set_size(VALUE self, VALUE rb_scale) {
     sfView_setSize(Get_View_Struct(self), vec2f_from_rb(rb_scale));
     return self;
 }
 
+/* call-seq:
+ *   center=(value) -> self
+ *
+ * @return [self]
+ */
 static VALUE View_set_center(VALUE self, VALUE rb_origin) {
     sfVector2f origin = VEC2_RB2C(rb_origin);
     sfView_setCenter(Get_View_Struct(self), origin);
     return self;
 }
 
+/* call-seq:
+ *   viewport=(value) -> self
+ *
+ * Sets the viewport: the target-relative (0..1) rectangle this view is
+ * rendered into.
+ *
+ * @return [self]
+ */
 static VALUE View_set_viewport(VALUE self, VALUE rb_viewport) {
     sfFloatRect viewport = RECT_RB2C(rb_viewport);
     sfView_setViewport(Get_View_Struct(self), viewport);
@@ -79,55 +115,116 @@ static VALUE View_set_viewport(VALUE self, VALUE rb_viewport) {
     return self;
 }
 
+/* call-seq: rotation -> Float
+ *
+ * @return [Float] degrees
+ */
 static VALUE View_get_rotation(VALUE self) {
     return DBL2NUM(sfView_getRotation(Get_View_Struct(self)));
 }
 
+/* call-seq: size -> Vector2
+ *
+ * @return [Vector2]
+ */
 static VALUE View_get_size(VALUE self) {
     return vec2f_to_rb(sfView_getSize(Get_View_Struct(self)));
 }
 
+/* call-seq: center -> Vector2
+ *
+ * @return [Vector2]
+ */
 static VALUE View_get_center(VALUE self) {
     return vec2f_to_rb(sfView_getCenter(Get_View_Struct(self)));
 }
 
+/* call-seq: viewport -> Rect
+ *
+ * @return [Rect]
+ */
 static VALUE View_get_viewport(VALUE self) {
     return RECT_C2RB(sfView_getViewport(Get_View_Struct(self)));
 }
 
+/* call-seq:
+ *   scissor=(value) -> self
+ *
+ * @return [self]
+ */
 static VALUE View_set_scissor(VALUE self, VALUE rb_scissor) {
     sfView_setScissor(Get_View_Struct(self), RECT_RB2C(rb_scissor));
 
     return self;
 }
 
+/* call-seq: scissor -> Rect
+ *
+ * @return [Rect]
+ */
 static VALUE View_get_scissor(VALUE self) {
     return RECT_C2RB(sfView_getScissor(Get_View_Struct(self)));
 }
 
+/* call-seq:
+ *   move(offset) -> self
+ *
+ * @return [self]
+ */
 static VALUE View_move(VALUE self, VALUE rb_move) {
     sfView_move(Get_View_Struct(self), vec2f_from_rb(rb_move));
     return self;
 }
 
+/* call-seq:
+ *   rotate(angle) -> self
+ *
+ * @return [self]
+ */
 static VALUE View_rotate(VALUE self, VALUE rb_angle) {
     sfView_rotate(Get_View_Struct(self), NUM2DBL(rb_angle));
 
     return self;
 }
 
+/* call-seq:
+ *   zoom(factor) -> self
+ *
+ * Multiplies the view's size by +factor+.
+ *
+ * @return [self]
+ */
 static VALUE View_zoom(VALUE self, VALUE rb_zoom) {
     sfView_zoom(Get_View_Struct(self), NUM2DBL(rb_zoom));
 
     return self;
 }
 
+/* call-seq: copy -> View
+ *
+ * @return [View] an independent copy
+ */
 static VALUE View_copy(VALUE self) {
     return Get_Casting_View(sfView_copy(Get_View_Struct(self)));
 }
 
-void Init_View(VALUE rb_module) {
-    rb_cView = rb_define_class_under(rb_module, "View", rb_cObject);
+/* Document-class: SFML::View
+ * A 2D camera: the region of the scene visible on a render target, and
+ * where on that target it is shown.
+ *
+ * @!attribute rotation
+ *   @return [Float] degrees
+ * @!attribute size
+ *   @return [Vector2]
+ * @!attribute center
+ *   @return [Vector2]
+ * @!attribute viewport
+ *   @return [Rect] the target-relative (0..1) rectangle this view renders into
+ * @!attribute scissor
+ *   @return [Rect]
+ */
+void Init_View(VALUE rb_mSFML) {
+    rb_cView = rb_define_class_under(rb_mSFML, "View", rb_cObject);
 
     rb_define_singleton_method(rb_cView, "new", View_new, 0);
     rb_define_singleton_method(rb_cView, "from_rect", View_s_from_rect, 1);
