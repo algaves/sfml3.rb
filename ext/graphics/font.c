@@ -225,12 +225,18 @@ static VALUE Font_get_info(VALUE self) {
     return rb_str_new_cstr(info.family != NULL ? info.family : "");
 }
 
+static VALUE Font_alloc(VALUE klass) {
+    (void)klass;
+    rb_raise(rb_eNotImpError, "use Font.from_file, Font.from_memory or Font.from_stream");
+}
+
 /* Document-class: SFML::Font
  * A font face used to render text, loaded from a file, memory buffer or
  * stream. Glyphs are rasterized and cached lazily per character size.
  */
 void Init_Font(VALUE rb_mSFML) {
     rb_cFont = rb_define_class_under(rb_mSFML, "Font", rb_cObject);
+    rb_define_alloc_func(rb_cFont, Font_alloc);
 
     rb_define_singleton_method(rb_cFont, "from_file", Font_from_file, 1);
     rb_define_singleton_method(rb_cFont, "from_memory", Font_from_memory, 1);

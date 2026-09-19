@@ -130,6 +130,29 @@ static VALUE FtpListingResponse_wrap(sfFtpListingResponse* handle) {
     return TypedData_Wrap_Struct(rb_cFtpListingResponse, &FtpListingResponse_data_type, ptr);
 }
 
+static VALUE Ftp_alloc(VALUE klass) {
+    (void)klass;
+    return Ftp_wrap(sfFtp_create());
+}
+
+static VALUE FtpResponse_alloc(VALUE klass) {
+    (void)klass;
+    rb_raise(rb_eNotImpError, "FTP response objects are returned by Ftp methods and cannot be "
+                              "constructed directly");
+}
+
+static VALUE FtpDirectoryResponse_alloc(VALUE klass) {
+    (void)klass;
+    rb_raise(rb_eNotImpError, "FTP response objects are returned by Ftp methods and cannot be "
+                              "constructed directly");
+}
+
+static VALUE FtpListingResponse_alloc(VALUE klass) {
+    (void)klass;
+    rb_raise(rb_eNotImpError, "FTP response objects are returned by Ftp methods and cannot be "
+                              "constructed directly");
+}
+
 /* call-seq:
  *   Ftp.new -> Ftp
  *
@@ -137,8 +160,8 @@ static VALUE FtpListingResponse_wrap(sfFtpListingResponse* handle) {
  *
  * @return [Ftp]
  */
-static VALUE Ftp_new(VALUE klass) {
-    return Ftp_wrap(sfFtp_create());
+static VALUE Ftp_initialize(VALUE self) {
+    return self;
 }
 
 /* call-seq:
@@ -550,22 +573,26 @@ static VALUE FtpListingResponse_name(VALUE self, VALUE rb_index) {
  */
 void Init_Ftp(VALUE rb_mSFML) {
     rb_cFtp = rb_define_class_under(rb_mSFML, "Ftp", rb_cObject);
+    rb_define_alloc_func(rb_cFtp, Ftp_alloc);
     /* Document-class: SFML::FtpResponse
      * The status and message returned by most Ftp commands.
      */
     rb_cFtpResponse = rb_define_class_under(rb_mSFML, "FtpResponse", rb_cObject);
+    rb_define_alloc_func(rb_cFtpResponse, FtpResponse_alloc);
     /* Document-class: SFML::FtpDirectoryResponse
      * An FtpResponse specialization returned by Ftp#working_directory,
      * additionally carrying the directory path.
      */
     rb_cFtpDirectoryResponse = rb_define_class_under(rb_mSFML, "FtpDirectoryResponse", rb_cObject);
+    rb_define_alloc_func(rb_cFtpDirectoryResponse, FtpDirectoryResponse_alloc);
     /* Document-class: SFML::FtpListingResponse
      * An FtpResponse specialization returned by Ftp#directory_listing,
      * additionally carrying the list of filenames.
      */
     rb_cFtpListingResponse = rb_define_class_under(rb_mSFML, "FtpListingResponse", rb_cObject);
+    rb_define_alloc_func(rb_cFtpListingResponse, FtpListingResponse_alloc);
 
-    rb_define_singleton_method(rb_cFtp, "new", Ftp_new, 0);
+    rb_define_method(rb_cFtp, "initialize", Ftp_initialize, 0);
 
     rb_define_method(rb_cFtp, "connect", Ftp_connect, -1);
     rb_define_method(rb_cFtp, "login_anonymous", Ftp_login_anonymous, 0);

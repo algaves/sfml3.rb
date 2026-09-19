@@ -56,6 +56,10 @@ static VALUE RenderStates_wrap(VALUE klass, RenderStates* states) {
     return TypedData_Wrap_Struct(klass, &RenderStates_data_type, states);
 }
 
+static VALUE RenderStates_alloc(VALUE klass) {
+    return RenderStates_wrap(klass, RenderStates_create());
+}
+
 /* call-seq:
  *   RenderState.new         -> RenderState
  *   RenderState.new(matrix) -> RenderState
@@ -67,21 +71,14 @@ static VALUE RenderStates_wrap(VALUE klass, RenderStates* states) {
  * @return [RenderState]
  * @raise [ArgumentError] if given more than one argument
  */
-static VALUE RenderStates_new(int argc, VALUE* argv, VALUE klass) {
-    RenderStates* states;
-    VALUE self;
-
+static VALUE RenderStates_initialize(int argc, VALUE* argv, VALUE self) {
     if (argc > 1) {
         raise_invalid_arguments_excepted(1, argc);
     }
 
-    states = RenderStates_create();
-
     if (argc == 1) {
-        states->c.transform = Transform_ArrayToTransform(argv[0]);
+        Get_RenderState_Struct(self)->transform = Transform_ArrayToTransform(argv[0]);
     }
-
-    self = RenderStates_wrap(klass, states);
 
     return self;
 }
@@ -282,7 +279,8 @@ static VALUE RenderStates_set_shader(VALUE self, VALUE rb_shader) {
 void Init_RenderState(VALUE rb_mSFML) {
     rb_cRenderState = rb_define_class_under(rb_mSFML, "RenderState", rb_cObject);
 
-    rb_define_singleton_method(rb_cRenderState, "new", RenderStates_new, -1);
+    rb_define_alloc_func(rb_cRenderState, RenderStates_alloc);
+    rb_define_method(rb_cRenderState, "initialize", RenderStates_initialize, -1);
 
     // setters
     rb_define_method(rb_cRenderState, "transform=", RenderStates_set_transform, 1);

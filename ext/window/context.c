@@ -23,6 +23,16 @@ static sfContext* Get_Context_Struct(VALUE self) {
     return ptr;
 }
 
+static VALUE Context_alloc(VALUE klass) {
+    sfContext* context = sfContext_create();
+
+    if (context == NULL) {
+        rb_raise(rb_eRuntimeError, "failed to create context");
+    }
+
+    return TypedData_Wrap_Struct(klass, &Context_data_type, context);
+}
+
 /* call-seq:
  *   Context.new -> Context
  *
@@ -31,16 +41,7 @@ static sfContext* Get_Context_Struct(VALUE self) {
  * @return [Context]
  * @raise [RuntimeError] if context creation fails
  */
-static VALUE Context_new(VALUE klass) {
-    sfContext* context = sfContext_create();
-    VALUE self;
-
-    if (context == NULL) {
-        rb_raise(rb_eRuntimeError, "failed to create context");
-    }
-
-    self = TypedData_Wrap_Struct(klass, &Context_data_type, context);
-
+static VALUE Context_initialize(VALUE self) {
     return self;
 }
 
@@ -110,7 +111,9 @@ static VALUE Context_active_context_id(VALUE klass) {
 void Init_Context(VALUE rb_mSFML) {
     rb_cContext = rb_define_class_under(rb_mSFML, "Context", rb_cObject);
 
-    rb_define_singleton_method(rb_cContext, "new", Context_new, 0);
+    rb_define_alloc_func(rb_cContext, Context_alloc);
+    rb_define_method(rb_cContext, "initialize", Context_initialize, 0);
+
     rb_define_singleton_method(rb_cContext, "extension_available?", Context_extension_available, 1);
     rb_define_singleton_method(rb_cContext, "function", Context_get_function, 1);
     rb_define_singleton_method(rb_cContext, "active_context_id", Context_active_context_id, 0);

@@ -193,6 +193,26 @@ static void SoundStream_on_seek(sfTime time, void* userData) {
     run_on_ruby_thread(SoundStream_seek_run, &ctx, SOUND_STREAM_CALLBACK_TIMEOUT_MS);
 }
 
+static VALUE SoundStream_alloc(VALUE klass) {
+    SoundStream* ptr = malloc(sizeof(SoundStream));
+    VALUE self;
+
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate sound stream");
+    }
+
+    ptr->source.handle = NULL;
+    ptr->source.effect_slot = -1;
+    ptr->rb_self = Qnil;
+    ptr->samples = NULL;
+    ptr->samples_capacity = 0;
+
+    self = TypedData_Wrap_Struct(klass, &SoundStream_data_type, ptr);
+    ptr->rb_self = self;
+
+    return self;
+}
+
 /* call-seq:
  *   SoundStream.new(channel_count, sample_rate)             -> SoundStream
  *   SoundStream.new(channel_count, sample_rate, channel_map) -> SoundStream
@@ -206,13 +226,14 @@ static void SoundStream_on_seek(sfTime time, void* userData) {
  * @raise [NotImplementedError] if the subclass does not define #on_get_data
  * @raise [RuntimeError] if the underlying stream could not be created
  */
-static VALUE SoundStream_new(int argc, VALUE* argv, VALUE klass) {
+static VALUE SoundStream_initialize(int argc, VALUE* argv, VALUE self) {
     VALUE rb_channel_count, rb_sample_rate, rb_channel_map;
     sfSoundChannel* channel_map = NULL;
     size_t channel_map_size = 0;
     SoundStream* ptr;
-    VALUE self;
     long i;
+
+    TypedData_Get_Struct(self, SoundStream, &SoundStream_data_type, ptr);
 
     rb_scan_args(argc, argv, "21", &rb_channel_count, &rb_sample_rate, &rb_channel_map);
 
@@ -229,19 +250,7 @@ static VALUE SoundStream_new(int argc, VALUE* argv, VALUE klass) {
         }
     }
 
-    ptr = malloc(sizeof(SoundStream));
-    ptr->source.handle = NULL;
-    ptr->source.effect_slot = -1;
-    ptr->rb_self = Qnil;
-    ptr->samples = NULL;
-    ptr->samples_capacity = 0;
-
-    self = TypedData_Wrap_Struct(klass, &SoundStream_data_type, ptr);
-    ptr->rb_self = self;
-
     if (!rb_respond_to(self, rb_intern("on_get_data"))) {
-        /* The wrapper is already owned by Ruby; its dfree tolerates a NULL
-           handle, so raising here just leaves it to be collected. */
         free(channel_map);
         rb_raise(rb_eNotImpError, "subclass must define #on_get_data");
     }
@@ -447,7 +456,8 @@ static VALUE SoundStream_channel_map(VALUE self) {
 void Init_SoundStream(VALUE rb_mSFML) {
     rb_cSoundStream = rb_define_class_under(rb_mSFML, "SoundStream", rb_cObject);
 
-    rb_define_singleton_method(rb_cSoundStream, "new", SoundStream_new, -1);
+    rb_define_alloc_func(rb_cSoundStream, SoundStream_alloc);
+    rb_define_method(rb_cSoundStream, "initialize", SoundStream_initialize, -1);
 
     rb_define_method(rb_cSoundStream, "channel_count", SoundStream_channel_count, 0);
     rb_define_method(rb_cSoundStream, "sample_rate", SoundStream_sample_rate, 0);

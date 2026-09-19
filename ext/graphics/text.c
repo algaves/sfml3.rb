@@ -28,7 +28,10 @@ static void Text_mark(void* ptr) {
 }
 
 static void Text_free(void* ptr) {
-    sfText_destroy(((Text*)ptr)->text);
+    if (((Text*)ptr)->text != NULL) {
+        sfText_destroy(((Text*)ptr)->text);
+    }
+
     free(ptr);
 }
 
@@ -61,6 +64,24 @@ static VALUE Text_wrap(VALUE klass, sfText* text) {
     return TypedData_Wrap_Struct(klass, &Text_data_type, ptr);
 }
 
+static VALUE Text_initialize_copy(VALUE self, VALUE other) {
+    (void)other;
+    rb_raise(rb_eTypeError, "can't copy a %s", rb_obj_classname(self));
+}
+
+static VALUE Text_alloc(VALUE klass) {
+    Text* ptr = malloc(sizeof(Text));
+
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate text");
+    }
+
+    ptr->text = NULL;
+    ptr->rb_font = Qnil;
+
+    return TypedData_Wrap_Struct(klass, &Text_data_type, ptr);
+}
+
 /* call-seq:
  *   Text.new(font)                        -> Text
  *   Text.new(font, string)                -> Text
@@ -73,8 +94,8 @@ static VALUE Text_wrap(VALUE klass, sfText* text) {
  * @return [Text]
  * @raise [ArgumentError] if +font+ is not a Font
  */
-static VALUE Text_new(int argc, VALUE* argv, VALUE klass) {
-    VALUE rb_font, rb_string, rb_size, self;
+static VALUE Text_initialize(int argc, VALUE* argv, VALUE self) {
+    VALUE rb_font, rb_string, rb_size;
     Text* ptr;
 
     rb_scan_args(argc, argv, "12", &rb_font, &rb_string, &rb_size);
@@ -83,16 +104,14 @@ static VALUE Text_new(int argc, VALUE* argv, VALUE klass) {
         raise_invalid_argument_class(Get_Klass_Font());
     }
 
-    ptr = malloc(sizeof(Text));
+    TypedData_Get_Struct(self, Text, &Text_data_type, ptr);
+
     ptr->text = sfText_create(Get_Font_Struct(rb_font));
     ptr->rb_font = rb_font;
 
     if (ptr->text == NULL) {
-        free(ptr);
         rb_raise(rb_eRuntimeError, "failed to create text");
     }
-
-    self = TypedData_Wrap_Struct(klass, &Text_data_type, ptr);
 
     if (!NIL_P(rb_string)) {
         sfText_setString(ptr->text, StringValueCStr(rb_string));
@@ -594,9 +613,12 @@ static VALUE Text_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
 void Init_Text(VALUE rb_mSFML) {
     rb_cText = rb_define_class_under(rb_mSFML, "Text", rb_cObject);
 
+    rb_define_alloc_func(rb_cText, Text_alloc);
+
     rb_include_module(rb_cText, Get_Module_Drawable());
 
-    rb_define_singleton_method(rb_cText, "new", Text_new, -1);
+    rb_define_method(rb_cText, "initialize", Text_initialize, -1);
+    rb_define_private_method(rb_cText, "initialize_copy", Text_initialize_copy, 1);
 
     rb_define_method(rb_cText, "copy", Text_copy, 0);
     rb_define_method(rb_cText, "font", Text_get_font, 0);

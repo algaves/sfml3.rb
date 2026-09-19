@@ -15,7 +15,9 @@
 static VALUE rb_cRenderTexture;
 
 static void RenderTexture_free(void* ptr) {
-    sfRenderTexture_destroy(ptr);
+    if (ptr != NULL) {
+        sfRenderTexture_destroy(ptr);
+    }
 }
 
 static const rb_data_type_t RenderTexture_data_type = {
@@ -29,12 +31,13 @@ sfRenderTexture* Get_RenderTexture_Struct(VALUE self) {
     return ptr;
 }
 
-static VALUE RenderTexture_wrap(VALUE klass, sfRenderTexture* render_texture) {
-    if (render_texture == NULL) {
-        rb_raise(rb_eRuntimeError, "failed to create render texture");
-    }
+static VALUE RenderTexture_initialize_copy(VALUE self, VALUE other) {
+    (void)other;
+    rb_raise(rb_eTypeError, "can't copy a %s", rb_obj_classname(self));
+}
 
-    return TypedData_Wrap_Struct(klass, &RenderTexture_data_type, render_texture);
+static VALUE RenderTexture_alloc(VALUE klass) {
+    return TypedData_Wrap_Struct(klass, &RenderTexture_data_type, NULL);
 }
 
 /* call-seq:
@@ -46,14 +49,23 @@ static VALUE RenderTexture_wrap(VALUE klass, sfRenderTexture* render_texture) {
  * @return [RenderTexture]
  * @raise [RuntimeError] if creation fails
  */
-static VALUE RenderTexture_new(int argc, VALUE* argv, VALUE klass) {
+static VALUE RenderTexture_initialize(int argc, VALUE* argv, VALUE self) {
     VALUE rb_size, rb_settings;
+    sfRenderTexture* render_texture;
 
     rb_scan_args(argc, argv, "11", &rb_size, &rb_settings);
 
     (void)rb_settings;
 
-    return RenderTexture_wrap(klass, sfRenderTexture_create(vec2u_from_rb(rb_size), NULL));
+    render_texture = sfRenderTexture_create(vec2u_from_rb(rb_size), NULL);
+
+    if (render_texture == NULL) {
+        rb_raise(rb_eRuntimeError, "failed to create render texture");
+    }
+
+    DATA_PTR(self) = render_texture;
+
+    return self;
 }
 
 /* call-seq: size -> Vector2
@@ -314,7 +326,10 @@ static VALUE RenderTexture_maximum_antialiasing_level(VALUE klass) {
 void Init_RenderTexture(VALUE rb_mSFML) {
     rb_cRenderTexture = rb_define_class_under(rb_mSFML, "RenderTexture", rb_cObject);
 
-    rb_define_singleton_method(rb_cRenderTexture, "new", RenderTexture_new, -1);
+    rb_define_alloc_func(rb_cRenderTexture, RenderTexture_alloc);
+    rb_define_method(rb_cRenderTexture, "initialize", RenderTexture_initialize, -1);
+    rb_define_private_method(rb_cRenderTexture, "initialize_copy", RenderTexture_initialize_copy,
+                             1);
     rb_define_singleton_method(rb_cRenderTexture, "maximum_antialiasing_level",
                                RenderTexture_maximum_antialiasing_level, 0);
 

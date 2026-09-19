@@ -66,12 +66,19 @@ static VALUE Glyph_get_texture_rect(VALUE self) {
     return int_rect_to_rb(Get_Glyph(self)->glyph.textureRect);
 }
 
+static VALUE Glyph_alloc(VALUE klass) {
+    (void)klass;
+    rb_raise(rb_eNotImpError,
+             "glyph objects are returned by Font#glyph and cannot be constructed directly");
+}
+
 /* Document-class: SFML::Glyph
  * A single character's rendering metrics and texture location, as returned
  * by Font#glyph. Read-only.
  */
 void Init_Glyph(VALUE rb_mSFML) {
     rb_cGlyph = rb_define_class_under(rb_mSFML, "Glyph", rb_cObject);
+    rb_define_alloc_func(rb_cGlyph, Glyph_alloc);
 
     rb_define_method(rb_cGlyph, "advance", Glyph_get_advance, 0);
     rb_define_method(rb_cGlyph, "bounds", Glyph_get_bounds, 0);

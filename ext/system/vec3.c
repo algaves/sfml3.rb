@@ -21,6 +21,20 @@ static const rb_data_type_t Vector3_data_type = {
     .function = {.dmark = NULL, .dfree = Vector3_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
+static VALUE Vector3_alloc(VALUE klass) {
+    Vector3* ptr = malloc(sizeof(Vector3));
+
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate vector");
+    }
+
+    ptr->vec.x = 0;
+    ptr->vec.y = 0;
+    ptr->vec.z = 0;
+
+    return TypedData_Wrap_Struct(klass, &Vector3_data_type, ptr);
+}
+
 /* call-seq:
  *   Vector3.new                -> Vector3(0, 0, 0)
  *   Vector3.new(x, y, z)       -> Vector3(x, y, z)
@@ -34,8 +48,7 @@ static const rb_data_type_t Vector3_data_type = {
  * @raise [ArgumentError] if given an Array shorter than 3 elements, or an
  *   argument count other than 0, 1 or 3
  */
-static VALUE Vector3_new(int argc, VALUE* argv, VALUE klass) {
-    VALUE self;
+static VALUE Vector3_initialize(int argc, VALUE* argv, VALUE self) {
     Vector3* ptr;
     float x = 0;
     float y = 0;
@@ -62,17 +75,10 @@ static VALUE Vector3_new(int argc, VALUE* argv, VALUE klass) {
         raise_invalid_arguments_excepted(3, argc);
     }
 
-    ptr = malloc(sizeof(Vector3));
-
-    if (ptr == NULL) {
-        rb_raise(rb_eNoMemError, "failed to allocate vector");
-    }
-
+    ptr = Get_Vector3_Struct(self);
     ptr->vec.x = x;
     ptr->vec.y = y;
     ptr->vec.z = z;
-
-    self = TypedData_Wrap_Struct(klass, &Vector3_data_type, ptr);
 
     return self;
 }
@@ -286,7 +292,8 @@ void Init_Vector3(VALUE rb_mSFML) {
 
     rb_include_module(rb_cVector3, rb_mEnumerable);
 
-    rb_define_singleton_method(rb_cVector3, "new", Vector3_new, -1);
+    rb_define_alloc_func(rb_cVector3, Vector3_alloc);
+    rb_define_method(rb_cVector3, "initialize", Vector3_initialize, -1);
 
     rb_define_method(rb_cVector3, "x", Vector3_get_x, 0);
     rb_define_method(rb_cVector3, "y", Vector3_get_y, 0);

@@ -78,6 +78,18 @@ static sfStencilUpdateOperation operation_from_rb(VALUE rb_value) {
     return sfStencilUpdateOperationKeep;
 }
 
+static VALUE StencilMode_alloc(VALUE klass) {
+    StencilMode* ptr = malloc(sizeof(StencilMode));
+
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate stencil mode");
+    }
+
+    ptr->mode = sfStencilMode_default;
+
+    return TypedData_Wrap_Struct(klass, &StencilMode_data_type, ptr);
+}
+
 /* call-seq:
  *   StencilMode.new -> StencilMode
  *   StencilMode.new(comparison, update_operation, reference, mask, stencil_only) -> StencilMode
@@ -90,9 +102,7 @@ static sfStencilUpdateOperation operation_from_rb(VALUE rb_value) {
  * @return [StencilMode]
  * @raise [ArgumentError] if given an argument count other than 0 or 5
  */
-static VALUE StencilMode_new(int argc, VALUE* argv, VALUE klass) {
-    VALUE self;
-    StencilMode* ptr;
+static VALUE StencilMode_initialize(int argc, VALUE* argv, VALUE self) {
     sfStencilMode mode = sfStencilMode_default;
 
     if (argc == 5) {
@@ -105,10 +115,7 @@ static VALUE StencilMode_new(int argc, VALUE* argv, VALUE klass) {
         raise_invalid_arguments_excepted(5, argc);
     }
 
-    ptr = malloc(sizeof(StencilMode));
-    ptr->mode = mode;
-
-    self = TypedData_Wrap_Struct(klass, &StencilMode_data_type, ptr);
+    ((StencilMode*)Get_StencilMode_Struct(self))->mode = mode;
 
     return self;
 }
@@ -280,7 +287,8 @@ static VALUE StencilMode_eql(VALUE self, VALUE rb_other) {
 void Init_StencilMode(VALUE rb_mSFML) {
     rb_cStencilMode = rb_define_class_under(rb_mSFML, "StencilMode", rb_cObject);
 
-    rb_define_singleton_method(rb_cStencilMode, "new", StencilMode_new, -1);
+    rb_define_alloc_func(rb_cStencilMode, StencilMode_alloc);
+    rb_define_method(rb_cStencilMode, "initialize", StencilMode_initialize, -1);
 
     rb_define_method(rb_cStencilMode, "comparison", StencilMode_get_comparison, 0);
     rb_define_method(rb_cStencilMode, "update_operation", StencilMode_get_operation, 0);

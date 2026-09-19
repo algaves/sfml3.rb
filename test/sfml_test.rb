@@ -905,4 +905,32 @@ class SfmlTest < Minitest::Test
   def test_ftp_construction
     assert_kind_of Ftp, Ftp.new
   end
+
+  # Ruby warns (and undefines #allocate) whenever a T_DATA class is wrapped
+  # without an allocator. Constructing every display-free class in a child
+  # process catches a binding that forgot rb_define_alloc_func; the graphics
+  # classes that open a context cannot be built here without a display.
+  def test_no_allocator_warnings_on_construction
+    lib = File.expand_path('../lib', __dir__)
+    script = <<~RUBY
+      require 'sfml'
+      SFML::Color.new(1, 2, 3)
+      SFML::BlendMode.new
+      SFML::IpAddress.new(1)
+      SFML::Vector2.new(1, 2)
+      SFML::Vector3.new(1, 2, 3)
+      SFML::Time.new(1)
+      SFML::Clock.new
+      SFML::View.new
+      SFML::Event.new
+      SFML::VideoMode.new(1, 2, 3)
+      SFML::RenderState.new
+      SFML::Transformable.new
+      SFML::Circle.new(1)
+    RUBY
+
+    output = IO.popen([RbConfig.ruby, "-I#{lib}", '-e', script], err: %i[child out], &:read)
+
+    refute_includes output, 'undefining the allocator'
+  end
 end

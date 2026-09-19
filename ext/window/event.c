@@ -14,16 +14,6 @@
 
 static VALUE rb_cEvent;
 
-static sfEvent* Event_create() {
-    sfEvent* event = malloc(sizeof(sfEvent));
-
-    if (event == NULL) {
-        rb_raise(rb_eNoMemError, "failed to allocate event");
-    }
-
-    return event;
-}
-
 static void Event_free(void* ptr) {
     free(ptr);
 }
@@ -33,6 +23,18 @@ static const rb_data_type_t Event_data_type = {
     .function = {.dmark = NULL, .dfree = Event_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
+static VALUE Event_alloc(VALUE klass) {
+    sfEvent* event = malloc(sizeof(sfEvent));
+
+    if (event == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate event");
+    }
+
+    *event = (sfEvent){0};
+
+    return TypedData_Wrap_Struct(klass, &Event_data_type, event);
+}
+
 /* call-seq:
  *   Event.new -> Event
  *
@@ -40,17 +42,6 @@ static const rb_data_type_t Event_data_type = {
  *
  * @return [Event]
  */
-static VALUE Event_new(VALUE klass) {
-    VALUE self;
-    sfEvent* event;
-
-    event = Event_create();
-    self = TypedData_Wrap_Struct(klass, &Event_data_type, event);
-
-    rb_obj_call_init(self, 0, NULL);
-
-    return self;
-}
 
 /* call-seq: initialize -> self
  *
@@ -60,7 +51,7 @@ static VALUE Event_new(VALUE klass) {
  *   internally (e.g. by #poll_event!).
  * @return [self]
  */
-static VALUE Event_init(VALUE self) {
+static VALUE Event_initialize(VALUE self) {
     return self;
 }
 
@@ -306,9 +297,8 @@ static VALUE Event_get_sensor(VALUE self) {
 void Init_Event(VALUE rb_mSFML) {
     rb_cEvent = rb_define_class_under(rb_mSFML, "Event", rb_cObject);
 
-    rb_define_singleton_method(rb_cEvent, "new", Event_new, 0);
-
-    rb_define_method(rb_cEvent, "initialize", Event_init, 0);
+    rb_define_alloc_func(rb_cEvent, Event_alloc);
+    rb_define_method(rb_cEvent, "initialize", Event_initialize, 0);
 
     rb_define_method(rb_cEvent, "type", Event_type, 0);
     rb_define_method(rb_cEvent, "size", Event_get_size, 0);

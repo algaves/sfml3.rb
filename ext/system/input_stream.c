@@ -190,6 +190,23 @@ static int64_t InputStream_get_size(void* userData) {
     return ctx.result;
 }
 
+static VALUE InputStream_alloc(VALUE klass) {
+    InputStream* stream = malloc(sizeof(InputStream));
+
+    if (stream == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate input stream");
+    }
+
+    stream->rb_io = Qnil;
+    stream->stream.read = InputStream_read;
+    stream->stream.seek = InputStream_seek;
+    stream->stream.tell = InputStream_tell;
+    stream->stream.getSize = InputStream_get_size;
+    stream->stream.userData = stream;
+
+    return TypedData_Wrap_Struct(klass, &InputStream_data_type, stream);
+}
+
 /* call-seq:
  *   InputStream.new(io) -> InputStream
  *
@@ -200,24 +217,16 @@ static int64_t InputStream_get_size(void* userData) {
  * @return [InputStream]
  * @raise [ArgumentError] if +io+ does not respond to +#read+
  */
-static VALUE InputStream_new(VALUE klass, VALUE rb_io) {
-    VALUE self;
+static VALUE InputStream_initialize(VALUE self, VALUE rb_io) {
     InputStream* stream;
 
     if (!rb_respond_to(rb_io, rb_intern("read"))) {
         rb_raise(rb_eArgError, "stream object must respond to #read");
     }
 
-    stream = malloc(sizeof(InputStream));
+    TypedData_Get_Struct(self, InputStream, &InputStream_data_type, stream);
 
     stream->rb_io = rb_io;
-    stream->stream.read = InputStream_read;
-    stream->stream.seek = InputStream_seek;
-    stream->stream.tell = InputStream_tell;
-    stream->stream.getSize = InputStream_get_size;
-    stream->stream.userData = stream;
-
-    self = TypedData_Wrap_Struct(klass, &InputStream_data_type, stream);
 
     return self;
 }
@@ -240,7 +249,8 @@ static VALUE InputStream_get_io(VALUE self) {
 void Init_InputStream(VALUE rb_mSFML) {
     rb_cInputStream = rb_define_class_under(rb_mSFML, "InputStream", rb_cObject);
 
-    rb_define_singleton_method(rb_cInputStream, "new", InputStream_new, 1);
+    rb_define_alloc_func(rb_cInputStream, InputStream_alloc);
+    rb_define_method(rb_cInputStream, "initialize", InputStream_initialize, 1);
 
     rb_define_method(rb_cInputStream, "io", InputStream_get_io, 0);
 }
