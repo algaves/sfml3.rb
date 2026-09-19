@@ -2,7 +2,7 @@ module SFML
   class Shape
     include Drawable
 
-    def self.new: () -> Shape
+    def initialize: () -> void
 
     def update!: () -> self
     def move: (Vector2 | Array[Float] offset) -> self

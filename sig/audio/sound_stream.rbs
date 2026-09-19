@@ -1,6 +1,6 @@
 module SFML
   class SoundStream
-    def self.new: (Integer channel_count, Integer sample_rate, ?Array[Symbol] channel_map) -> SoundStream
+    def initialize: (Integer channel_count, Integer sample_rate, ?Array[Symbol] channel_map) -> void
 
     def channel_count: () -> Integer
     def sample_rate: () -> Integer

@@ -1,6 +1,6 @@
 module SFML
   class Window < WindowBase
-    def self.new: (VideoMode video_mode, String title, ?Symbol | Array[Symbol] | Integer style, ?Symbol state, ?ContextSettings? settings) -> Window
+    def initialize: (VideoMode video_mode, String title, ?Symbol | Array[Symbol] | Integer style, ?Symbol state, ?ContextSettings? settings) -> void
     def self.from_handle: (Integer handle, ?ContextSettings? settings) -> Window
 
     def clear: (?untyped color) -> self

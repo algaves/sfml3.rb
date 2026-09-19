@@ -2,7 +2,7 @@ module SFML
   class RenderTexture
     include RenderTarget
 
-    def self.new: (Vector2 size, ?untyped settings) -> RenderTexture
+    def initialize: (Vector2 size, ?untyped settings) -> void
     def self.maximum_antialiasing_level: () -> Integer
 
     def size: () -> Vector2

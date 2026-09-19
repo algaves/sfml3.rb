@@ -2,7 +2,7 @@ module SFML
   class ConvexShape
     include Drawable
 
-    def self.new: (?Integer point_count) -> ConvexShape
+    def initialize: (?Integer point_count) -> void
 
     def copy: () -> ConvexShape
     def move: (Vector2 | Array[Float] offset) -> self

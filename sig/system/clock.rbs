@@ -1,6 +1,6 @@
 module SFML
   class Clock
-    def self.new: () -> Clock
+    def initialize: () -> void
 
     def elapsed_time: () -> Time
     def restart!: () -> Time

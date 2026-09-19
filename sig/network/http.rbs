@@ -1,13 +1,13 @@
 module SFML
   class Http
-    def self.new: () -> Http
+    def initialize: () -> void
 
     def set_host: (String host, ?Integer port) -> self
     def send_request: (HttpRequest request, ?Time timeout) -> HttpResponse
   end
 
   class HttpRequest
-    def self.new: () -> HttpRequest
+    def initialize: () -> void
 
     def set_field: (String field, String value) -> String
     def method=: (Symbol | Integer value) -> (Symbol | Integer)

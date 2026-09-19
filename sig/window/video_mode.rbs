@@ -1,6 +1,6 @@
 module SFML
   class VideoMode
-    def self.new: (Integer width, Integer height, Integer bits_per_pixel) -> VideoMode
+    def initialize: (Integer width, Integer height, Integer bits_per_pixel) -> void
     def self.desktop_mode: () -> VideoMode
     def self.fullscreen_modes: () -> Array[VideoMode]
 

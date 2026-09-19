@@ -1,8 +1,6 @@
 module SFML
   class Target
-    def self.new: (untyped window) -> Target
-
-    def initialize: () -> void
+    def initialize: (untyped window) -> void
     def draw: (untyped drawable, untyped state) -> nil
     def view: () -> untyped
     def view=: (untyped value) -> nil

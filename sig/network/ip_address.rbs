@@ -1,6 +1,6 @@
 module SFML
   class IpAddress
-    def self.new: (Integer | String | IpAddress address) -> IpAddress
+    def initialize: (Integer | String | IpAddress address) -> void
     def self.from_string: (String address) -> IpAddress
     def self.from_bytes: (Integer byte0, Integer byte1, Integer byte2, Integer byte3) -> IpAddress
     def self.from_integer: (Integer value) -> IpAddress

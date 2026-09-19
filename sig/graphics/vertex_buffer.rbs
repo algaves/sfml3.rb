@@ -1,9 +1,9 @@
 module SFML
   class VertexBuffer
-    def self.new: () -> VertexBuffer
-                 | (Integer count) -> VertexBuffer
-                 | (Integer count, Symbol primitive) -> VertexBuffer
-                 | (Integer count, Symbol primitive, Symbol usage) -> VertexBuffer
+    def initialize: () -> void
+                 | (Integer count) -> void
+                 | (Integer count, Symbol primitive) -> void
+                 | (Integer count, Symbol primitive, Symbol usage) -> void
     def self.available?: () -> bool
 
     def copy: () -> VertexBuffer

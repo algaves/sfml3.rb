@@ -1,9 +1,9 @@
 module SFML
   class Vertex
-    def self.new: () -> Vertex
-                 | (Vector2 position) -> Vertex
-                 | (Vector2 position, untyped color) -> Vertex
-                 | (Vector2 position, untyped color, Vector2 tex_coords) -> Vertex
+    def initialize: () -> void
+                 | (Vector2 position) -> void
+                 | (Vector2 position, untyped color) -> void
+                 | (Vector2 position, untyped color, Vector2 tex_coords) -> void
 
     def position: () -> Vector2
     def position=: (Vector2 value) -> Vector2

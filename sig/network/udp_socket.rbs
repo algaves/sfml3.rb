@@ -1,6 +1,6 @@
 module SFML
   class UdpSocket
-    def self.new: () -> UdpSocket
+    def initialize: () -> void
     def self.any_port: () -> Integer
     def self.max_datagram_size: () -> Integer
 

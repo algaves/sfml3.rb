@@ -1,6 +1,5 @@
 module SFML
   class View
-    def self.new: () -> View
     def self.from_rect: (untyped rect) -> View
 
     def initialize: () -> void

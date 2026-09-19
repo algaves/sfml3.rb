@@ -1,6 +1,6 @@
 module SFML
   class Ftp
-    def self.new: () -> Ftp
+    def initialize: () -> void
 
     def connect: (IpAddress | String | Integer address, ?Integer port, ?Time timeout) -> FtpResponse
     def login_anonymous: () -> FtpResponse

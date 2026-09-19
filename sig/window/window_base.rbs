@@ -1,6 +1,6 @@
 module SFML
   class WindowBase
-    def self.new: (VideoMode video_mode, String title, ?Symbol | Array[Symbol] | Integer style, ?Symbol state) -> WindowBase
+    def initialize: (VideoMode video_mode, String title, ?Symbol | Array[Symbol] | Integer style, ?Symbol state) -> void
     def self.from_handle: (Integer handle) -> WindowBase
 
     def is_open?: () -> bool
