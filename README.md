@@ -5,6 +5,7 @@ Ruby bindings for [SFML 3](https://www.sfml-dev.org/), via its C API, [CSFML](ht
 [![Ruby](https://img.shields.io/badge/ruby-3.1%2B-red?style=flat-square)](https://www.ruby-lang.org/)
 [![Test](https://github.com/algaves/sfml3.rb/actions/workflows/test.yaml/badge.svg)](https://github.com/algaves/sfml3.rb/actions/workflows/test.yaml)
 [![Check](https://github.com/algaves/sfml3.rb/actions/workflows/check.yaml/badge.svg)](https://github.com/algaves/sfml3.rb/actions/workflows/check.yaml)
+[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-4c9a2a?style=flat-square)](https://algaves.github.io/sfml3.rb/)
 [![Gem Version](https://img.shields.io/gem/v/sfml3-rb?style=flat-square)](https://rubygems.org/gems/sfml3-rb)
 [![Gem Downloads](https://img.shields.io/gem/dt/sfml3-rb?style=flat-square)](https://rubygems.org/gems/sfml3-rb)
 [![License](https://img.shields.io/badge/license-0BSD-green?style=flat-square)](LICENSE.md)
@@ -20,7 +21,7 @@ Latest release: **0.3.0**, bound against **CSFML 3**.
 * **A source fallback everywhere else**, which downloads and builds the pinned, checksum-verified
   dependencies at install time, so the gem works on macOS, ARM and the BSDs out of the box.
 * **Complete API documentation and types**: every class, module, method and constant is documented
-  on [rubydoc.info](https://rubydoc.info/gems/sfml3-rb) and covered by RBS signatures shipped in
+  on the [docs site](https://algaves.github.io/sfml3.rb/) and covered by RBS signatures shipped in
   the gem.
 * **A close fit to SFML's own model**: classes mirror the C++ types (Window, Texture, Sprite,
   Sound, ...) minus the parts that only exist in C++, like `std::string` and exceptions.
@@ -124,8 +125,9 @@ part of the test suite.
 
 ## Documentation
 
-* [API reference](https://rubydoc.info/gems/sfml3-rb) — every class, module, method and constant,
-  built from the YARD comments in `ext/**/*.c`.
+* [API reference](https://algaves.github.io/sfml3.rb/) — every class, module, method and constant,
+  built from the YARD comments in `ext/**/*.c` and deployed to GitHub Pages by CI. The same docs
+  are also generated on [RubyDoc.info](https://rubydoc.info/gems/sfml3-rb).
 * RBS type signatures (`sig/**/*.rbs`) ship in the gem for IDE completion (Solargraph, RubyMine)
   and static type-checking (Sorbet, Steep). Validate them with `rake rbs`.
 * [CHANGELOG.md](CHANGELOG.md) — what changed in each release.

@@ -1,0 +1,17 @@
+<meta charset="<%= charset %>">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  <%= h @page_title %>
+  <% if options.title && @page_title != options.title %>
+    &mdash; <%= h options.title %>
+  <% end %>
+</title>
+<link rel="icon" type="image/svg+xml" href="<%= mtime_url('favicon.svg') %>">
+<% stylesheets.each do |stylesheet| %>
+  <link rel="stylesheet" href="<%= mtime_url(stylesheet) %>" type="text/css">
+<% end %>
+<link rel="stylesheet" href="<%= mtime_url('css/sfml.css') %>" type="text/css">
+<%= erb :script_setup %>
+<% javascripts.each do |javascript| %>
+  <script type="text/javascript" charset="utf-8" src="<%= mtime_url(javascript) %>"></script>
+<% end %>

@@ -1,0 +1,48 @@
+name: Docs
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# GitHub Pages deploys through the Actions artifact pipeline; `id-token` is
+# what lets deploy-pages prove the artifact came from this workflow.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # No `rake ports`/`rake compile`: YARD parses the C sources statically,
+      # so this needs none of the SFML toolchain.
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
+      - name: Build API docs
+        run: bundle exec rake doc:site
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: doc
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

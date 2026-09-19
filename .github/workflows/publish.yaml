@@ -132,8 +132,10 @@ jobs:
   publish:
     needs: [source, native, verify-source]
     runs-on: ubuntu-latest
+    # `contents: write` is for attaching the built gems to the release, not for
+    # the RubyGems push (which authenticates with its own API key).
     permissions:
-      contents: read
+      contents: write
     steps:
       - uses: ruby/setup-ruby@v1
         with:
@@ -144,6 +146,14 @@ jobs:
           path: pkg
           pattern: gem-*
           merge-multiple: true
+
+      # The same gems the RubyGems step pushes, so the release page carries
+      # every package. Guarded because workflow_dispatch runs have no release.
+      - name: Attach gems to the release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${{ github.event.release.tag_name }}" pkg/*.gem --clobber
 
       - name: Publish to RubyGems
         env:
