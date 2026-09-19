@@ -10,7 +10,7 @@ Ruby bindings for [SFML 3](https://www.sfml-dev.org/), via its C API, [CSFML](ht
 [![Gem Downloads](https://img.shields.io/gem/dt/sfml3-rb?style=flat-square)](https://rubygems.org/gems/sfml3-rb)
 [![License](https://img.shields.io/badge/license-0BSD-green?style=flat-square)](LICENSE.md)
 
-Latest release: **0.3.0**, bound against **CSFML 3**.
+Latest release: **0.3.1**, bound against **CSFML 3**.
 
 ## Features
 

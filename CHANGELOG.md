@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-09-19
+
 ### Added
 * **`SFML::WindowBase`, `SFML::RenderWindow` and the `SFML::RenderTarget` module**, mirroring
   SFML 3's own hierarchy. `WindowBase` wraps `sfWindowBase` -- an OS window and event queue with
@@ -15,12 +17,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   `RenderTarget` too, so a drawable's `#draw` now accepts a `RenderWindow` or a `RenderTexture`
   directly (the legacy `Target` still works). The shared window surface is generated once, in
   `ext/window/window_base.inc`.
+* **RBS signatures are now checked against the code.** `sig/**/*.rbs` declares `SFML::VERSION`, and
+  a `Steepfile` plus the `steep` development gem add `rake steep` to type-check `lib/` against the
+  signatures. `check.yaml` runs both `rake rbs` and `rake steep`, on `main` and on `release/**`
+  PRs, which previously ran no workflow at all.
 
 ### Changed
 * `Mouse.position`, `Mouse.set_position` and `Touch.position` dispatch to the
   `*RenderWindow` or `*WindowBase` CSFML entry point depending on whether the argument is a
   Window/RenderWindow or a WindowBase, instead of passing an `sfRenderWindow*` where an
   `sfWindowBase*` is expected.
+* **RBS constructors use `def initialize`.** Every `def self.new` became
+  `def initialize: (…) -> void`, the form RubyMine links to `Foo.new` and Steep checks, and which
+  matches the C extension, where every constructor is an `initialize`.
 
 ## [0.3.0] - 2026-09-19
 
