@@ -13,6 +13,17 @@ begin
   desc 'Build API docs (alias for yard)'
   task doc: :yard
 
+  desc 'Build the themed API docs for the GitHub Pages site'
+  task 'doc:site' do
+    # Same sources and output dir as `rake yard` (both come from .yardopts),
+    # plus the custom template and assets. Kept out of .yardopts so the gem
+    # does not have to ship them and rubydoc.info stays on the stock theme.
+    sh 'bundle exec yardoc ' \
+       '--template-path yard/templates ' \
+       '--asset yard/assets/sfml.css:css/sfml.css ' \
+       '--asset yard/assets/favicon.svg:favicon.svg'
+  end
+
   desc 'Fail if any method has no description prose (yard stats uses blank?, which passes for tags-only docs)'
   task 'doc:undoc' do
     YARD.parse(Dir.glob(File.expand_path('../ext/**/*.c', __dir__)))

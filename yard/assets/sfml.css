@@ -1,0 +1,81 @@
+/* Custom skin for the sfml3-rb API docs, layered over YARD's stock style.css.
+   It is applied only by `rake doc:site` (the GitHub Pages build); the stock
+   theme is left in place for `rake yard` and rubydoc.info. */
+
+:root {
+  --sfml-ink: #1b2733;
+  --sfml-accent: #4c9a2a;
+  --sfml-bar-height: 46px;
+}
+
+body {
+  box-sizing: border-box;
+  padding-top: var(--sfml-bar-height);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    sans-serif;
+}
+
+.project_bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--sfml-bar-height);
+  padding: 0 18px;
+  background: var(--sfml-ink);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.28);
+  box-sizing: border-box;
+}
+
+.project_bar a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.project_bar .project_name {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.project_bar .project_name span {
+  color: var(--sfml-accent);
+}
+
+.project_bar nav a {
+  margin-left: 20px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.project_bar nav a:hover {
+  opacity: 1;
+  border-bottom: 2px solid var(--sfml-accent);
+}
+
+/* Keep the loading bar and the mobile nav below the fixed project bar. */
+#main_progress {
+  top: var(--sfml-bar-height);
+}
+
+@media (max-width: 920px) {
+  .nav_wrap {
+    top: var(--sfml-bar-height);
+  }
+}
+
+#content a,
+#content a:visited {
+  color: var(--sfml-accent);
+}
+
+#content h1,
+#content h2,
+#content h3 {
+  color: var(--sfml-ink);
+}
