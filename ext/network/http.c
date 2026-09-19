@@ -101,6 +101,8 @@ static VALUE HttpResponse_wrap(sfHttpResponse* handle) {
 /* call-seq:
  *   Http.new -> Http
  *
+ * Creates a new HTTP client with no host set.
+ *
  * @return [Http]
  */
 static VALUE Http_new(VALUE klass) {
@@ -152,6 +154,8 @@ static VALUE Http_send_request(int argc, VALUE* argv, VALUE self) {
 /* call-seq:
  *   HttpRequest.new -> HttpRequest
  *
+ * Creates a new HTTP request.
+ *
  * @return [HttpRequest] a new request, defaulting to a GET of +"/"+ over
  *   HTTP/1.0 with no fields or body
  */
@@ -189,6 +193,8 @@ static VALUE HttpRequest_set_method(VALUE self, VALUE rb_method) {
 /* call-seq:
  *   uri=(value) -> value
  *
+ * Sets the request URI, e.g. +"/index.html"+.
+ *
  * @return [String] +value+
  */
 static VALUE HttpRequest_set_uri(VALUE self, VALUE rb_uri) {
@@ -198,6 +204,8 @@ static VALUE HttpRequest_set_uri(VALUE self, VALUE rb_uri) {
 
 /* call-seq:
  *   set_http_version(major, minor) -> [major, minor]
+ *
+ * Sets the HTTP protocol version used by the request.
  *
  * @return [Array(Integer, Integer)] +[major, minor]+
  */
@@ -223,6 +231,8 @@ static VALUE HttpRequest_set_body(VALUE self, VALUE rb_body) {
 /* call-seq:
  *   field(name) -> String or nil
  *
+ * Returns the value of the response header field named +name+.
+ *
  * @return [String, nil] the value of response header field +name+
  *   (case-insensitive), or +nil+ if it wasn't sent
  */
@@ -235,6 +245,8 @@ static VALUE HttpResponse_field(VALUE self, VALUE rb_field) {
 
 /* call-seq: status -> Integer
  *
+ * Returns the numeric HTTP status code.
+ *
  * @return [Integer] the raw HTTP status code
  */
 static VALUE HttpResponse_status(VALUE self) {
@@ -242,6 +254,8 @@ static VALUE HttpResponse_status(VALUE self) {
 }
 
 /* call-seq: status_name -> Symbol
+ *
+ * Returns the status as an HttpStatus name.
  *
  * @return [Symbol] an HttpStatus name for #status
  */
@@ -252,6 +266,8 @@ static VALUE HttpResponse_status_name(VALUE self) {
 
 /* call-seq: major_version -> Integer
  *
+ * Returns the major component of the HTTP protocol version.
+ *
  * @return [Integer] the major version of the HTTP protocol used by the server
  */
 static VALUE HttpResponse_major_version(VALUE self) {
@@ -260,6 +276,8 @@ static VALUE HttpResponse_major_version(VALUE self) {
 
 /* call-seq: minor_version -> Integer
  *
+ * Returns the minor component of the HTTP protocol version.
+ *
  * @return [Integer] the minor version of the HTTP protocol used by the server
  */
 static VALUE HttpResponse_minor_version(VALUE self) {
@@ -267,6 +285,8 @@ static VALUE HttpResponse_minor_version(VALUE self) {
 }
 
 /* call-seq: body -> String
+ *
+ * Returns the body of the response.
  *
  * @return [String] the body of the response, possibly an error message
  *   when the server sent something other than valid HTML

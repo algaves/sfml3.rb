@@ -133,6 +133,8 @@ static VALUE FtpListingResponse_wrap(sfFtpListingResponse* handle) {
 /* call-seq:
  *   Ftp.new -> Ftp
  *
+ * Creates a new FTP client.
+ *
  * @return [Ftp]
  */
 static VALUE Ftp_new(VALUE klass) {
@@ -180,6 +182,8 @@ static VALUE Ftp_login_anonymous(VALUE self) {
 /* call-seq:
  *   login(name, password) -> FtpResponse
  *
+ * Logs in with the given +name+ and +password+.
+ *
  * @return [FtpResponse]
  */
 static VALUE Ftp_login(VALUE self, VALUE rb_name, VALUE rb_password) {
@@ -211,6 +215,8 @@ static VALUE Ftp_keep_alive(VALUE self) {
 
 /* call-seq:
  *   working_directory -> FtpDirectoryResponse
+ *
+ * Returns the current working directory on the server.
  *
  * @return [FtpDirectoryResponse] the current working directory on the server
  */
@@ -261,6 +267,8 @@ static VALUE Ftp_parent_directory(VALUE self) {
 /* call-seq:
  *   create_directory(name) -> FtpResponse
  *
+ * Creates a directory named +name+ on the server.
+ *
  * @return [FtpResponse]
  */
 static VALUE Ftp_create_directory(VALUE self, VALUE rb_name) {
@@ -269,6 +277,8 @@ static VALUE Ftp_create_directory(VALUE self, VALUE rb_name) {
 
 /* call-seq:
  *   delete_directory(name) -> FtpResponse
+ *
+ * Deletes the directory named +name+ on the server.
  *
  * @return [FtpResponse]
  */
@@ -279,6 +289,8 @@ static VALUE Ftp_delete_directory(VALUE self, VALUE rb_name) {
 /* call-seq:
  *   rename_file(file, new_name) -> FtpResponse
  *
+ * Renames +file+ to +new_name+ on the server.
+ *
  * @return [FtpResponse]
  */
 static VALUE Ftp_rename_file(VALUE self, VALUE rb_file, VALUE rb_new_name) {
@@ -288,6 +300,8 @@ static VALUE Ftp_rename_file(VALUE self, VALUE rb_file, VALUE rb_new_name) {
 
 /* call-seq:
  *   delete_file(name) -> FtpResponse
+ *
+ * Deletes the file named +name+ on the server.
  *
  * @return [FtpResponse]
  */
@@ -366,6 +380,8 @@ static VALUE Ftp_send_command(int argc, VALUE* argv, VALUE self) {
 
 /* call-seq: ok? -> true or false
  *
+ * Returns +true+ if the server reported success.
+ *
  * @return [Boolean] whether the status is a "success" code (< 400)
  */
 static VALUE FtpResponse_ok(VALUE self) {
@@ -374,6 +390,8 @@ static VALUE FtpResponse_ok(VALUE self) {
 
 /* call-seq: status -> Integer
  *
+ * Returns the raw status code reported by the server.
+ *
  * @return [Integer] the raw FTP status code
  */
 static VALUE FtpResponse_status(VALUE self) {
@@ -381,6 +399,8 @@ static VALUE FtpResponse_status(VALUE self) {
 }
 
 /* call-seq: status_name -> Symbol
+ *
+ * Returns the status as an FtpStatus name.
  *
  * @return [Symbol] an FtpStatus name for #status
  */
@@ -391,6 +411,8 @@ static VALUE FtpResponse_status_name(VALUE self) {
 
 /* call-seq: message -> String
  *
+ * Returns the message sent by the server.
+ *
  * @return [String] the full response message sent by the server
  */
 static VALUE FtpResponse_message(VALUE self) {
@@ -398,6 +420,8 @@ static VALUE FtpResponse_message(VALUE self) {
 }
 
 /* call-seq: ok? -> true or false
+ *
+ * Returns +true+ if the server reported success.
  *
  * @return [Boolean] whether the status is a "success" code (< 400)
  */
@@ -407,6 +431,8 @@ static VALUE FtpDirectoryResponse_ok(VALUE self) {
 
 /* call-seq: status -> Integer
  *
+ * Returns the raw status code reported by the server.
+ *
  * @return [Integer] the raw FTP status code
  */
 static VALUE FtpDirectoryResponse_status(VALUE self) {
@@ -414,6 +440,8 @@ static VALUE FtpDirectoryResponse_status(VALUE self) {
 }
 
 /* call-seq: status_name -> Symbol
+ *
+ * Returns the status as an FtpStatus name.
  *
  * @return [Symbol] an FtpStatus name for #status
  */
@@ -423,6 +451,8 @@ static VALUE FtpDirectoryResponse_status_name(VALUE self) {
 }
 
 /* call-seq: message -> String
+ *
+ * Returns the message sent by the server.
  *
  * @return [String] the full response message sent by the server
  */
@@ -445,6 +475,8 @@ static VALUE FtpDirectoryResponse_directory(VALUE self) {
 
 /* call-seq: ok? -> true or false
  *
+ * Returns +true+ if the server reported success.
+ *
  * @return [Boolean] whether the status is a "success" code (< 400)
  */
 static VALUE FtpListingResponse_ok(VALUE self) {
@@ -453,6 +485,8 @@ static VALUE FtpListingResponse_ok(VALUE self) {
 
 /* call-seq: status -> Integer
  *
+ * Returns the raw status code reported by the server.
+ *
  * @return [Integer] the raw FTP status code
  */
 static VALUE FtpListingResponse_status(VALUE self) {
@@ -460,6 +494,8 @@ static VALUE FtpListingResponse_status(VALUE self) {
 }
 
 /* call-seq: status_name -> Symbol
+ *
+ * Returns the status as an FtpStatus name.
  *
  * @return [Symbol] an FtpStatus name for #status
  */
@@ -470,6 +506,8 @@ static VALUE FtpListingResponse_status_name(VALUE self) {
 
 /* call-seq: message -> String
  *
+ * Returns the message sent by the server.
+ *
  * @return [String] the full response message sent by the server
  */
 static VALUE FtpListingResponse_message(VALUE self) {
@@ -477,6 +515,8 @@ static VALUE FtpListingResponse_message(VALUE self) {
 }
 
 /* call-seq: count -> Integer
+ *
+ * Returns the number of filenames in the listing.
  *
  * @return [Integer] the number of filenames in the listing
  */
@@ -486,6 +526,8 @@ static VALUE FtpListingResponse_count(VALUE self) {
 
 /* call-seq:
  *   name(index) -> String
+ *
+ * Returns the filename stored at +index+ in the listing.
  *
  * @return [String] the filename at +index+ in the listing
  * @raise [IndexError] if +index+ is out of range

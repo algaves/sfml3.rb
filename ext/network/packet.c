@@ -41,6 +41,8 @@ static VALUE Packet_wrap(VALUE klass, sfPacket* packet) {
 /* call-seq:
  *   Packet.new -> Packet
  *
+ * Creates a new, empty packet.
+ *
  * @return [Packet] a new, empty packet
  */
 static VALUE Packet_new(VALUE klass) {
@@ -48,6 +50,8 @@ static VALUE Packet_new(VALUE klass) {
 }
 
 /* call-seq: copy -> Packet
+ *
+ * Returns an independent copy of the packet.
  *
  * @return [Packet] an independent copy with the same data and read position
  */
@@ -84,6 +88,8 @@ static VALUE Packet_clear(VALUE self) {
 
 /* call-seq: data -> String
  *
+ * Returns the packet's raw byte content.
+ *
  * @return [String] the packet's raw byte content
  */
 static VALUE Packet_data(VALUE self) {
@@ -94,6 +100,8 @@ static VALUE Packet_data(VALUE self) {
 
 /* call-seq: data_size -> Integer
  *
+ * Returns the number of bytes held by the packet.
+ *
  * @return [Integer] the number of bytes in the packet's data
  */
 static VALUE Packet_data_size(VALUE self) {
@@ -101,6 +109,8 @@ static VALUE Packet_data_size(VALUE self) {
 }
 
 /* call-seq: read_position -> Integer
+ *
+ * Returns the current read position, in bytes.
  *
  * @return [Integer] the current read position, in bytes
  */
@@ -110,6 +120,8 @@ static VALUE Packet_read_position(VALUE self) {
 
 /* call-seq: end_of_packet? -> true or false
  *
+ * Returns +true+ once all of the packet's data has been read.
+ *
  * @return [Boolean] whether the end of the packet has been reached, i.e.
  *   whether all the data has been read
  */
@@ -118,6 +130,8 @@ static VALUE Packet_end_of_packet(VALUE self) {
 }
 
 /* call-seq: can_read? -> true or false
+ *
+ * Returns +true+ if the packet is still in a valid reading state.
  *
  * @return [Boolean] whether the packet is in a valid reading state, i.e.
  *   whether the last read operation succeeded
@@ -230,55 +244,77 @@ void Init_Packet(VALUE rb_mSFML) {
 
     /* call-seq: read_bool -> true or false
      *
+     * Reads a boolean from the packet.
+     *
      * @return [Boolean]
      */
     rb_define_method(rb_cPacket, "read_bool", Packet_read_bool, 0);
     /* call-seq: read_int8 -> Integer
+     *
+     * Reads a signed 8-bit integer from the packet.
      *
      * @return [Integer] a signed 8-bit integer
      */
     rb_define_method(rb_cPacket, "read_int8", Packet_read_int8, 0);
     /* call-seq: read_uint8 -> Integer
      *
+     * Reads an unsigned 8-bit integer from the packet.
+     *
      * @return [Integer] an unsigned 8-bit integer
      */
     rb_define_method(rb_cPacket, "read_uint8", Packet_read_uint8, 0);
     /* call-seq: read_int16 -> Integer
+     *
+     * Reads a signed 16-bit integer from the packet.
      *
      * @return [Integer] a signed 16-bit integer
      */
     rb_define_method(rb_cPacket, "read_int16", Packet_read_int16, 0);
     /* call-seq: read_uint16 -> Integer
      *
+     * Reads an unsigned 16-bit integer from the packet.
+     *
      * @return [Integer] an unsigned 16-bit integer
      */
     rb_define_method(rb_cPacket, "read_uint16", Packet_read_uint16, 0);
     /* call-seq: read_int32 -> Integer
+     *
+     * Reads a signed 32-bit integer from the packet.
      *
      * @return [Integer] a signed 32-bit integer
      */
     rb_define_method(rb_cPacket, "read_int32", Packet_read_int32, 0);
     /* call-seq: read_uint32 -> Integer
      *
+     * Reads an unsigned 32-bit integer from the packet.
+     *
      * @return [Integer] an unsigned 32-bit integer
      */
     rb_define_method(rb_cPacket, "read_uint32", Packet_read_uint32, 0);
     /* call-seq: read_int64 -> Integer
+     *
+     * Reads a signed 64-bit integer from the packet.
      *
      * @return [Integer] a signed 64-bit integer
      */
     rb_define_method(rb_cPacket, "read_int64", Packet_read_int64, 0);
     /* call-seq: read_uint64 -> Integer
      *
+     * Reads an unsigned 64-bit integer from the packet.
+     *
      * @return [Integer] an unsigned 64-bit integer
      */
     rb_define_method(rb_cPacket, "read_uint64", Packet_read_uint64, 0);
     /* call-seq: read_float -> Float
      *
+     * Reads a single-precision float from the packet.
+     *
      * @return [Float] a single-precision float
      */
     rb_define_method(rb_cPacket, "read_float", Packet_read_float, 0);
     /* call-seq: read_double -> Float
+     *
+     * Reads a double-precision float from the packet.
      *
      * @return [Float] a double-precision float
      */
@@ -287,6 +323,8 @@ void Init_Packet(VALUE rb_mSFML) {
 
     /* call-seq:
      *   write_bool(value) -> value
+     *
+     * Writes +value+ as a boolean.
      *
      * @return [Boolean] +value+
      */
@@ -358,11 +396,15 @@ void Init_Packet(VALUE rb_mSFML) {
     /* call-seq:
      *   write_float(value) -> value
      *
+     * Writes +value+ as a single-precision float.
+     *
      * @return [Float] +value+
      */
     rb_define_method(rb_cPacket, "write_float", Packet_write_float, 1);
     /* call-seq:
      *   write_double(value) -> value
+     *
+     * Writes +value+ as a double-precision float.
      *
      * @return [Float] +value+
      */

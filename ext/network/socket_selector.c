@@ -44,6 +44,8 @@ static VALUE SocketSelector_wrap(VALUE klass, sfSocketSelector* handle) {
 /* call-seq:
  *   SocketSelector.new -> SocketSelector
  *
+ * Creates a new, empty socket selector.
+ *
  * @return [SocketSelector]
  */
 static VALUE SocketSelector_new(VALUE klass) {
@@ -51,6 +53,8 @@ static VALUE SocketSelector_new(VALUE klass) {
 }
 
 /* call-seq: copy -> SocketSelector
+ *
+ * Returns an independent copy of the selector.
  *
  * @return [SocketSelector] an independent copy with the same watched sockets
  */

@@ -77,6 +77,9 @@ static VALUE Time_new(int argc, VALUE* argv, VALUE klass) {
 /* call-seq:
  *   Time.seconds(value) -> Time
  *
+ * Creates a Time of +value+ seconds, where +value+ is any Float-convertible
+ * number.
+ *
  * @return [Time]
  */
 static VALUE Time_seconds(VALUE klass, VALUE rb_seconds) {
@@ -85,6 +88,8 @@ static VALUE Time_seconds(VALUE klass, VALUE rb_seconds) {
 
 /* call-seq:
  *   Time.milliseconds(value) -> Time
+ *
+ * Creates a Time of +value+ milliseconds.
  *
  * @return [Time]
  */
@@ -95,6 +100,8 @@ static VALUE Time_milliseconds(VALUE klass, VALUE rb_milliseconds) {
 /* call-seq:
  *   Time.microseconds(value) -> Time
  *
+ * Creates a Time of +value+ microseconds.
+ *
  * @return [Time]
  */
 static VALUE Time_microseconds(VALUE klass, VALUE rb_microseconds) {
@@ -104,6 +111,8 @@ static VALUE Time_microseconds(VALUE klass, VALUE rb_microseconds) {
 /* call-seq:
  *   Time.zero -> Time
  *
+ * Returns the zero-duration Time.
+ *
  * @return [Time] a zero-duration Time
  */
 static VALUE Time_zero(VALUE klass) {
@@ -111,6 +120,8 @@ static VALUE Time_zero(VALUE klass) {
 }
 
 /* call-seq: as_seconds -> Float
+ *
+ * Returns the duration expressed in seconds.
  *
  * @return [Float]
  */
@@ -120,6 +131,8 @@ static VALUE Time_as_seconds(VALUE self) {
 
 /* call-seq: as_milliseconds -> Integer
  *
+ * Returns the duration expressed in whole milliseconds.
+ *
  * @return [Integer]
  */
 static VALUE Time_as_milliseconds(VALUE self) {
@@ -127,6 +140,8 @@ static VALUE Time_as_milliseconds(VALUE self) {
 }
 
 /* call-seq: as_microseconds -> Integer
+ *
+ * Returns the duration expressed in whole microseconds.
  *
  * @return [Integer]
  */
@@ -157,6 +172,8 @@ static VALUE Time_to_i(VALUE self) {
 /* call-seq:
  *   self + other -> Time
  *
+ * Adds +other+ to the duration, returning a new Time.
+ *
  * @return [Time]
  */
 static VALUE Time_add(VALUE self, VALUE rb_other) {
@@ -169,6 +186,8 @@ static VALUE Time_add(VALUE self, VALUE rb_other) {
 /* call-seq:
  *   self - other -> Time
  *
+ * Subtracts +other+ from the duration, returning a new Time.
+ *
  * @return [Time]
  */
 static VALUE Time_sub(VALUE self, VALUE rb_other) {
@@ -180,6 +199,8 @@ static VALUE Time_sub(VALUE self, VALUE rb_other) {
 
 /* call-seq:
  *   self * scalar -> Time
+ *
+ * Scales the duration by +scalar+, returning a new Time.
  *
  * @return [Time]
  */
@@ -217,6 +238,8 @@ static VALUE Time_div(VALUE self, VALUE rb_other) {
 /* call-seq:
  *   self <=> other -> -1, 0 or 1
  *
+ * Compares the duration with +other+, which may be a Time or a number.
+ *
  * @return [Integer]
  */
 static VALUE Time_cmp(VALUE self, VALUE rb_other) {
@@ -239,6 +262,8 @@ static VALUE Time_cmp(VALUE self, VALUE rb_other) {
 /* call-seq:
  *   self == other -> true or false
  *
+ * Returns +true+ if +other+ is a Time holding the same duration.
+ *
  * @return [Boolean]
  */
 static VALUE Time_eql(VALUE self, VALUE rb_other) {
@@ -251,6 +276,8 @@ static VALUE Time_eql(VALUE self, VALUE rb_other) {
 }
 
 /* call-seq: to_s -> String
+ *
+ * Returns the duration formatted as a number of seconds.
  *
  * @return [String] +"N s"+, e.g. +"1.5 s"+
  */

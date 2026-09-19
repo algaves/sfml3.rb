@@ -50,6 +50,8 @@ VALUE tcp_socket_from_handle(sfTcpSocket* socket) {
 /* call-seq:
  *   TcpSocket.new -> TcpSocket
  *
+ * Creates a new, unconnected TCP socket.
+ *
  * @return [TcpSocket] a new, unconnected socket
  */
 static VALUE TcpSocket_new(VALUE klass) {
@@ -57,6 +59,8 @@ static VALUE TcpSocket_new(VALUE klass) {
 }
 
 /* call-seq: blocking? -> true or false
+ *
+ * Returns +true+ if the socket is in blocking mode.
  *
  * @return [Boolean]
  */
@@ -67,6 +71,8 @@ static VALUE TcpSocket_blocking(VALUE self) {
 /* call-seq:
  *   blocking=(value) -> value
  *
+ * Enables or disables blocking mode according to +value+.
+ *
  * @return [Boolean] +value+
  */
 static VALUE TcpSocket_set_blocking(VALUE self, VALUE rb_value) {
@@ -75,6 +81,8 @@ static VALUE TcpSocket_set_blocking(VALUE self, VALUE rb_value) {
 }
 
 /* call-seq: local_port -> Integer
+ *
+ * Returns the local port the socket is bound to.
  *
  * @return [Integer] the local port the socket is bound to, or 0 if it
  *   isn't connected
@@ -85,6 +93,8 @@ static VALUE TcpSocket_local_port(VALUE self) {
 
 /* call-seq: remote_address -> IpAddress
  *
+ * Returns the address of the remote peer.
+ *
  * @return [IpAddress] the address of the remote peer, or +IpAddress::NONE+
  *   if not connected
  */
@@ -93,6 +103,8 @@ static VALUE TcpSocket_remote_address(VALUE self) {
 }
 
 /* call-seq: remote_port -> Integer
+ *
+ * Returns the port of the remote peer.
  *
  * @return [Integer] the port of the remote peer, or 0 if not connected
  */
@@ -222,6 +234,8 @@ static VALUE TcpSocket_receive(int argc, VALUE* argv, VALUE self) {
 
 /* call-seq:
  *   send_packet(packet) -> Symbol
+ *
+ * Sends +packet+ over the connection.
  *
  * @return [Symbol] a SocketStatus name, +:done+ on success
  * @raise [TypeError] if +packet+ is not an SFML::Packet
