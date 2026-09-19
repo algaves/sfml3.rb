@@ -41,7 +41,10 @@ static void Window_mark(void* ptr) {
 static void Window_free(void* ptr) {
     Window* window = ptr;
 
-    sfRenderWindow_destroy(window->window);
+    if (window->window != NULL) {
+        sfRenderWindow_destroy(window->window);
+    }
+
     free(window);
 }
 
@@ -63,6 +66,24 @@ static VALUE Window_wrap(VALUE klass, sfRenderWindow* c_window) {
     return TypedData_Wrap_Struct(klass, &Window_data_type, window);
 }
 
+static VALUE Window_initialize_copy(VALUE self, VALUE other) {
+    (void)other;
+    rb_raise(rb_eTypeError, "can't copy a %s", rb_obj_classname(self));
+}
+
+static VALUE Window_alloc(VALUE klass) {
+    Window* window = malloc(sizeof(Window));
+
+    if (window == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate window");
+    }
+
+    window->window = NULL;
+    window->rb_cursor = Qnil;
+
+    return TypedData_Wrap_Struct(klass, &Window_data_type, window);
+}
+
 /* call-seq:
  *   Window.new(video_mode, title, style = :default, state = :windowed, settings = nil) -> Window
  *
@@ -71,13 +92,14 @@ static VALUE Window_wrap(VALUE klass, sfRenderWindow* c_window) {
  * @return [Window]
  * @raise [RuntimeError] if window creation fails
  */
-static VALUE Window_new(int argc, VALUE* argv, VALUE klass) {
-    VALUE self, rb_video_mode, rb_title, rb_style, rb_state, rb_settings, title_buffer;
+static VALUE Window_initialize(int argc, VALUE* argv, VALUE self) {
+    VALUE rb_video_mode, rb_title, rb_style, rb_state, rb_settings, title_buffer;
     sfWindowState state = sfWindowed;
     sfContextSettings settings;
     const sfContextSettings* settings_ptr = NULL;
     uint32_t style = sfDefaultStyle;
     sfRenderWindow* window;
+    Window* ptr;
 
     rb_scan_args(argc, argv, "23", &rb_video_mode, &rb_title, &rb_style, &rb_state, &rb_settings);
 
@@ -107,9 +129,8 @@ static VALUE Window_new(int argc, VALUE* argv, VALUE klass) {
         rb_raise(rb_eRuntimeError, "failed to create window");
     }
 
-    self = Window_wrap(klass, window);
-
-    rb_obj_call_init(self, argc, argv);
+    TypedData_Get_Struct(self, Window, &Window_data_type, ptr);
+    ptr->window = window;
 
     return self;
 }
@@ -148,12 +169,6 @@ static VALUE Window_s_from_handle(int argc, VALUE* argv, VALUE klass) {
 
     self = Window_wrap(klass, window);
 
-    rb_obj_call_init(self, 0, NULL);
-
-    return self;
-}
-
-static VALUE Window_init(int argc, VALUE* argv, VALUE self) {
     return self;
 }
 
@@ -680,11 +695,13 @@ static VALUE Window_get_default_view(VALUE self) {
 void Init_Window(VALUE rb_mSFML) {
     rb_cWindow = rb_define_class_under(rb_mSFML, "Window", rb_cObject);
 
-    rb_define_singleton_method(rb_cWindow, "new", Window_new, -1);
+    rb_define_alloc_func(rb_cWindow, Window_alloc);
+
     rb_define_singleton_method(rb_cWindow, "from_handle", Window_s_from_handle, -1);
 
     // methods
-    rb_define_method(rb_cWindow, "initialize", Window_init, -1);
+    rb_define_method(rb_cWindow, "initialize", Window_initialize, -1);
+    rb_define_private_method(rb_cWindow, "initialize_copy", Window_initialize_copy, 1);
     rb_define_method(rb_cWindow, "is_open?", Window_is_open, 0);
     rb_define_method(rb_cWindow, "close!", Window_close, 0);
     rb_define_method(rb_cWindow, "clear", Window_clear, -1);

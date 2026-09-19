@@ -64,12 +64,18 @@ static VALUE Cursor_from_system(VALUE klass, VALUE rb_type) {
     return Cursor_wrap(sfCursor_createFromSystem(cursor_type_from_rb(rb_type)));
 }
 
+static VALUE Cursor_alloc(VALUE klass) {
+    (void)klass;
+    rb_raise(rb_eNotImpError, "use Cursor.from_system or Cursor.from_pixels");
+}
+
 /* Document-class: SFML::Cursor
  * A native mouse cursor, either built from raw pixel data or one of the
  * platform's built-in system cursors. Assign to Window#cursor= to apply.
  */
 void Init_Cursor(VALUE rb_mSFML) {
     rb_cCursor = rb_define_class_under(rb_mSFML, "Cursor", rb_cObject);
+    rb_define_alloc_func(rb_cCursor, Cursor_alloc);
 
     rb_define_singleton_method(rb_cCursor, "from_pixels", Cursor_from_pixels, 3);
     rb_define_singleton_method(rb_cCursor, "from_system", Cursor_from_system, 1);
