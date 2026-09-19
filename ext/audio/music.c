@@ -216,6 +216,11 @@ static VALUE Music_set_loop_points(VALUE self, VALUE rb_span) {
 #undef SS_FN
 #undef SS_METHOD
 
+static VALUE Music_alloc(VALUE klass) {
+    (void)klass;
+    rb_raise(rb_eNotImpError, "use Music.from_file, Music.from_memory or Music.from_stream");
+}
+
 /* Document-class: SFML::Music
  * Music streamed from a file, memory buffer or InputStream rather than held
  * fully decoded in memory, so it's suited to long tracks that would be
@@ -349,6 +354,7 @@ static VALUE Music_set_loop_points(VALUE self, VALUE rb_span) {
  */
 void Init_Music(VALUE rb_mSFML) {
     rb_cMusic = rb_define_class_under(rb_mSFML, "Music", rb_cObject);
+    rb_define_alloc_func(rb_cMusic, Music_alloc);
 
     rb_define_singleton_method(rb_cMusic, "from_file", Music_from_file, 1);
     rb_define_singleton_method(rb_cMusic, "from_memory", Music_from_memory, 1);

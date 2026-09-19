@@ -29,6 +29,18 @@ static VALUE SoundSourceCone_wrap(sfSoundSourceCone cone) {
     return TypedData_Wrap_Struct(rb_cSoundSourceCone, &SoundSourceCone_data_type, ptr);
 }
 
+static VALUE SoundSourceCone_alloc(VALUE klass) {
+    SoundSourceCone* ptr = malloc(sizeof(SoundSourceCone));
+
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate sound source cone");
+    }
+
+    ptr->cone = (sfSoundSourceCone){0.0f, 0.0f, 0.0f};
+
+    return TypedData_Wrap_Struct(klass, &SoundSourceCone_data_type, ptr);
+}
+
 /* call-seq:
  *   SoundSourceCone.new(inner_angle, outer_angle, outer_gain) -> SoundSourceCone
  *
@@ -36,12 +48,14 @@ static VALUE SoundSourceCone_wrap(sfSoundSourceCone cone) {
  *
  * @return [SoundSourceCone]
  */
-static VALUE SoundSourceCone_new(VALUE klass, VALUE rb_inner, VALUE rb_outer, VALUE rb_gain) {
+static VALUE SoundSourceCone_initialize(VALUE self, VALUE rb_inner, VALUE rb_outer, VALUE rb_gain) {
     sfSoundSourceCone cone = {.innerAngle = (float)NUM2DBL(rb_inner),
                               .outerAngle = (float)NUM2DBL(rb_outer),
                               .outerGain = (float)NUM2DBL(rb_gain)};
 
-    return SoundSourceCone_wrap(cone);
+    ((SoundSourceCone*)Get_SoundSourceCone_Struct(self))->cone = cone;
+
+    return self;
 }
 
 /* call-seq: inner_angle -> Float
@@ -172,7 +186,8 @@ static VALUE SoundSourceCone_eql(VALUE self, VALUE rb_other) {
 void Init_SoundSourceCone(VALUE rb_mSFML) {
     rb_cSoundSourceCone = rb_define_class_under(rb_mSFML, "SoundSourceCone", rb_cObject);
 
-    rb_define_singleton_method(rb_cSoundSourceCone, "new", SoundSourceCone_new, 3);
+    rb_define_alloc_func(rb_cSoundSourceCone, SoundSourceCone_alloc);
+    rb_define_method(rb_cSoundSourceCone, "initialize", SoundSourceCone_initialize, 3);
 
     rb_define_method(rb_cSoundSourceCone, "inner_angle", SoundSourceCone_get_inner_angle, 0);
     rb_define_method(rb_cSoundSourceCone, "outer_angle", SoundSourceCone_get_outer_angle, 0);

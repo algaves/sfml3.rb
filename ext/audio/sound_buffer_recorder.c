@@ -41,6 +41,10 @@ static VALUE SoundBufferRecorder_wrap(VALUE klass, sfSoundBufferRecorder* handle
     return TypedData_Wrap_Struct(klass, &SoundBufferRecorder_data_type, ptr);
 }
 
+static VALUE SoundBufferRecorder_alloc(VALUE klass) {
+    return SoundBufferRecorder_wrap(klass, sfSoundBufferRecorder_create());
+}
+
 /* call-seq:
  *   SoundBufferRecorder.new -> SoundBufferRecorder
  *
@@ -49,8 +53,8 @@ static VALUE SoundBufferRecorder_wrap(VALUE klass, sfSoundBufferRecorder* handle
  * @return [SoundBufferRecorder]
  * @raise [RuntimeError] if no capture device is available
  */
-static VALUE SoundBufferRecorder_new(VALUE klass) {
-    return SoundBufferRecorder_wrap(klass, sfSoundBufferRecorder_create());
+static VALUE SoundBufferRecorder_initialize(VALUE self) {
+    return self;
 }
 
 /* call-seq:
@@ -151,7 +155,8 @@ static VALUE SoundBufferRecorder_set_channel_count(VALUE self, VALUE rb_count) {
 void Init_SoundBufferRecorder(VALUE rb_mSFML) {
     rb_cSoundBufferRecorder = rb_define_class_under(rb_mSFML, "SoundBufferRecorder", rb_cObject);
 
-    rb_define_singleton_method(rb_cSoundBufferRecorder, "new", SoundBufferRecorder_new, 0);
+    rb_define_alloc_func(rb_cSoundBufferRecorder, SoundBufferRecorder_alloc);
+    rb_define_method(rb_cSoundBufferRecorder, "initialize", SoundBufferRecorder_initialize, 0);
 
     rb_define_method(rb_cSoundBufferRecorder, "start", SoundBufferRecorder_start, 1);
     rb_define_method(rb_cSoundBufferRecorder, "stop", SoundBufferRecorder_stop, 0);

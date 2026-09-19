@@ -154,6 +154,23 @@ static void SoundRecorder_on_stop(void* userData) {
     }
 }
 
+static VALUE SoundRecorder_alloc(VALUE klass) {
+    SoundRecorder* ptr = malloc(sizeof(SoundRecorder));
+    VALUE self;
+
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate sound recorder");
+    }
+
+    ptr->rb_self = Qnil;
+    ptr->handle = NULL;
+
+    self = TypedData_Wrap_Struct(klass, &SoundRecorder_data_type, ptr);
+    ptr->rb_self = self;
+
+    return self;
+}
+
 /* call-seq:
  *   SoundRecorder.new -> SoundRecorder
  *
@@ -167,21 +184,13 @@ static void SoundRecorder_on_stop(void* userData) {
  * @raise [NotImplementedError] if the subclass does not define #on_process
  * @raise [RuntimeError] if no capture device is available
  */
-static VALUE SoundRecorder_new(VALUE klass) {
+static VALUE SoundRecorder_initialize(VALUE self) {
     SoundRecorder* ptr;
     sfSoundRecorder* handle;
-    VALUE self;
 
-    ptr = malloc(sizeof(SoundRecorder));
-    ptr->rb_self = Qnil;
-    ptr->handle = NULL;
-
-    self = TypedData_Wrap_Struct(klass, &SoundRecorder_data_type, ptr);
-    ptr->rb_self = self;
+    TypedData_Get_Struct(self, SoundRecorder, &SoundRecorder_data_type, ptr);
 
     if (!rb_respond_to(self, rb_intern("on_process"))) {
-        /* Ruby already owns the wrapper; SoundRecorder_free handles the NULL
-           handle, so let GC clean up after the raise. */
         rb_raise(rb_eNotImpError, "subclass must define #on_process");
     }
 
@@ -360,7 +369,8 @@ static VALUE SoundRecorder_channel_map(VALUE self) {
 void Init_SoundRecorder(VALUE rb_mSFML) {
     rb_cSoundRecorder = rb_define_class_under(rb_mSFML, "SoundRecorder", rb_cObject);
 
-    rb_define_singleton_method(rb_cSoundRecorder, "new", SoundRecorder_new, 0);
+    rb_define_alloc_func(rb_cSoundRecorder, SoundRecorder_alloc);
+    rb_define_method(rb_cSoundRecorder, "initialize", SoundRecorder_initialize, 0);
     rb_define_singleton_method(rb_cSoundRecorder, "available?", SoundRecorder_available, 0);
     rb_define_singleton_method(rb_cSoundRecorder, "available_devices",
                                SoundRecorder_available_devices, 0);
