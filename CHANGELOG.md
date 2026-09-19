@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-18
+
+### Documentation
+* **Every public class, module, method and constant is documented**, with the
+  result rendered on [rubydoc.info](https://rubydoc.info/gems/sfml3-rb). The
+  comments live beside each binding in `ext/**/*.c`; `rake yard` builds them
+  into `doc/`. Previously the comments carried `call-seq` and `@return` tags
+  but little prose, so rubydoc.info showed a signature with a blank
+  description; every such method now has a sentence of its own.
+* RBS type signatures for the same surface ship in `sig/**/*.rbs`, for IDE
+  completion (Solargraph, RubyMine) and static checking (Sorbet, Steep);
+  `rake rbs` validates them.
+* `.yardopts` ships in the gem, so rubydoc.info generates with the same title,
+  README and extra files as `rake yard`.
+* `rake doc:undoc` fails when a method is left without a description, so the
+  coverage cannot regress silently (`yard stats` uses `blank?` and passes for
+  tag-only comments, which is how the blanks went unnoticed).
+
 ## [0.2.1]
 
 ### Added
