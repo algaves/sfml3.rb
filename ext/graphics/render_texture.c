@@ -58,6 +58,8 @@ static VALUE RenderTexture_new(int argc, VALUE* argv, VALUE klass) {
 
 /* call-seq: size -> Vector2
  *
+ * Returns the object's size.
+ *
  * @return [Vector2]
  */
 static VALUE RenderTexture_get_size(VALUE self) {
@@ -116,6 +118,8 @@ static VALUE RenderTexture_clear(int argc, VALUE* argv, VALUE self) {
 /* call-seq:
  *   view=(value) -> self
  *
+ * Sets the target's current view.
+ *
  * @return [self]
  * @raise [TypeError] if +value+ is not a View
  */
@@ -131,6 +135,8 @@ static VALUE RenderTexture_set_view(VALUE self, VALUE rb_view) {
 
 /* call-seq: view -> View
  *
+ * Returns the target's current view.
+ *
  * @return [View] a copy of the current view
  */
 static VALUE RenderTexture_get_view(VALUE self) {
@@ -138,6 +144,8 @@ static VALUE RenderTexture_get_view(VALUE self) {
 }
 
 /* call-seq: default_view -> View
+ *
+ * Returns the view covering the whole render target.
  *
  * @return [View] a copy of the view covering the render texture's full area
  */
@@ -147,6 +155,8 @@ static VALUE RenderTexture_get_default_view(VALUE self) {
 }
 
 /* call-seq: texture -> Texture
+ *
+ * Returns the target texture, whose contents update after each #display.
  *
  * @return [Texture] the target texture, borrowed -- its contents update
  *   after each #display
@@ -158,6 +168,8 @@ static VALUE RenderTexture_get_texture(VALUE self) {
 /* call-seq:
  *   smooth=(value) -> true or false
  *
+ * Enables or disables smooth rendering.
+ *
  * @return [Boolean] +value+
  */
 static VALUE RenderTexture_set_smooth(VALUE self, VALUE rb_smooth) {
@@ -166,6 +178,8 @@ static VALUE RenderTexture_set_smooth(VALUE self, VALUE rb_smooth) {
 }
 
 /* call-seq: smooth? -> true or false
+ *
+ * Returns +true+ if smooth rendering is enabled.
  *
  * @return [Boolean]
  */
@@ -176,6 +190,8 @@ static VALUE RenderTexture_is_smooth(VALUE self) {
 /* call-seq:
  *   repeated=(value) -> true or false
  *
+ * Enables or disables texture repeating.
+ *
  * @return [Boolean] +value+
  */
 static VALUE RenderTexture_set_repeated(VALUE self, VALUE rb_repeated) {
@@ -185,6 +201,8 @@ static VALUE RenderTexture_set_repeated(VALUE self, VALUE rb_repeated) {
 
 /* call-seq: repeated? -> true or false
  *
+ * Returns +true+ if texture repeating is enabled.
+ *
  * @return [Boolean]
  */
 static VALUE RenderTexture_is_repeated(VALUE self) {
@@ -192,6 +210,8 @@ static VALUE RenderTexture_is_repeated(VALUE self) {
 }
 
 /* call-seq: generate_mipmap -> true or false
+ *
+ * Generates the mipmap pyramid for the texture.
  *
  * @return [Boolean] whether mipmap generation succeeded
  */
@@ -228,6 +248,8 @@ static VALUE RenderTexture_draw(int argc, VALUE* argv, VALUE self) {
 /* call-seq:
  *   RenderTexture.maximum_antialiasing_level -> Integer
  *
+ * Returns the maximum supported antialiasing level.
+ *
  * @return [Integer]
  */
 static VALUE RenderTexture_maximum_antialiasing_level(VALUE klass) {
@@ -252,14 +274,19 @@ static VALUE RenderTexture_maximum_antialiasing_level(VALUE klass) {
  * doc-comment scanner. Window's own docs restate the same list.
  *
  * @!method srgb?
+ *   Returns +true+ if the render texture uses an sRGB format.
  *   @return [Boolean]
  * @!method clear_stencil(value)
+ *   Clears the stencil buffer with the given value.
  *   @return [self]
  * @!method clear_color_and_stencil(color, stencil)
+ *   Clears the color and stencil buffers in one pass.
  *   @return [self]
  * @!method viewport(view = nil)
+ *   Returns the current viewport in pixels; +view+ defaults to the target's current view.
  *   @return [Rect] the current viewport in pixels; +view+ defaults to the target's current view
  * @!method scissor(view = nil)
+ *   Returns the current scissor rectangle in pixels; +view+ defaults to the target's current view.
  *   @return [Rect] the current scissor rectangle in pixels; +view+ defaults to the target's current
  * view
  * @!method map_pixel_to_coords(point, view = nil)
@@ -269,14 +296,19 @@ static VALUE RenderTexture_maximum_antialiasing_level(VALUE klass) {
  *   Converts a world position to pixel coordinates.
  *   @return [Vector2]
  * @!method push_gl_states
+ *   Saves the current OpenGL states before custom drawing.
  *   @return [self]
  * @!method pop_gl_states
+ *   Restores the OpenGL states saved by #push_gl_states.
  *   @return [self]
  * @!method reset_gl_states
+ *   Resets the OpenGL states to those SFML expects.
  *   @return [self]
  * @!method draw_primitives(vertices, primitive, state = nil)
+ *   Draws raw vertex primitives using the given primitive type and render state.
  *   @return [self]
  * @!method draw_vertex_buffer_range(buffer, first, count, state = nil)
+ *   Draws a range of vertices from a VertexBuffer.
  *   @return [self]
  */
 void Init_RenderTexture(VALUE rb_mSFML) {

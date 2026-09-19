@@ -65,6 +65,8 @@ static VALUE Vertex_new(int argc, VALUE* argv, VALUE klass) {
 
 /* call-seq: position -> Vector2
  *
+ * Returns the object's position.
+ *
  * @return [Vector2]
  */
 static VALUE Vertex_get_position(VALUE self) {
@@ -73,6 +75,8 @@ static VALUE Vertex_get_position(VALUE self) {
 
 /* call-seq:
  *   position=(value) -> Vector2
+ *
+ * Sets the object's position.
  *
  * @return [Vector2] +value+
  */
@@ -83,6 +87,8 @@ static VALUE Vertex_set_position(VALUE self, VALUE rb_position) {
 
 /* call-seq: color -> Color
  *
+ * Returns the object's color.
+ *
  * @return [Color]
  */
 static VALUE Vertex_get_color(VALUE self) {
@@ -91,6 +97,8 @@ static VALUE Vertex_get_color(VALUE self) {
 
 /* call-seq:
  *   color=(value) -> Color
+ *
+ * Sets the object's color.
  *
  * @return [Color] +value+
  */
@@ -101,6 +109,8 @@ static VALUE Vertex_set_color(VALUE self, VALUE rb_color) {
 
 /* call-seq: tex_coords -> Vector2
  *
+ * Returns the vertex's texture coordinates.
+ *
  * @return [Vector2]
  */
 static VALUE Vertex_get_tex_coords(VALUE self) {
@@ -110,6 +120,8 @@ static VALUE Vertex_get_tex_coords(VALUE self) {
 /* call-seq:
  *   tex_coords=(value) -> Vector2
  *
+ * Sets the vertex's texture coordinates.
+ *
  * @return [Vector2] +value+
  */
 static VALUE Vertex_set_tex_coords(VALUE self, VALUE rb_tex_coords) {
@@ -118,6 +130,8 @@ static VALUE Vertex_set_tex_coords(VALUE self, VALUE rb_tex_coords) {
 }
 
 /* call-seq: to_a -> [Vector2, Color]
+ *
+ * Returns the object as an Array.
  *
  * @return [Array] +[position, color]+
  */
@@ -129,6 +143,8 @@ static VALUE Vertex_to_a(VALUE self) {
 
 /* call-seq:
  *   self == other -> true or false
+ *
+ * Returns +true+ if the two objects are equal.
  *
  * @return [Boolean]
  */
@@ -153,10 +169,13 @@ static VALUE Vertex_eql(VALUE self, VALUE rb_other) {
  * a position, a color, and texture coordinates.
  *
  * @!attribute position
+ *   The object's position.
  *   @return [Vector2]
  * @!attribute color
+ *   The object's color.
  *   @return [Color]
  * @!attribute tex_coords
+ *   The vertex's texture coordinates.
  *   @return [Vector2]
  */
 void Init_Vertex(VALUE rb_mSFML) {

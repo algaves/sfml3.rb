@@ -88,6 +88,8 @@ static VALUE Sprite_new(VALUE klass, VALUE rb_texture) {
 
 /* call-seq: copy -> Sprite
  *
+ * Returns a deep copy of the object.
+ *
  * @return [Sprite] an independent copy
  */
 static VALUE Sprite_copy(VALUE self) {
@@ -98,6 +100,8 @@ static VALUE Sprite_copy(VALUE self) {
 
 /* call-seq:
  *   texture=(value) -> Texture or nil
+ *
+ * Sets the object's texture.
  *
  * @return [Texture, nil] +value+
  * @raise [TypeError] if +value+ is neither nil nor a Texture
@@ -123,6 +127,8 @@ static VALUE Sprite_set_texture(VALUE self, VALUE rb_texture) {
 
 /* call-seq: texture -> Texture or nil
  *
+ * Returns the object's texture, or +nil+ if it has none.
+ *
  * @return [Texture, nil]
  */
 static VALUE Sprite_get_texture(VALUE self) {
@@ -130,6 +136,8 @@ static VALUE Sprite_get_texture(VALUE self) {
 }
 
 /* call-seq: texture_rect -> Rect
+ *
+ * Returns the sub-rectangle of the texture displayed on the object.
  *
  * @return [Rect] the sub-rectangle of the texture that gets displayed
  */
@@ -140,6 +148,8 @@ static VALUE Sprite_get_texture_rect(VALUE self) {
 /* call-seq:
  *   texture_rect=(value) -> Rect
  *
+ * Sets the sub-rectangle of the texture displayed on the object.
+ *
  * @return [Rect] +value+
  */
 static VALUE Sprite_set_texture_rect(VALUE self, VALUE rb_rect) {
@@ -148,6 +158,8 @@ static VALUE Sprite_set_texture_rect(VALUE self, VALUE rb_rect) {
 }
 
 /* call-seq: color -> Color
+ *
+ * Returns the object's color.
  *
  * @return [Color] the tint color multiplied with the texture's pixels
  */
@@ -158,6 +170,8 @@ static VALUE Sprite_get_color(VALUE self) {
 /* call-seq:
  *   color=(value) -> Color
  *
+ * Sets the object's color.
+ *
  * @return [Color] +value+
  */
 static VALUE Sprite_set_color(VALUE self, VALUE rb_color) {
@@ -166,6 +180,8 @@ static VALUE Sprite_set_color(VALUE self, VALUE rb_color) {
 }
 
 /* call-seq: position -> Vector2
+ *
+ * Returns the object's position.
  *
  * @return [Vector2]
  */
@@ -176,6 +192,8 @@ static VALUE Sprite_get_position(VALUE self) {
 /* call-seq:
  *   position=(value) -> Vector2
  *
+ * Sets the object's position.
+ *
  * @return [Vector2] +value+
  */
 static VALUE Sprite_set_position(VALUE self, VALUE rb_position) {
@@ -184,6 +202,8 @@ static VALUE Sprite_set_position(VALUE self, VALUE rb_position) {
 }
 
 /* call-seq: rotation -> Float
+ *
+ * Returns the object's rotation, in degrees.
  *
  * @return [Float] degrees
  */
@@ -194,6 +214,8 @@ static VALUE Sprite_get_rotation(VALUE self) {
 /* call-seq:
  *   rotation=(value) -> Float
  *
+ * Sets the object's rotation, in degrees.
+ *
  * @return [Float] +value+
  */
 static VALUE Sprite_set_rotation(VALUE self, VALUE rb_rotation) {
@@ -202,6 +224,8 @@ static VALUE Sprite_set_rotation(VALUE self, VALUE rb_rotation) {
 }
 
 /* call-seq: scale -> Vector2
+ *
+ * Returns the object's scale factors.
  *
  * @return [Vector2]
  */
@@ -212,6 +236,8 @@ static VALUE Sprite_get_scale(VALUE self) {
 /* call-seq:
  *   scale=(value) -> Vector2
  *
+ * Sets the object's scale factors.
+ *
  * @return [Vector2] +value+
  */
 static VALUE Sprite_set_scale(VALUE self, VALUE rb_scale) {
@@ -221,6 +247,8 @@ static VALUE Sprite_set_scale(VALUE self, VALUE rb_scale) {
 
 /* call-seq: origin -> Vector2
  *
+ * Returns the object's origin.
+ *
  * @return [Vector2]
  */
 static VALUE Sprite_get_origin(VALUE self) {
@@ -229,6 +257,8 @@ static VALUE Sprite_get_origin(VALUE self) {
 
 /* call-seq:
  *   origin=(value) -> Vector2
+ *
+ * Sets the object's origin.
  *
  * @return [Vector2] +value+
  */
@@ -240,6 +270,8 @@ static VALUE Sprite_set_origin(VALUE self, VALUE rb_origin) {
 /* call-seq:
  *   move(offset) -> self
  *
+ * Moves the object by +offset+.
+ *
  * @return [self]
  */
 static VALUE Sprite_move(VALUE self, VALUE rb_offset) {
@@ -249,6 +281,8 @@ static VALUE Sprite_move(VALUE self, VALUE rb_offset) {
 
 /* call-seq:
  *   rotate(angle) -> self
+ *
+ * Rotates the object by +angle+ degrees.
  *
  * @return [self]
  */
@@ -260,6 +294,8 @@ static VALUE Sprite_rotate(VALUE self, VALUE rb_angle) {
 /* call-seq:
  *   scale!(factors) -> self
  *
+ * Scales the object by +factors+ relative to its current scale.
+ *
  * @return [self]
  */
 static VALUE Sprite_scale(VALUE self, VALUE rb_factors) {
@@ -269,6 +305,8 @@ static VALUE Sprite_scale(VALUE self, VALUE rb_factors) {
 
 /* call-seq: transform -> Array<Float>
  *
+ * Returns the object's 3x3 row-major transform matrix.
+ *
  * @return [Array<Float>] the 9-element matrix (also available as #matrix)
  */
 static VALUE Sprite_get_transform(VALUE self) {
@@ -276,6 +314,8 @@ static VALUE Sprite_get_transform(VALUE self) {
 }
 
 /* call-seq: inverse_transform -> Array<Float>
+ *
+ * Returns the 3x3 row-major inverse of the object's transform matrix.
  *
  * @return [Array<Float>] the inverse of #transform
  */
@@ -285,6 +325,8 @@ static VALUE Sprite_get_inverse_transform(VALUE self) {
 
 /* call-seq: local_bounds -> Rect
  *
+ * Returns the bounding box in local (untransformed) coordinates.
+ *
  * @return [Rect] the bounding box in local coordinates, before any
  *   transform is applied
  */
@@ -293,6 +335,8 @@ static VALUE Sprite_get_local_bounds(VALUE self) {
 }
 
 /* call-seq: global_bounds -> Rect
+ *
+ * Returns the bounding box after the transform is applied.
  *
  * @return [Rect] the bounding box in the parent's coordinate system, after
  *   the current transform is applied
@@ -334,18 +378,25 @@ static VALUE Sprite_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
  * Includes +Drawable+.
  *
  * @!attribute texture
+ *   The object's texture, or +nil+ if it has none.
  *   @return [Texture, nil]
  * @!attribute texture_rect
+ *   The sub-rectangle of the texture displayed on the object.
  *   @return [Rect]
  * @!attribute color
+ *   The object's color.
  *   @return [Color]
  * @!attribute position
+ *   The object's position.
  *   @return [Vector2]
  * @!attribute rotation
+ *   The object's rotation, in degrees.
  *   @return [Float] degrees
  * @!attribute scale
+ *   The object's scale factors.
  *   @return [Vector2]
  * @!attribute origin
+ *   The object's origin.
  *   @return [Vector2]
  */
 void Init_Sprite(VALUE rb_mSFML) {

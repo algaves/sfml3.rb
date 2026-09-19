@@ -72,6 +72,8 @@ static VALUE Rect_new(int argc, VALUE* argv, VALUE klass) {
 
 /* call-seq: left -> Float
  *
+ * Returns the X coordinate of the left edge.
+ *
  * @return [Float]
  */
 static VALUE Rect_get_left(VALUE self) {
@@ -79,6 +81,8 @@ static VALUE Rect_get_left(VALUE self) {
 }
 
 /* call-seq: top -> Float
+ *
+ * Returns the Y coordinate of the top edge.
  *
  * @return [Float]
  */
@@ -88,6 +92,8 @@ static VALUE Rect_get_top(VALUE self) {
 
 /* call-seq: width -> Float
  *
+ * Returns the width.
+ *
  * @return [Float]
  */
 static VALUE Rect_get_width(VALUE self) {
@@ -95,6 +101,8 @@ static VALUE Rect_get_width(VALUE self) {
 }
 
 /* call-seq: height -> Float
+ *
+ * Returns the height.
  *
  * @return [Float]
  */
@@ -104,6 +112,8 @@ static VALUE Rect_get_height(VALUE self) {
 
 /* call-seq:
  *   left=(value) -> Float
+ *
+ * Sets the X coordinate of the left edge.
  *
  * @return [Float] +value+
  */
@@ -115,6 +125,8 @@ static VALUE Rect_set_left(VALUE self, VALUE rb_value) {
 /* call-seq:
  *   top=(value) -> Float
  *
+ * Sets the Y coordinate of the top edge.
+ *
  * @return [Float] +value+
  */
 static VALUE Rect_set_top(VALUE self, VALUE rb_value) {
@@ -124,6 +136,8 @@ static VALUE Rect_set_top(VALUE self, VALUE rb_value) {
 
 /* call-seq:
  *   width=(value) -> Float
+ *
+ * Sets the width.
  *
  * @return [Float] +value+
  */
@@ -135,6 +149,8 @@ static VALUE Rect_set_width(VALUE self, VALUE rb_value) {
 /* call-seq:
  *   height=(value) -> Float
  *
+ * Sets the height.
+ *
  * @return [Float] +value+
  */
 static VALUE Rect_set_height(VALUE self, VALUE rb_value) {
@@ -143,6 +159,8 @@ static VALUE Rect_set_height(VALUE self, VALUE rb_value) {
 }
 
 /* call-seq: position -> Vector2
+ *
+ * Returns the object's position.
  *
  * @return [Vector2] the +(left, top)+ corner
  */
@@ -153,6 +171,8 @@ static VALUE Rect_get_position(VALUE self) {
 }
 
 /* call-seq: size -> Vector2
+ *
+ * Returns the object's size.
  *
  * @return [Vector2] the +(width, height)+ dimensions
  */
@@ -165,6 +185,8 @@ static VALUE Rect_get_size(VALUE self) {
 /* call-seq:
  *   position=(value) -> Vector2
  *
+ * Sets the object's position.
+ *
  * @return [Vector2] +value+
  */
 static VALUE Rect_set_position(VALUE self, VALUE rb_position) {
@@ -174,6 +196,8 @@ static VALUE Rect_set_position(VALUE self, VALUE rb_position) {
 
 /* call-seq:
  *   size=(value) -> Vector2
+ *
+ * Sets the object's size.
  *
  * @return [Vector2] +value+
  */
@@ -185,6 +209,8 @@ static VALUE Rect_set_size(VALUE self, VALUE rb_size) {
 /* call-seq:
  *   contains?(point) -> true or false
  *   contains?(x, y) -> true or false
+ *
+ * Returns +true+ if the rectangle contains the given point.
  *
  * @return [Boolean]
  * @raise [ArgumentError] if given an argument count other than 1 or 2
@@ -208,6 +234,8 @@ static VALUE Rect_contains(int argc, VALUE* argv, VALUE self) {
 /* call-seq:
  *   intersection(other) -> Rect or nil
  *
+ * Returns the overlapping region of two rectangles.
+ *
  * @return [Rect, nil] the overlapping region, or +nil+ if the rects don't
  *   intersect
  */
@@ -226,6 +254,8 @@ static VALUE Rect_intersection(VALUE self, VALUE rb_other) {
 /* call-seq:
  *   intersects?(other) -> true or false
  *
+ * Returns +true+ if the two rectangles overlap.
+ *
  * @return [Boolean]
  */
 static VALUE Rect_intersects(VALUE self, VALUE rb_other) {
@@ -233,6 +263,8 @@ static VALUE Rect_intersects(VALUE self, VALUE rb_other) {
 }
 
 /* call-seq: to_a -> [Float, Float, Float, Float]
+ *
+ * Returns the object as an Array.
  *
  * @return [Array<Float>] +[left, top, width, height]+
  */
@@ -285,6 +317,8 @@ static VALUE Rect_eql(VALUE self, VALUE rb_other) {
 
 /* call-seq: to_s -> String
  *
+ * Returns a human-readable representation of the object.
+ *
  * @return [String] +"(left, top, width, height)"+
  */
 static VALUE Rect_to_s(VALUE self) {
@@ -305,16 +339,22 @@ static VALUE Rect_to_s(VALUE self) {
  * Includes +Enumerable+ and behaves like a 4-element sequence.
  *
  * @!attribute left
+ *   The X coordinate of the left edge.
  *   @return [Float] the X coordinate of the top-left corner
  * @!attribute top
+ *   The Y coordinate of the top edge.
  *   @return [Float] the Y coordinate of the top-left corner
  * @!attribute width
+ *   The width.
  *   @return [Float] the width
  * @!attribute height
+ *   The height.
  *   @return [Float] the height
  * @!attribute position
+ *   The object's position.
  *   @return [Vector2] the +(left, top)+ corner
  * @!attribute size
+ *   The object's size.
  *   @return [Vector2] the +(width, height)+ dimensions
  */
 void Init_Rect(VALUE rb_mSFML) {

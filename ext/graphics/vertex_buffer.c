@@ -99,6 +99,8 @@ static VALUE VertexBuffer_new(int argc, VALUE* argv, VALUE klass) {
 
 /* call-seq: copy -> VertexBuffer
  *
+ * Returns a deep copy of the object.
+ *
  * @return [VertexBuffer] an independent copy
  */
 static VALUE VertexBuffer_copy(VALUE self) {
@@ -107,6 +109,8 @@ static VALUE VertexBuffer_copy(VALUE self) {
 }
 
 /* call-seq: vertex_count -> Integer
+ *
+ * Returns the number of vertices stored.
  *
  * @return [Integer]
  */
@@ -170,6 +174,8 @@ static VALUE VertexBuffer_update_from(VALUE self, VALUE rb_other) {
 /* call-seq:
  *   swap(other) -> self
  *
+ * Swaps the contents with +other+.
+ *
  * @return [self]
  * @raise [TypeError] if +other+ is not a VertexBuffer
  */
@@ -185,6 +191,8 @@ static VALUE VertexBuffer_swap(VALUE self, VALUE rb_other) {
 
 /* call-seq: primitive -> Symbol
  *
+ * Returns the primitive type used to draw the vertices.
+ *
  * @return [Symbol] see VertexArray#primitive
  */
 static VALUE VertexBuffer_get_primitive_type(VALUE self) {
@@ -195,6 +203,8 @@ static VALUE VertexBuffer_get_primitive_type(VALUE self) {
 /* call-seq:
  *   primitive=(value) -> Symbol
  *
+ * Sets the primitive type used to draw the vertices.
+ *
  * @return [Symbol] +value+
  */
 static VALUE VertexBuffer_set_primitive_type(VALUE self, VALUE rb_type) {
@@ -203,6 +213,8 @@ static VALUE VertexBuffer_set_primitive_type(VALUE self, VALUE rb_type) {
 }
 
 /* call-seq: usage -> Symbol
+ *
+ * Returns the buffer's usage hint.
  *
  * @return [Symbol] one of :stream, :dynamic, :static
  */
@@ -213,6 +225,8 @@ static VALUE VertexBuffer_get_usage(VALUE self) {
 /* call-seq:
  *   usage=(value) -> Symbol
  *
+ * Sets the buffer's usage hint.
+ *
  * @return [Symbol] +value+
  */
 static VALUE VertexBuffer_set_usage(VALUE self, VALUE rb_usage) {
@@ -222,6 +236,8 @@ static VALUE VertexBuffer_set_usage(VALUE self, VALUE rb_usage) {
 
 /* call-seq: native_handle -> Integer
  *
+ * Returns the underlying OpenGL handle.
+ *
  * @return [Integer] the underlying OpenGL buffer handle
  */
 static VALUE VertexBuffer_get_native_handle(VALUE self) {
@@ -229,6 +245,8 @@ static VALUE VertexBuffer_get_native_handle(VALUE self) {
 }
 
 /* call-seq: bind -> self
+ *
+ * Binds the buffer for drawing.
  *
  * @return [self]
  */
@@ -239,6 +257,8 @@ static VALUE VertexBuffer_bind(VALUE self) {
 
 /* call-seq:
  *   VertexBuffer.available? -> true or false
+ *
+ * Returns +true+ if vertex buffers are supported.
  *
  * @return [Boolean] whether the system supports vertex buffers
  */
@@ -280,8 +300,10 @@ static VALUE VertexBuffer_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
  * Includes +Drawable+.
  *
  * @!attribute primitive
+ *   The primitive type used to draw the vertices.
  *   @return [Symbol]
  * @!attribute usage
+ *   The buffer's usage hint.
  *   @return [Symbol] one of :stream, :dynamic, :static
  */
 void Init_VertexBuffer(VALUE rb_mSFML) {

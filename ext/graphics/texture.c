@@ -79,6 +79,8 @@ static const sfIntRect* Texture_area_ptr(VALUE rb_area, sfIntRect* storage) {
 /* call-seq:
  *   Texture.new(size) -> Texture
  *
+ * Creates an empty texture with the given +width+ and +height+.
+ *
  * @return [Texture] an empty texture of +size+ (a Vector2 or 2-element Array)
  * @raise [RuntimeError] if creation fails
  */
@@ -88,6 +90,8 @@ static VALUE Texture_new(VALUE klass, VALUE rb_size) {
 
 /* call-seq:
  *   Texture.srgb(size) -> Texture
+ *
+ * Creates an empty texture with an sRGB format.
  *
  * @return [Texture] an empty sRGB-encoded texture of +size+
  * @raise [RuntimeError] if creation fails
@@ -99,6 +103,8 @@ static VALUE Texture_srgb(VALUE klass, VALUE rb_size) {
 /* call-seq:
  *   Texture.from_file(path)       -> Texture
  *   Texture.from_file(path, area) -> Texture
+ *
+ * Loads a texture from the image file at +filename+.
  *
  * @return [Texture] loaded from the file at +path+, cropped to +area+ (a
  *   Rect) if given
@@ -118,6 +124,8 @@ static VALUE Texture_from_file(int argc, VALUE* argv, VALUE klass) {
  *   Texture.srgb_from_file(path)       -> Texture
  *   Texture.srgb_from_file(path, area) -> Texture
  *
+ * Loads an sRGB texture from the image file at +filename+.
+ *
  * @return [Texture] sRGB-encoded, loaded from the file at +path+, cropped
  *   to +area+ (a Rect) if given
  * @raise [RuntimeError] if loading fails
@@ -135,6 +143,8 @@ static VALUE Texture_srgb_from_file(int argc, VALUE* argv, VALUE klass) {
 /* call-seq:
  *   Texture.from_memory(data)       -> Texture
  *   Texture.from_memory(data, area) -> Texture
+ *
+ * Loads a texture from an in-memory image buffer.
  *
  * @return [Texture] decoded from the encoded image bytes in +data+ (a
  *   String), cropped to +area+ (a Rect) if given
@@ -156,6 +166,8 @@ static VALUE Texture_from_memory(int argc, VALUE* argv, VALUE klass) {
  *   Texture.srgb_from_memory(data)       -> Texture
  *   Texture.srgb_from_memory(data, area) -> Texture
  *
+ * Loads an sRGB texture from an in-memory image buffer.
+ *
  * @return [Texture] sRGB-encoded, decoded from the encoded image bytes in
  *   +data+ (a String), cropped to +area+ (a Rect) if given
  * @raise [RuntimeError] if decoding fails
@@ -175,6 +187,8 @@ static VALUE Texture_srgb_from_memory(int argc, VALUE* argv, VALUE klass) {
 /* call-seq:
  *   Texture.from_stream(stream)       -> Texture
  *   Texture.from_stream(stream, area) -> Texture
+ *
+ * Loads a texture from the image data read from +stream+.
  *
  * @return [Texture] decoded from +stream+ (an InputStream), cropped to
  *   +area+ (a Rect) if given
@@ -203,6 +217,8 @@ static VALUE Texture_from_stream(int argc, VALUE* argv, VALUE klass) {
  *   Texture.srgb_from_stream(stream)       -> Texture
  *   Texture.srgb_from_stream(stream, area) -> Texture
  *
+ * Loads an sRGB texture from the image data read from +stream+.
+ *
  * @return [Texture] sRGB-encoded, decoded from +stream+ (an InputStream),
  *   cropped to +area+ (a Rect) if given
  * @raise [RuntimeError] if decoding fails
@@ -230,6 +246,8 @@ static VALUE Texture_srgb_from_stream(int argc, VALUE* argv, VALUE klass) {
  *   Texture.from_image(image)       -> Texture
  *   Texture.from_image(image, area) -> Texture
  *
+ * Creates a texture from the pixels of an existing Image.
+ *
  * @return [Texture] built from +image+ (an Image), cropped to +area+ (a
  *   Rect) if given
  * @raise [TypeError] if +image+ is not an Image
@@ -253,6 +271,8 @@ static VALUE Texture_from_image(int argc, VALUE* argv, VALUE klass) {
  *   Texture.srgb_from_image(image)       -> Texture
  *   Texture.srgb_from_image(image, area) -> Texture
  *
+ * Creates an sRGB texture from the pixels of an existing Image.
+ *
  * @return [Texture] sRGB-encoded, built from +image+ (an Image), cropped to
  *   +area+ (a Rect) if given
  * @raise [TypeError] if +image+ is not an Image
@@ -274,6 +294,8 @@ static VALUE Texture_srgb_from_image(int argc, VALUE* argv, VALUE klass) {
 
 /* call-seq: copy -> Texture
  *
+ * Returns a deep copy of the object.
+ *
  * @return [Texture] an independent copy
  */
 static VALUE Texture_copy(VALUE self) {
@@ -281,6 +303,8 @@ static VALUE Texture_copy(VALUE self) {
 }
 
 /* call-seq: size -> Vector2
+ *
+ * Returns the object's size.
  *
  * @return [Vector2]
  */
@@ -319,6 +343,8 @@ static VALUE Texture_resize_srgb(VALUE self, VALUE rb_size) {
 /* call-seq:
  *   swap(other) -> self
  *
+ * Swaps the contents with +other+.
+ *
  * @return [self]
  * @raise [TypeError] if +other+ is not a Texture
  */
@@ -333,6 +359,8 @@ static VALUE Texture_swap(VALUE self, VALUE rb_other) {
 }
 
 /* call-seq: copy_to_image -> Image
+ *
+ * Copies the texture's pixels into +image+.
  *
  * @return [Image] the texture's pixels, read back from the GPU
  * @raise [RuntimeError] if the copy fails
@@ -387,6 +415,8 @@ static VALUE Texture_update_from_pixels(VALUE self, VALUE rb_pixels, VALUE rb_si
 /* call-seq:
  *   update_from_image(image, offset) -> self
  *
+ * Updates the texture from the pixels of +image+.
+ *
  * @return [self]
  * @raise [TypeError] if +image+ is not an Image
  */
@@ -403,6 +433,8 @@ static VALUE Texture_update_from_image(VALUE self, VALUE rb_image, VALUE rb_offs
 
 /* call-seq:
  *   update_from_texture(source, offset) -> self
+ *
+ * Updates the texture from the pixels of another texture.
  *
  * @return [self]
  * @raise [TypeError] if +source+ is not a Texture
@@ -421,6 +453,8 @@ static VALUE Texture_update_from_texture(VALUE self, VALUE rb_source, VALUE rb_o
 /* call-seq:
  *   update_from_window(window, offset) -> self
  *
+ * Updates the texture from the contents of a window.
+ *
  * @return [self]
  * @raise [TypeError] if +window+ is not a Window
  */
@@ -438,6 +472,8 @@ static VALUE Texture_update_from_window(VALUE self, VALUE rb_window, VALUE rb_of
 /* call-seq:
  *   smooth=(value) -> true or false
  *
+ * Enables or disables smooth rendering.
+ *
  * @return [Boolean] +value+
  */
 static VALUE Texture_set_smooth(VALUE self, VALUE rb_smooth) {
@@ -447,6 +483,8 @@ static VALUE Texture_set_smooth(VALUE self, VALUE rb_smooth) {
 
 /* call-seq: smooth? -> true or false
  *
+ * Returns +true+ if smooth rendering is enabled.
+ *
  * @return [Boolean]
  */
 static VALUE Texture_is_smooth(VALUE self) {
@@ -454,6 +492,8 @@ static VALUE Texture_is_smooth(VALUE self) {
 }
 
 /* call-seq: srgb? -> true or false
+ *
+ * Returns +true+ if the texture uses an sRGB format.
  *
  * @return [Boolean]
  */
@@ -464,6 +504,8 @@ static VALUE Texture_is_srgb(VALUE self) {
 /* call-seq:
  *   repeated=(value) -> true or false
  *
+ * Enables or disables texture repeating.
+ *
  * @return [Boolean] +value+
  */
 static VALUE Texture_set_repeated(VALUE self, VALUE rb_repeated) {
@@ -473,6 +515,8 @@ static VALUE Texture_set_repeated(VALUE self, VALUE rb_repeated) {
 
 /* call-seq: repeated? -> true or false
  *
+ * Returns +true+ if texture repeating is enabled.
+ *
  * @return [Boolean]
  */
 static VALUE Texture_is_repeated(VALUE self) {
@@ -481,6 +525,8 @@ static VALUE Texture_is_repeated(VALUE self) {
 
 /* call-seq: generate_mipmap -> true or false
  *
+ * Generates the mipmap pyramid for the texture.
+ *
  * @return [Boolean] whether mipmap generation succeeded
  */
 static VALUE Texture_generate_mipmap(VALUE self) {
@@ -488,6 +534,8 @@ static VALUE Texture_generate_mipmap(VALUE self) {
 }
 
 /* call-seq: native_handle -> Integer
+ *
+ * Returns the underlying OpenGL handle.
  *
  * @return [Integer] the underlying OpenGL texture handle
  */
@@ -522,6 +570,8 @@ static VALUE Texture_bind(int argc, VALUE* argv, VALUE self) {
 
 /* call-seq:
  *   Texture.maximum_size -> Integer
+ *
+ * Returns the maximum texture size supported by the GPU.
  *
  * @return [Integer] the maximum texture size supported by the current
  *   OpenGL implementation

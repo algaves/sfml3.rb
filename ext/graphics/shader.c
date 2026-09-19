@@ -150,6 +150,8 @@ static VALUE Shader_from_stream(int argc, VALUE* argv, VALUE klass) {
 
 /* call-seq: native_handle -> Integer
  *
+ * Returns the underlying OpenGL handle.
+ *
  * @return [Integer] the underlying OpenGL program handle
  */
 static VALUE Shader_get_native_handle(VALUE self) {
@@ -171,6 +173,8 @@ static VALUE Shader_bind(VALUE self) {
 /* call-seq:
  *   Shader.available? -> true or false
  *
+ * Returns +true+ if shaders are supported.
+ *
  * @return [Boolean] whether the system supports shaders at all
  */
 static VALUE Shader_is_available(VALUE klass) {
@@ -179,6 +183,8 @@ static VALUE Shader_is_available(VALUE klass) {
 
 /* call-seq:
  *   Shader.geometry_available? -> true or false
+ *
+ * Returns +true+ if geometry shaders are supported.
  *
  * @return [Boolean] whether the system supports geometry shaders
  */
@@ -195,6 +201,8 @@ static void Shader_name(VALUE rb_name, char* buffer, size_t length) {
 /* call-seq:
  *   set_float(name, x) -> self
  *
+ * Sets the +name+ uniform to a single Float.
+ *
  * @return [self]
  */
 static VALUE Shader_set_float(VALUE self, VALUE rb_name, VALUE rb_x) {
@@ -209,6 +217,8 @@ static VALUE Shader_set_float(VALUE self, VALUE rb_name, VALUE rb_x) {
 /* call-seq:
  *   set_int(name, x) -> self
  *
+ * Sets the +name+ uniform to a single Integer.
+ *
  * @return [self]
  */
 static VALUE Shader_set_int(VALUE self, VALUE rb_name, VALUE rb_x) {
@@ -222,6 +232,8 @@ static VALUE Shader_set_int(VALUE self, VALUE rb_name, VALUE rb_x) {
 
 /* call-seq:
  *   set_bool(name, x) -> self
+ *
+ * Sets the +name+ uniform to a boolean.
  *
  * @return [self]
  */
@@ -270,6 +282,8 @@ static VALUE Shader_set_int_color(VALUE self, VALUE rb_name, VALUE rb_color) {
 /* call-seq:
  *   set_vec2(name, vector) -> self
  *
+ * Sets the +name+ uniform to a Vector2.
+ *
  * @return [self]
  */
 static VALUE Shader_set_vec2(VALUE self, VALUE rb_name, VALUE rb_vector) {
@@ -283,6 +297,8 @@ static VALUE Shader_set_vec2(VALUE self, VALUE rb_name, VALUE rb_vector) {
 
 /* call-seq:
  *   set_vec3(name, vector) -> self
+ *
+ * Sets the +name+ uniform to a Vector3.
  *
  * @return [self]
  */
@@ -366,6 +382,8 @@ static VALUE Shader_set_vec4(VALUE self, VALUE rb_name, VALUE rb_vector) {
 
 /* call-seq:
  *   set_ivec2(name, vector) -> self
+ *
+ * Sets the +name+ uniform to a Vector2 of Integers.
  *
  * @return [self]
  */
@@ -719,10 +737,13 @@ static VALUE Shader_set_uniform(VALUE self, VALUE rb_name, VALUE rb_value) {
  * their function bodies from the doc-comment scanner.
  *
  * @!method set_float_array(name, values)
+ *   Sets the +name+ uniform to an Array of Floats.
  *   @return [self]
  * @!method set_vec2_array(name, values)
+ *   Sets the +name+ uniform to an Array of Vector2 values.
  *   @return [self]
  * @!method set_vec3_array(name, values)
+ *   Sets the +name+ uniform to an Array of Vector3 values.
  *   @return [self]
  * @!method set_vec4_array(name, values)
  *   values is an Array of 4-element Arrays.

@@ -58,6 +58,8 @@ static VALUE View_new(VALUE klass) {
 /* call-seq:
  *   View.from_rect(rect) -> View
  *
+ * Creates a view covering the given rectangle.
+ *
  * @return [View] a view whose visible area is +rect+ (position is the
  *   top-left corner)
  */
@@ -72,6 +74,8 @@ static VALUE View_init(VALUE self) {
 /* call-seq:
  *   rotation=(value) -> self
  *
+ * Sets the object's rotation, in degrees.
+ *
  * @return [self]
  */
 static VALUE View_set_rotation(VALUE self, VALUE rb_rotation) {
@@ -82,6 +86,8 @@ static VALUE View_set_rotation(VALUE self, VALUE rb_rotation) {
 /* call-seq:
  *   size=(value) -> self
  *
+ * Sets the object's size.
+ *
  * @return [self]
  */
 static VALUE View_set_size(VALUE self, VALUE rb_scale) {
@@ -91,6 +97,8 @@ static VALUE View_set_size(VALUE self, VALUE rb_scale) {
 
 /* call-seq:
  *   center=(value) -> self
+ *
+ * Sets the view's center.
  *
  * @return [self]
  */
@@ -117,6 +125,8 @@ static VALUE View_set_viewport(VALUE self, VALUE rb_viewport) {
 
 /* call-seq: rotation -> Float
  *
+ * Returns the object's rotation, in degrees.
+ *
  * @return [Float] degrees
  */
 static VALUE View_get_rotation(VALUE self) {
@@ -124,6 +134,8 @@ static VALUE View_get_rotation(VALUE self) {
 }
 
 /* call-seq: size -> Vector2
+ *
+ * Returns the object's size.
  *
  * @return [Vector2]
  */
@@ -133,6 +145,8 @@ static VALUE View_get_size(VALUE self) {
 
 /* call-seq: center -> Vector2
  *
+ * Returns the view's center.
+ *
  * @return [Vector2]
  */
 static VALUE View_get_center(VALUE self) {
@@ -140,6 +154,8 @@ static VALUE View_get_center(VALUE self) {
 }
 
 /* call-seq: viewport -> Rect
+ *
+ * Returns the target's viewport rectangle, or +nil+ if none is set.
  *
  * @return [Rect]
  */
@@ -149,6 +165,8 @@ static VALUE View_get_viewport(VALUE self) {
 
 /* call-seq:
  *   scissor=(value) -> self
+ *
+ * Sets the target's scissor rectangle.
  *
  * @return [self]
  */
@@ -160,6 +178,8 @@ static VALUE View_set_scissor(VALUE self, VALUE rb_scissor) {
 
 /* call-seq: scissor -> Rect
  *
+ * Returns the target's scissor rectangle, or +nil+ if none is set.
+ *
  * @return [Rect]
  */
 static VALUE View_get_scissor(VALUE self) {
@@ -168,6 +188,8 @@ static VALUE View_get_scissor(VALUE self) {
 
 /* call-seq:
  *   move(offset) -> self
+ *
+ * Moves the object by +offset+.
  *
  * @return [self]
  */
@@ -178,6 +200,8 @@ static VALUE View_move(VALUE self, VALUE rb_move) {
 
 /* call-seq:
  *   rotate(angle) -> self
+ *
+ * Rotates the object by +angle+ degrees.
  *
  * @return [self]
  */
@@ -202,6 +226,8 @@ static VALUE View_zoom(VALUE self, VALUE rb_zoom) {
 
 /* call-seq: copy -> View
  *
+ * Returns a deep copy of the object.
+ *
  * @return [View] an independent copy
  */
 static VALUE View_copy(VALUE self) {
@@ -213,14 +239,19 @@ static VALUE View_copy(VALUE self) {
  * where on that target it is shown.
  *
  * @!attribute rotation
+ *   The object's rotation, in degrees.
  *   @return [Float] degrees
  * @!attribute size
+ *   The object's size.
  *   @return [Vector2]
  * @!attribute center
+ *   The view's center.
  *   @return [Vector2]
  * @!attribute viewport
+ *   The view's viewport rectangle.
  *   @return [Rect] the target-relative (0..1) rectangle this view renders into
  * @!attribute scissor
+ *   The view's scissor rectangle.
  *   @return [Rect]
  */
 void Init_View(VALUE rb_mSFML) {

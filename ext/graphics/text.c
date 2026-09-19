@@ -107,6 +107,8 @@ static VALUE Text_new(int argc, VALUE* argv, VALUE klass) {
 
 /* call-seq: copy -> Text
  *
+ * Returns a deep copy of the object.
+ *
  * @return [Text] an independent copy
  */
 static VALUE Text_copy(VALUE self) {
@@ -121,6 +123,8 @@ static VALUE Text_copy(VALUE self) {
 
 /* call-seq:
  *   font=(value) -> Font or nil
+ *
+ * Sets the text's font.
  *
  * @return [Font, nil] +value+
  * @raise [TypeError] if +value+ is neither nil nor a Font
@@ -146,6 +150,8 @@ static VALUE Text_set_font(VALUE self, VALUE rb_font) {
 
 /* call-seq: font -> Font or nil
  *
+ * Returns the text's font.
+ *
  * @return [Font, nil]
  */
 static VALUE Text_get_font(VALUE self) {
@@ -156,6 +162,8 @@ static VALUE Text_get_font(VALUE self) {
    bytes with the C locale and mangles anything outside ASCII. */
 /* call-seq:
  *   string=(value) -> String
+ *
+ * Sets the displayed string.
  *
  * @return [String] +value+
  */
@@ -171,6 +179,8 @@ static VALUE Text_set_string(VALUE self, VALUE rb_string) {
 
 /* call-seq: string -> String
  *
+ * Returns the displayed string.
+ *
  * @return [String]
  */
 static VALUE Text_get_string(VALUE self) {
@@ -180,6 +190,8 @@ static VALUE Text_get_string(VALUE self) {
 /* call-seq:
  *   character_size=(value) -> Integer
  *
+ * Sets the character size in pixels.
+ *
  * @return [Integer] +value+
  */
 static VALUE Text_set_character_size(VALUE self, VALUE rb_size) {
@@ -188,6 +200,8 @@ static VALUE Text_set_character_size(VALUE self, VALUE rb_size) {
 }
 
 /* call-seq: character_size -> Integer
+ *
+ * Returns the character size in pixels.
  *
  * @return [Integer] in pixels
  */
@@ -210,6 +224,8 @@ static VALUE Text_set_style(VALUE self, VALUE rb_style) {
 
 /* call-seq: style -> Integer
  *
+ * Returns the text style flags.
+ *
  * @return [Integer] a bitmask of the active style flags
  */
 static VALUE Text_get_style(VALUE self) {
@@ -217,6 +233,8 @@ static VALUE Text_get_style(VALUE self) {
 }
 
 /* call-seq: fill_color -> Color
+ *
+ * Returns the shape's fill color.
  *
  * @return [Color]
  */
@@ -227,6 +245,8 @@ static VALUE Text_get_fill_color(VALUE self) {
 /* call-seq:
  *   fill_color=(value) -> Color
  *
+ * Sets the shape's fill color.
+ *
  * @return [Color] +value+
  */
 static VALUE Text_set_fill_color(VALUE self, VALUE rb_color) {
@@ -235,6 +255,8 @@ static VALUE Text_set_fill_color(VALUE self, VALUE rb_color) {
 }
 
 /* call-seq: outline_color -> Color
+ *
+ * Returns the shape's outline color.
  *
  * @return [Color]
  */
@@ -245,6 +267,8 @@ static VALUE Text_get_outline_color(VALUE self) {
 /* call-seq:
  *   outline_color=(value) -> Color
  *
+ * Sets the shape's outline color.
+ *
  * @return [Color] +value+
  */
 static VALUE Text_set_outline_color(VALUE self, VALUE rb_color) {
@@ -253,6 +277,8 @@ static VALUE Text_set_outline_color(VALUE self, VALUE rb_color) {
 }
 
 /* call-seq: outline_thickness -> Float
+ *
+ * Returns the shape's outline thickness.
  *
  * @return [Float]
  */
@@ -263,6 +289,8 @@ static VALUE Text_get_outline_thickness(VALUE self) {
 /* call-seq:
  *   outline_thickness=(value) -> Float
  *
+ * Sets the shape's outline thickness.
+ *
  * @return [Float] +value+
  */
 static VALUE Text_set_outline_thickness(VALUE self, VALUE rb_thickness) {
@@ -271,6 +299,8 @@ static VALUE Text_set_outline_thickness(VALUE self, VALUE rb_thickness) {
 }
 
 /* call-seq: letter_spacing -> Float
+ *
+ * Returns the spacing between letters.
  *
  * @return [Float] a multiplier of the font's default spacing (1.0 = default)
  */
@@ -281,6 +311,8 @@ static VALUE Text_get_letter_spacing(VALUE self) {
 /* call-seq:
  *   letter_spacing=(value) -> Float
  *
+ * Sets the spacing between letters.
+ *
  * @return [Float] +value+
  */
 static VALUE Text_set_letter_spacing(VALUE self, VALUE rb_spacing) {
@@ -289,6 +321,8 @@ static VALUE Text_set_letter_spacing(VALUE self, VALUE rb_spacing) {
 }
 
 /* call-seq: line_spacing -> Float
+ *
+ * Returns the line spacing multiplier.
  *
  * @return [Float] a multiplier of the font's default line spacing
  */
@@ -299,6 +333,8 @@ static VALUE Text_get_line_spacing(VALUE self) {
 /* call-seq:
  *   line_spacing=(value) -> Float
  *
+ * Sets the spacing between lines.
+ *
  * @return [Float] +value+
  */
 static VALUE Text_set_line_spacing(VALUE self, VALUE rb_spacing) {
@@ -307,6 +343,8 @@ static VALUE Text_set_line_spacing(VALUE self, VALUE rb_spacing) {
 }
 
 /* call-seq: position -> Vector2
+ *
+ * Returns the object's position.
  *
  * @return [Vector2]
  */
@@ -317,6 +355,8 @@ static VALUE Text_get_position(VALUE self) {
 /* call-seq:
  *   position=(value) -> Vector2
  *
+ * Sets the object's position.
+ *
  * @return [Vector2] +value+
  */
 static VALUE Text_set_position(VALUE self, VALUE rb_position) {
@@ -325,6 +365,8 @@ static VALUE Text_set_position(VALUE self, VALUE rb_position) {
 }
 
 /* call-seq: rotation -> Float
+ *
+ * Returns the object's rotation, in degrees.
  *
  * @return [Float] degrees
  */
@@ -335,6 +377,8 @@ static VALUE Text_get_rotation(VALUE self) {
 /* call-seq:
  *   rotation=(value) -> Float
  *
+ * Sets the object's rotation, in degrees.
+ *
  * @return [Float] +value+
  */
 static VALUE Text_set_rotation(VALUE self, VALUE rb_rotation) {
@@ -343,6 +387,8 @@ static VALUE Text_set_rotation(VALUE self, VALUE rb_rotation) {
 }
 
 /* call-seq: scale -> Vector2
+ *
+ * Returns the object's scale factors.
  *
  * @return [Vector2]
  */
@@ -353,6 +399,8 @@ static VALUE Text_get_scale(VALUE self) {
 /* call-seq:
  *   scale=(value) -> Vector2
  *
+ * Sets the object's scale factors.
+ *
  * @return [Vector2] +value+
  */
 static VALUE Text_set_scale(VALUE self, VALUE rb_scale) {
@@ -362,6 +410,8 @@ static VALUE Text_set_scale(VALUE self, VALUE rb_scale) {
 
 /* call-seq: origin -> Vector2
  *
+ * Returns the object's origin.
+ *
  * @return [Vector2]
  */
 static VALUE Text_get_origin(VALUE self) {
@@ -370,6 +420,8 @@ static VALUE Text_get_origin(VALUE self) {
 
 /* call-seq:
  *   origin=(value) -> Vector2
+ *
+ * Sets the object's origin.
  *
  * @return [Vector2] +value+
  */
@@ -381,6 +433,8 @@ static VALUE Text_set_origin(VALUE self, VALUE rb_origin) {
 /* call-seq:
  *   move(offset) -> self
  *
+ * Moves the object by +offset+.
+ *
  * @return [self]
  */
 static VALUE Text_move(VALUE self, VALUE rb_offset) {
@@ -390,6 +444,8 @@ static VALUE Text_move(VALUE self, VALUE rb_offset) {
 
 /* call-seq:
  *   rotate(angle) -> self
+ *
+ * Rotates the object by +angle+ degrees.
  *
  * @return [self]
  */
@@ -401,6 +457,8 @@ static VALUE Text_rotate(VALUE self, VALUE rb_angle) {
 /* call-seq:
  *   scale!(factors) -> self
  *
+ * Scales the object by +factors+ relative to its current scale.
+ *
  * @return [self]
  */
 static VALUE Text_scale(VALUE self, VALUE rb_factors) {
@@ -410,6 +468,8 @@ static VALUE Text_scale(VALUE self, VALUE rb_factors) {
 
 /* call-seq: transform -> Array<Float>
  *
+ * Returns the object's 3x3 row-major transform matrix.
+ *
  * @return [Array<Float>] the 9-element matrix (also available as #matrix)
  */
 static VALUE Text_get_transform(VALUE self) {
@@ -417,6 +477,8 @@ static VALUE Text_get_transform(VALUE self) {
 }
 
 /* call-seq: inverse_transform -> Array<Float>
+ *
+ * Returns the 3x3 row-major inverse of the object's transform matrix.
  *
  * @return [Array<Float>] the inverse of #transform
  */
@@ -427,6 +489,8 @@ static VALUE Text_get_inverse_transform(VALUE self) {
 /* call-seq:
  *   find_character_pos(index) -> Vector2
  *
+ * Returns the index of the character at the given position.
+ *
  * @return [Vector2] the position of the +index+-th character, in global
  *   (parent) coordinates
  */
@@ -436,6 +500,8 @@ static VALUE Text_find_character_pos(VALUE self, VALUE rb_index) {
 
 /* call-seq: local_bounds -> Rect
  *
+ * Returns the bounding box in local (untransformed) coordinates.
+ *
  * @return [Rect] the bounding box in local coordinates, before any
  *   transform is applied
  */
@@ -444,6 +510,8 @@ static VALUE Text_get_local_bounds(VALUE self) {
 }
 
 /* call-seq: global_bounds -> Rect
+ *
+ * Returns the bounding box after the transform is applied.
  *
  * @return [Rect] the bounding box in the parent's coordinate system, after
  *   the current transform is applied
@@ -484,30 +552,43 @@ static VALUE Text_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
  * Includes +Drawable+.
  *
  * @!attribute font
+ *   The text's font.
  *   @return [Font, nil]
  * @!attribute string
+ *   The displayed string.
  *   @return [String]
  * @!attribute character_size
+ *   The character size in pixels.
  *   @return [Integer] in pixels
  * @!attribute style
+ *   The text style flags.
  *   @return [Integer] a bitmask of style flags
  * @!attribute fill_color
+ *   The object's fill color.
  *   @return [Color]
  * @!attribute outline_color
+ *   The object's outline color.
  *   @return [Color]
  * @!attribute outline_thickness
+ *   The object's outline thickness.
  *   @return [Float]
  * @!attribute letter_spacing
+ *   The spacing between letters.
  *   @return [Float]
  * @!attribute line_spacing
+ *   The spacing between lines.
  *   @return [Float]
  * @!attribute position
+ *   The object's position.
  *   @return [Vector2]
  * @!attribute rotation
+ *   The object's rotation, in degrees.
  *   @return [Float] degrees
  * @!attribute scale
+ *   The object's scale factors.
  *   @return [Vector2]
  * @!attribute origin
+ *   The object's origin.
  *   @return [Vector2]
  */
 void Init_Text(VALUE rb_mSFML) {

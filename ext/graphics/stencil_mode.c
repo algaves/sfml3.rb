@@ -115,6 +115,8 @@ static VALUE StencilMode_new(int argc, VALUE* argv, VALUE klass) {
 
 /* call-seq: comparison -> Symbol
  *
+ * Returns the comparison used against the stencil buffer.
+ *
  * @return [Symbol] one of :never, :less, :less_equal, :greater,
  *   :greater_equal, :equal, :not_equal, :always
  */
@@ -124,6 +126,8 @@ static VALUE StencilMode_get_comparison(VALUE self) {
 }
 
 /* call-seq: update_operation -> Symbol
+ *
+ * Returns the operation applied when the stencil test passes or fails.
  *
  * @return [Symbol] one of :keep, :zero, :replace, :increment, :decrement,
  *   :invert
@@ -136,6 +140,8 @@ static VALUE StencilMode_get_operation(VALUE self) {
 
 /* call-seq: reference -> Integer
  *
+ * Returns the reference value compared against the stencil buffer.
+ *
  * @return [Integer]
  */
 static VALUE StencilMode_get_reference(VALUE self) {
@@ -143,6 +149,8 @@ static VALUE StencilMode_get_reference(VALUE self) {
 }
 
 /* call-seq: mask -> Integer
+ *
+ * Returns the bitmask applied to the stencil values.
  *
  * @return [Integer]
  */
@@ -152,6 +160,8 @@ static VALUE StencilMode_get_mask(VALUE self) {
 
 /* call-seq: stencil_only -> true or false
  *
+ * Returns +true+ if only the stencil buffer is written to.
+ *
  * @return [Boolean]
  */
 static VALUE StencilMode_get_only(VALUE self) {
@@ -160,6 +170,8 @@ static VALUE StencilMode_get_only(VALUE self) {
 
 /* call-seq:
  *   comparison=(value) -> Symbol or Integer
+ *
+ * Sets the comparison used against the stencil buffer.
  *
  * @return [Symbol, Integer] +value+
  */
@@ -172,6 +184,8 @@ static VALUE StencilMode_set_comparison(VALUE self, VALUE rb_value) {
 /* call-seq:
  *   update_operation=(value) -> Symbol or Integer
  *
+ * Sets the operation applied when the stencil test passes or fails.
+ *
  * @return [Symbol, Integer] +value+
  */
 static VALUE StencilMode_set_operation(VALUE self, VALUE rb_value) {
@@ -182,6 +196,8 @@ static VALUE StencilMode_set_operation(VALUE self, VALUE rb_value) {
 
 /* call-seq:
  *   reference=(value) -> Integer
+ *
+ * Sets the reference value compared against the stencil buffer.
  *
  * @return [Integer] +value+
  */
@@ -194,6 +210,8 @@ static VALUE StencilMode_set_reference(VALUE self, VALUE rb_value) {
 /* call-seq:
  *   mask=(value) -> Integer
  *
+ * Sets the bitmask applied to the stencil values.
+ *
  * @return [Integer] +value+
  */
 static VALUE StencilMode_set_mask(VALUE self, VALUE rb_value) {
@@ -205,6 +223,8 @@ static VALUE StencilMode_set_mask(VALUE self, VALUE rb_value) {
 /* call-seq:
  *   stencil_only=(value) -> true or false
  *
+ * Enables or disables writing only to the stencil buffer.
+ *
  * @return [Boolean] +value+
  */
 static VALUE StencilMode_set_only(VALUE self, VALUE rb_value) {
@@ -214,6 +234,8 @@ static VALUE StencilMode_set_only(VALUE self, VALUE rb_value) {
 
 /* call-seq:
  *   self == other -> true or false
+ *
+ * Returns +true+ if the two objects are equal.
  *
  * @return [Boolean]
  */
@@ -238,16 +260,21 @@ static VALUE StencilMode_eql(VALUE self, VALUE rb_other) {
  * carried on RenderState#stencil_mode.
  *
  * @!attribute comparison
+ *   The comparison used against the stencil buffer.
  *   @return [Symbol] one of :never, :less, :less_equal, :greater,
  *     :greater_equal, :equal, :not_equal, :always
  * @!attribute update_operation
+ *   The operation applied when the stencil test passes or fails.
  *   @return [Symbol] one of :keep, :zero, :replace, :increment, :decrement,
  *     :invert
  * @!attribute reference
+ *   The reference value compared against the stencil buffer.
  *   @return [Integer]
  * @!attribute mask
+ *   The bitmask applied to the stencil values.
  *   @return [Integer]
  * @!attribute stencil_only
+ *   Whether only the stencil buffer is written to.
  *   @return [Boolean]
  */
 void Init_StencilMode(VALUE rb_mSFML) {

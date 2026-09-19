@@ -101,6 +101,8 @@ static VALUE Color_new(int argc, VALUE* argv, VALUE klass) {
 /* call-seq:
  *   Color.from_rgb(value) -> Color
  *
+ * Creates a color from 8-bit red, green and blue components.
+ *
  * @return [Color] the fully-opaque color packed as 0xRRGGBB
  */
 static VALUE Color_from_rgb(VALUE klass, VALUE rb_integer) {
@@ -123,6 +125,8 @@ static VALUE Color_from_rgba(VALUE klass, VALUE rb_integer) {
 
 /* call-seq: r -> Integer
  *
+ * Returns the red component.
+ *
  * @return [Integer] the red channel, 0..255
  */
 static VALUE Color_get_r(VALUE self) {
@@ -130,6 +134,8 @@ static VALUE Color_get_r(VALUE self) {
 }
 
 /* call-seq: g -> Integer
+ *
+ * Returns the green component.
  *
  * @return [Integer] the green channel, 0..255
  */
@@ -139,6 +145,8 @@ static VALUE Color_get_g(VALUE self) {
 
 /* call-seq: b -> Integer
  *
+ * Returns the blue component.
+ *
  * @return [Integer] the blue channel, 0..255
  */
 static VALUE Color_get_b(VALUE self) {
@@ -146,6 +154,8 @@ static VALUE Color_get_b(VALUE self) {
 }
 
 /* call-seq: a -> Integer
+ *
+ * Returns the alpha component.
  *
  * @return [Integer] the alpha channel, 0..255
  */
@@ -207,6 +217,8 @@ static VALUE Color_set_a(VALUE self, VALUE rb_value) {
 
 /* call-seq: to_i -> Integer
  *
+ * Returns the color encoded as a 32-bit integer.
+ *
  * @return [Integer] the color packed as 0xRRGGBBAA
  */
 static VALUE Color_to_i(VALUE self) {
@@ -217,6 +229,8 @@ static VALUE Color_to_i(VALUE self) {
 }
 
 /* call-seq: to_a -> [Integer, Integer, Integer, Integer]
+ *
+ * Returns the object as an Array.
  *
  * @return [Array<Integer>] +[r, g, b, a]+
  */
@@ -229,6 +243,8 @@ static VALUE Color_to_a(VALUE self) {
 
 /* call-seq:
  *   self == other -> true or false
+ *
+ * Returns +true+ if the two objects are equal.
  *
  * @return [Boolean]
  */
@@ -296,6 +312,8 @@ static VALUE Color_mul(VALUE self, VALUE rb_other) {
 
 /* call-seq: to_s -> String
  *
+ * Returns a human-readable representation of the object.
+ *
  * @return [String] +"(r, g, b, a)"+
  */
 static VALUE Color_to_s(VALUE self) {
@@ -311,12 +329,16 @@ static VALUE Color_to_s(VALUE self) {
  * An RGBA color, each channel an Integer 0..255.
  *
  * @!attribute r
+ *   The red component.
  *   @return [Integer] the red channel, 0..255
  * @!attribute g
+ *   The green component.
  *   @return [Integer] the green channel, 0..255
  * @!attribute b
+ *   The blue component.
  *   @return [Integer] the blue channel, 0..255
  * @!attribute a
+ *   The alpha component.
  *   @return [Integer] the alpha channel, 0..255
  */
 void Init_Color(VALUE rb_mSFML) {
