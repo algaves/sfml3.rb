@@ -25,6 +25,8 @@ static const sfRenderWindow* Touch_relative_window(VALUE rb_window) {
 /* call-seq:
  *   down?(finger) -> true or false
  *
+ * Returns +true+ if touch point +finger+ is currently down.
+ *
  * @return [Boolean] whether touch point +finger+ is currently down
  */
 static VALUE Touch_is_down(VALUE module, VALUE rb_finger) {
@@ -33,6 +35,8 @@ static VALUE Touch_is_down(VALUE module, VALUE rb_finger) {
 
 /* call-seq:
  *   position(finger, window = nil) -> Vector2
+ *
+ * Returns the position of touch point +finger+.
  *
  * @return [Vector2] the position of touch point +finger+, in desktop
  *   coordinates, or relative to +window+'s client area when given

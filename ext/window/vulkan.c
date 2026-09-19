@@ -8,6 +8,8 @@
 /* call-seq:
  *   available?(require_graphics = false) -> true or false
  *
+ * Returns +true+ if Vulkan is available, optionally requiring graphics support.
+ *
  * @return [Boolean] whether Vulkan is available, optionally also requiring
  *   graphics-capable support when +require_graphics+ is true
  */
@@ -27,6 +29,9 @@ static VALUE Vulkan_is_available(int argc, VALUE* argv, VALUE module) {
 /* call-seq:
  *   function(name) -> Integer
  *
+ * Returns the address of the Vulkan function or extension +name+ as an
+ * Integer, or 0 when it is not available.
+ *
  * @return [Integer] the address of the Vulkan function/extension +name+, as
  *   a raw pointer value, or 0 if it is not available
  */
@@ -35,6 +40,8 @@ static VALUE Vulkan_get_function(VALUE module, VALUE rb_name) {
 }
 
 /* call-seq: graphics_required_instance_extensions -> Array<String>
+ *
+ * Returns the Vulkan instance extensions needed to create a window surface.
  *
  * @return [Array<String>] the Vulkan instance extensions required to create
  *   a Vulkan surface for a Window

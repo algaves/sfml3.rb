@@ -36,6 +36,8 @@ static const rb_data_type_t Event_data_type = {
 /* call-seq:
  *   Event.new -> Event
  *
+ * Creates an empty, uninitialized event.
+ *
  * @return [Event]
  */
 static VALUE Event_new(VALUE klass) {
@@ -52,6 +54,8 @@ static VALUE Event_new(VALUE klass) {
 
 /* call-seq: initialize -> self
  *
+ * Does nothing; instances are built internally by the event-polling methods.
+ *
  * @private No-op; objects of this class are only ever constructed
  *   internally (e.g. by #poll_event!).
  * @return [self]
@@ -62,6 +66,8 @@ static VALUE Event_init(VALUE self) {
 
 /* call-seq: type -> String
  *
+ * Returns the event's kind as a String, such as +"closed"+ or +"key-pressed"+.
+ *
  * @return [String] the event's kind, e.g. +"closed"+, +"key-pressed"+,
  *   +"mouse-moved"+ (see SFML::Window#poll_event!)
  */
@@ -70,6 +76,8 @@ static VALUE Event_type(VALUE self) {
 }
 
 /* call-seq: size -> Vector2
+ *
+ * Returns the new size carried by a +"resized"+ event.
  *
  * @return [Vector2] the new size, for a +"resized"+ event
  */
@@ -80,6 +88,8 @@ static VALUE Event_get_size(VALUE self) {
 }
 
 /* call-seq: key -> Hash
+ *
+ * Returns the key descriptor Hash for a key press or release event.
  *
  * @return [Hash] +:code+, +:scancode+, +:alt+, +:control+, +:shift+,
  *   +:system+, for a +"key-pressed"+/+"key-released"+ event
@@ -124,6 +134,8 @@ static VALUE unicode_to_utf8(uint32_t code) {
 
 /* call-seq: text -> String
  *
+ * Returns the entered character for a +"text-entered"+ event.
+ *
  * @return [String] the entered character, decoded from Unicode, for a
  *   +"text-entered"+ event
  */
@@ -132,6 +144,8 @@ static VALUE Event_get_text(VALUE self) {
 }
 
 /* call-seq: mouse_move -> Vector2
+ *
+ * Returns the new cursor position for a +"mouse-moved"+ event.
  *
  * @return [Vector2] the new cursor position, for a +"mouse-moved"+ event
  */
@@ -143,6 +157,8 @@ static VALUE Event_get_mouse_move(VALUE self) {
 
 /* call-seq: mouse_move_raw -> Vector2
  *
+ * Returns the unfiltered relative motion for a +"mouse-moved-raw"+ event.
+ *
  * @return [Vector2] unfiltered relative motion, for a +"mouse-moved-raw"+
  *   event
  */
@@ -153,6 +169,8 @@ static VALUE Event_get_mouse_move_raw(VALUE self) {
 }
 
 /* call-seq: mouse_button -> Hash
+ *
+ * Returns the button descriptor Hash for a mouse press or release event.
  *
  * @return [Hash] +:button+, +:position+, for a
  *   +"mouse-button-pressed"+/+"mouse-button-released"+ event
@@ -170,6 +188,8 @@ static VALUE Event_get_mouse_button(VALUE self) {
 }
 
 /* call-seq: mouse_wheel_scroll -> Hash
+ *
+ * Returns the wheel descriptor Hash for a +"mouse-wheel-scrolled"+ event.
  *
  * @return [Hash] +:wheel+, +:delta+, +:position+, for a
  *   +"mouse-wheel-scrolled"+ event
@@ -189,6 +209,8 @@ static VALUE Event_get_mouse_wheel_scroll(VALUE self) {
 
 /* call-seq: joystick_move -> Hash
  *
+ * Returns the descriptor Hash for a +"joystick-moved"+ event.
+ *
  * @return [Hash] +:joystick_id+, +:axis+, +:position+, for a
  *   +"joystick-moved"+ event
  */
@@ -206,6 +228,8 @@ static VALUE Event_get_joystick_move(VALUE self) {
 
 /* call-seq: joystick_button -> Hash
  *
+ * Returns the descriptor Hash for a joystick button press or release event.
+ *
  * @return [Hash] +:joystick_id+, +:button+, for a
  *   +"joystick-button-pressed"+/+"joystick-button-released"+ event
  */
@@ -220,6 +244,8 @@ static VALUE Event_get_joystick_button(VALUE self) {
 }
 
 /* call-seq: joystick_connect -> Hash
+ *
+ * Returns the descriptor Hash for a joystick connect or disconnect event.
  *
  * @return [Hash] +:joystick_id+, +:connected+, for a
  *   +"joystick-connected"+/+"joystick-disconnected"+ event
@@ -238,6 +264,8 @@ static VALUE Event_get_joystick_connect(VALUE self) {
 
 /* call-seq: touch -> Hash
  *
+ * Returns the descriptor Hash for a touch begin, move or end event.
+ *
  * @return [Hash] +:finger+, +:position+, for a
  *   +"touch-began"+/+"touch-moved"+/+"touch-ended"+ event
  */
@@ -253,6 +281,8 @@ static VALUE Event_get_touch(VALUE self) {
 }
 
 /* call-seq: sensor -> Hash
+ *
+ * Returns the descriptor Hash for a +"sensor-changed"+ event.
  *
  * @return [Hash] +:type+, +:value+, for a +"sensor-changed"+ event
  */

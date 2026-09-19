@@ -195,6 +195,8 @@ static VALUE Keyboard_scancode_pressed_p(VALUE module, VALUE rb_scancode) {
 /* call-seq:
  *   localize(scancode) -> Symbol
  *
+ * Returns the key Symbol that +scancode+ produces on the current layout.
+ *
  * @return [Symbol] the key that +scancode+ produces on the current keyboard
  *   layout
  */
@@ -206,6 +208,8 @@ static VALUE Keyboard_localize(VALUE module, VALUE rb_scancode) {
 /* call-seq:
  *   delocalize(key) -> Integer
  *
+ * Returns the scancode that produces +key+ on the current keyboard layout.
+ *
  * @return [Integer] the scancode that produces +key+ on the current keyboard
  *   layout
  * @raise [ArgumentError] if +key+ is a Symbol/String naming an unknown key
@@ -216,6 +220,8 @@ static VALUE Keyboard_delocalize(VALUE module, VALUE rb_key) {
 
 /* call-seq:
  *   description(scancode) -> String
+ *
+ * Returns a human-readable, localized name for +scancode+.
  *
  * @return [String] a human-readable, localized name for +scancode+
  */

@@ -50,6 +50,8 @@ static VALUE VideoMode_from_c(sfVideoMode mode) {
 /* call-seq:
  *   VideoMode.new(width, height, bits_per_pixel) -> VideoMode
  *
+ * Creates a video mode with the given +width+, +height+ and +bits_per_pixel+.
+ *
  * @return [VideoMode]
  */
 static VALUE VideoMode_new(VALUE klass, VALUE rb_width, VALUE rb_height, VALUE rb_bits) {
@@ -67,6 +69,8 @@ static VALUE VideoMode_new(VALUE klass, VALUE rb_width, VALUE rb_height, VALUE r
 
 /* call-seq: initialize(width, height, bits) -> self
  *
+ * Stores the mode's dimensions; called internally by .new.
+ *
  * @private Sets the ivars backing the #width/#height/#bits readers; called
  *   internally by .new.
  * @return [self]
@@ -81,6 +85,8 @@ static VALUE VideoMode_init(VALUE self, VALUE rb_width, VALUE rb_height, VALUE r
 
 /* call-seq: desktop_mode -> VideoMode
  *
+ * Returns the current desktop video mode.
+ *
  * @return [VideoMode] the current desktop video mode
  */
 static VALUE VideoMode_desktop_mode(VALUE klass) {
@@ -88,6 +94,8 @@ static VALUE VideoMode_desktop_mode(VALUE klass) {
 }
 
 /* call-seq: fullscreen_modes -> Array<VideoMode>
+ *
+ * Returns all fullscreen video modes supported by the current desktop.
  *
  * @return [Array<VideoMode>] all video modes supported in fullscreen mode,
  *   sorted from best to worst
@@ -106,6 +114,8 @@ static VALUE VideoMode_fullscreen_modes(VALUE klass) {
 
 /* call-seq: valid? -> true or false
  *
+ * Returns +true+ if this mode is valid for fullscreen use.
+ *
  * @return [Boolean] whether this mode is valid for fullscreen use on the
  *   current desktop
  */
@@ -114,6 +124,8 @@ static VALUE VideoMode_is_available(VALUE self) {
 }
 
 /* call-seq: size -> Vector2
+ *
+ * Returns +width+ and +height+ as a Vector2.
  *
  * @return [Vector2] +width+ and +height+ as a vector
  */
@@ -125,6 +137,8 @@ static VALUE VideoMode_get_size(VALUE self) {
 
 /* call-seq:
  *   self == other -> true or false
+ *
+ * Returns +true+ if +other+ has the same size and bit depth.
  *
  * @return [Boolean]
  */
@@ -153,10 +167,13 @@ static VALUE VideoMode_eql(VALUE self, VALUE rb_other) {
  * definitions.
  *
  * @!attribute [r] width
+ *   Width in pixels.
  *   @return [Integer] width in pixels
  * @!attribute [r] height
+ *   Height in pixels.
  *   @return [Integer] height in pixels
  * @!attribute [r] bits
+ *   Bits per pixel.
  *   @return [Integer] bits per pixel
  */
 void Init_VideoMode(VALUE rb_mSFML) {

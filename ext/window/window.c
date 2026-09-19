@@ -66,6 +66,8 @@ static VALUE Window_wrap(VALUE klass, sfRenderWindow* c_window) {
 /* call-seq:
  *   Window.new(video_mode, title, style = :default, state = :windowed, settings = nil) -> Window
  *
+ * Creates a window from +video_mode+ and +title+.
+ *
  * @return [Window]
  * @raise [RuntimeError] if window creation fails
  */
@@ -119,6 +121,8 @@ static VALUE Window_new(int argc, VALUE* argv, VALUE klass) {
 /* call-seq:
  *   Window.from_handle(handle, settings = nil) -> Window
  *
+ * Creates a window that adopts the existing OS window +handle+.
+ *
  * @return [Window]
  * @raise [RuntimeError] if window creation fails
  */
@@ -155,6 +159,8 @@ static VALUE Window_init(int argc, VALUE* argv, VALUE self) {
 
 /* call-seq: is_open? -> true or false
  *
+ * Returns +true+ while the window is open.
+ *
  * @return [Boolean]
  */
 static VALUE Window_is_open(VALUE self) {
@@ -162,6 +168,8 @@ static VALUE Window_is_open(VALUE self) {
 }
 
 /* call-seq: close! -> self
+ *
+ * Closes the window.
  *
  * @return [self]
  */
@@ -172,6 +180,8 @@ static VALUE Window_close(VALUE self) {
 
 /* call-seq:
  *   clear(color = Color::BLACK) -> self
+ *
+ * Clears the window to +color+ (black by default).
  *
  * @return [self]
  * @raise [ArgumentError] if given more than one argument
@@ -240,6 +250,8 @@ static VALUE Window_wait_event(VALUE self, VALUE rb_event) {
 
 /* call-seq: position -> Vector2
  *
+ * Returns the window's position in desktop coordinates.
+ *
  * @return [Vector2] the window's position, in desktop coordinates
  */
 static VALUE Window_get_position(VALUE self) {
@@ -248,6 +260,8 @@ static VALUE Window_get_position(VALUE self) {
 
 /* call-seq:
  *   position=(value) -> value
+ *
+ * Moves the window to +value+ in desktop coordinates.
  *
  * @return [Vector2] +value+
  */
@@ -271,6 +285,8 @@ static VALUE Window_set_frame_rate(VALUE self, VALUE rb_limit) {
 /* call-seq:
  *   size=(value) -> self
  *
+ * Resizes the window's client area to +value+.
+ *
  * @return [self]
  */
 static VALUE Window_set_size(VALUE self, VALUE rb_size) {
@@ -280,6 +296,8 @@ static VALUE Window_set_size(VALUE self, VALUE rb_size) {
 
 /* call-seq: size -> Vector2
  *
+ * Returns the client area size in pixels.
+ *
  * @return [Vector2] the client area size, in pixels
  */
 static VALUE Window_get_size(VALUE self) {
@@ -288,6 +306,8 @@ static VALUE Window_get_size(VALUE self) {
 
 /* call-seq:
  *   minimum_size=(value) -> value
+ *
+ * Sets the window's minimum allowed client size.
  *
  * @return [Vector2] +value+
  */
@@ -301,6 +321,8 @@ static VALUE Window_set_minimum_size(VALUE self, VALUE rb_size) {
 
 /* call-seq:
  *   maximum_size=(value) -> value
+ *
+ * Sets the window's maximum allowed client size.
  *
  * @return [Vector2] +value+
  */
@@ -326,6 +348,8 @@ static VALUE Window_set_active(VALUE self, VALUE rb_active) {
 
 /* call-seq: native_handle -> Integer
  *
+ * Returns the OS-specific window handle.
+ *
  * @return [Integer] the OS-specific window handle
  */
 static VALUE Window_get_native_handle(VALUE self) {
@@ -339,6 +363,8 @@ static VALUE Window_get_native_handle(VALUE self) {
    failed. */
 /* call-seq:
  *   create_vulkan_surface(instance, allocator = nil) -> Integer or nil
+ *
+ * Creates a Vulkan surface for this window from +instance+.
  *
  * @return [Integer, nil] the new +VkSurfaceKHR+, or +nil+ if creation failed
  */
@@ -390,6 +416,8 @@ static VALUE Window_set_icon(VALUE self, VALUE rb_size, VALUE rb_pixels) {
 
 /* call-seq: settings -> ContextSettings
  *
+ * Returns the context settings this window was created with.
+ *
  * @return [ContextSettings] the settings this window's context was created
  *   with
  */
@@ -401,6 +429,8 @@ static VALUE Window_get_settings(VALUE self) {
    with the C locale and mangles anything outside ASCII. */
 /* call-seq:
  *   title=(value) -> self
+ *
+ * Sets the window title.
  *
  * @return [self]
  */
@@ -417,6 +447,8 @@ static VALUE Window_set_title(VALUE self, VALUE rb_title) {
 /* call-seq:
  *   visible=(value) -> self
  *
+ * Shows or hides the window.
+ *
  * @return [self]
  */
 static VALUE Window_set_visible(VALUE self, VALUE rb_visible) {
@@ -427,6 +459,8 @@ static VALUE Window_set_visible(VALUE self, VALUE rb_visible) {
 /* call-seq:
  *   vertical_sync_enabled=(value) -> self
  *
+ * Enables or disables vertical synchronization.
+ *
  * @return [self]
  */
 static VALUE Window_set_vertical_sync_enabled(VALUE self, VALUE rb_enable) {
@@ -436,6 +470,8 @@ static VALUE Window_set_vertical_sync_enabled(VALUE self, VALUE rb_enable) {
 
 /* call-seq:
  *   cursor_visible=(value) -> self
+ *
+ * Shows or hides the mouse cursor over the window.
  *
  * @return [self]
  */
@@ -487,6 +523,8 @@ static VALUE Window_set_mouse_cursor(VALUE self, VALUE rb_cursor) {
 /* call-seq:
  *   key_repeat_enabled=(value) -> self
  *
+ * Enables or disables key-repeat events.
+ *
  * @return [self]
  */
 static VALUE Window_set_key_repeat_enabled(VALUE self, VALUE rb_enabled) {
@@ -509,6 +547,8 @@ static VALUE Window_set_joystick_threshold(VALUE self, VALUE rb_threshold) {
 
 /* call-seq: request_focus -> self
  *
+ * Requests focus for this window.
+ *
  * @return [self]
  */
 static VALUE Window_request_focus(VALUE self) {
@@ -518,6 +558,8 @@ static VALUE Window_request_focus(VALUE self) {
 
 /* call-seq: focus? -> true or false
  *
+ * Returns +true+ if the window currently has focus.
+ *
  * @return [Boolean]
  */
 static VALUE Window_has_focus(VALUE self) {
@@ -526,6 +568,8 @@ static VALUE Window_has_focus(VALUE self) {
 
 /* call-seq:
  *   draw(drawable, state = nil) -> self
+ *
+ * Draws +drawable+ into the window.
  *
  * @return [self]
  * @raise [ArgumentError] if given no arguments or more than 2
@@ -548,6 +592,8 @@ static VALUE Window_draw(int argc, VALUE* argv, VALUE self) {
 /* call-seq:
  *   view=(value) -> self
  *
+ * Sets the window's active view to +value+.
+ *
  * @return [self]
  * @raise [ArgumentError] if +value+ is not a View
  */
@@ -563,6 +609,8 @@ static VALUE Window_set_view(VALUE self, VALUE rb_view) {
 
 /* call-seq: view -> View
  *
+ * Returns a copy of the window's currently active view.
+ *
  * @return [View] a copy of the window's currently active view
  */
 static VALUE Window_get_view(VALUE self) {
@@ -570,6 +618,8 @@ static VALUE Window_get_view(VALUE self) {
 }
 
 /* call-seq: default_view -> View
+ *
+ * Returns a copy of the window's default view.
  *
  * @return [View] a copy of the window's default view
  */
@@ -590,14 +640,19 @@ static VALUE Window_get_default_view(VALUE self) {
  * below) a render target you can draw to.
  *
  * @!method srgb?
+ *   Returns +true+ if the target's framebuffer is sRGB-capable.
  *   @return [Boolean]
  * @!method clear_stencil(value)
+ *   Clears the stencil buffer to +value+.
  *   @return [self]
  * @!method clear_color_and_stencil(color, stencil)
+ *   Clears the color buffer to +color+ and the stencil buffer to +stencil+.
  *   @return [self]
  * @!method viewport(view = nil)
+ *   Returns the current viewport rectangle in pixels.
  *   @return [Rect] the current viewport in pixels; +view+ defaults to the target's current view
  * @!method scissor(view = nil)
+ *   Returns the current scissor rectangle in pixels.
  *   @return [Rect] the current scissor rectangle in pixels; +view+ defaults to the target's current
  * view
  * @!method map_pixel_to_coords(point, view = nil)
@@ -607,14 +662,19 @@ static VALUE Window_get_default_view(VALUE self) {
  *   Converts a world position to pixel coordinates.
  *   @return [Vector2]
  * @!method push_gl_states
+ *   Saves the current OpenGL state.
  *   @return [self]
  * @!method pop_gl_states
+ *   Restores the OpenGL state saved by #push_gl_states.
  *   @return [self]
  * @!method reset_gl_states
+ *   Resets the OpenGL state to SFML's defaults.
  *   @return [self]
  * @!method draw_primitives(vertices, primitive, state = nil)
+ *   Draws raw vertex data as the given primitive type.
  *   @return [self]
  * @!method draw_vertex_buffer_range(buffer, first, count, state = nil)
+ *   Draws a range of vertices from a vertex buffer.
  *   @return [self]
  */
 void Init_Window(VALUE rb_mSFML) {

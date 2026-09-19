@@ -10,6 +10,8 @@
 /* call-seq:
  *   available?(type) -> true or false
  *
+ * Returns +true+ if sensor +type+ is available on this device.
+ *
  * @return [Boolean] whether sensor +type+ (a Symbol like
  *   +:accelerometer+, +:gyroscope+) is available on this device
  */
@@ -31,6 +33,8 @@ static VALUE Sensor_set_enabled(VALUE module, VALUE rb_type, VALUE rb_enabled) {
 
 /* call-seq:
  *   value(type) -> Vector3
+ *
+ * Returns the current value of sensor +type+.
  *
  * @return [Vector3] the current value of sensor +type+
  */
