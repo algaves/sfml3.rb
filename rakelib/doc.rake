@@ -49,3 +49,14 @@ begin
 rescue LoadError
   # See above.
 end
+
+begin
+  require 'steep'
+
+  desc 'Type-check lib/ against sig/**/*.rbs'
+  task :steep do
+    sh 'bundle exec steep check'
+  end
+rescue LoadError
+  # See above.
+end
