@@ -1,0 +1,18 @@
+module SFML
+  # Included by RenderWindow and RenderTexture. The method bodies are generated
+  # per class from ext/graphics/render_target.inc.
+  module RenderTarget
+    def srgb?: () -> bool
+    def clear_stencil: (Integer value) -> self
+    def clear_color_and_stencil: (untyped color, Integer stencil) -> self
+    def viewport: (?untyped view) -> untyped
+    def scissor: (?untyped view) -> untyped
+    def map_pixel_to_coords: (untyped point, ?untyped view) -> untyped
+    def map_coords_to_pixel: (untyped point, ?untyped view) -> untyped
+    def push_gl_states: () -> self
+    def pop_gl_states: () -> self
+    def reset_gl_states: () -> self
+    def draw_primitives: (untyped vertices, untyped primitive, ?untyped state) -> self
+    def draw_vertex_buffer_range: (untyped buffer, Integer first, Integer count, ?untyped state) -> self
+  end
+end
