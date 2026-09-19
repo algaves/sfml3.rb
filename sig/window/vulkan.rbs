@@ -1,0 +1,7 @@
+module SFML
+  module Vulkan
+    def self.available?: (?bool require_graphics) -> bool
+    def self.function: (String name) -> Integer
+    def self.graphics_required_instance_extensions: () -> Array[String]
+  end
+end

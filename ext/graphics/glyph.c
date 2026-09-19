@@ -11,44 +11,61 @@ typedef struct {
 
 static VALUE rb_cGlyph;
 
-static void Glyph_free(void *ptr) {
+static void Glyph_free(void* ptr) {
     free(ptr);
 }
 
 static const rb_data_type_t Glyph_data_type = {
     .wrap_struct_name = "SFML::Glyph",
     .function = {.dmark = NULL, .dfree = Glyph_free, .dsize = NULL},
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY
-};
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
 VALUE glyph_from_c(sfGlyph glyph) {
-    Glyph *ptr = malloc(sizeof(Glyph));
+    Glyph* ptr = malloc(sizeof(Glyph));
 
     ptr->glyph = glyph;
 
     return TypedData_Wrap_Struct(rb_cGlyph, &Glyph_data_type, ptr);
 }
 
-static Glyph *Get_Glyph(VALUE self) {
-    Glyph *ptr;
+static Glyph* Get_Glyph(VALUE self) {
+    Glyph* ptr;
     TypedData_Get_Struct(self, Glyph, &Glyph_data_type, ptr);
     return ptr;
 }
 
+/* call-seq: advance -> Float
+ *
+ * @return [Float] the horizontal offset to advance to the next character
+ */
 static VALUE Glyph_get_advance(VALUE self) {
     return DBL2NUM(Get_Glyph(self)->glyph.advance);
 }
 
+/* call-seq: bounds -> Rect
+ *
+ * @return [Rect] the glyph's bounding box, relative to the baseline and
+ *   the cursor position
+ */
 static VALUE Glyph_get_bounds(VALUE self) {
     return rect_to_rb(Get_Glyph(self)->glyph.bounds);
 }
 
+/* call-seq: texture_rect -> Rect
+ *
+ * @return [Rect] the sub-rectangle of the font's texture holding this
+ *   glyph's pixels
+ */
 static VALUE Glyph_get_texture_rect(VALUE self) {
     return int_rect_to_rb(Get_Glyph(self)->glyph.textureRect);
 }
 
-void Init_Glyph(VALUE rb_module) {
-    rb_cGlyph = rb_define_class_under(rb_module, "Glyph", rb_cObject);
+/* Document-class: SFML::Glyph
+ * A single character's rendering metrics and texture location, as returned
+ * by Font#glyph. Read-only.
+ */
+void Init_Glyph(VALUE rb_mSFML) {
+    rb_cGlyph = rb_define_class_under(rb_mSFML, "Glyph", rb_cObject);
 
     rb_define_method(rb_cGlyph, "advance", Glyph_get_advance, 0);
     rb_define_method(rb_cGlyph, "bounds", Glyph_get_bounds, 0);

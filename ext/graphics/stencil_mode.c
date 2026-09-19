@@ -13,26 +13,23 @@ typedef struct {
 
 static VALUE rb_cStencilMode;
 
-static const char *comparison_names[] = {
-    "never", "less", "less_equal", "greater", "greater_equal", "equal", "not_equal", "always"
-};
+static const char* comparison_names[] = {"never",         "less",  "less_equal", "greater",
+                                         "greater_equal", "equal", "not_equal",  "always"};
 
-static const char *operation_names[] = {
-    "keep", "zero", "replace", "increment", "decrement", "invert"
-};
+static const char* operation_names[] = {"keep",      "zero",      "replace",
+                                        "increment", "decrement", "invert"};
 
-static void StencilMode_free(void *ptr) {
+static void StencilMode_free(void* ptr) {
     free(ptr);
 }
 
 static const rb_data_type_t StencilMode_data_type = {
     .wrap_struct_name = "SFML::StencilMode",
     .function = {.dmark = NULL, .dfree = StencilMode_free, .dsize = NULL},
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY
-};
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
 static VALUE StencilMode_wrap(sfStencilMode mode) {
-    StencilMode *ptr = malloc(sizeof(StencilMode));
+    StencilMode* ptr = malloc(sizeof(StencilMode));
 
     ptr->mode = mode;
 
@@ -43,15 +40,15 @@ static sfStencilComparison comparison_from_rb(VALUE rb_value) {
     size_t i;
 
     if (RB_INTEGER_TYPE_P(rb_value)) {
-        return (sfStencilComparison) NUM2INT(rb_value);
+        return (sfStencilComparison)NUM2INT(rb_value);
     }
 
     if (SYMBOL_P(rb_value)) {
-        const char *name = rb_id2name(SYM2ID(rb_value));
+        const char* name = rb_id2name(SYM2ID(rb_value));
 
         for (i = 0; i < sizeof(comparison_names) / sizeof(comparison_names[0]); i++) {
             if (strcmp(name, comparison_names[i]) == 0) {
-                return (sfStencilComparison) i;
+                return (sfStencilComparison)i;
             }
         }
     }
@@ -64,15 +61,15 @@ static sfStencilUpdateOperation operation_from_rb(VALUE rb_value) {
     size_t i;
 
     if (RB_INTEGER_TYPE_P(rb_value)) {
-        return (sfStencilUpdateOperation) NUM2INT(rb_value);
+        return (sfStencilUpdateOperation)NUM2INT(rb_value);
     }
 
     if (SYMBOL_P(rb_value)) {
-        const char *name = rb_id2name(SYM2ID(rb_value));
+        const char* name = rb_id2name(SYM2ID(rb_value));
 
         for (i = 0; i < sizeof(operation_names) / sizeof(operation_names[0]); i++) {
             if (strcmp(name, operation_names[i]) == 0) {
-                return (sfStencilUpdateOperation) i;
+                return (sfStencilUpdateOperation)i;
             }
         }
     }
@@ -81,16 +78,28 @@ static sfStencilUpdateOperation operation_from_rb(VALUE rb_value) {
     return sfStencilUpdateOperationKeep;
 }
 
-static VALUE StencilMode_new(int argc, VALUE *argv, VALUE klass) {
+/* call-seq:
+ *   StencilMode.new -> StencilMode
+ *   StencilMode.new(comparison, update_operation, reference, mask, stencil_only) -> StencilMode
+ *
+ * With no arguments, builds the default stencil mode (always passes,
+ * doesn't modify the stencil buffer). +comparison+ and +update_operation+
+ * accept either a Symbol (see #comparison and #update_operation) or the
+ * matching CSFML Integer constant.
+ *
+ * @return [StencilMode]
+ * @raise [ArgumentError] if given an argument count other than 0 or 5
+ */
+static VALUE StencilMode_new(int argc, VALUE* argv, VALUE klass) {
     VALUE self;
-    StencilMode *ptr;
+    StencilMode* ptr;
     sfStencilMode mode = sfStencilMode_default;
 
     if (argc == 5) {
         mode.stencilComparison = comparison_from_rb(argv[0]);
         mode.stencilUpdateOperation = operation_from_rb(argv[1]);
-        mode.stencilReference.value = (unsigned int) NUM2UINT(argv[2]);
-        mode.stencilMask.value = (unsigned int) NUM2UINT(argv[3]);
+        mode.stencilReference.value = (unsigned int)NUM2UINT(argv[2]);
+        mode.stencilMask.value = (unsigned int)NUM2UINT(argv[3]);
         mode.stencilOnly = RTEST(argv[4]);
     } else if (argc != 0) {
         raise_invalid_arguments_excepted(5, argc);
@@ -104,72 +113,145 @@ static VALUE StencilMode_new(int argc, VALUE *argv, VALUE klass) {
     return self;
 }
 
+/* call-seq: comparison -> Symbol
+ *
+ * @return [Symbol] one of :never, :less, :less_equal, :greater,
+ *   :greater_equal, :equal, :not_equal, :always
+ */
 static VALUE StencilMode_get_comparison(VALUE self) {
-    return ID2SYM(rb_intern(comparison_names[((StencilMode *) Get_StencilMode_Struct(self))->mode.stencilComparison]));
+    return ID2SYM(rb_intern(
+        comparison_names[((StencilMode*)Get_StencilMode_Struct(self))->mode.stencilComparison]));
 }
 
+/* call-seq: update_operation -> Symbol
+ *
+ * @return [Symbol] one of :keep, :zero, :replace, :increment, :decrement,
+ *   :invert
+ */
 static VALUE StencilMode_get_operation(VALUE self) {
-    sfStencilMode mode = ((StencilMode *) Get_StencilMode_Struct(self))->mode;
+    sfStencilMode mode = ((StencilMode*)Get_StencilMode_Struct(self))->mode;
 
     return ID2SYM(rb_intern(operation_names[mode.stencilUpdateOperation]));
 }
 
+/* call-seq: reference -> Integer
+ *
+ * @return [Integer]
+ */
 static VALUE StencilMode_get_reference(VALUE self) {
-    return UINT2NUM(((StencilMode *) Get_StencilMode_Struct(self))->mode.stencilReference.value);
+    return UINT2NUM(((StencilMode*)Get_StencilMode_Struct(self))->mode.stencilReference.value);
 }
 
+/* call-seq: mask -> Integer
+ *
+ * @return [Integer]
+ */
 static VALUE StencilMode_get_mask(VALUE self) {
-    return UINT2NUM(((StencilMode *) Get_StencilMode_Struct(self))->mode.stencilMask.value);
+    return UINT2NUM(((StencilMode*)Get_StencilMode_Struct(self))->mode.stencilMask.value);
 }
 
+/* call-seq: stencil_only -> true or false
+ *
+ * @return [Boolean]
+ */
 static VALUE StencilMode_get_only(VALUE self) {
-    return BOOL2RB(((StencilMode *) Get_StencilMode_Struct(self))->mode.stencilOnly);
+    return BOOL2RB(((StencilMode*)Get_StencilMode_Struct(self))->mode.stencilOnly);
 }
 
+/* call-seq:
+ *   comparison=(value) -> Symbol or Integer
+ *
+ * @return [Symbol, Integer] +value+
+ */
 static VALUE StencilMode_set_comparison(VALUE self, VALUE rb_value) {
-    ((StencilMode *) Get_StencilMode_Struct(self))->mode.stencilComparison = comparison_from_rb(rb_value);
+    ((StencilMode*)Get_StencilMode_Struct(self))->mode.stencilComparison =
+        comparison_from_rb(rb_value);
     return rb_value;
 }
 
+/* call-seq:
+ *   update_operation=(value) -> Symbol or Integer
+ *
+ * @return [Symbol, Integer] +value+
+ */
 static VALUE StencilMode_set_operation(VALUE self, VALUE rb_value) {
-    ((StencilMode *) Get_StencilMode_Struct(self))->mode.stencilUpdateOperation = operation_from_rb(rb_value);
+    ((StencilMode*)Get_StencilMode_Struct(self))->mode.stencilUpdateOperation =
+        operation_from_rb(rb_value);
     return rb_value;
 }
 
+/* call-seq:
+ *   reference=(value) -> Integer
+ *
+ * @return [Integer] +value+
+ */
 static VALUE StencilMode_set_reference(VALUE self, VALUE rb_value) {
-    ((StencilMode *) Get_StencilMode_Struct(self))->mode.stencilReference.value = (unsigned int) NUM2UINT(rb_value);
+    ((StencilMode*)Get_StencilMode_Struct(self))->mode.stencilReference.value =
+        (unsigned int)NUM2UINT(rb_value);
     return rb_value;
 }
 
+/* call-seq:
+ *   mask=(value) -> Integer
+ *
+ * @return [Integer] +value+
+ */
 static VALUE StencilMode_set_mask(VALUE self, VALUE rb_value) {
-    ((StencilMode *) Get_StencilMode_Struct(self))->mode.stencilMask.value = (unsigned int) NUM2UINT(rb_value);
+    ((StencilMode*)Get_StencilMode_Struct(self))->mode.stencilMask.value =
+        (unsigned int)NUM2UINT(rb_value);
     return rb_value;
 }
 
+/* call-seq:
+ *   stencil_only=(value) -> true or false
+ *
+ * @return [Boolean] +value+
+ */
 static VALUE StencilMode_set_only(VALUE self, VALUE rb_value) {
-    ((StencilMode *) Get_StencilMode_Struct(self))->mode.stencilOnly = RTEST(rb_value);
+    ((StencilMode*)Get_StencilMode_Struct(self))->mode.stencilOnly = RTEST(rb_value);
     return rb_value;
 }
 
+/* call-seq:
+ *   self == other -> true or false
+ *
+ * @return [Boolean]
+ */
 static VALUE StencilMode_eql(VALUE self, VALUE rb_other) {
-    sfStencilMode a = ((StencilMode *) Get_StencilMode_Struct(self))->mode;
+    sfStencilMode a = ((StencilMode*)Get_StencilMode_Struct(self))->mode;
     sfStencilMode b;
 
     if (!rb_obj_is_kind_of(rb_other, rb_cStencilMode)) {
         return Qfalse;
     }
 
-    b = ((StencilMode *) Get_StencilMode_Struct(rb_other))->mode;
+    b = ((StencilMode*)Get_StencilMode_Struct(rb_other))->mode;
 
     return BOOL2RB(a.stencilComparison == b.stencilComparison &&
                    a.stencilUpdateOperation == b.stencilUpdateOperation &&
                    a.stencilReference.value == b.stencilReference.value &&
-                   a.stencilMask.value == b.stencilMask.value &&
-                   a.stencilOnly == b.stencilOnly);
+                   a.stencilMask.value == b.stencilMask.value && a.stencilOnly == b.stencilOnly);
 }
 
-void Init_StencilMode(VALUE rb_module) {
-    rb_cStencilMode = rb_define_class_under(rb_module, "StencilMode", rb_cObject);
+/* Document-class: SFML::StencilMode
+ * Configures how the stencil buffer is used and updated when drawing,
+ * carried on RenderState#stencil_mode.
+ *
+ * @!attribute comparison
+ *   @return [Symbol] one of :never, :less, :less_equal, :greater,
+ *     :greater_equal, :equal, :not_equal, :always
+ * @!attribute update_operation
+ *   @return [Symbol] one of :keep, :zero, :replace, :increment, :decrement,
+ *     :invert
+ * @!attribute reference
+ *   @return [Integer]
+ * @!attribute mask
+ *   @return [Integer]
+ * @!attribute stencil_only
+ *   @return [Boolean]
+ */
+void Init_StencilMode(VALUE rb_mSFML) {
+    rb_cStencilMode = rb_define_class_under(rb_mSFML, "StencilMode", rb_cObject);
 
     rb_define_singleton_method(rb_cStencilMode, "new", StencilMode_new, -1);
 
@@ -192,15 +274,15 @@ VALUE Get_Klass_StencilMode(void) {
     return rb_cStencilMode;
 }
 
-void *Get_StencilMode_Struct(VALUE self) {
-    StencilMode *ptr;
+void* Get_StencilMode_Struct(VALUE self) {
+    StencilMode* ptr;
     TypedData_Get_Struct(self, StencilMode, &StencilMode_data_type, ptr);
     return ptr;
 }
 
 sfStencilMode stencil_mode_from_rb(VALUE rb_mode) {
     if (rb_obj_is_kind_of(rb_mode, rb_cStencilMode)) {
-        return ((StencilMode *) Get_StencilMode_Struct(rb_mode))->mode;
+        return ((StencilMode*)Get_StencilMode_Struct(rb_mode))->mode;
     }
 
     return sfStencilMode_default;

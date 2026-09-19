@@ -1,0 +1,21 @@
+module SFML
+  class RenderState
+    def self.new: () -> RenderState
+                 | (Array[Array[Float]] | Array[Float] matrix) -> RenderState
+
+    def transform: () -> Array[untyped]
+    def transform=: (Array[Array[Float]] | Array[Float] matrix) -> self
+    def matrix: () -> Array[untyped]
+    def matrix=: (Array[Array[Float]] | Array[Float] matrix) -> self
+    def blend_mode: () -> BlendMode
+    def blend_mode=: (BlendMode value) -> BlendMode
+    def stencil_mode: () -> StencilMode
+    def stencil_mode=: (StencilMode value) -> StencilMode
+    def coordinate_type: () -> Symbol
+    def coordinate_type=: (Symbol value) -> Symbol
+    def texture: () -> (Texture | nil)
+    def texture=: (Texture? value) -> Texture?
+    def shader: () -> (Shader | nil)
+    def shader=: (Shader? value) -> Shader?
+  end
+end

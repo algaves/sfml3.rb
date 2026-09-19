@@ -49,9 +49,12 @@ static void* SoundStream_destroy_without_gvl(void* handle) {
 static void SoundStream_free(void* ptr) {
     SoundStream* stream = ptr;
 
-    effect_processor_release(stream->source.effect_slot);
+    /* Destroy (which blocks until CSFML guarantees no in-flight audio-thread
+       callback still references this source) before releasing the effect
+       slot, not after -- see the matching comment in sound.c's Sound_free. */
     rb_thread_call_without_gvl(SoundStream_destroy_without_gvl, stream->source.handle, RUBY_UBF_IO,
                                NULL);
+    effect_processor_release(stream->source.effect_slot);
     free(stream->samples);
     free(stream);
 }
@@ -185,6 +188,19 @@ static void SoundStream_on_seek(sfTime time, void* userData) {
     run_on_ruby_thread(SoundStream_seek_run, &ctx, SOUND_STREAM_CALLBACK_TIMEOUT_MS);
 }
 
+/* call-seq:
+ *   SoundStream.new(channel_count, sample_rate)             -> SoundStream
+ *   SoundStream.new(channel_count, sample_rate, channel_map) -> SoundStream
+ *
+ * SoundStream must be subclassed: the subclass is required to implement
+ * +#on_get_data+, called from a foreign audio thread whenever more samples
+ * are needed, and may optionally implement +#on_seek+. +channel_map+, if
+ * given, is an Array of channel Symbols (see SoundChannel), one per channel.
+ *
+ * @return [SoundStream]
+ * @raise [NotImplementedError] if the subclass does not define #on_get_data
+ * @raise [RuntimeError] if the underlying stream could not be created
+ */
 static VALUE SoundStream_new(int argc, VALUE* argv, VALUE klass) {
     VALUE rb_channel_count, rb_sample_rate, rb_channel_map;
     sfSoundChannel* channel_map = NULL;
@@ -238,14 +254,27 @@ static VALUE SoundStream_new(int argc, VALUE* argv, VALUE klass) {
     return self;
 }
 
+/* call-seq: channel_count -> Integer
+ *
+ * @return [Integer]
+ */
 static VALUE SoundStream_channel_count(VALUE self) {
     return UINT2NUM(sfSoundStream_getChannelCount(Get_SoundStream_Struct(self)));
 }
 
+/* call-seq: sample_rate -> Integer
+ *
+ * @return [Integer]
+ */
 static VALUE SoundStream_sample_rate(VALUE self) {
     return UINT2NUM(sfSoundStream_getSampleRate(Get_SoundStream_Struct(self)));
 }
 
+/* call-seq: channel_map -> Array<Symbol>
+ *
+ * @return [Array<Symbol>] one entry per channel, e.g.
+ *   +[:front_left, :front_right]+
+ */
 static VALUE SoundStream_channel_map(VALUE self) {
     size_t count = 0;
     sfSoundChannel* map = sfSoundStream_getChannelMap(Get_SoundStream_Struct(self), &count);
@@ -271,8 +300,102 @@ static VALUE SoundStream_channel_map(VALUE self) {
 #undef SS_FN
 #undef SS_METHOD
 
-void Init_SoundStream(VALUE rb_module) {
-    rb_cSoundStream = rb_define_class_under(rb_module, "SoundStream", rb_cObject);
+/* Document-class: SFML::SoundStream
+ * Base class for a custom audio source that generates or decodes its own
+ * samples on demand. Subclasses must implement +#on_get_data+, returning an
+ * Array of Integer samples or a packed String of int16 samples for the next
+ * chunk (or +nil+/+false+ to signal end of stream), and may implement
+ * +#on_seek(time)+ to support seeking.
+ *
+ * @!method play
+ *   @return [self]
+ * @!method pause
+ *   @return [self]
+ * @!method stop
+ *   Stops playback and rewinds to the beginning. May briefly block the
+ *   calling thread if an audio-thread callback for this source is in
+ *   flight.
+ *   @return [self]
+ * @!method status
+ *   @return [Symbol] one of +:stopped+, +:paused+, +:playing+
+ * @!method looping?
+ *   @return [Boolean]
+ * @!method looping=(value)
+ *   @return [Boolean]
+ * @!method pitch
+ *   @return [Float]
+ * @!method pitch=(value)
+ *   @return [Float]
+ * @!method pan
+ *   @return [Float] stereo pan, -1 (left) to 1 (right)
+ * @!method pan=(value)
+ *   @return [Float]
+ * @!method volume
+ *   @return [Float] 0 to 100
+ * @!method volume=(value)
+ *   @return [Float]
+ * @!method spatialization_enabled?
+ *   @return [Boolean]
+ * @!method spatialization_enabled=(value)
+ *   @return [Boolean]
+ * @!method position
+ *   @return [Vector3]
+ * @!method position=(value)
+ *   @return [Vector3]
+ * @!method direction
+ *   @return [Vector3]
+ * @!method direction=(value)
+ *   @return [Vector3]
+ * @!method velocity
+ *   @return [Vector3]
+ * @!method velocity=(value)
+ *   @return [Vector3]
+ * @!method cone
+ *   @return [SoundSourceCone]
+ * @!method cone=(value)
+ *   @return [SoundSourceCone]
+ * @!method doppler_factor
+ *   @return [Float]
+ * @!method doppler_factor=(value)
+ *   @return [Float]
+ * @!method directional_attenuation_factor
+ *   @return [Float]
+ * @!method directional_attenuation_factor=(value)
+ *   @return [Float]
+ * @!method relative_to_listener?
+ *   @return [Boolean]
+ * @!method relative_to_listener=(value)
+ *   @return [Boolean]
+ * @!method min_distance
+ *   @return [Float]
+ * @!method min_distance=(value)
+ *   @return [Float]
+ * @!method max_distance
+ *   @return [Float]
+ * @!method max_distance=(value)
+ *   @return [Float]
+ * @!method min_gain
+ *   @return [Float]
+ * @!method min_gain=(value)
+ *   @return [Float]
+ * @!method max_gain
+ *   @return [Float]
+ * @!method max_gain=(value)
+ *   @return [Float]
+ * @!method attenuation
+ *   @return [Float]
+ * @!method attenuation=(value)
+ *   @return [Float]
+ * @!method playing_offset
+ *   @return [Time]
+ * @!method playing_offset=(value)
+ *   @return [Time]
+ * @!method effect_processor=(proc)
+ *   Installs a Proc that post-processes this source's audio in real time.
+ *   @return [Proc] +proc+
+ */
+void Init_SoundStream(VALUE rb_mSFML) {
+    rb_cSoundStream = rb_define_class_under(rb_mSFML, "SoundStream", rb_cObject);
 
     rb_define_singleton_method(rb_cSoundStream, "new", SoundStream_new, -1);
 

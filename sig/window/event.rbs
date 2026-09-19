@@ -1,0 +1,20 @@
+module SFML
+  class Event
+    def self.new: () -> Event
+
+    def type: () -> String
+    def size: () -> Vector2
+    def key: () -> Hash[Symbol, untyped]
+    def text: () -> String
+    def mouse_move: () -> Vector2
+    def mouse_move_raw: () -> Vector2
+    def mouse_button: () -> Hash[Symbol, untyped]
+    def mouse_wheel_scroll: () -> Hash[Symbol, untyped]
+    def mouse_wheel: () -> Hash[Symbol, untyped]
+    def joystick_move: () -> Hash[Symbol, untyped]
+    def joystick_button: () -> Hash[Symbol, untyped]
+    def joystick_connect: () -> Hash[Symbol, untyped]
+    def touch: () -> Hash[Symbol, untyped]
+    def sensor: () -> Hash[Symbol, untyped]
+  end
+end

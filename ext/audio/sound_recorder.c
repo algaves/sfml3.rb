@@ -1,33 +1,42 @@
 #include "audio/sound_recorder.h"
 
 #include <ruby.h>
-#include <ruby/thread.h>
 #include <stdint.h>
 #include <stdlib.h>
 
 #include "audio/audio_enums.h"
+#include "core/foreign_thread.h"
 #include "core/macros.h"
 
-/* A subclassable recorder. The capture callbacks arrive on SFML's audio
-   thread, so each re-enters Ruby through rb_thread_call_with_gvl and treats an
-   exception as "stop capturing" instead of unwinding into the audio engine.
-   A subclass only has to implement #on_process; #on_start and #on_stop are
-   optional and default to continuing. */
+/* A subclassable recorder. The capture callbacks arrive on SFML's capture
+   thread -- a real OS thread never created by Ruby, exactly like the audio
+   playback thread effect_processor.c/sound_stream.c are built to handle --
+   so re-entering Ruby directly (e.g. via rb_thread_call_with_gvl, as this
+   file previously did for #on_process, or via rb_protect with no GVL
+   handling at all, as it previously did for #on_start/#on_stop) is a fatal
+   VM error. Every callback here instead posts its work to the shared
+   foreign-thread worker (core/foreign_thread.h), the same mechanism the
+   other two files use, and treats an exception as "stop capturing" rather
+   than unwinding into the audio engine. A subclass only has to implement
+   #on_process; #on_start and #on_stop are optional and default to
+   continuing. */
+
+#define SOUND_RECORDER_JOB_TIMEOUT_MS 50
 typedef struct {
     VALUE rb_self;
-    sfSoundRecorder *handle;
+    sfSoundRecorder* handle;
 } SoundRecorder;
 
 static VALUE rb_cSoundRecorder;
 
-static void SoundRecorder_mark(void *ptr) {
-    SoundRecorder *recorder = ptr;
+static void SoundRecorder_mark(void* ptr) {
+    SoundRecorder* recorder = ptr;
 
     rb_gc_mark(recorder->rb_self);
 }
 
-static void SoundRecorder_free(void *ptr) {
-    SoundRecorder *recorder = ptr;
+static void SoundRecorder_free(void* ptr) {
+    SoundRecorder* recorder = ptr;
 
     if (recorder->handle != NULL) {
         sfSoundRecorder_destroy(recorder->handle);
@@ -39,8 +48,7 @@ static void SoundRecorder_free(void *ptr) {
 static const rb_data_type_t SoundRecorder_data_type = {
     .wrap_struct_name = "SFML::SoundRecorder",
     .function = {.dmark = SoundRecorder_mark, .dfree = SoundRecorder_free, .dsize = NULL},
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY
-};
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
 typedef struct {
     VALUE self;
@@ -48,25 +56,31 @@ typedef struct {
 } InvokeContext;
 
 static VALUE SoundRecorder_invoke_body(VALUE raw) {
-    InvokeContext *ctx = (InvokeContext *) raw;
+    InvokeContext* ctx = (InvokeContext*)raw;
 
     return rb_funcall(ctx->self, ctx->method, 0);
 }
 
-/* Calls a zero-argument Ruby method, swallowing any exception it raises. */
-static void SoundRecorder_invoke(VALUE self, ID method) {
-    InvokeContext ctx = {.self = self, .method = method};
+/* Runs on the shared foreign-thread worker, which holds the GVL. */
+static void SoundRecorder_invoke_run(void* raw) {
     int state = 0;
 
-    rb_protect(SoundRecorder_invoke_body, (VALUE) &ctx, &state);
+    rb_protect(SoundRecorder_invoke_body, (VALUE)raw, &state);
 
     if (state) {
         rb_set_errinfo(Qnil);
     }
 }
 
-static bool SoundRecorder_on_start(void *userData) {
-    SoundRecorder *recorder = userData;
+/* Calls a zero-argument Ruby method, swallowing any exception it raises. */
+static void SoundRecorder_invoke(VALUE self, ID method) {
+    InvokeContext ctx = {.self = self, .method = method};
+
+    run_on_ruby_thread(SoundRecorder_invoke_run, &ctx, SOUND_RECORDER_JOB_TIMEOUT_MS);
+}
+
+static bool SoundRecorder_on_start(void* userData) {
+    SoundRecorder* recorder = userData;
 
     if (rb_respond_to(recorder->rb_self, rb_intern("on_start"))) {
         SoundRecorder_invoke(recorder->rb_self, rb_intern("on_start"));
@@ -76,15 +90,15 @@ static bool SoundRecorder_on_start(void *userData) {
 }
 
 typedef struct {
-    SoundRecorder *recorder;
-    const int16_t *samples;
+    SoundRecorder* recorder;
+    const int16_t* samples;
     size_t sample_count;
     int ok;
 } ProcessContext;
 
 static VALUE SoundRecorder_process_body(VALUE raw) {
-    ProcessContext *ctx = (ProcessContext *) raw;
-    VALUE rb_samples = rb_ary_new_capa((long) ctx->sample_count);
+    ProcessContext* ctx = (ProcessContext*)raw;
+    VALUE rb_samples = rb_ary_new_capa((long)ctx->sample_count);
     VALUE result;
     size_t i;
 
@@ -98,41 +112,58 @@ static VALUE SoundRecorder_process_body(VALUE raw) {
     return Qnil;
 }
 
-static void *SoundRecorder_process_gvl(void *raw) {
+/* Runs on the shared foreign-thread worker, which holds the GVL. */
+static void SoundRecorder_process_run(void* raw) {
     int state = 0;
 
-    rb_protect(SoundRecorder_process_body, (VALUE) raw, &state);
+    rb_protect(SoundRecorder_process_body, (VALUE)raw, &state);
 
     if (state) {
         rb_set_errinfo(Qnil);
-        ((ProcessContext *) raw)->ok = 0;
+        ((ProcessContext*)raw)->ok = 0;
     }
-
-    return NULL;
 }
 
-static bool SoundRecorder_on_process(const int16_t *samples, size_t sample_count, void *userData) {
-    SoundRecorder *recorder = userData;
+static bool SoundRecorder_on_process(const int16_t* samples, size_t sample_count, void* userData) {
+    SoundRecorder* recorder = userData;
     ProcessContext ctx = {
-        .recorder = recorder, .samples = samples, .sample_count = sample_count, .ok = 0
-    };
+        .recorder = recorder, .samples = samples, .sample_count = sample_count, .ok = 0};
 
-    rb_thread_call_with_gvl(SoundRecorder_process_gvl, &ctx);
+    if (!run_on_ruby_thread(SoundRecorder_process_run, &ctx, SOUND_RECORDER_JOB_TIMEOUT_MS)) {
+        /* Timed out before the worker even claimed the job (e.g. GVL
+           contention): drop this one chunk rather than block the capture
+           thread indefinitely, but keep recording rather than aborting the
+           whole session over one missed callback. */
+        return true;
+    }
 
     return ctx.ok ? true : false;
 }
 
-static void SoundRecorder_on_stop(void *userData) {
-    SoundRecorder *recorder = userData;
+static void SoundRecorder_on_stop(void* userData) {
+    SoundRecorder* recorder = userData;
 
     if (rb_respond_to(recorder->rb_self, rb_intern("on_stop"))) {
         SoundRecorder_invoke(recorder->rb_self, rb_intern("on_stop"));
     }
 }
 
+/* call-seq:
+ *   SoundRecorder.new -> SoundRecorder
+ *
+ * SoundRecorder must be subclassed: the subclass is required to implement
+ * +#on_process(samples)+, called from the audio thread with an Array of
+ * captured Integer samples whenever a chunk is ready (return a truthy value
+ * to keep recording, falsy to stop), and may optionally implement
+ * +#on_start+ and +#on_stop+.
+ *
+ * @return [SoundRecorder]
+ * @raise [NotImplementedError] if the subclass does not define #on_process
+ * @raise [RuntimeError] if no capture device is available
+ */
 static VALUE SoundRecorder_new(VALUE klass) {
-    SoundRecorder *ptr;
-    sfSoundRecorder *handle;
+    SoundRecorder* ptr;
+    sfSoundRecorder* handle;
     VALUE self;
 
     ptr = malloc(sizeof(SoundRecorder));
@@ -160,27 +191,49 @@ static VALUE SoundRecorder_new(VALUE klass) {
     return self;
 }
 
+/* call-seq:
+ *   start(sample_rate) -> true or false
+ *
+ * @return [Boolean] whether recording started successfully
+ */
 static VALUE SoundRecorder_start(VALUE self, VALUE rb_sample_rate) {
     return BOOL2RB(sfSoundRecorder_start(Get_SoundRecorder_Struct(self),
-                                         (unsigned int) NUM2INT(rb_sample_rate)));
+                                         (unsigned int)NUM2INT(rb_sample_rate)));
 }
 
+/* call-seq: stop -> self
+ *
+ * @return [self]
+ */
 static VALUE SoundRecorder_stop(VALUE self) {
     sfSoundRecorder_stop(Get_SoundRecorder_Struct(self));
     return self;
 }
 
+/* call-seq: sample_rate -> Integer
+ *
+ * @return [Integer]
+ */
 static VALUE SoundRecorder_sample_rate(VALUE self) {
     return UINT2NUM(sfSoundRecorder_getSampleRate(Get_SoundRecorder_Struct(self)));
 }
 
+/* call-seq: SoundRecorder.available? -> true or false
+ *
+ * @return [Boolean] whether the audio backend supports capture at all
+ */
 static VALUE SoundRecorder_available(VALUE klass) {
     return BOOL2RB(sfSoundRecorder_isAvailable());
 }
 
+/* call-seq: SoundRecorder.available_devices -> Array<String>
+ *
+ * @return [Array<String>] names of the capture devices available on this
+ *   system
+ */
 static VALUE SoundRecorder_available_devices(VALUE klass) {
     size_t count = 0;
-    const char *const *devices = sfSoundRecorder_getAvailableDevices(&count);
+    const char* const* devices = sfSoundRecorder_getAvailableDevices(&count);
     VALUE rb_array;
     size_t i;
 
@@ -188,7 +241,7 @@ static VALUE SoundRecorder_available_devices(VALUE klass) {
         return rb_ary_new();
     }
 
-    rb_array = rb_ary_new_capa((long) count);
+    rb_array = rb_ary_new_capa((long)count);
 
     for (i = 0; i < count; i++) {
         rb_ary_push(rb_array, rb_str_new_cstr(devices[i]));
@@ -197,31 +250,64 @@ static VALUE SoundRecorder_available_devices(VALUE klass) {
     return rb_array;
 }
 
+/* call-seq: SoundRecorder.default_device -> String
+ *
+ * @return [String] the name of the system's default capture device
+ */
 static VALUE SoundRecorder_default_device(VALUE klass) {
     return rb_str_new_cstr(sfSoundRecorder_getDefaultDevice());
 }
 
+/* call-seq: device -> String
+ *
+ * @return [String] the name of the capture device in use
+ */
 static VALUE SoundRecorder_device(VALUE self) {
     return rb_str_new_cstr(sfSoundRecorder_getDevice(Get_SoundRecorder_Struct(self)));
 }
 
+/* call-seq:
+ *   device=(value) -> true or false
+ *
+ * Must be called while not recording. Get available names from
+ * .available_devices.
+ *
+ * @return [Boolean] whether the device was set successfully
+ */
 static VALUE SoundRecorder_set_device(VALUE self, VALUE rb_name) {
     return BOOL2RB(
         sfSoundRecorder_setDevice(Get_SoundRecorder_Struct(self), StringValueCStr(rb_name)));
 }
 
+/* call-seq: channel_count -> Integer
+ *
+ * @return [Integer]
+ */
 static VALUE SoundRecorder_channel_count(VALUE self) {
     return UINT2NUM(sfSoundRecorder_getChannelCount(Get_SoundRecorder_Struct(self)));
 }
 
+/* call-seq:
+ *   channel_count=(value) -> Integer
+ *
+ * Must be called while not recording.
+ *
+ * @return [Integer] +value+
+ */
 static VALUE SoundRecorder_set_channel_count(VALUE self, VALUE rb_count) {
-    sfSoundRecorder_setChannelCount(Get_SoundRecorder_Struct(self), (unsigned int) NUM2INT(rb_count));
+    sfSoundRecorder_setChannelCount(Get_SoundRecorder_Struct(self),
+                                    (unsigned int)NUM2INT(rb_count));
     return rb_count;
 }
 
+/* call-seq: channel_map -> Array<Symbol>
+ *
+ * @return [Array<Symbol>] one entry per channel, e.g.
+ *   +[:front_left, :front_right]+
+ */
 static VALUE SoundRecorder_channel_map(VALUE self) {
     size_t count = 0;
-    sfSoundChannel *map = sfSoundRecorder_getChannelMap(Get_SoundRecorder_Struct(self), &count);
+    sfSoundChannel* map = sfSoundRecorder_getChannelMap(Get_SoundRecorder_Struct(self), &count);
     VALUE rb_array;
     size_t i;
 
@@ -229,7 +315,7 @@ static VALUE SoundRecorder_channel_map(VALUE self) {
         return rb_ary_new();
     }
 
-    rb_array = rb_ary_new_capa((long) count);
+    rb_array = rb_ary_new_capa((long)count);
 
     for (i = 0; i < count; i++) {
         rb_ary_push(rb_array, ID2SYM(rb_intern(sound_channel_name(map[i]))));
@@ -238,14 +324,22 @@ static VALUE SoundRecorder_channel_map(VALUE self) {
     return rb_array;
 }
 
-void Init_SoundRecorder(VALUE rb_module) {
-    rb_cSoundRecorder = rb_define_class_under(rb_module, "SoundRecorder", rb_cObject);
+/* Document-class: SFML::SoundRecorder
+ * Base class for a custom audio capture consumer. Subclasses must implement
+ * +#on_process(samples)+, called from the audio thread whenever a chunk of
+ * captured samples is ready, and may implement +#on_start+/+#on_stop+ to
+ * react to recording starting/stopping. For simply capturing into a
+ * SoundBuffer without custom processing, use SoundBufferRecorder instead.
+ */
+void Init_SoundRecorder(VALUE rb_mSFML) {
+    rb_cSoundRecorder = rb_define_class_under(rb_mSFML, "SoundRecorder", rb_cObject);
 
     rb_define_singleton_method(rb_cSoundRecorder, "new", SoundRecorder_new, 0);
     rb_define_singleton_method(rb_cSoundRecorder, "available?", SoundRecorder_available, 0);
     rb_define_singleton_method(rb_cSoundRecorder, "available_devices",
                                SoundRecorder_available_devices, 0);
-    rb_define_singleton_method(rb_cSoundRecorder, "default_device", SoundRecorder_default_device, 0);
+    rb_define_singleton_method(rb_cSoundRecorder, "default_device", SoundRecorder_default_device,
+                               0);
 
     rb_define_method(rb_cSoundRecorder, "start", SoundRecorder_start, 1);
     rb_define_method(rb_cSoundRecorder, "stop", SoundRecorder_stop, 0);
@@ -261,8 +355,8 @@ VALUE Get_Klass_SoundRecorder(void) {
     return rb_cSoundRecorder;
 }
 
-void *Get_SoundRecorder_Struct(VALUE self) {
-    SoundRecorder *ptr;
+void* Get_SoundRecorder_Struct(VALUE self) {
+    SoundRecorder* ptr;
     TypedData_Get_Struct(self, SoundRecorder, &SoundRecorder_data_type, ptr);
     return ptr->handle;
 }

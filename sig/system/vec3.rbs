@@ -1,0 +1,27 @@
+module SFML
+  class Vector3
+    include Enumerable[Float]
+
+    def self.new: () -> Vector3
+                 | (Float x, Float y, Float z) -> Vector3
+                 | (Array[Float] xyz) -> Vector3
+                 | (Vector3 other) -> Vector3
+
+    def x: () -> Float
+    def x=: (Float value) -> Float
+    def y: () -> Float
+    def y=: (Float value) -> Float
+    def z: () -> Float
+    def z=: (Float value) -> Float
+    def to_a: () -> [Float, Float, Float]
+    def to_ary: () -> [Float, Float, Float]
+    def each: () { (Float) -> void } -> self
+    def size: () -> Integer
+    def length: () -> Integer
+    def ==: (untyped other) -> bool
+    def +: (Vector3 | Array[Float] other) -> Vector3
+    def -: (Vector3 | Array[Float] other) -> Vector3
+    def *: (Float scalar) -> Vector3
+    def to_s: () -> String
+  end
+end

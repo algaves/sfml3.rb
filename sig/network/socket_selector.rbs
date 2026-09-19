@@ -1,0 +1,14 @@
+module SFML
+  class SocketSelector
+    def self.new: () -> SocketSelector
+
+    def copy: () -> SocketSelector
+    def add: (TcpListener | TcpSocket | UdpSocket socket) -> self
+    def remove: (TcpListener | TcpSocket | UdpSocket socket) -> self
+    def clear: () -> self
+    def wait: (?Time timeout) -> bool
+    def tcp_listener_ready?: (TcpListener listener) -> bool
+    def tcp_socket_ready?: (TcpSocket socket) -> bool
+    def udp_socket_ready?: (UdpSocket socket) -> bool
+  end
+end

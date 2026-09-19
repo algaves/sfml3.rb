@@ -1,0 +1,26 @@
+module SFML
+  class Vector2
+    include Enumerable[Float]
+
+    def self.new: () -> Vector2
+                 | (Float x, Float y) -> Vector2
+                 | (Array[Float] xy) -> Vector2
+                 | (Vector2 other) -> Vector2
+
+    def x: () -> Float
+    def x=: (Float value) -> Float
+    def y: () -> Float
+    def y=: (Float value) -> Float
+    def to_a: () -> [Float, Float]
+    def to_ary: () -> [Float, Float]
+    def each: () { (Float) -> void } -> self
+    def []: (Integer index) -> Float
+    def size: () -> Integer
+    def length: () -> Integer
+    def ==: (untyped other) -> bool
+    def +: (Vector2 | Array[Float] other) -> Vector2
+    def -: (Vector2 | Array[Float] other) -> Vector2
+    def *: (Float scalar) -> Vector2
+    def to_s: () -> String
+  end
+end

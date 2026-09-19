@@ -1,0 +1,17 @@
+module SFML
+  class VertexArray
+    def self.new: () -> VertexArray
+
+    def copy: () -> VertexArray
+    def vertex_count: () -> Integer
+    def vertex: (Integer index) -> Vertex
+    def set_vertex: (Integer index, Vertex vertex) -> Vertex
+    def append: (Vertex vertex) -> self
+    def clear!: () -> self
+    def resize: (Integer count) -> self
+    def primitive: () -> Symbol
+    def primitive=: (Symbol value) -> Symbol
+    def bounds: () -> untyped
+    def draw: (untyped target, untyped state) -> nil
+  end
+end

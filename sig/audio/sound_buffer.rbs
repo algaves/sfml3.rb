@@ -1,0 +1,17 @@
+module SFML
+  class SoundBuffer
+    def self.from_file: (String path) -> SoundBuffer
+    def self.from_memory: (String data) -> SoundBuffer
+    def self.from_stream: (untyped stream) -> SoundBuffer
+    def self.from_samples: (Array[Integer] | String samples, Integer channel_count, Integer sample_rate, ?Array[Symbol] channel_map) -> SoundBuffer
+
+    def copy: () -> SoundBuffer
+    def save_to_file: (String path) -> bool
+    def samples: () -> Array[Integer]
+    def sample_count: () -> Integer
+    def sample_rate: () -> Integer
+    def channel_count: () -> Integer
+    def channel_map: () -> Array[Symbol]
+    def duration: () -> Time
+  end
+end

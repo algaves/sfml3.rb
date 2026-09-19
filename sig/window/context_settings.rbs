@@ -1,0 +1,20 @@
+module SFML
+  class ContextSettings
+    def self.new: (?Integer depth_bits, ?Integer stencil_bits, ?Integer antialiasing_level, ?Integer major_version, ?Integer minor_version, ?(Symbol | Array[Symbol] | Integer) flags, ?bool srgb_capable) -> ContextSettings
+
+    def depth_bits: () -> Integer
+    def depth_bits=: (Integer value) -> Integer
+    def stencil_bits: () -> Integer
+    def stencil_bits=: (Integer value) -> Integer
+    def antialiasing_level: () -> Integer
+    def antialiasing_level=: (Integer value) -> Integer
+    def major_version: () -> Integer
+    def major_version=: (Integer value) -> Integer
+    def minor_version: () -> Integer
+    def minor_version=: (Integer value) -> Integer
+    def attribute_flags: () -> Array[Symbol]
+    def attribute_flags=: (Symbol | Array[Symbol] | Integer value) -> (Symbol | Array[Symbol] | Integer)
+    def srgb_capable?: () -> bool
+    def srgb_capable=: (bool value) -> bool
+  end
+end

@@ -1,0 +1,10 @@
+module SFML
+  class Target
+    def self.new: (untyped window) -> Target
+
+    def initialize: () -> void
+    def draw: (untyped drawable, untyped state) -> nil
+    def view: () -> untyped
+    def view=: (untyped value) -> nil
+  end
+end

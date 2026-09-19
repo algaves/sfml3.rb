@@ -1,0 +1,22 @@
+module SFML
+  class VertexBuffer
+    def self.new: () -> VertexBuffer
+                 | (Integer count) -> VertexBuffer
+                 | (Integer count, Symbol primitive) -> VertexBuffer
+                 | (Integer count, Symbol primitive, Symbol usage) -> VertexBuffer
+    def self.available?: () -> bool
+
+    def copy: () -> VertexBuffer
+    def vertex_count: () -> Integer
+    def update: (Array[untyped] vertices, ?Integer offset) -> bool
+    def update_from: (VertexBuffer other) -> bool
+    def swap: (VertexBuffer other) -> self
+    def primitive: () -> Symbol
+    def primitive=: (Symbol value) -> Symbol
+    def usage: () -> Symbol
+    def usage=: (Symbol value) -> Symbol
+    def native_handle: () -> Integer
+    def bind: () -> self
+    def draw: (untyped target, untyped state) -> nil
+  end
+end

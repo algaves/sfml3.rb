@@ -1,0 +1,7 @@
+module SFML
+  class InputStream
+    def self.new: (untyped io) -> InputStream
+
+    def io: () -> untyped
+  end
+end

@@ -12,19 +12,28 @@ typedef struct {
 
 static VALUE rb_cVector3;
 
-static void Vector3_free(void *ptr) {
+static void Vector3_free(void* ptr) {
     free(ptr);
 }
 
 static const rb_data_type_t Vector3_data_type = {
     .wrap_struct_name = "SFML::Vector3",
     .function = {.dmark = NULL, .dfree = Vector3_free, .dsize = NULL},
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY
-};
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
-static VALUE Vector3_new(int argc, VALUE *argv, VALUE klass) {
+/* call-seq:
+ *   Vector3.new                -> Vector3(0, 0, 0)
+ *   Vector3.new(x, y, z)       -> Vector3(x, y, z)
+ *   Vector3.new([x, y, z])     -> Vector3(x, y, z)
+ *   Vector3.new(other_vector3) -> copy of +other_vector3+
+ *
+ * @return [Vector3]
+ * @raise [ArgumentError] if given an Array shorter than 3 elements, or an
+ *   argument count other than 0, 1 or 3
+ */
+static VALUE Vector3_new(int argc, VALUE* argv, VALUE klass) {
     VALUE self;
-    Vector3 *ptr;
+    Vector3* ptr;
     float x = 0;
     float y = 0;
     float z = 0;
@@ -51,6 +60,11 @@ static VALUE Vector3_new(int argc, VALUE *argv, VALUE klass) {
     }
 
     ptr = malloc(sizeof(Vector3));
+
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate vector");
+    }
+
     ptr->vec.x = x;
     ptr->vec.y = y;
     ptr->vec.z = z;
@@ -60,41 +74,84 @@ static VALUE Vector3_new(int argc, VALUE *argv, VALUE klass) {
     return self;
 }
 
+/* call-seq: x -> Float
+ *
+ * @return [Float] the X component
+ */
 static VALUE Vector3_get_x(VALUE self) {
-    return DBL2NUM(((Vector3 *) Get_Vector3_Struct(self))->vec.x);
+    return DBL2NUM(((Vector3*)Get_Vector3_Struct(self))->vec.x);
 }
 
+/* call-seq: y -> Float
+ *
+ * @return [Float] the Y component
+ */
 static VALUE Vector3_get_y(VALUE self) {
-    return DBL2NUM(((Vector3 *) Get_Vector3_Struct(self))->vec.y);
+    return DBL2NUM(((Vector3*)Get_Vector3_Struct(self))->vec.y);
 }
 
+/* call-seq: z -> Float
+ *
+ * @return [Float] the Z component
+ */
 static VALUE Vector3_get_z(VALUE self) {
-    return DBL2NUM(((Vector3 *) Get_Vector3_Struct(self))->vec.z);
+    return DBL2NUM(((Vector3*)Get_Vector3_Struct(self))->vec.z);
 }
 
+/* call-seq:
+ *   x=(value) -> Float
+ *
+ * Sets the X component. +value+ is any Float-convertible number.
+ *
+ * @return [Float] +value+
+ */
 static VALUE Vector3_set_x(VALUE self, VALUE rb_x) {
-    ((Vector3 *) Get_Vector3_Struct(self))->vec.x = NUM2DBL(rb_x);
+    ((Vector3*)Get_Vector3_Struct(self))->vec.x = NUM2DBL(rb_x);
     return rb_x;
 }
 
+/* call-seq:
+ *   y=(value) -> Float
+ *
+ * Sets the Y component. +value+ is any Float-convertible number.
+ *
+ * @return [Float] +value+
+ */
 static VALUE Vector3_set_y(VALUE self, VALUE rb_y) {
-    ((Vector3 *) Get_Vector3_Struct(self))->vec.y = NUM2DBL(rb_y);
+    ((Vector3*)Get_Vector3_Struct(self))->vec.y = NUM2DBL(rb_y);
     return rb_y;
 }
 
+/* call-seq:
+ *   z=(value) -> Float
+ *
+ * Sets the Z component. +value+ is any Float-convertible number.
+ *
+ * @return [Float] +value+
+ */
 static VALUE Vector3_set_z(VALUE self, VALUE rb_z) {
-    ((Vector3 *) Get_Vector3_Struct(self))->vec.z = NUM2DBL(rb_z);
+    ((Vector3*)Get_Vector3_Struct(self))->vec.z = NUM2DBL(rb_z);
     return rb_z;
 }
 
+/* call-seq: to_a -> Array
+ *
+ * @return [Array<Float>] +[x, y, z]+
+ */
 static VALUE Vector3_to_a(VALUE self) {
-    Vector3 *vec = Get_Vector3_Struct(self);
+    Vector3* vec = Get_Vector3_Struct(self);
 
     return rb_ary_new_from_args(3, DBL2NUM(vec->vec.x), DBL2NUM(vec->vec.y), DBL2NUM(vec->vec.z));
 }
 
+/* call-seq: each { |component| ... } -> self
+ *
+ * Yields +x+, +y+, then +z+.
+ *
+ * @return [self]
+ */
 static VALUE Vector3_each(VALUE self) {
-    Vector3 *vec = Get_Vector3_Struct(self);
+    Vector3* vec = Get_Vector3_Struct(self);
 
     rb_yield(DBL2NUM(vec->vec.x));
     rb_yield(DBL2NUM(vec->vec.y));
@@ -103,16 +160,27 @@ static VALUE Vector3_each(VALUE self) {
     return self;
 }
 
+/* call-seq: size -> Integer
+ *
+ * @return [Integer] always 3
+ */
 static VALUE Vector3_size(VALUE self) {
     return INT2NUM(3);
 }
 
+/* call-seq:
+ *   self == other -> true or false
+ *
+ * +other+ may be a Vector3 or a 3-element Array.
+ *
+ * @return [Boolean]
+ */
 static VALUE Vector3_eql(VALUE self, VALUE rb_other) {
-    Vector3 *a = Get_Vector3_Struct(self);
+    Vector3* a = Get_Vector3_Struct(self);
     sfVector3f b;
 
     if (rb_obj_is_kind_of(rb_other, rb_cVector3)) {
-        b = ((Vector3 *) Get_Vector3_Struct(rb_other))->vec;
+        b = ((Vector3*)Get_Vector3_Struct(rb_other))->vec;
     } else if (RB_TYPE_P(rb_other, T_ARRAY) && RARRAY_LEN(rb_other) >= 3) {
         b = vec3f_from_rb(rb_other);
     } else {
@@ -122,29 +190,52 @@ static VALUE Vector3_eql(VALUE self, VALUE rb_other) {
     return BOOL2RB(a->vec.x == b.x && a->vec.y == b.y && a->vec.z == b.z);
 }
 
+/* call-seq:
+ *   self + other -> Vector3
+ *
+ * +other+ may be a Vector3 or a 3-element Array.
+ *
+ * @return [Vector3] componentwise sum
+ */
 static VALUE Vector3_add(VALUE self, VALUE rb_other) {
-    Vector3 *a = Get_Vector3_Struct(self);
+    Vector3* a = Get_Vector3_Struct(self);
     sfVector3f b = vec3f_from_rb(rb_other);
 
-    return vec3f_to_rb((sfVector3f) {a->vec.x + b.x, a->vec.y + b.y, a->vec.z + b.z});
+    return vec3f_to_rb((sfVector3f){a->vec.x + b.x, a->vec.y + b.y, a->vec.z + b.z});
 }
 
+/* call-seq:
+ *   self - other -> Vector3
+ *
+ * +other+ may be a Vector3 or a 3-element Array.
+ *
+ * @return [Vector3] componentwise difference
+ */
 static VALUE Vector3_sub(VALUE self, VALUE rb_other) {
-    Vector3 *a = Get_Vector3_Struct(self);
+    Vector3* a = Get_Vector3_Struct(self);
     sfVector3f b = vec3f_from_rb(rb_other);
 
-    return vec3f_to_rb((sfVector3f) {a->vec.x - b.x, a->vec.y - b.y, a->vec.z - b.z});
+    return vec3f_to_rb((sfVector3f){a->vec.x - b.x, a->vec.y - b.y, a->vec.z - b.z});
 }
 
+/* call-seq:
+ *   self * scalar -> Vector3
+ *
+ * @return [Vector3]
+ */
 static VALUE Vector3_mul(VALUE self, VALUE rb_scalar) {
-    Vector3 *a = Get_Vector3_Struct(self);
+    Vector3* a = Get_Vector3_Struct(self);
     float scalar = NUM2DBL(rb_scalar);
 
-    return vec3f_to_rb((sfVector3f) {a->vec.x * scalar, a->vec.y * scalar, a->vec.z * scalar});
+    return vec3f_to_rb((sfVector3f){a->vec.x * scalar, a->vec.y * scalar, a->vec.z * scalar});
 }
 
+/* call-seq: to_s -> String
+ *
+ * @return [String] +"(x, y, z)"+
+ */
 static VALUE Vector3_to_s(VALUE self) {
-    Vector3 *a = Get_Vector3_Struct(self);
+    Vector3* a = Get_Vector3_Struct(self);
     char buffer[96];
 
     snprintf(buffer, sizeof(buffer), "(%g, %g, %g)", a->vec.x, a->vec.y, a->vec.z);
@@ -152,8 +243,23 @@ static VALUE Vector3_to_s(VALUE self) {
     return rb_str_new2(buffer);
 }
 
-void Init_Vector3(VALUE rb_module) {
-    rb_cVector3 = rb_define_class_under(rb_module, "Vector3", rb_cObject);
+/* Document-class: SFML::Vector3
+ * A 3D vector of floats, used for positions, sizes and directions in 3D
+ * space (e.g. Listener and SoundSource position/direction/velocity).
+ *
+ * Includes +Enumerable+ and behaves like a 3-element sequence: it responds to
+ * #each and #to_a, and can be compared or combined with a plain
+ * +[x, y, z]+ Array anywhere a Vector3 is accepted.
+ *
+ * @!attribute x
+ *   @return [Float] the X component
+ * @!attribute y
+ *   @return [Float] the Y component
+ * @!attribute z
+ *   @return [Float] the Z component
+ */
+void Init_Vector3(VALUE rb_mSFML) {
+    rb_cVector3 = rb_define_class_under(rb_mSFML, "Vector3", rb_cObject);
 
     rb_include_module(rb_cVector3, rb_mEnumerable);
 
@@ -182,15 +288,15 @@ VALUE Get_Klass_Vector3(void) {
     return rb_cVector3;
 }
 
-void *Get_Vector3_Struct(VALUE self) {
-    Vector3 *ptr;
+void* Get_Vector3_Struct(VALUE self) {
+    Vector3* ptr;
     TypedData_Get_Struct(self, Vector3, &Vector3_data_type, ptr);
     return ptr;
 }
 
 sfVector3f vec3f_from_rb(VALUE rb_vec) {
     if (rb_obj_is_kind_of(rb_vec, rb_cVector3)) {
-        return ((Vector3 *) Get_Vector3_Struct(rb_vec))->vec;
+        return ((Vector3*)Get_Vector3_Struct(rb_vec))->vec;
     }
 
     if (RB_TYPE_P(rb_vec, T_ARRAY)) {
@@ -198,20 +304,22 @@ sfVector3f vec3f_from_rb(VALUE rb_vec) {
             raise_invalid_array_length(3);
         }
 
-        return (sfVector3f) {
-            (float) NUM2DBL(rb_ary_entry(rb_vec, 0)),
-            (float) NUM2DBL(rb_ary_entry(rb_vec, 1)),
-            (float) NUM2DBL(rb_ary_entry(rb_vec, 2))
-        };
+        return (sfVector3f){(float)NUM2DBL(rb_ary_entry(rb_vec, 0)),
+                            (float)NUM2DBL(rb_ary_entry(rb_vec, 1)),
+                            (float)NUM2DBL(rb_ary_entry(rb_vec, 2))};
     }
 
     raise_invalid_argument_class(rb_cVector3);
 
-    return (sfVector3f) {0, 0, 0};
+    return (sfVector3f){0, 0, 0};
 }
 
 VALUE vec3f_to_rb(sfVector3f c_vec) {
-    Vector3 *ptr = malloc(sizeof(Vector3));
+    Vector3* ptr = malloc(sizeof(Vector3));
+
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate vector");
+    }
 
     ptr->vec = c_vec;
 

@@ -13,21 +13,49 @@
 
 static VALUE rb_cShader;
 
+/* SFML's Shader::setUniform(name, const Texture&) stores a pointer to the
+   texture internally and re-binds it at draw/bind time, so (per SFML's own
+   docs) the caller must keep every Texture passed to #set_texture alive for
+   as long as the shader might use it -- hence the retaining Hash and the
+   dmark this needs, unlike a bare pointer wrap. */
+typedef struct {
+    sfShader* shader;
+    VALUE rb_textures;
+} Shader;
+
+static void Shader_mark(void* ptr) {
+    rb_gc_mark(((Shader*)ptr)->rb_textures);
+}
+
 static void Shader_free(void* ptr) {
-    sfShader_destroy(ptr);
+    Shader* wrapper = ptr;
+
+    sfShader_destroy(wrapper->shader);
+    free(wrapper);
 }
 
 static const rb_data_type_t Shader_data_type = {
     .wrap_struct_name = "SFML::Shader",
-    .function = {.dmark = NULL, .dfree = Shader_free, .dsize = NULL},
+    .function = {.dmark = Shader_mark, .dfree = Shader_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
-static VALUE Shader_wrap(VALUE klass, sfShader* shader) {
-    if (shader == NULL) {
+static VALUE Shader_wrap(VALUE klass, sfShader* c_shader) {
+    Shader* wrapper;
+
+    if (c_shader == NULL) {
         rb_raise(rb_eRuntimeError, "failed to create shader");
     }
 
-    return TypedData_Wrap_Struct(klass, &Shader_data_type, shader);
+    wrapper = malloc(sizeof(Shader));
+
+    if (wrapper == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate shader");
+    }
+
+    wrapper->shader = c_shader;
+    wrapper->rb_textures = rb_hash_new();
+
+    return TypedData_Wrap_Struct(klass, &Shader_data_type, wrapper);
 }
 
 /* NULL skips a stage, mirroring CSFML. */
@@ -39,6 +67,17 @@ static const char* Shader_optional_cstr(VALUE rb_value) {
     return StringValueCStr(rb_value);
 }
 
+/* call-seq:
+ *   Shader.from_file(vertex)                     -> Shader
+ *   Shader.from_file(vertex, fragment)            -> Shader
+ *   Shader.from_file(vertex, fragment, geometry)  -> Shader
+ *
+ * Compiles a shader from GLSL source file paths. Any of the three may be
+ * +nil+ to skip that stage.
+ *
+ * @return [Shader]
+ * @raise [RuntimeError] if compilation fails
+ */
 static VALUE Shader_from_file(int argc, VALUE* argv, VALUE klass) {
     VALUE rb_vertex, rb_fragment, rb_geometry;
 
@@ -49,6 +88,17 @@ static VALUE Shader_from_file(int argc, VALUE* argv, VALUE klass) {
                                                       Shader_optional_cstr(rb_fragment)));
 }
 
+/* call-seq:
+ *   Shader.from_memory(vertex)                    -> Shader
+ *   Shader.from_memory(vertex, fragment)          -> Shader
+ *   Shader.from_memory(vertex, fragment, geometry) -> Shader
+ *
+ * Compiles a shader from GLSL source Strings. Any of the three may be
+ * +nil+ to skip that stage.
+ *
+ * @return [Shader]
+ * @raise [RuntimeError] if compilation fails
+ */
 static VALUE Shader_from_memory(int argc, VALUE* argv, VALUE klass) {
     VALUE rb_vertex, rb_fragment, rb_geometry;
 
@@ -59,6 +109,17 @@ static VALUE Shader_from_memory(int argc, VALUE* argv, VALUE klass) {
                                                         Shader_optional_cstr(rb_fragment)));
 }
 
+/* call-seq:
+ *   Shader.from_stream(vertex)                    -> Shader
+ *   Shader.from_stream(vertex, fragment)          -> Shader
+ *   Shader.from_stream(vertex, fragment, geometry) -> Shader
+ *
+ * Compiles a shader from GLSL source read through InputStream objects. Any
+ * of the three may be +nil+ to skip that stage.
+ *
+ * @return [Shader]
+ * @raise [RuntimeError] if compilation fails
+ */
 static VALUE Shader_from_stream(int argc, VALUE* argv, VALUE klass) {
     VALUE rb_vertex, rb_fragment, rb_geometry;
     VALUE holder_vertex = Qnil, holder_fragment = Qnil, holder_geometry = Qnil;
@@ -87,19 +148,40 @@ static VALUE Shader_from_stream(int argc, VALUE* argv, VALUE klass) {
     return Shader_wrap(klass, sfShader_createFromStream(vertex, geometry, fragment));
 }
 
+/* call-seq: native_handle -> Integer
+ *
+ * @return [Integer] the underlying OpenGL program handle
+ */
 static VALUE Shader_get_native_handle(VALUE self) {
     return UINT2NUM(sfShader_getNativeHandle(Get_Shader_Struct(self)));
 }
 
+/* call-seq: bind -> self
+ *
+ * Activates this shader for rendering. Pass a RenderState carrying it to
+ * Target#draw instead of calling this directly, unless drawing raw OpenGL.
+ *
+ * @return [self]
+ */
 static VALUE Shader_bind(VALUE self) {
     sfShader_bind(Get_Shader_Struct(self));
     return self;
 }
 
+/* call-seq:
+ *   Shader.available? -> true or false
+ *
+ * @return [Boolean] whether the system supports shaders at all
+ */
 static VALUE Shader_is_available(VALUE klass) {
     return BOOL2RB(sfShader_isAvailable());
 }
 
+/* call-seq:
+ *   Shader.geometry_available? -> true or false
+ *
+ * @return [Boolean] whether the system supports geometry shaders
+ */
 static VALUE Shader_is_geometry_available(VALUE klass) {
     return BOOL2RB(sfShader_isGeometryAvailable());
 }
@@ -110,6 +192,11 @@ static void Shader_name(VALUE rb_name, char* buffer, size_t length) {
     snprintf(buffer, length, "%s", name);
 }
 
+/* call-seq:
+ *   set_float(name, x) -> self
+ *
+ * @return [self]
+ */
 static VALUE Shader_set_float(VALUE self, VALUE rb_name, VALUE rb_x) {
     char name[256];
 
@@ -119,6 +206,11 @@ static VALUE Shader_set_float(VALUE self, VALUE rb_name, VALUE rb_x) {
     return self;
 }
 
+/* call-seq:
+ *   set_int(name, x) -> self
+ *
+ * @return [self]
+ */
 static VALUE Shader_set_int(VALUE self, VALUE rb_name, VALUE rb_x) {
     char name[256];
 
@@ -128,6 +220,11 @@ static VALUE Shader_set_int(VALUE self, VALUE rb_name, VALUE rb_x) {
     return self;
 }
 
+/* call-seq:
+ *   set_bool(name, x) -> self
+ *
+ * @return [self]
+ */
 static VALUE Shader_set_bool(VALUE self, VALUE rb_name, VALUE rb_x) {
     char name[256];
 
@@ -137,6 +234,14 @@ static VALUE Shader_set_bool(VALUE self, VALUE rb_name, VALUE rb_x) {
     return self;
 }
 
+/* call-seq:
+ *   set_color(name, color) -> self
+ *
+ * Sets a +vec4+ uniform from +color+ (a Color), normalized to the 0..1
+ * range.
+ *
+ * @return [self]
+ */
 static VALUE Shader_set_color(VALUE self, VALUE rb_name, VALUE rb_color) {
     char name[256];
 
@@ -146,6 +251,13 @@ static VALUE Shader_set_color(VALUE self, VALUE rb_name, VALUE rb_color) {
     return self;
 }
 
+/* call-seq:
+ *   set_int_color(name, color) -> self
+ *
+ * Sets an +ivec4+ uniform from +color+ (a Color), in the 0..255 range.
+ *
+ * @return [self]
+ */
 static VALUE Shader_set_int_color(VALUE self, VALUE rb_name, VALUE rb_color) {
     char name[256];
 
@@ -155,6 +267,11 @@ static VALUE Shader_set_int_color(VALUE self, VALUE rb_name, VALUE rb_color) {
     return self;
 }
 
+/* call-seq:
+ *   set_vec2(name, vector) -> self
+ *
+ * @return [self]
+ */
 static VALUE Shader_set_vec2(VALUE self, VALUE rb_name, VALUE rb_vector) {
     char name[256];
 
@@ -164,6 +281,11 @@ static VALUE Shader_set_vec2(VALUE self, VALUE rb_name, VALUE rb_vector) {
     return self;
 }
 
+/* call-seq:
+ *   set_vec3(name, vector) -> self
+ *
+ * @return [self]
+ */
 static VALUE Shader_set_vec3(VALUE self, VALUE rb_name, VALUE rb_vector) {
     char name[256];
 
@@ -223,6 +345,14 @@ static sfGlslMat4 glsl_mat4_from_rb(VALUE rb_matrix) {
     return matrix;
 }
 
+/* call-seq:
+ *   set_vec4(name, vector) -> self
+ *
+ * +vector+ is a 4-element Array.
+ *
+ * @return [self]
+ * @raise [ArgumentError] if +vector+ has fewer than 4 elements
+ */
 static VALUE Shader_set_vec4(VALUE self, VALUE rb_name, VALUE rb_vector) {
     char name[256];
     sfGlslVec4 vector = glsl_vec4_from_rb(rb_vector);
@@ -234,6 +364,11 @@ static VALUE Shader_set_vec4(VALUE self, VALUE rb_name, VALUE rb_vector) {
     return self;
 }
 
+/* call-seq:
+ *   set_ivec2(name, vector) -> self
+ *
+ * @return [self]
+ */
 static VALUE Shader_set_ivec2(VALUE self, VALUE rb_name, VALUE rb_vector) {
     char name[256];
     sfVector2f vec = vec2f_from_rb(rb_vector);
@@ -245,6 +380,14 @@ static VALUE Shader_set_ivec2(VALUE self, VALUE rb_name, VALUE rb_vector) {
     return self;
 }
 
+/* call-seq:
+ *   set_ivec3(name, vector) -> self
+ *
+ * +vector+ is a 3-element Array.
+ *
+ * @return [self]
+ * @raise [ArgumentError] if +vector+ has fewer than 3 elements
+ */
 static VALUE Shader_set_ivec3(VALUE self, VALUE rb_name, VALUE rb_vector) {
     char name[256];
     VALUE array = rb_convert_type(rb_vector, T_ARRAY, "Array", "to_ary");
@@ -265,6 +408,14 @@ static VALUE Shader_set_ivec3(VALUE self, VALUE rb_name, VALUE rb_vector) {
     return self;
 }
 
+/* call-seq:
+ *   set_ivec4(name, vector) -> self
+ *
+ * +vector+ is a 4-element Array.
+ *
+ * @return [self]
+ * @raise [ArgumentError] if +vector+ has fewer than 4 elements
+ */
 static VALUE Shader_set_ivec4(VALUE self, VALUE rb_name, VALUE rb_vector) {
     char name[256];
     VALUE array = rb_convert_type(rb_vector, T_ARRAY, "Array", "to_ary");
@@ -286,6 +437,14 @@ static VALUE Shader_set_ivec4(VALUE self, VALUE rb_name, VALUE rb_vector) {
     return self;
 }
 
+/* call-seq:
+ *   set_bvec2(name, vector) -> self
+ *
+ * +vector+ is a 2-element Array.
+ *
+ * @return [self]
+ * @raise [ArgumentError] if +vector+ has fewer than 2 elements
+ */
 static VALUE Shader_set_bvec2(VALUE self, VALUE rb_name, VALUE rb_vector) {
     char name[256];
     VALUE array = rb_convert_type(rb_vector, T_ARRAY, "Array", "to_ary");
@@ -303,6 +462,14 @@ static VALUE Shader_set_bvec2(VALUE self, VALUE rb_name, VALUE rb_vector) {
     return self;
 }
 
+/* call-seq:
+ *   set_bvec3(name, vector) -> self
+ *
+ * +vector+ is a 3-element Array.
+ *
+ * @return [self]
+ * @raise [ArgumentError] if +vector+ has fewer than 3 elements
+ */
 static VALUE Shader_set_bvec3(VALUE self, VALUE rb_name, VALUE rb_vector) {
     char name[256];
     VALUE array = rb_convert_type(rb_vector, T_ARRAY, "Array", "to_ary");
@@ -321,6 +488,14 @@ static VALUE Shader_set_bvec3(VALUE self, VALUE rb_name, VALUE rb_vector) {
     return self;
 }
 
+/* call-seq:
+ *   set_bvec4(name, vector) -> self
+ *
+ * +vector+ is a 4-element Array.
+ *
+ * @return [self]
+ * @raise [ArgumentError] if +vector+ has fewer than 4 elements
+ */
 static VALUE Shader_set_bvec4(VALUE self, VALUE rb_name, VALUE rb_vector) {
     char name[256];
     VALUE array = rb_convert_type(rb_vector, T_ARRAY, "Array", "to_ary");
@@ -339,6 +514,14 @@ static VALUE Shader_set_bvec4(VALUE self, VALUE rb_name, VALUE rb_vector) {
     return self;
 }
 
+/* call-seq:
+ *   set_mat3(name, matrix) -> self
+ *
+ * +matrix+ is a 9-element Array.
+ *
+ * @return [self]
+ * @raise [ArgumentError] if +matrix+ has fewer than 9 elements
+ */
 static VALUE Shader_set_mat3(VALUE self, VALUE rb_name, VALUE rb_matrix) {
     char name[256];
     sfGlslMat3 matrix = glsl_mat3_from_rb(rb_matrix);
@@ -350,6 +533,14 @@ static VALUE Shader_set_mat3(VALUE self, VALUE rb_name, VALUE rb_matrix) {
     return self;
 }
 
+/* call-seq:
+ *   set_mat4(name, matrix) -> self
+ *
+ * +matrix+ is a 16-element Array.
+ *
+ * @return [self]
+ * @raise [ArgumentError] if +matrix+ has fewer than 16 elements
+ */
 static VALUE Shader_set_mat4(VALUE self, VALUE rb_name, VALUE rb_matrix) {
     char name[256];
     sfGlslMat4 matrix = glsl_mat4_from_rb(rb_matrix);
@@ -403,26 +594,44 @@ SHADER_ARRAY_UNIFORM(mat4, sfGlslMat4, glsl_mat4_from_rb, sfShader_setMat4Unifor
 
 #undef SHADER_ARRAY_UNIFORM
 
+/* Document-method: SFML::Shader#set_texture
+ * call-seq:
+ *   set_texture(name, texture) -> Texture
+ *
+ * SFML keeps and re-binds a pointer to +texture+ internally (rather than
+ * copying it) for as long as the shader may use it; this binding keeps a
+ * reference alongside it so the Texture can't be GC'd out from under the
+ * shader. CSFML's C API unconditionally dereferences the texture argument,
+ * so unlike most other uniform setters here, +nil+ is not accepted.
+ *
+ * @return [Texture] +texture+
+ * @raise [ArgumentError] if +texture+ is not a Texture
+ */
 static VALUE Shader_set_texture(VALUE self, VALUE rb_name, VALUE rb_texture) {
+    Shader* wrapper;
     char name[256];
 
+    TypedData_Get_Struct(self, Shader, &Shader_data_type, wrapper);
     Shader_name(rb_name, name, sizeof(name));
-
-    if (NIL_P(rb_texture)) {
-        sfShader_setTextureUniform((sfShader*)Get_Shader_Struct(self), name, NULL);
-        return rb_texture;
-    }
 
     if (!rb_obj_is_kind_of(rb_texture, Get_Klass_Texture())) {
         raise_invalid_argument_class(Get_Klass_Texture());
     }
 
-    sfShader_setTextureUniform((sfShader*)Get_Shader_Struct(self), name,
-                               Get_Texture_Struct(rb_texture));
+    sfShader_setTextureUniform(wrapper->shader, name, Get_Texture_Struct(rb_texture));
+    rb_hash_aset(wrapper->rb_textures, rb_str_new_cstr(name), rb_texture);
 
     return rb_texture;
 }
 
+/* call-seq:
+ *   set_current_texture(name) -> self
+ *
+ * Binds the target's own currently-bound texture (CSFML's "current
+ * texture" special value) to the sampler uniform +name+.
+ *
+ * @return [self]
+ */
 static VALUE Shader_set_current_texture(VALUE self, VALUE rb_name) {
     char name[256];
 
@@ -432,6 +641,18 @@ static VALUE Shader_set_current_texture(VALUE self, VALUE rb_name) {
     return self;
 }
 
+/* call-seq:
+ *   set_uniform(name, value) -> self
+ *   uniform=(name, value)    -> self
+ *
+ * Sets the uniform +name+, dispatching to the appropriate +set_*+ method
+ * based on +value+'s class: Color, Texture, Vector2, Vector3, true/false,
+ * Integer, Float, or an Array (dispatched by length: 2 -> vec2, 3 -> vec3,
+ * 4 -> vec4, 9 -> mat3, 16 -> mat4).
+ *
+ * @return [self]
+ * @raise [ArgumentError] if +value+'s class/length isn't recognized
+ */
 static VALUE Shader_set_uniform(VALUE self, VALUE rb_name, VALUE rb_value) {
     if (rb_obj_is_kind_of(rb_value, Get_Klass_Color())) {
         return Shader_set_color(self, rb_name, rb_value);
@@ -489,8 +710,32 @@ static VALUE Shader_set_uniform(VALUE self, VALUE rb_name, VALUE rb_value) {
     return self;
 }
 
-void Init_Shader(VALUE rb_module) {
-    rb_cShader = rb_define_class_under(rb_module, "Shader", rb_cObject);
+/* Document-class: SFML::Shader
+ * A GLSL vertex/geometry/fragment shader program, uploaded to the GPU and
+ * carried on RenderState#shader.
+ *
+ * The +set_*_array+ methods below are generated from a shared macro (see
+ * ext/graphics/shader.c) and documented here directly since the macro hides
+ * their function bodies from the doc-comment scanner.
+ *
+ * @!method set_float_array(name, values)
+ *   @return [self]
+ * @!method set_vec2_array(name, values)
+ *   @return [self]
+ * @!method set_vec3_array(name, values)
+ *   @return [self]
+ * @!method set_vec4_array(name, values)
+ *   values is an Array of 4-element Arrays.
+ *   @return [self]
+ * @!method set_mat3_array(name, values)
+ *   values is an Array of 9-element Arrays.
+ *   @return [self]
+ * @!method set_mat4_array(name, values)
+ *   values is an Array of 16-element Arrays.
+ *   @return [self]
+ */
+void Init_Shader(VALUE rb_mSFML) {
+    rb_cShader = rb_define_class_under(rb_mSFML, "Shader", rb_cObject);
 
     rb_define_singleton_method(rb_cShader, "from_file", Shader_from_file, -1);
     rb_define_singleton_method(rb_cShader, "from_memory", Shader_from_memory, -1);
@@ -534,7 +779,7 @@ VALUE Get_Klass_Shader(void) {
 }
 
 const sfShader* Get_Shader_Struct(VALUE self) {
-    sfShader* ptr;
-    TypedData_Get_Struct(self, sfShader, &Shader_data_type, ptr);
-    return ptr;
+    Shader* ptr;
+    TypedData_Get_Struct(self, Shader, &Shader_data_type, ptr);
+    return ptr->shader;
 }

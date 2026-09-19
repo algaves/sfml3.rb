@@ -1,0 +1,11 @@
+module SFML
+  class Context
+    def self.new: () -> Context
+    def self.extension_available?: (String name) -> bool
+    def self.function: (String name) -> Integer
+    def self.active_context_id: () -> Integer
+
+    def active=: (bool value) -> bool
+    def settings: () -> ContextSettings
+  end
+end

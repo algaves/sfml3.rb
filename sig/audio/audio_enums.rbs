@@ -1,0 +1,30 @@
+module SFML
+  module SoundStatus
+    STOPPED: Integer
+    PAUSED: Integer
+    PLAYING: Integer
+  end
+
+  module SoundChannel
+    UNSPECIFIED: Integer
+    MONO: Integer
+    FRONT_LEFT: Integer
+    FRONT_RIGHT: Integer
+    FRONT_CENTER: Integer
+    FRONT_LEFT_OF_CENTER: Integer
+    FRONT_RIGHT_OF_CENTER: Integer
+    LOW_FREQUENCY_EFFECTS: Integer
+    BACK_LEFT: Integer
+    BACK_RIGHT: Integer
+    BACK_CENTER: Integer
+    SIDE_LEFT: Integer
+    SIDE_RIGHT: Integer
+    TOP_CENTER: Integer
+    TOP_FRONT_LEFT: Integer
+    TOP_FRONT_RIGHT: Integer
+    TOP_FRONT_CENTER: Integer
+    TOP_BACK_LEFT: Integer
+    TOP_BACK_RIGHT: Integer
+    TOP_BACK_CENTER: Integer
+  end
+end

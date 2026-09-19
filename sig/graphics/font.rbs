@@ -1,0 +1,20 @@
+module SFML
+  class Font
+    def self.from_file: (String path) -> Font
+    def self.from_memory: (String data) -> Font
+    def self.from_stream: (untyped stream) -> Font
+
+    def copy: () -> Font
+    def glyph: (Integer codepoint, Integer size, ?bool bold, ?Float outline_thickness) -> Glyph
+    def has_glyph?: (Integer codepoint) -> bool
+    def kerning: (Integer first, Integer second, Integer size) -> Float
+    def bold_kerning: (Integer first, Integer second, Integer size) -> Float
+    def line_spacing: (Integer size) -> Float
+    def underline_position: (Integer size) -> Float
+    def underline_thickness: (Integer size) -> Float
+    def texture: (Integer size) -> Texture
+    def smooth=: (bool value) -> bool
+    def smooth?: () -> bool
+    def info: () -> String
+  end
+end

@@ -13,37 +13,68 @@ typedef struct {
 
 static VALUE rb_cIpAddress;
 
-static void IpAddress_free(void *ptr) {
+static void IpAddress_free(void* ptr) {
     free(ptr);
 }
 
 static const rb_data_type_t IpAddress_data_type = {
     .wrap_struct_name = "SFML::IpAddress",
     .function = {.dmark = NULL, .dfree = IpAddress_free, .dsize = NULL},
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY
-};
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
 VALUE ip_address_to_rb(sfIpAddress address) {
-    IpAddress *ptr = malloc(sizeof(IpAddress));
+    IpAddress* ptr = malloc(sizeof(IpAddress));
 
     ptr->address = address;
 
     return TypedData_Wrap_Struct(rb_cIpAddress, &IpAddress_data_type, ptr);
 }
 
+/* call-seq:
+ *   IpAddress.from_string(address) -> IpAddress
+ *
+ * Builds an address from a string, which may be a dotted decimal
+ * (+"192.168.1.1"+) or a network name (+"localhost"+).
+ *
+ * @return [IpAddress]
+ */
 static VALUE IpAddress_from_string(VALUE klass, VALUE rb_address) {
     return ip_address_to_rb(sfIpAddress_fromString(StringValueCStr(rb_address)));
 }
 
+/* call-seq:
+ *   IpAddress.from_bytes(byte0, byte1, byte2, byte3) -> IpAddress
+ *
+ * Builds an address from its four decimal byte components (e.g.
+ * +192, 168, 1, 1+).
+ *
+ * @return [IpAddress]
+ */
 static VALUE IpAddress_from_bytes(VALUE klass, VALUE rb0, VALUE rb1, VALUE rb2, VALUE rb3) {
-    return ip_address_to_rb(sfIpAddress_fromBytes((uint8_t) NUM2INT(rb0), (uint8_t) NUM2INT(rb1),
-                                                  (uint8_t) NUM2INT(rb2), (uint8_t) NUM2INT(rb3)));
+    return ip_address_to_rb(sfIpAddress_fromBytes((uint8_t)NUM2INT(rb0), (uint8_t)NUM2INT(rb1),
+                                                  (uint8_t)NUM2INT(rb2), (uint8_t)NUM2INT(rb3)));
 }
 
+/* call-seq:
+ *   IpAddress.from_integer(value) -> IpAddress
+ *
+ * Builds an address from its 32-bit representation, in host byte order.
+ *
+ * @return [IpAddress]
+ */
 static VALUE IpAddress_from_integer(VALUE klass, VALUE rb_integer) {
-    return ip_address_to_rb(sfIpAddress_fromInteger((uint32_t) NUM2UINT(rb_integer)));
+    return ip_address_to_rb(sfIpAddress_fromInteger((uint32_t)NUM2UINT(rb_integer)));
 }
 
+/* call-seq:
+ *   IpAddress.new(address) -> IpAddress
+ *
+ * +address+ may be an Integer (32-bit representation), a String (dotted
+ * decimal or network name), or another IpAddress to copy.
+ *
+ * @return [IpAddress]
+ * @raise [TypeError] if +address+ is none of the above
+ */
 static VALUE IpAddress_new(VALUE klass, VALUE rb_address) {
     if (RB_INTEGER_TYPE_P(rb_address)) {
         return IpAddress_from_integer(klass, rb_address);
@@ -54,7 +85,7 @@ static VALUE IpAddress_new(VALUE klass, VALUE rb_address) {
     }
 
     if (rb_obj_is_kind_of(rb_address, rb_cIpAddress)) {
-        return ip_address_to_rb(((IpAddress *) Get_IpAddress_Struct(rb_address))->address);
+        return ip_address_to_rb(((IpAddress*)Get_IpAddress_Struct(rb_address))->address);
     }
 
     raise_invalid_argument_class(rb_cIpAddress);
@@ -62,11 +93,25 @@ static VALUE IpAddress_new(VALUE klass, VALUE rb_address) {
     return Qnil;
 }
 
+/* call-seq:
+ *   IpAddress.local_address -> IpAddress
+ *
+ * @return [IpAddress] the address of the local computer on the local
+ *   network
+ */
 static VALUE IpAddress_local_address(VALUE klass) {
     return ip_address_to_rb(sfIpAddress_getLocalAddress());
 }
 
-static VALUE IpAddress_public_address(int argc, VALUE *argv, VALUE klass) {
+/* call-seq:
+ *   IpAddress.public_address(timeout = Time.zero) -> IpAddress
+ *
+ * Blocks while querying an external web service for the computer's
+ * public address, as seen from outside the local network.
+ *
+ * @return [IpAddress] +IpAddress::NONE+ if the request timed out or failed
+ */
+static VALUE IpAddress_public_address(int argc, VALUE* argv, VALUE klass) {
     VALUE rb_timeout;
     sfTime timeout = sfTime_Zero;
 
@@ -79,37 +124,57 @@ static VALUE IpAddress_public_address(int argc, VALUE *argv, VALUE klass) {
     return ip_address_to_rb(sfIpAddress_getPublicAddress(timeout));
 }
 
+/* call-seq: to_s -> String
+ *
+ * @return [String] dotted decimal representation, e.g. +"192.168.1.1"+
+ */
 static VALUE IpAddress_to_s(VALUE self) {
     char buffer[16];
 
-    sfIpAddress_toString(((IpAddress *) Get_IpAddress_Struct(self))->address, buffer);
+    sfIpAddress_toString(((IpAddress*)Get_IpAddress_Struct(self))->address, buffer);
 
     return rb_str_new_cstr(buffer);
 }
 
+/* call-seq: to_integer -> Integer
+ *
+ * @return [Integer] the 32-bit representation, in host byte order
+ */
 static VALUE IpAddress_to_integer(VALUE self) {
-    return UINT2NUM(sfIpAddress_toInteger(((IpAddress *) Get_IpAddress_Struct(self))->address));
+    return UINT2NUM(sfIpAddress_toInteger(((IpAddress*)Get_IpAddress_Struct(self))->address));
 }
 
+/* call-seq:
+ *   self == other -> true or false
+ *
+ * @return [Boolean]
+ */
 static VALUE IpAddress_eql(VALUE self, VALUE rb_other) {
-    sfIpAddress a = ((IpAddress *) Get_IpAddress_Struct(self))->address;
+    sfIpAddress a = ((IpAddress*)Get_IpAddress_Struct(self))->address;
     sfIpAddress b;
 
     if (!rb_obj_is_kind_of(rb_other, rb_cIpAddress)) {
         return Qfalse;
     }
 
-    b = ((IpAddress *) Get_IpAddress_Struct(rb_other))->address;
+    b = ((IpAddress*)Get_IpAddress_Struct(rb_other))->address;
 
     return BOOL2RB(sfIpAddress_toInteger(a) == sfIpAddress_toInteger(b));
 }
 
+/* call-seq: hash -> Integer
+ *
+ * @return [Integer] a hash suitable for use as a Hash key, consistent with #==
+ */
 static VALUE IpAddress_hash(VALUE self) {
-    return UINT2NUM(sfIpAddress_toInteger(((IpAddress *) Get_IpAddress_Struct(self))->address));
+    return UINT2NUM(sfIpAddress_toInteger(((IpAddress*)Get_IpAddress_Struct(self))->address));
 }
 
-void Init_IpAddress(VALUE rb_module) {
-    rb_cIpAddress = rb_define_class_under(rb_module, "IpAddress", rb_cObject);
+/* Document-class: SFML::IpAddress
+ * An IPv4 network address.
+ */
+void Init_IpAddress(VALUE rb_mSFML) {
+    rb_cIpAddress = rb_define_class_under(rb_mSFML, "IpAddress", rb_cObject);
 
     rb_define_singleton_method(rb_cIpAddress, "new", IpAddress_new, 1);
     rb_define_singleton_method(rb_cIpAddress, "from_string", IpAddress_from_string, 1);
@@ -125,18 +190,24 @@ void Init_IpAddress(VALUE rb_module) {
     rb_define_method(rb_cIpAddress, "==", IpAddress_eql, 1);
     rb_define_method(rb_cIpAddress, "eql?", IpAddress_eql, 1);
 
-    rb_define_const(rb_cIpAddress, "NONE", ip_address_to_rb(sfIpAddress_None));
-    rb_define_const(rb_cIpAddress, "ANY", ip_address_to_rb(sfIpAddress_Any));
-    rb_define_const(rb_cIpAddress, "LOCAL_HOST", ip_address_to_rb(sfIpAddress_LocalHost));
-    rb_define_const(rb_cIpAddress, "BROADCAST", ip_address_to_rb(sfIpAddress_Broadcast));
+    /* An invalid/unspecified address. */
+    rb_define_const(rb_cIpAddress, "NONE", rb_obj_freeze(ip_address_to_rb(sfIpAddress_None)));
+    /* Any address, 0.0.0.0, e.g. to bind a listener to all network interfaces. */
+    rb_define_const(rb_cIpAddress, "ANY", rb_obj_freeze(ip_address_to_rb(sfIpAddress_Any)));
+    /* The local host address, 127.0.0.1. */
+    rb_define_const(rb_cIpAddress, "LOCAL_HOST",
+                    rb_obj_freeze(ip_address_to_rb(sfIpAddress_LocalHost)));
+    /* The broadcast address, 255.255.255.255. */
+    rb_define_const(rb_cIpAddress, "BROADCAST",
+                    rb_obj_freeze(ip_address_to_rb(sfIpAddress_Broadcast)));
 }
 
 VALUE Get_Klass_IpAddress(void) {
     return rb_cIpAddress;
 }
 
-void *Get_IpAddress_Struct(VALUE self) {
-    IpAddress *ptr;
+void* Get_IpAddress_Struct(VALUE self) {
+    IpAddress* ptr;
     TypedData_Get_Struct(self, IpAddress, &IpAddress_data_type, ptr);
     return ptr;
 }
@@ -147,7 +218,7 @@ sfIpAddress ip_address_from_rb(VALUE rb_address, sfIpAddress fallback) {
     }
 
     if (rb_obj_is_kind_of(rb_address, rb_cIpAddress)) {
-        return ((IpAddress *) Get_IpAddress_Struct(rb_address))->address;
+        return ((IpAddress*)Get_IpAddress_Struct(rb_address))->address;
     }
 
     if (RB_TYPE_P(rb_address, T_STRING)) {
@@ -155,7 +226,7 @@ sfIpAddress ip_address_from_rb(VALUE rb_address, sfIpAddress fallback) {
     }
 
     if (RB_INTEGER_TYPE_P(rb_address)) {
-        return sfIpAddress_fromInteger((uint32_t) NUM2UINT(rb_address));
+        return sfIpAddress_fromInteger((uint32_t)NUM2UINT(rb_address));
     }
 
     raise_invalid_argument_class(rb_cIpAddress);

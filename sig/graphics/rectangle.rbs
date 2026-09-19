@@ -1,0 +1,42 @@
+module SFML
+  class RectangleShape
+    include Drawable
+
+    def self.new: (?(Vector2 | Array[Float]) size) -> RectangleShape
+
+    def copy: () -> RectangleShape
+    def move: (Vector2 | Array[Float] offset) -> self
+    def rotate: (Float angle) -> self
+    def scale!: (Vector2 | Array[Float] factors) -> self
+    def draw: (untyped target, RenderState state) -> nil
+
+    def size: () -> Vector2
+    def size=: (Vector2 | Array[Float] value) -> Vector2
+    def position: () -> Vector2
+    def position=: (Vector2 | Array[Float] value) -> Vector2
+    def rotation: () -> Float
+    def rotation=: (Float value) -> Float
+    def scale: () -> Vector2
+    def scale=: (Vector2 | Array[Float] value) -> Vector2
+    def origin: () -> Vector2
+    def origin=: (Vector2 | Array[Float] value) -> Vector2
+    def fill_color: () -> Color
+    def fill_color=: (Color value) -> Color
+    def outline_color: () -> Color
+    def outline_color=: (Color value) -> Color
+    def outline_thickness: () -> Float
+    def outline_thickness=: (Float value) -> Float
+    def texture: () -> (Texture | nil)
+    def texture=: (Texture? value) -> Texture?
+    def texture_rect: () -> Rect
+    def texture_rect=: (Rect value) -> Rect
+    def point_count: () -> Integer
+    def point: (Integer index) -> Vector2
+    def geometric_center: () -> Vector2
+    def local_bounds: () -> Rect
+    def global_bounds: () -> Rect
+    def transform: () -> Array[untyped]
+    def inverse_transform: () -> Array[untyped]
+    def matrix: () -> Array[untyped]
+  end
+end

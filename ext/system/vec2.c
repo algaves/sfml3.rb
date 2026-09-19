@@ -13,19 +13,28 @@ typedef struct {
 
 static VALUE rb_cVector2;
 
-static void Vector2_free(void *ptr) {
+static void Vector2_free(void* ptr) {
     free(ptr);
 }
 
 static const rb_data_type_t Vector2_data_type = {
     .wrap_struct_name = "SFML::Vector2",
     .function = {.dmark = NULL, .dfree = Vector2_free, .dsize = NULL},
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY
-};
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
-static VALUE Vector2_new(int argc, VALUE *argv, VALUE klass) {
+/* call-seq:
+ *   Vector2.new                -> Vector2(0, 0)
+ *   Vector2.new(x, y)          -> Vector2(x, y)
+ *   Vector2.new([x, y])        -> Vector2(x, y)
+ *   Vector2.new(other_vector2) -> copy of +other_vector2+
+ *
+ * @return [Vector2]
+ * @raise [ArgumentError] if given an Array shorter than 2 elements, or an
+ *   argument count other than 0, 1 or 2
+ */
+static VALUE Vector2_new(int argc, VALUE* argv, VALUE klass) {
     VALUE self;
-    Vector2 *ptr;
+    Vector2* ptr;
     float x = 0;
     float y = 0;
 
@@ -48,6 +57,11 @@ static VALUE Vector2_new(int argc, VALUE *argv, VALUE klass) {
     }
 
     ptr = malloc(sizeof(Vector2));
+
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate vector");
+    }
+
     ptr->vec.x = x;
     ptr->vec.y = y;
 
@@ -56,32 +70,64 @@ static VALUE Vector2_new(int argc, VALUE *argv, VALUE klass) {
     return self;
 }
 
+/* call-seq: x -> Float
+ *
+ * @return [Float] the X component
+ */
 static VALUE Vector2_get_x(VALUE self) {
-    return DBL2NUM(((Vector2 *) Get_Vector2_Struct(self))->vec.x);
+    return DBL2NUM(((Vector2*)Get_Vector2_Struct(self))->vec.x);
 }
 
+/* call-seq: y -> Float
+ *
+ * @return [Float] the Y component
+ */
 static VALUE Vector2_get_y(VALUE self) {
-    return DBL2NUM(((Vector2 *) Get_Vector2_Struct(self))->vec.y);
+    return DBL2NUM(((Vector2*)Get_Vector2_Struct(self))->vec.y);
 }
 
+/* call-seq:
+ *   x=(value) -> Float
+ *
+ * Sets the X component. +value+ is any Float-convertible number.
+ *
+ * @return [Float] +value+
+ */
 static VALUE Vector2_set_x(VALUE self, VALUE rb_x) {
-    ((Vector2 *) Get_Vector2_Struct(self))->vec.x = NUM2DBL(rb_x);
+    ((Vector2*)Get_Vector2_Struct(self))->vec.x = NUM2DBL(rb_x);
     return rb_x;
 }
 
+/* call-seq:
+ *   y=(value) -> Float
+ *
+ * Sets the Y component. +value+ is any Float-convertible number.
+ *
+ * @return [Float] +value+
+ */
 static VALUE Vector2_set_y(VALUE self, VALUE rb_y) {
-    ((Vector2 *) Get_Vector2_Struct(self))->vec.y = NUM2DBL(rb_y);
+    ((Vector2*)Get_Vector2_Struct(self))->vec.y = NUM2DBL(rb_y);
     return rb_y;
 }
 
+/* call-seq: to_a -> [Float, Float]
+ *
+ * @return [Array<Float>] +[x, y]+
+ */
 static VALUE Vector2_to_a(VALUE self) {
-    Vector2 *vec = Get_Vector2_Struct(self);
+    Vector2* vec = Get_Vector2_Struct(self);
 
     return rb_ary_new_from_args(2, DBL2NUM(vec->vec.x), DBL2NUM(vec->vec.y));
 }
 
+/* call-seq: each { |component| ... } -> self
+ *
+ * Yields +x+ then +y+.
+ *
+ * @return [self]
+ */
 static VALUE Vector2_each(VALUE self) {
-    Vector2 *vec = Get_Vector2_Struct(self);
+    Vector2* vec = Get_Vector2_Struct(self);
 
     rb_yield(DBL2NUM(vec->vec.x));
     rb_yield(DBL2NUM(vec->vec.y));
@@ -89,20 +135,36 @@ static VALUE Vector2_each(VALUE self) {
     return self;
 }
 
+/* call-seq:
+ *   [](index) -> Float
+ *
+ * @return [Float] +x+ for index 0, +y+ for index 1
+ */
 static VALUE Vector2_aref(VALUE self, VALUE rb_index) {
     return rb_ary_entry(Vector2_to_a(self), NUM2LONG(rb_index));
 }
 
+/* call-seq: size -> Integer
+ *
+ * @return [Integer] always 2
+ */
 static VALUE Vector2_size(VALUE self) {
     return INT2NUM(2);
 }
 
+/* call-seq:
+ *   self == other -> true or false
+ *
+ * +other+ may be a Vector2 or a 2-element Array.
+ *
+ * @return [Boolean]
+ */
 static VALUE Vector2_eql(VALUE self, VALUE rb_other) {
-    Vector2 *a = Get_Vector2_Struct(self);
+    Vector2* a = Get_Vector2_Struct(self);
     sfVector2f b;
 
     if (rb_obj_is_kind_of(rb_other, rb_cVector2)) {
-        b = ((Vector2 *) Get_Vector2_Struct(rb_other))->vec;
+        b = ((Vector2*)Get_Vector2_Struct(rb_other))->vec;
     } else if (RB_TYPE_P(rb_other, T_ARRAY) && RARRAY_LEN(rb_other) >= 2) {
         b = vec2f_from_rb(rb_other);
     } else {
@@ -112,29 +174,52 @@ static VALUE Vector2_eql(VALUE self, VALUE rb_other) {
     return BOOL2RB(a->vec.x == b.x && a->vec.y == b.y);
 }
 
+/* call-seq:
+ *   self + other -> Vector2
+ *
+ * +other+ may be a Vector2 or a 2-element Array.
+ *
+ * @return [Vector2] componentwise sum
+ */
 static VALUE Vector2_add(VALUE self, VALUE rb_other) {
-    Vector2 *a = Get_Vector2_Struct(self);
+    Vector2* a = Get_Vector2_Struct(self);
     sfVector2f b = vec2f_from_rb(rb_other);
 
-    return vec2f_to_rb((sfVector2f) {a->vec.x + b.x, a->vec.y + b.y});
+    return vec2f_to_rb((sfVector2f){a->vec.x + b.x, a->vec.y + b.y});
 }
 
+/* call-seq:
+ *   self - other -> Vector2
+ *
+ * +other+ may be a Vector2 or a 2-element Array.
+ *
+ * @return [Vector2] componentwise difference
+ */
 static VALUE Vector2_sub(VALUE self, VALUE rb_other) {
-    Vector2 *a = Get_Vector2_Struct(self);
+    Vector2* a = Get_Vector2_Struct(self);
     sfVector2f b = vec2f_from_rb(rb_other);
 
-    return vec2f_to_rb((sfVector2f) {a->vec.x - b.x, a->vec.y - b.y});
+    return vec2f_to_rb((sfVector2f){a->vec.x - b.x, a->vec.y - b.y});
 }
 
+/* call-seq:
+ *   self * scalar -> Vector2
+ *
+ * @return [Vector2]
+ */
 static VALUE Vector2_mul(VALUE self, VALUE rb_scalar) {
-    Vector2 *a = Get_Vector2_Struct(self);
+    Vector2* a = Get_Vector2_Struct(self);
     float scalar = NUM2DBL(rb_scalar);
 
-    return vec2f_to_rb((sfVector2f) {a->vec.x * scalar, a->vec.y * scalar});
+    return vec2f_to_rb((sfVector2f){a->vec.x * scalar, a->vec.y * scalar});
 }
 
+/* call-seq: to_s -> String
+ *
+ * @return [String] +"(x, y)"+
+ */
 static VALUE Vector2_to_s(VALUE self) {
-    Vector2 *a = Get_Vector2_Struct(self);
+    Vector2* a = Get_Vector2_Struct(self);
     char buffer[64];
 
     snprintf(buffer, sizeof(buffer), "(%g, %g)", a->vec.x, a->vec.y);
@@ -142,8 +227,21 @@ static VALUE Vector2_to_s(VALUE self) {
     return rb_str_new2(buffer);
 }
 
-void Init_Vector2(VALUE rb_module) {
-    rb_cVector2 = rb_define_class_under(rb_module, "Vector2", rb_cObject);
+/* Document-class: SFML::Vector2
+ * A 2D vector of floats, used throughout the library for positions, sizes,
+ * scale factors and directions.
+ *
+ * Includes +Enumerable+ and behaves like a 2-element sequence: it responds to
+ * #each, #to_a and #[], and can be compared or combined with a plain
+ * +[x, y]+ Array anywhere a Vector2 is accepted.
+ *
+ * @!attribute x
+ *   @return [Float] the X component
+ * @!attribute y
+ *   @return [Float] the Y component
+ */
+void Init_Vector2(VALUE rb_mSFML) {
+    rb_cVector2 = rb_define_class_under(rb_mSFML, "Vector2", rb_cObject);
 
     rb_include_module(rb_cVector2, rb_mEnumerable);
 
@@ -171,15 +269,15 @@ VALUE Get_Klass_Vector2(void) {
     return rb_cVector2;
 }
 
-void *Get_Vector2_Struct(VALUE self) {
-    Vector2 *ptr;
+void* Get_Vector2_Struct(VALUE self) {
+    Vector2* ptr;
     TypedData_Get_Struct(self, Vector2, &Vector2_data_type, ptr);
     return ptr;
 }
 
 sfVector2f vec2f_from_rb(VALUE rb_vec) {
     if (rb_obj_is_kind_of(rb_vec, rb_cVector2)) {
-        return ((Vector2 *) Get_Vector2_Struct(rb_vec))->vec;
+        return ((Vector2*)Get_Vector2_Struct(rb_vec))->vec;
     }
 
     if (RB_TYPE_P(rb_vec, T_ARRAY)) {
@@ -187,31 +285,33 @@ sfVector2f vec2f_from_rb(VALUE rb_vec) {
             raise_invalid_array_length(2);
         }
 
-        return (sfVector2f) {
-            (float) NUM2DBL(rb_ary_entry(rb_vec, 0)),
-            (float) NUM2DBL(rb_ary_entry(rb_vec, 1))
-        };
+        return (sfVector2f){(float)NUM2DBL(rb_ary_entry(rb_vec, 0)),
+                            (float)NUM2DBL(rb_ary_entry(rb_vec, 1))};
     }
 
     raise_invalid_argument_class(rb_cVector2);
 
-    return (sfVector2f) {0, 0};
+    return (sfVector2f){0, 0};
 }
 
 sfVector2i vec2i_from_rb(VALUE rb_vec) {
     sfVector2f vec = vec2f_from_rb(rb_vec);
 
-    return (sfVector2i) {(int) vec.x, (int) vec.y};
+    return (sfVector2i){(int)vec.x, (int)vec.y};
 }
 
 sfVector2u vec2u_from_rb(VALUE rb_vec) {
     sfVector2f vec = vec2f_from_rb(rb_vec);
 
-    return (sfVector2u) {(unsigned) vec.x, (unsigned) vec.y};
+    return (sfVector2u){(unsigned)vec.x, (unsigned)vec.y};
 }
 
 VALUE vec2f_to_rb(sfVector2f c_vec) {
-    Vector2 *ptr = malloc(sizeof(Vector2));
+    Vector2* ptr = malloc(sizeof(Vector2));
+
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate vector");
+    }
 
     ptr->vec = c_vec;
 
@@ -219,7 +319,7 @@ VALUE vec2f_to_rb(sfVector2f c_vec) {
 }
 
 VALUE vec2_new(float x, float y) {
-    return vec2f_to_rb((sfVector2f) {x, y});
+    return vec2f_to_rb((sfVector2f){x, y});
 }
 
 void vec2_check(VALUE rb_arr) {

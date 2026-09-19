@@ -1,0 +1,18 @@
+module SFML
+  class TcpSocket
+    def self.new: () -> TcpSocket
+
+    def blocking?: () -> bool
+    def blocking=: (bool value) -> bool
+    def local_port: () -> Integer
+    def remote_address: () -> IpAddress
+    def remote_port: () -> Integer
+    def connect: (IpAddress | String | Integer address, Integer port, ?Time timeout) -> Symbol
+    def disconnect: () -> self
+    def send: (String data) -> Symbol
+    def send_partial: (String data) -> [Integer, Symbol]
+    def receive: (?Integer max_length) -> [String, Symbol]
+    def send_packet: (Packet packet) -> Symbol
+    def receive_packet: (Packet packet) -> Symbol
+  end
+end

@@ -1,0 +1,37 @@
+module SFML
+  class Transform
+    def initialize: () -> void
+                   | (Array[Float] array_of_9) -> void
+                   | (Float, Float, Float, Float, Float, Float, Float, Float, Float) -> void
+
+    def self.identity: () -> Transform
+    def self.from_a: (Array[Float] array_of_9) -> Transform
+    def self.combine: (Array[Float] array_a, Array[Float] array_b) -> Array[Float]
+    def self.inverse: (Array[Float] array) -> Array[Float]
+
+    def to_a: () -> Array[Float]
+    def to_ary: () -> Array[Float]
+    def matrix: () -> Array[Float]
+    def gl_matrix: () -> Array[Float]
+    def ==: (untyped other) -> bool
+    def to_s: () -> String
+    def inspect: () -> String
+
+    def copy: () -> Transform
+    def inverse: () -> Transform
+    def transform_point: (untyped point) -> untyped
+    def transform_rect: (untyped rect) -> untyped
+
+    def *: (Transform | Array[Float] other) -> Transform
+    def combine: (Transform | Array[Float] other) -> Transform
+    def combine!: (Transform | Array[Float] other) -> self
+    def translate: (untyped offset) -> Transform
+    def translate!: (untyped offset) -> self
+    def rotate: (Float angle, ?untyped center) -> Transform
+    def rotate!: (Float angle, ?untyped center) -> self
+    def scale: (untyped factors, ?untyped center) -> Transform
+    def scale!: (untyped factors, ?untyped center) -> self
+
+    IDENTITY: Transform
+  end
+end

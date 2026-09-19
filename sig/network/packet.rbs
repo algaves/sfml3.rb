@@ -1,0 +1,40 @@
+module SFML
+  class Packet
+    def self.new: () -> Packet
+
+    def copy: () -> Packet
+    def append: (String data) -> self
+    def clear: () -> self
+    def data: () -> String
+    def data_size: () -> Integer
+    def read_position: () -> Integer
+    def end_of_packet?: () -> bool
+    def can_read?: () -> bool
+
+    def read_bool: () -> bool
+    def read_int8: () -> Integer
+    def read_uint8: () -> Integer
+    def read_int16: () -> Integer
+    def read_uint16: () -> Integer
+    def read_int32: () -> Integer
+    def read_uint32: () -> Integer
+    def read_int64: () -> Integer
+    def read_uint64: () -> Integer
+    def read_float: () -> Float
+    def read_double: () -> Float
+    def read_string: () -> String
+
+    def write_bool: (bool value) -> bool
+    def write_int8: (Integer value) -> Integer
+    def write_uint8: (Integer value) -> Integer
+    def write_int16: (Integer value) -> Integer
+    def write_uint16: (Integer value) -> Integer
+    def write_int32: (Integer value) -> Integer
+    def write_uint32: (Integer value) -> Integer
+    def write_int64: (Integer value) -> Integer
+    def write_uint64: (Integer value) -> Integer
+    def write_float: (Float value) -> Float
+    def write_double: (Float value) -> Float
+    def write_string: (String value) -> String
+  end
+end

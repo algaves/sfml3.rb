@@ -1,0 +1,28 @@
+module SFML
+  class Time
+    include Comparable
+
+    def self.new: () -> Time
+                 | (Float seconds) -> Time
+                 | (Integer microseconds) -> Time
+                 | (Time other) -> Time
+    def self.seconds: (Float value) -> Time
+    def self.milliseconds: (Integer value) -> Time
+    def self.microseconds: (Integer value) -> Time
+    def self.zero: () -> Time
+
+    def as_seconds: () -> Float
+    def as_milliseconds: () -> Integer
+    def as_microseconds: () -> Integer
+    def to_f: () -> Float
+    def to_i: () -> Integer
+    def +: (Time other) -> Time
+    def -: (Time other) -> Time
+    def *: (Float scalar) -> Time
+    def /: (Time other) -> Float
+         | (Float other) -> Time
+    def <=>: (Time other) -> Integer
+    def ==: (untyped other) -> bool
+    def to_s: () -> String
+  end
+end
