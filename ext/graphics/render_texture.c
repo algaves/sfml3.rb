@@ -37,6 +37,15 @@ static VALUE RenderTexture_wrap(VALUE klass, sfRenderTexture* render_texture) {
     return TypedData_Wrap_Struct(klass, &RenderTexture_data_type, render_texture);
 }
 
+/* call-seq:
+ *   RenderTexture.new(size)           -> RenderTexture
+ *   RenderTexture.new(size, settings) -> RenderTexture
+ *
+ * +settings+ is currently accepted but ignored.
+ *
+ * @return [RenderTexture]
+ * @raise [RuntimeError] if creation fails
+ */
 static VALUE RenderTexture_new(int argc, VALUE* argv, VALUE klass) {
     VALUE rb_size, rb_settings;
 
@@ -47,21 +56,50 @@ static VALUE RenderTexture_new(int argc, VALUE* argv, VALUE klass) {
     return RenderTexture_wrap(klass, sfRenderTexture_create(vec2u_from_rb(rb_size), NULL));
 }
 
+/* call-seq: size -> Vector2
+ *
+ * Returns the object's size.
+ *
+ * @return [Vector2]
+ */
 static VALUE RenderTexture_get_size(VALUE self) {
     sfVector2u size = sfRenderTexture_getSize(Get_RenderTexture_Struct(self));
 
     return vec2f_to_rb((sfVector2f){(float)size.x, (float)size.y});
 }
 
+/* call-seq:
+ *   active=(value) -> true or false
+ *
+ * Activates or deactivates this render texture as the current OpenGL
+ * rendering target on the calling thread.
+ *
+ * @return [Boolean] whether the operation succeeded
+ */
 static VALUE RenderTexture_set_active(VALUE self, VALUE rb_active) {
     return BOOL2RB(sfRenderTexture_setActive(Get_RenderTexture_Struct(self), RTEST(rb_active)));
 }
 
+/* call-seq: display -> self
+ *
+ * Updates the target texture with everything drawn so far. Call this after
+ * drawing and before reading #texture.
+ *
+ * @return [self]
+ */
 static VALUE RenderTexture_display(VALUE self) {
     sfRenderTexture_display(Get_RenderTexture_Struct(self));
     return self;
 }
 
+/* call-seq:
+ *   clear             -> self
+ *   clear(color)       -> self
+ *
+ * Clears the render texture to +color+ (a Color, default black).
+ *
+ * @return [self]
+ */
 static VALUE RenderTexture_clear(int argc, VALUE* argv, VALUE self) {
     VALUE rb_color;
     sfColor color = sfBlack;
@@ -77,6 +115,14 @@ static VALUE RenderTexture_clear(int argc, VALUE* argv, VALUE self) {
     return self;
 }
 
+/* call-seq:
+ *   view=(value) -> self
+ *
+ * Sets the target's current view.
+ *
+ * @return [self]
+ * @raise [TypeError] if +value+ is not a View
+ */
 static VALUE RenderTexture_set_view(VALUE self, VALUE rb_view) {
     if (!rb_obj_is_kind_of(rb_view, Get_Klass_View())) {
         raise_invalid_argument_class(Get_Klass_View());
@@ -87,41 +133,102 @@ static VALUE RenderTexture_set_view(VALUE self, VALUE rb_view) {
     return self;
 }
 
+/* call-seq: view -> View
+ *
+ * Returns the target's current view.
+ *
+ * @return [View] a copy of the current view
+ */
 static VALUE RenderTexture_get_view(VALUE self) {
     return Get_Casting_View(sfView_copy(sfRenderTexture_getView(Get_RenderTexture_Struct(self))));
 }
 
+/* call-seq: default_view -> View
+ *
+ * Returns the view covering the whole render target.
+ *
+ * @return [View] a copy of the view covering the render texture's full area
+ */
 static VALUE RenderTexture_get_default_view(VALUE self) {
     return Get_Casting_View(
         sfView_copy(sfRenderTexture_getDefaultView(Get_RenderTexture_Struct(self))));
 }
 
+/* call-seq: texture -> Texture
+ *
+ * Returns the target texture, whose contents update after each #display.
+ *
+ * @return [Texture] the target texture, borrowed -- its contents update
+ *   after each #display
+ */
 static VALUE RenderTexture_get_texture(VALUE self) {
     return texture_from_borrowed(sfRenderTexture_getTexture(Get_RenderTexture_Struct(self)));
 }
 
+/* call-seq:
+ *   smooth=(value) -> true or false
+ *
+ * Enables or disables smooth rendering.
+ *
+ * @return [Boolean] +value+
+ */
 static VALUE RenderTexture_set_smooth(VALUE self, VALUE rb_smooth) {
     sfRenderTexture_setSmooth(Get_RenderTexture_Struct(self), RTEST(rb_smooth));
     return rb_smooth;
 }
 
+/* call-seq: smooth? -> true or false
+ *
+ * Returns +true+ if smooth rendering is enabled.
+ *
+ * @return [Boolean]
+ */
 static VALUE RenderTexture_is_smooth(VALUE self) {
     return BOOL2RB(sfRenderTexture_isSmooth(Get_RenderTexture_Struct(self)));
 }
 
+/* call-seq:
+ *   repeated=(value) -> true or false
+ *
+ * Enables or disables texture repeating.
+ *
+ * @return [Boolean] +value+
+ */
 static VALUE RenderTexture_set_repeated(VALUE self, VALUE rb_repeated) {
     sfRenderTexture_setRepeated(Get_RenderTexture_Struct(self), RTEST(rb_repeated));
     return rb_repeated;
 }
 
+/* call-seq: repeated? -> true or false
+ *
+ * Returns +true+ if texture repeating is enabled.
+ *
+ * @return [Boolean]
+ */
 static VALUE RenderTexture_is_repeated(VALUE self) {
     return BOOL2RB(sfRenderTexture_isRepeated(Get_RenderTexture_Struct(self)));
 }
 
+/* call-seq: generate_mipmap -> true or false
+ *
+ * Generates the mipmap pyramid for the texture.
+ *
+ * @return [Boolean] whether mipmap generation succeeded
+ */
 static VALUE RenderTexture_generate_mipmap(VALUE self) {
     return BOOL2RB(sfRenderTexture_generateMipmap(Get_RenderTexture_Struct(self)));
 }
 
+/* call-seq:
+ *   draw(drawable)         -> self
+ *   draw(drawable, state)  -> self
+ *
+ * Draws +drawable+ (anything responding to +#draw+, i.e. including
+ * Drawable) using +state+ (a RenderState, default the identity state).
+ *
+ * @return [self]
+ * @raise [ArgumentError] if given no arguments or more than 2
+ */
 static VALUE RenderTexture_draw(int argc, VALUE* argv, VALUE self) {
     VALUE rb_drawable, rb_state;
 
@@ -138,6 +245,13 @@ static VALUE RenderTexture_draw(int argc, VALUE* argv, VALUE self) {
     return self;
 }
 
+/* call-seq:
+ *   RenderTexture.maximum_antialiasing_level -> Integer
+ *
+ * Returns the maximum supported antialiasing level.
+ *
+ * @return [Integer]
+ */
 static VALUE RenderTexture_maximum_antialiasing_level(VALUE klass) {
     return UINT2NUM(sfRenderTexture_getMaximumAntiAliasingLevel());
 }
@@ -150,8 +264,55 @@ static VALUE RenderTexture_maximum_antialiasing_level(VALUE klass) {
 #undef RT_METHOD
 #undef RT_HANDLE
 
-void Init_RenderTexture(VALUE rb_module) {
-    rb_cRenderTexture = rb_define_class_under(rb_module, "RenderTexture", rb_cObject);
+/* Document-class: SFML::RenderTexture
+ * An off-screen render target backed by a Texture: anything drawable can be
+ * drawn onto it, then read back via #texture (after #display).
+ *
+ * The methods below are shared with Window via the render_target.inc
+ * fragment (see ext/graphics/render_target.inc) and documented here
+ * directly since the fragment hides their function bodies from the
+ * doc-comment scanner. Window's own docs restate the same list.
+ *
+ * @!method srgb?
+ *   Returns +true+ if the render texture uses an sRGB format.
+ *   @return [Boolean]
+ * @!method clear_stencil(value)
+ *   Clears the stencil buffer with the given value.
+ *   @return [self]
+ * @!method clear_color_and_stencil(color, stencil)
+ *   Clears the color and stencil buffers in one pass.
+ *   @return [self]
+ * @!method viewport(view = nil)
+ *   Returns the current viewport in pixels; +view+ defaults to the target's current view.
+ *   @return [Rect] the current viewport in pixels; +view+ defaults to the target's current view
+ * @!method scissor(view = nil)
+ *   Returns the current scissor rectangle in pixels; +view+ defaults to the target's current view.
+ *   @return [Rect] the current scissor rectangle in pixels; +view+ defaults to the target's current
+ * view
+ * @!method map_pixel_to_coords(point, view = nil)
+ *   Converts a pixel position to world coordinates, using the inverse of the view transform.
+ *   @return [Vector2]
+ * @!method map_coords_to_pixel(point, view = nil)
+ *   Converts a world position to pixel coordinates.
+ *   @return [Vector2]
+ * @!method push_gl_states
+ *   Saves the current OpenGL states before custom drawing.
+ *   @return [self]
+ * @!method pop_gl_states
+ *   Restores the OpenGL states saved by #push_gl_states.
+ *   @return [self]
+ * @!method reset_gl_states
+ *   Resets the OpenGL states to those SFML expects.
+ *   @return [self]
+ * @!method draw_primitives(vertices, primitive, state = nil)
+ *   Draws raw vertex primitives using the given primitive type and render state.
+ *   @return [self]
+ * @!method draw_vertex_buffer_range(buffer, first, count, state = nil)
+ *   Draws a range of vertices from a VertexBuffer.
+ *   @return [self]
+ */
+void Init_RenderTexture(VALUE rb_mSFML) {
+    rb_cRenderTexture = rb_define_class_under(rb_mSFML, "RenderTexture", rb_cObject);
 
     rb_define_singleton_method(rb_cRenderTexture, "new", RenderTexture_new, -1);
     rb_define_singleton_method(rb_cRenderTexture, "maximum_antialiasing_level",

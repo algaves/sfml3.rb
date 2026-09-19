@@ -1,0 +1,15 @@
+module SFML
+  module Joystick
+    COUNT: Integer
+    BUTTON_COUNT: Integer
+    AXIS_COUNT: Integer
+
+    def self.connected?: (Integer joystick) -> bool
+    def self.button_count: (Integer joystick) -> Integer
+    def self.has_axis?: (Integer joystick, Symbol | Integer axis) -> bool
+    def self.button_pressed?: (Integer joystick, Integer button) -> bool
+    def self.axis_position: (Integer joystick, Symbol | Integer axis) -> Float
+    def self.identification: (Integer joystick) -> Hash[Symbol, untyped]
+    def self.update!: () -> nil
+  end
+end

@@ -1,0 +1,5 @@
+module SFML
+  module Drawable
+    def draw: (untyped target, RenderState state) -> nil
+  end
+end

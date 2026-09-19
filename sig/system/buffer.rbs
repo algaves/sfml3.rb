@@ -1,0 +1,11 @@
+module SFML
+  class Buffer
+    def self.new: () -> Buffer
+
+    def size: () -> Integer
+    def length: () -> Integer
+    def data: () -> String
+    def to_s: () -> String
+    def empty?: () -> bool
+  end
+end

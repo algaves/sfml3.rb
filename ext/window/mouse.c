@@ -23,10 +23,26 @@ static const sfRenderWindow* Mouse_relative_window(VALUE rb_window) {
     return Get_Window_Struct(rb_window);
 }
 
+/* call-seq:
+ *   button_pressed?(button) -> true or false
+ *
+ * Returns +true+ if +button+ is currently pressed.
+ *
+ * @return [Boolean] whether +button+ (a Symbol like +:left+, +:right+,
+ *   +:middle+, or an Integer) is currently pressed
+ */
 static VALUE Mouse_is_button_pressed(VALUE module, VALUE rb_button) {
     return BOOL2RB(sfMouse_isButtonPressed(mouse_button_from_rb(rb_button)));
 }
 
+/* call-seq:
+ *   position(window = nil) -> Vector2
+ *
+ * Returns the mouse position in desktop coordinates, or relative to +window+.
+ *
+ * @return [Vector2] the mouse position in desktop coordinates, or relative
+ *   to +window+'s client area when given
+ */
 static VALUE Mouse_get_position(int argc, VALUE* argv, VALUE module) {
     VALUE rb_window;
     sfVector2i position;
@@ -41,6 +57,14 @@ static VALUE Mouse_get_position(int argc, VALUE* argv, VALUE module) {
     return vec2f_to_rb((sfVector2f){(float)position.x, (float)position.y});
 }
 
+/* call-seq:
+ *   set_position(position, window = nil) -> position
+ *
+ * Moves the mouse cursor to +position+, in desktop coordinates, or relative
+ * to +window+'s client area when given.
+ *
+ * @return [Vector2] +position+
+ */
 static VALUE Mouse_set_position(int argc, VALUE* argv, VALUE module) {
     VALUE rb_position, rb_window;
 
@@ -55,12 +79,22 @@ static VALUE Mouse_set_position(int argc, VALUE* argv, VALUE module) {
     return rb_position;
 }
 
+/* call-seq:
+ *   position=(value) -> value
+ *
+ * Moves the mouse cursor to +value+, in desktop coordinates.
+ *
+ * @return [Vector2] +value+
+ */
 static VALUE Mouse_position_eq(VALUE module, VALUE rb_position) {
     return Mouse_set_position(1, &rb_position, module);
 }
 
-void Init_Mouse(VALUE rb_module) {
-    VALUE rb_mMouse = rb_define_module_under(rb_module, "Mouse");
+/* Document-module: SFML::Mouse
+ * Real-time mouse state and cursor positioning.
+ */
+void Init_Mouse(VALUE rb_mSFML) {
+    VALUE rb_mMouse = rb_define_module_under(rb_mSFML, "Mouse");
 
     rb_define_module_function(rb_mMouse, "button_pressed?", Mouse_is_button_pressed, 1);
     rb_define_module_function(rb_mMouse, "pressed?", Mouse_is_button_pressed, 1);

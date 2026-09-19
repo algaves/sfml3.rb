@@ -1,0 +1,95 @@
+module SFML
+  module SocketStatus
+    DONE: Integer
+    NOT_READY: Integer
+    PARTIAL: Integer
+    DISCONNECTED: Integer
+    ERROR: Integer
+  end
+
+  module HttpMethod
+    GET: Integer
+    POST: Integer
+    HEAD: Integer
+    PUT: Integer
+    DELETE: Integer
+  end
+
+  module HttpStatus
+    OK: Integer
+    CREATED: Integer
+    ACCEPTED: Integer
+    NO_CONTENT: Integer
+    RESET_CONTENT: Integer
+    PARTIAL_CONTENT: Integer
+    MULTIPLE_CHOICES: Integer
+    MOVED_PERMANENTLY: Integer
+    MOVED_TEMPORARILY: Integer
+    NOT_MODIFIED: Integer
+    BAD_REQUEST: Integer
+    UNAUTHORIZED: Integer
+    FORBIDDEN: Integer
+    NOT_FOUND: Integer
+    RANGE_NOT_SATISFIABLE: Integer
+    INTERNAL_SERVER_ERROR: Integer
+    NOT_IMPLEMENTED: Integer
+    BAD_GATEWAY: Integer
+    SERVICE_NOT_AVAILABLE: Integer
+    GATEWAY_TIMEOUT: Integer
+    VERSION_NOT_SUPPORTED: Integer
+    INVALID_RESPONSE: Integer
+    CONNECTION_FAILED: Integer
+  end
+
+  module FtpTransferMode
+    BINARY: Integer
+    ASCII: Integer
+    EBCDIC: Integer
+  end
+
+  module FtpStatus
+    RESTART_MARKER_REPLY: Integer
+    SERVICE_READY_SOON: Integer
+    DATA_CONNECTION_ALREADY_OPENED: Integer
+    OPENING_DATA_CONNECTION: Integer
+    OK: Integer
+    POINTLESS_COMMAND: Integer
+    SYSTEM_STATUS: Integer
+    DIRECTORY_STATUS: Integer
+    FILE_STATUS: Integer
+    HELP_MESSAGE: Integer
+    SYSTEM_TYPE: Integer
+    SERVICE_READY: Integer
+    CLOSING_CONNECTION: Integer
+    DATA_CONNECTION_OPENED: Integer
+    CLOSING_DATA_CONNECTION: Integer
+    ENTERING_PASSIVE_MODE: Integer
+    LOGGED_IN: Integer
+    FILE_ACTION_OK: Integer
+    DIRECTORY_OK: Integer
+    NEED_PASSWORD: Integer
+    NEED_ACCOUNT_TO_LOG_IN: Integer
+    NEED_INFORMATION: Integer
+    SERVICE_UNAVAILABLE: Integer
+    DATA_CONNECTION_UNAVAILABLE: Integer
+    TRANSFER_ABORTED: Integer
+    FILE_ACTION_ABORTED: Integer
+    LOCAL_ERROR: Integer
+    INSUFFICIENT_STORAGE_SPACE: Integer
+    COMMAND_UNKNOWN: Integer
+    PARAMETERS_UNKNOWN: Integer
+    COMMAND_NOT_IMPLEMENTED: Integer
+    BAD_COMMAND_SEQUENCE: Integer
+    PARAMETER_NOT_IMPLEMENTED: Integer
+    NOT_LOGGED_IN: Integer
+    NEED_ACCOUNT_TO_STORE: Integer
+    FILE_UNAVAILABLE: Integer
+    PAGE_TYPE_UNKNOWN: Integer
+    NOT_ENOUGH_MEMORY: Integer
+    FILENAME_NOT_ALLOWED: Integer
+    INVALID_RESPONSE: Integer
+    CONNECTION_FAILED: Integer
+    CONNECTION_CLOSED: Integer
+    INVALID_FILE: Integer
+  end
+end

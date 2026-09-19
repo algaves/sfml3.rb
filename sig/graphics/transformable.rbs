@@ -1,0 +1,25 @@
+module SFML
+  class Transformable
+    def self.new: () -> Transformable
+
+    def position=: (Vector2 value) -> self
+    def rotation=: (Float value) -> self
+    def scale=: (Vector2 value) -> self
+    def origin=: (Vector2 value) -> self
+
+    def position: () -> Vector2
+    def rotation: () -> Float
+    def scale: () -> Vector2
+    def origin: () -> Vector2
+
+    def move: (Vector2 offset) -> self
+    def rotate: (Float angle) -> self
+    def scale!: (Vector2 factors) -> self
+
+    def transform: () -> Array[Float]
+    def matrix: () -> Array[Float]
+    def inverse_transform: () -> Array[Float]
+
+    def copy: () -> Transformable
+  end
+end

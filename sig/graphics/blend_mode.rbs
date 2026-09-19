@@ -1,0 +1,29 @@
+module SFML
+  class BlendMode
+    def self.new: () -> BlendMode
+                 | (Symbol | Integer color_src_factor, Symbol | Integer color_dst_factor,
+                    Symbol | Integer color_equation, Symbol | Integer alpha_src_factor,
+                    Symbol | Integer alpha_dst_factor, Symbol | Integer alpha_equation) -> BlendMode
+
+    def color_src_factor: () -> Symbol
+    def color_src_factor=: (Symbol | Integer value) -> Symbol
+    def color_dst_factor: () -> Symbol
+    def color_dst_factor=: (Symbol | Integer value) -> Symbol
+    def color_equation: () -> Symbol
+    def color_equation=: (Symbol | Integer value) -> Symbol
+    def alpha_src_factor: () -> Symbol
+    def alpha_src_factor=: (Symbol | Integer value) -> Symbol
+    def alpha_dst_factor: () -> Symbol
+    def alpha_dst_factor=: (Symbol | Integer value) -> Symbol
+    def alpha_equation: () -> Symbol
+    def alpha_equation=: (Symbol | Integer value) -> Symbol
+    def ==: (untyped other) -> bool
+
+    NONE: BlendMode
+    ALPHA: BlendMode
+    ADD: BlendMode
+    MULTIPLY: BlendMode
+    MIN: BlendMode
+    MAX: BlendMode
+  end
+end

@@ -33,15 +33,25 @@ static void* Sound_destroy_without_gvl(void* handle) {
 static void Sound_free(void* ptr) {
     Sound* sound = ptr;
 
-    effect_processor_release(sound->source.effect_slot);
+    /* Destroy (which blocks until CSFML guarantees no in-flight audio-thread
+       callback still references this source) before releasing the effect
+       slot, not after: releasing first opens a window where another Ruby
+       thread's effect_processor_acquire could reuse the slot number for an
+       unrelated new source while this source's callback might still be
+       executing against it. */
     rb_thread_call_without_gvl(Sound_destroy_without_gvl, sound->source.handle, RUBY_UBF_IO, NULL);
+    effect_processor_release(sound->source.effect_slot);
     free(sound);
 }
 
+/* Deliberately no RUBY_TYPED_FREE_IMMEDIATELY: Sound_free releases the GVL for
+   sfSound_destroy, and freeing during GC (which the flag requests) would let
+   another thread allocate while GC is mid-cycle, which Ruby aborts on as
+   "object allocation during garbage collection phase". Deferred finalization
+   runs the same free with the GVL held and no GC in progress. */
 static const rb_data_type_t Sound_data_type = {
     .wrap_struct_name = "SFML::Sound",
-    .function = {.dmark = Sound_mark, .dfree = Sound_free, .dsize = NULL},
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY};
+    .function = {.dmark = Sound_mark, .dfree = Sound_free, .dsize = NULL}};
 
 static VALUE Sound_wrap(VALUE klass, sfSound* handle, VALUE rb_buffer) {
     Sound* ptr;
@@ -58,6 +68,14 @@ static VALUE Sound_wrap(VALUE klass, sfSound* handle, VALUE rb_buffer) {
     return TypedData_Wrap_Struct(klass, &Sound_data_type, ptr);
 }
 
+/* call-seq:
+ *   Sound.new(buffer) -> Sound
+ *
+ * Creates a sound that plays the given buffer.
+ *
+ * @return [Sound]
+ * @raise [ArgumentError] if +buffer+ is not a SoundBuffer
+ */
 static VALUE Sound_new(VALUE klass, VALUE rb_buffer) {
     if (!rb_obj_is_kind_of(rb_buffer, Get_Klass_SoundBuffer())) {
         raise_invalid_argument_class(Get_Klass_SoundBuffer());
@@ -66,6 +84,12 @@ static VALUE Sound_new(VALUE klass, VALUE rb_buffer) {
     return Sound_wrap(klass, sfSound_create(Get_SoundBuffer_Struct(rb_buffer)), rb_buffer);
 }
 
+/* call-seq: copy -> Sound
+ *
+ * Creates an independent copy of the sound that shares its buffer.
+ *
+ * @return [Sound] an independent copy that shares the same SoundBuffer
+ */
 static VALUE Sound_copy(VALUE self) {
     Sound* sound = (Sound*)Get_Sound_Struct(self);
 
@@ -73,6 +97,12 @@ static VALUE Sound_copy(VALUE self) {
                       sound->rb_buffer);
 }
 
+/* call-seq: buffer -> SoundBuffer
+ *
+ * Returns the buffer currently attached to this sound.
+ *
+ * @return [SoundBuffer] the buffer currently attached to this sound
+ */
 static VALUE Sound_get_buffer(VALUE self) {
     return ((Sound*)Get_Sound_Struct(self))->rb_buffer;
 }
@@ -93,6 +123,16 @@ static void* Sound_set_buffer_without_gvl(void* raw) {
     return NULL;
 }
 
+/* call-seq:
+ *   buffer=(value) -> SoundBuffer
+ *
+ * Attaches a new SoundBuffer. If a buffer is already attached and the sound
+ * is playing, it is stopped first, which may briefly block the calling
+ * thread (see #stop).
+ *
+ * @return [SoundBuffer] +value+
+ * @raise [ArgumentError] if +value+ is not a SoundBuffer
+ */
 static VALUE Sound_set_buffer(VALUE self, VALUE rb_buffer) {
     Sound* sound = (Sound*)Get_Sound_Struct(self);
     SoundSetBufferArgs args;
@@ -116,8 +156,138 @@ static VALUE Sound_set_buffer(VALUE self, VALUE rb_buffer) {
 #undef SS_FN
 #undef SS_METHOD
 
-void Init_Sound(VALUE rb_module) {
-    rb_cSound = rb_define_class_under(rb_module, "Sound", rb_cObject);
+/* Document-class: SFML::Sound
+ * A sound playing directly from a SoundBuffer held fully in memory. Suited
+ * to short effects; for long files prefer Music, which streams instead.
+ *
+ * @!method play
+ *   Starts playback, or resumes it when paused.
+ *   @return [self]
+ * @!method pause
+ *   Pauses playback, keeping the current playing offset.
+ *   @return [self]
+ * @!method stop
+ *   Stops playback and rewinds to the beginning. May briefly block the
+ *   calling thread if an audio-thread callback for this source is in
+ *   flight.
+ *   @return [self]
+ * @!method status
+ *   Returns the current playback status.
+ *   @return [Symbol] one of +:stopped+, +:paused+, +:playing+
+ * @!method looping?
+ *   Returns +true+ if playback loops back to the start on completion.
+ *   @return [Boolean]
+ * @!method looping=(value)
+ *   Enables or disables looping.
+ *   @return [Boolean]
+ * @!method pitch
+ *   Returns the pitch scaling factor.
+ *   @return [Float]
+ * @!method pitch=(value)
+ *   Sets the pitch scaling factor.
+ *   @return [Float]
+ * @!method pan
+ *   Returns the source's stereo pan.
+ *   @return [Float] stereo pan, -1 (left) to 1 (right)
+ * @!method pan=(value)
+ *   Sets the source's stereo pan.
+ *   @return [Float]
+ * @!method volume
+ *   Returns the source's volume.
+ *   @return [Float] 0 to 100
+ * @!method volume=(value)
+ *   Sets the source's volume.
+ *   @return [Float]
+ * @!method spatialization_enabled?
+ *   Returns +true+ if 3D spatialization is enabled.
+ *   @return [Boolean]
+ * @!method spatialization_enabled=(value)
+ *   Enables or disables 3D spatialization.
+ *   @return [Boolean]
+ * @!method position
+ *   Returns the source's position in 3D space.
+ *   @return [Vector3]
+ * @!method position=(value)
+ *   Sets the source's position in 3D space.
+ *   @return [Vector3]
+ * @!method direction
+ *   Returns the direction the source is facing.
+ *   @return [Vector3]
+ * @!method direction=(value)
+ *   Sets the direction the source is facing.
+ *   @return [Vector3]
+ * @!method velocity
+ *   Returns the source's velocity, used for Doppler calculations.
+ *   @return [Vector3]
+ * @!method velocity=(value)
+ *   Sets the source's velocity for Doppler calculations.
+ *   @return [Vector3]
+ * @!method cone
+ *   Returns the source's directional attenuation cone.
+ *   @return [SoundSourceCone]
+ * @!method cone=(value)
+ *   Sets the source's directional attenuation cone.
+ *   @return [SoundSourceCone]
+ * @!method doppler_factor
+ *   Returns the factor by which the Doppler effect is scaled.
+ *   @return [Float]
+ * @!method doppler_factor=(value)
+ *   Sets the factor by which the Doppler effect is scaled.
+ *   @return [Float]
+ * @!method directional_attenuation_factor
+ *   Returns the factor controlling directional attenuation.
+ *   @return [Float]
+ * @!method directional_attenuation_factor=(value)
+ *   Sets the factor controlling directional attenuation.
+ *   @return [Float]
+ * @!method relative_to_listener?
+ *   Returns +true+ if the source is positioned relative to the listener.
+ *   @return [Boolean]
+ * @!method relative_to_listener=(value)
+ *   Makes the source relative to, or independent of, the listener.
+ *   @return [Boolean]
+ * @!method min_distance
+ *   Returns the minimum distance of the distance-attenuation model.
+ *   @return [Float]
+ * @!method min_distance=(value)
+ *   Sets the minimum distance of the distance-attenuation model.
+ *   @return [Float]
+ * @!method max_distance
+ *   Returns the maximum distance of the distance-attenuation model.
+ *   @return [Float]
+ * @!method max_distance=(value)
+ *   Sets the maximum distance of the distance-attenuation model.
+ *   @return [Float]
+ * @!method min_gain
+ *   Returns the minimum gain of the distance-attenuation model.
+ *   @return [Float]
+ * @!method min_gain=(value)
+ *   Sets the minimum gain of the distance-attenuation model.
+ *   @return [Float]
+ * @!method max_gain
+ *   Returns the maximum gain of the distance-attenuation model.
+ *   @return [Float]
+ * @!method max_gain=(value)
+ *   Sets the maximum gain of the distance-attenuation model.
+ *   @return [Float]
+ * @!method attenuation
+ *   Returns the distance-attenuation factor.
+ *   @return [Float]
+ * @!method attenuation=(value)
+ *   Sets the distance-attenuation factor.
+ *   @return [Float]
+ * @!method playing_offset
+ *   Returns the current playing offset.
+ *   @return [Time]
+ * @!method playing_offset=(value)
+ *   Seeks to the given playing offset.
+ *   @return [Time]
+ * @!method effect_processor=(proc)
+ *   Installs a Proc that post-processes this source's audio in real time.
+ *   @return [Proc] +proc+
+ */
+void Init_Sound(VALUE rb_mSFML) {
+    rb_cSound = rb_define_class_under(rb_mSFML, "Sound", rb_cObject);
 
     rb_define_singleton_method(rb_cSound, "new", Sound_new, 1);
 

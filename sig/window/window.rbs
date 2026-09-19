@@ -1,0 +1,57 @@
+module SFML
+  class Window
+    def self.new: (VideoMode video_mode, String title, ?Symbol | Array[Symbol] | Integer style, ?Symbol state, ?ContextSettings? settings) -> Window
+    def self.from_handle: (Integer handle, ?ContextSettings? settings) -> Window
+
+    def is_open?: () -> bool
+    def close!: () -> self
+    def clear: (?untyped color) -> self
+    def display: () -> self
+    def poll_event!: (Event event) -> bool
+    def wait_event!: (Event event) -> bool
+
+    def frame_rate=: (Integer value) -> self
+    def framerate_limit=: (Integer value) -> self
+    def size=: (Vector2 | Array[Float] value) -> self
+    def minimum_size=: (Vector2 | Array[Float] value) -> (Vector2 | Array[Float])
+    def maximum_size=: (Vector2 | Array[Float] value) -> (Vector2 | Array[Float])
+    def title=: (String value) -> self
+    def set_icon: (Vector2 | Array[Float] size, String pixels) -> String
+    def visible=: (bool value) -> self
+    def active=: (bool value) -> bool
+    def vertical_sync_enabled=: (bool value) -> self
+    def cursor_visible=: (bool value) -> self
+    def cursor_grabbed=: (bool value) -> self
+    def mouse_cursor=: (Cursor? value) -> Cursor?
+    def cursor=: (Cursor? value) -> Cursor?
+    def key_repeat_enabled=: (bool value) -> self
+    def joystick_threshold=: (Float value) -> Float
+    def position=: (Vector2 | Array[Float] value) -> (Vector2 | Array[Float])
+    def view=: (untyped value) -> self
+
+    def request_focus: () -> self
+    def focus?: () -> bool
+    def draw: (untyped drawable, ?untyped state) -> self
+    def position: () -> Vector2
+    def size: () -> Vector2
+    def view: () -> untyped
+    def default_view: () -> untyped
+    def settings: () -> ContextSettings
+    def native_handle: () -> Integer
+    def create_vulkan_surface: (Integer instance, ?Integer? allocator) -> Integer?
+
+    # Shared with RenderTexture, via ext/graphics/render_target.inc.
+    def srgb?: () -> bool
+    def clear_stencil: (Integer value) -> self
+    def clear_color_and_stencil: (untyped color, Integer stencil) -> self
+    def viewport: (?untyped view) -> untyped
+    def scissor: (?untyped view) -> untyped
+    def map_pixel_to_coords: (untyped point, ?untyped view) -> untyped
+    def map_coords_to_pixel: (untyped point, ?untyped view) -> untyped
+    def push_gl_states: () -> self
+    def pop_gl_states: () -> self
+    def reset_gl_states: () -> self
+    def draw_primitives: (untyped vertices, untyped primitive, ?untyped state) -> self
+    def draw_vertex_buffer_range: (untyped buffer, Integer first, Integer count, ?untyped state) -> self
+  end
+end

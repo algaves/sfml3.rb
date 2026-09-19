@@ -1,0 +1,14 @@
+module SFML
+  class SoundBufferRecorder
+    def self.new: () -> SoundBufferRecorder
+
+    def start: (Integer sample_rate) -> bool
+    def stop: () -> self
+    def sample_rate: () -> Integer
+    def buffer: () -> SoundBuffer
+    def device: () -> String
+    def device=: (String value) -> bool
+    def channel_count: () -> Integer
+    def channel_count=: (Integer value) -> Integer
+  end
+end

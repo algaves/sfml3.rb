@@ -1,0 +1,27 @@
+name: Test arm64
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      # Any binding or test change can be arch-sensitive (the GC/free race that
+      # first surfaced here lived in ext/audio), so this is not narrowed to
+      # packaging files the way it used to be.
+      - 'ext/**'
+      - 'test/**'
+      - 'script/provision.sh'
+      - '.github/workflows/test-arm64.yaml'
+      - '.github/workflows/_test-reusable.yaml'
+
+jobs:
+  test:
+    # A hosted arm64 runner, not emulation: this is what actually lets
+    # aarch64-linux-gnu be run rather than only cross-compiled. publish.yaml
+    # still marks that platform experimental -- this job is the evidence that
+    # eventually justifies dropping it.
+    uses: ./.github/workflows/_test-reusable.yaml
+    with:
+      ruby-version: '3.3'
+      runner: ubuntu-24.04-arm
+      job-name: aarch64-linux-gnu (native runner)

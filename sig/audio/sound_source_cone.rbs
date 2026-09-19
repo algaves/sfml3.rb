@@ -1,0 +1,14 @@
+module SFML
+  class SoundSourceCone
+    def self.new: (Float inner_angle, Float outer_angle, Float outer_gain) -> SoundSourceCone
+
+    def inner_angle: () -> Float
+    def inner_angle=: (Float value) -> Float
+    def outer_angle: () -> Float
+    def outer_angle=: (Float value) -> Float
+    def outer_gain: () -> Float
+    def outer_gain=: (Float value) -> Float
+    def to_a: () -> [Float, Float, Float]
+    def ==: (untyped other) -> bool
+  end
+end

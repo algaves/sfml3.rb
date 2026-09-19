@@ -62,10 +62,16 @@ provision_musl() {
         chmod +x /tmp/apk.static
     fi
 
+    # --no-scripts: this sysroot is never booted, so package post-install/
+    # trigger scripts (busybox symlink setup, udev triggers, ...) have nothing
+    # to do here -- and for a foreign-arch sysroot (arch != the container's own)
+    # the container cannot execute them at all without emulation, which makes
+    # apk.static exit non-zero and abort this script under errexit.
     # shellcheck disable=SC2086  # deliberate word splitting into package args
     sudo /tmp/apk.static \
         -X "$alpine/main" -X "$alpine/community" \
         -U --allow-untrusted --arch "$arch" --root "$sysroot" --initdb \
+        --no-scripts \
         add $X11_ALPINE
 }
 
@@ -105,6 +111,20 @@ x86-linux-gnu)
     sudo apt-get install -y -qq ${X11_DEBIAN// /:i386 }:i386
     ;;
 
+arm-linux-gnu)
+    # Same reasoning as the arm64 branch above: Ubuntu's amd64 archive carries
+    # no armhf binaries, so armhf has to come from ports.ubuntu.com too.
+    sudo dpkg --add-architecture armhf
+    sudo sed -i 's|^deb \(http\)|deb [arch=amd64] \1|' /etc/apt/sources.list
+    sudo tee /etc/apt/sources.list.d/armhf.list >/dev/null <<'EOF'
+deb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports focal main universe
+deb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports focal-updates main universe
+EOF
+    sudo apt-get update -qq
+    # shellcheck disable=SC2086  # deliberate word splitting into package args
+    sudo apt-get install -y -qq ${X11_DEBIAN// /:armhf }:armhf
+    ;;
+
 x86_64-linux-musl)
     provision_musl "/usr/x86_64-unknown-linux-musl" x86_64
     ;;
@@ -113,7 +133,15 @@ x86-linux-musl)
     provision_musl "/usr/i686-unknown-linux-musl" x86
     ;;
 
-x64-mingw-ucrt | x86-mingw32 | x86_64-darwin | arm64-darwin)
+aarch64-linux-musl)
+    provision_musl "/usr/aarch64-linux-musl" aarch64
+    ;;
+
+arm-linux-musl)
+    provision_musl "/usr/arm-linux-musleabihf" armhf
+    ;;
+
+x64-mingw-ucrt | x86-mingw32 | aarch64-mingw-ucrt | x86_64-darwin | arm64-darwin)
     # Nothing to do -- see the header comment.
     ;;
 

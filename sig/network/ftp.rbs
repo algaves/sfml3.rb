@@ -1,0 +1,46 @@
+module SFML
+  class Ftp
+    def self.new: () -> Ftp
+
+    def connect: (IpAddress | String | Integer address, ?Integer port, ?Time timeout) -> FtpResponse
+    def login_anonymous: () -> FtpResponse
+    def login: (String name, String password) -> FtpResponse
+    def disconnect: () -> FtpResponse
+    def keep_alive: () -> FtpResponse
+    def working_directory: () -> FtpDirectoryResponse
+    def directory_listing: (?String? directory) -> FtpListingResponse
+    def change_directory: (String directory) -> FtpResponse
+    def parent_directory: () -> FtpResponse
+    def create_directory: (String name) -> FtpResponse
+    def delete_directory: (String name) -> FtpResponse
+    def rename_file: (String file, String new_name) -> FtpResponse
+    def delete_file: (String name) -> FtpResponse
+    def download: (String remote_file, String local_path, ?Symbol | Integer mode) -> FtpResponse
+    def upload: (String local_file, String remote_path, ?Symbol | Integer mode, ?bool append) -> FtpResponse
+    def send_command: (String command, ?String? parameter) -> FtpResponse
+  end
+
+  class FtpResponse
+    def ok?: () -> bool
+    def status: () -> Integer
+    def status_name: () -> Symbol
+    def message: () -> String
+  end
+
+  class FtpDirectoryResponse
+    def ok?: () -> bool
+    def status: () -> Integer
+    def status_name: () -> Symbol
+    def message: () -> String
+    def directory: () -> String
+  end
+
+  class FtpListingResponse
+    def ok?: () -> bool
+    def status: () -> Integer
+    def status_name: () -> Symbol
+    def message: () -> String
+    def count: () -> Integer
+    def name: (Integer index) -> String
+  end
+end

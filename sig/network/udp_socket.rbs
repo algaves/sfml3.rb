@@ -1,0 +1,17 @@
+module SFML
+  class UdpSocket
+    def self.new: () -> UdpSocket
+    def self.any_port: () -> Integer
+    def self.max_datagram_size: () -> Integer
+
+    def blocking?: () -> bool
+    def blocking=: (bool value) -> bool
+    def local_port: () -> Integer
+    def bind: (Integer port, ?IpAddress address) -> Symbol
+    def unbind: () -> self
+    def send: (String data, IpAddress | String | Integer address, Integer port) -> Symbol
+    def receive: (?Integer max_length) -> [String, IpAddress, Integer, Symbol]
+    def send_packet: (Packet packet, IpAddress | String | Integer address, Integer port) -> Symbol
+    def receive_packet: (Packet packet) -> [IpAddress, Integer, Symbol]
+  end
+end

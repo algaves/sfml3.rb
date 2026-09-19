@@ -31,6 +31,17 @@ static VALUE Vertex_wrap(sfVertex vertex) {
     return TypedData_Wrap_Struct(rb_cVertex, &Vertex_data_type, ptr);
 }
 
+/* call-seq:
+ *   Vertex.new                              -> Vertex
+ *   Vertex.new(position)                    -> Vertex
+ *   Vertex.new(position, color)             -> Vertex
+ *   Vertex.new(position, color, tex_coords) -> Vertex
+ *
+ * Any omitted argument defaults to position +(0, 0)+, color white, and
+ * tex_coords +(0, 0)+.
+ *
+ * @return [Vertex]
+ */
 static VALUE Vertex_new(int argc, VALUE* argv, VALUE klass) {
     VALUE rb_position, rb_color, rb_tex_coords;
     sfVertex vertex = {{0, 0}, {255, 255, 255, 255}, {0, 0}};
@@ -52,39 +63,91 @@ static VALUE Vertex_new(int argc, VALUE* argv, VALUE klass) {
     return Vertex_wrap(vertex);
 }
 
+/* call-seq: position -> Vector2
+ *
+ * Returns the object's position.
+ *
+ * @return [Vector2]
+ */
 static VALUE Vertex_get_position(VALUE self) {
     return vec2f_to_rb(((Vertex*)Get_Vertex_Struct(self))->vertex.position);
 }
 
+/* call-seq:
+ *   position=(value) -> Vector2
+ *
+ * Sets the object's position.
+ *
+ * @return [Vector2] +value+
+ */
 static VALUE Vertex_set_position(VALUE self, VALUE rb_position) {
     ((Vertex*)Get_Vertex_Struct(self))->vertex.position = vec2f_from_rb(rb_position);
     return rb_position;
 }
 
+/* call-seq: color -> Color
+ *
+ * Returns the object's color.
+ *
+ * @return [Color]
+ */
 static VALUE Vertex_get_color(VALUE self) {
     return color_to_rb(((Vertex*)Get_Vertex_Struct(self))->vertex.color);
 }
 
+/* call-seq:
+ *   color=(value) -> Color
+ *
+ * Sets the object's color.
+ *
+ * @return [Color] +value+
+ */
 static VALUE Vertex_set_color(VALUE self, VALUE rb_color) {
     ((Vertex*)Get_Vertex_Struct(self))->vertex.color = color_from_rb(rb_color);
     return rb_color;
 }
 
+/* call-seq: tex_coords -> Vector2
+ *
+ * Returns the vertex's texture coordinates.
+ *
+ * @return [Vector2]
+ */
 static VALUE Vertex_get_tex_coords(VALUE self) {
     return vec2f_to_rb(((Vertex*)Get_Vertex_Struct(self))->vertex.texCoords);
 }
 
+/* call-seq:
+ *   tex_coords=(value) -> Vector2
+ *
+ * Sets the vertex's texture coordinates.
+ *
+ * @return [Vector2] +value+
+ */
 static VALUE Vertex_set_tex_coords(VALUE self, VALUE rb_tex_coords) {
     ((Vertex*)Get_Vertex_Struct(self))->vertex.texCoords = vec2f_from_rb(rb_tex_coords);
     return rb_tex_coords;
 }
 
+/* call-seq: to_a -> [Vector2, Color]
+ *
+ * Returns the object as an Array.
+ *
+ * @return [Array] +[position, color]+
+ */
 static VALUE Vertex_to_a(VALUE self) {
     Vertex* v = Get_Vertex_Struct(self);
 
     return rb_ary_new_from_args(2, vec2f_to_rb(v->vertex.position), color_to_rb(v->vertex.color));
 }
 
+/* call-seq:
+ *   self == other -> true or false
+ *
+ * Returns +true+ if the two objects are equal.
+ *
+ * @return [Boolean]
+ */
 static VALUE Vertex_eql(VALUE self, VALUE rb_other) {
     sfVertex a = ((Vertex*)Get_Vertex_Struct(self))->vertex;
     sfVertex b;
@@ -101,8 +164,22 @@ static VALUE Vertex_eql(VALUE self, VALUE rb_other) {
                    a.texCoords.y == b.texCoords.y);
 }
 
-void Init_Vertex(VALUE rb_module) {
-    rb_cVertex = rb_define_class_under(rb_module, "Vertex", rb_cObject);
+/* Document-class: SFML::Vertex
+ * A single point used to build up VertexArray and VertexBuffer primitives:
+ * a position, a color, and texture coordinates.
+ *
+ * @!attribute position
+ *   The object's position.
+ *   @return [Vector2]
+ * @!attribute color
+ *   The object's color.
+ *   @return [Color]
+ * @!attribute tex_coords
+ *   The vertex's texture coordinates.
+ *   @return [Vector2]
+ */
+void Init_Vertex(VALUE rb_mSFML) {
+    rb_cVertex = rb_define_class_under(rb_mSFML, "Vertex", rb_cObject);
 
     rb_define_singleton_method(rb_cVertex, "new", Vertex_new, -1);
 

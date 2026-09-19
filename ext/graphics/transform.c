@@ -62,9 +62,18 @@ static VALUE Transform_alloc(VALUE klass) {
     return TypedData_Wrap_Struct(klass, &Transform_data_type, transform);
 }
 
-/* new                    -> identity
-   new(array_of_9)        -> from that matrix
-   new(a00, a01, ... a22) -> from those nine elements */
+/* call-seq:
+ *   Transform.new                    -> identity Transform
+ *   Transform.new(array_of_9)        -> Transform
+ *   Transform.new(a00, a01, ... a22) -> Transform
+ *
+ * A Transform wraps a 3x3 matrix (9 floats, row-major). With no arguments it
+ * is the identity transform; with a single 9-element Array or nine
+ * individual numbers, it is built from those matrix elements directly.
+ *
+ * @return [Transform]
+ * @raise [ArgumentError] if given an argument count other than 0, 1 or 9
+ */
 static VALUE Transform_init(int argc, VALUE* argv, VALUE self) {
     sfTransform* transform = Get_Transform_Struct(self);
     float matrix[MATRIX_LENGTH];
@@ -93,11 +102,26 @@ static VALUE Transform_init(int argc, VALUE* argv, VALUE self) {
     return self;
 }
 
+/* call-seq:
+ *   Transform.identity -> Transform
+ *
+ * Returns the identity transform.
+ *
+ * @return [Transform] a fresh identity transform
+ */
 static VALUE Transform_s_identity(VALUE klass) {
     (void)klass;
     return Transform_wrap(sfTransform_Identity);
 }
 
+/* call-seq:
+ *   Transform.from_a(array_of_9) -> Transform
+ *
+ * Creates a transform from a nine-element array.
+ *
+ * @return [Transform]
+ * @raise [ArgumentError] if the Array has fewer than 9 elements
+ */
 static VALUE Transform_s_from_a(VALUE klass, VALUE rb_matrix) {
     (void)klass;
     return Transform_wrap(Transform_ArrayToTransform(rb_matrix));
@@ -107,6 +131,12 @@ static VALUE Transform_s_from_a(VALUE klass, VALUE rb_matrix) {
 /* Matrix access                                                              */
 /* -------------------------------------------------------------------------- */
 
+/* call-seq: to_a -> Array<Float>
+ *
+ * Returns the object as an Array.
+ *
+ * @return [Array<Float>] the 9 matrix elements, row-major
+ */
 static VALUE Transform_to_a(VALUE self) {
     return Transform_MatrixToArray(Get_Transform_Struct(self)->matrix);
 }
@@ -114,6 +144,13 @@ static VALUE Transform_to_a(VALUE self) {
 /* The 16-float 4x4 that sfTransform_getMatrix() fills, ready for glLoadMatrixf.
    Deliberately not called #matrix: that name already means the 3x3 everywhere
    else in this binding (Sprite#matrix, Text#matrix, RenderState#matrix). */
+/* call-seq: gl_matrix -> Array<Float>
+ *
+ * Returns the transform as a 4x4 OpenGL matrix.
+ *
+ * @return [Array<Float>] the equivalent 16-element 4x4 matrix, ready for
+ *   +glLoadMatrixf+
+ */
 static VALUE Transform_gl_matrix(VALUE self) {
     float matrix[GL_MATRIX_LENGTH];
     VALUE rb_arr;
@@ -130,6 +167,13 @@ static VALUE Transform_gl_matrix(VALUE self) {
     return rb_arr;
 }
 
+/* call-seq:
+ *   self == other -> true or false
+ *
+ * +other+ may be a Transform or a 9-element Array.
+ *
+ * @return [Boolean]
+ */
 static VALUE Transform_eql(VALUE self, VALUE rb_other) {
     sfTransform other;
 
@@ -142,6 +186,12 @@ static VALUE Transform_eql(VALUE self, VALUE rb_other) {
     return BOOL2RB(sfTransform_equal(Get_Transform_Struct(self), &other));
 }
 
+/* call-seq: to_s -> String
+ *
+ * Returns a human-readable representation of the object.
+ *
+ * @return [String]
+ */
 static VALUE Transform_to_s(VALUE self) {
     const float* m = Get_Transform_Struct(self)->matrix;
 
@@ -153,6 +203,13 @@ static VALUE Transform_to_s(VALUE self) {
 /* Application                                                                */
 /* -------------------------------------------------------------------------- */
 
+/* call-seq:
+ *   transform_point(point) -> Vector2
+ *
+ * Applies the transform to a point and returns the result.
+ *
+ * @return [Vector2] +point+ transformed by this matrix
+ */
 static VALUE Transform_transform_point(VALUE self, VALUE rb_point) {
     sfVector2f point =
         sfTransform_transformPoint(Get_Transform_Struct(self), vec2f_from_rb(rb_point));
@@ -160,16 +217,37 @@ static VALUE Transform_transform_point(VALUE self, VALUE rb_point) {
     return vec2f_to_rb(point);
 }
 
+/* call-seq:
+ *   transform_rect(rect) -> Rect
+ *
+ * Applies the transform to a rectangle and returns the result.
+ *
+ * @return [Rect] the axis-aligned bounding box of +rect+ transformed by
+ *   this matrix
+ */
 static VALUE Transform_transform_rect(VALUE self, VALUE rb_rect) {
     sfFloatRect rect = sfTransform_transformRect(Get_Transform_Struct(self), rect_from_rb(rb_rect));
 
     return rect_to_rb(rect);
 }
 
+/* call-seq: inverse -> Transform
+ *
+ * Returns the inverse of the transform.
+ *
+ * @return [Transform] the inverse of this transform, or the identity if it
+ *   is not invertible
+ */
 static VALUE Transform_get_inverse(VALUE self) {
     return Transform_wrap(sfTransform_getInverse(Get_Transform_Struct(self)));
 }
 
+/* call-seq: copy -> Transform
+ *
+ * Returns a deep copy of the object.
+ *
+ * @return [Transform] an independent copy
+ */
 static VALUE Transform_copy(VALUE self) {
     return Transform_wrap(*Get_Transform_Struct(self));
 }
@@ -178,6 +256,14 @@ static VALUE Transform_copy(VALUE self) {
 /* Mutators -- each returns self so they chain                                */
 /* -------------------------------------------------------------------------- */
 
+/* call-seq:
+ *   combine!(other) -> self
+ *
+ * Combines this transform with +other+ (a Transform or 9-element Array) in
+ * place, equivalent to matrix multiplication (+self+ * +other+).
+ *
+ * @return [self]
+ */
 static VALUE Transform_combine_bang(VALUE self, VALUE rb_other) {
     sfTransform other = Transform_ArrayToTransform(rb_other);
 
@@ -186,6 +272,16 @@ static VALUE Transform_combine_bang(VALUE self, VALUE rb_other) {
     return self;
 }
 
+/* call-seq:
+ *   self * other -> Transform
+ *   combine(other) -> Transform
+ *
+ * Non-mutating combination: returns a new Transform equal to +self+
+ * combined with +other+ (a Transform or 9-element Array), leaving both
+ * operands untouched.
+ *
+ * @return [Transform]
+ */
 static VALUE Transform_mul(VALUE self, VALUE rb_other) {
     sfTransform combined = *Get_Transform_Struct(self);
     sfTransform other = Transform_ArrayToTransform(rb_other);
@@ -195,11 +291,27 @@ static VALUE Transform_mul(VALUE self, VALUE rb_other) {
     return Transform_wrap(combined);
 }
 
+/* call-seq:
+ *   translate!(offset) -> self
+ *
+ * Applies a translation to the transform in place.
+ *
+ * @return [self]
+ */
 static VALUE Transform_translate_bang(VALUE self, VALUE rb_offset) {
     sfTransform_translate(Transform_writable(self), vec2f_from_rb(rb_offset));
     return self;
 }
 
+/* call-seq:
+ *   rotate!(angle)         -> self
+ *   rotate!(angle, center) -> self
+ *
+ * Rotates by +angle+ degrees in place, around +center+ if given, otherwise
+ * around the origin.
+ *
+ * @return [self]
+ */
 static VALUE Transform_rotate_bang(int argc, VALUE* argv, VALUE self) {
     VALUE rb_angle, rb_center;
     sfTransform* transform;
@@ -216,6 +328,15 @@ static VALUE Transform_rotate_bang(int argc, VALUE* argv, VALUE self) {
     return self;
 }
 
+/* call-seq:
+ *   scale!(factors)         -> self
+ *   scale!(factors, center) -> self
+ *
+ * Scales by +factors+ (a Vector2 or 2-element Array) in place, around
+ * +center+ if given, otherwise around the origin.
+ *
+ * @return [self]
+ */
 static VALUE Transform_scale_bang(int argc, VALUE* argv, VALUE self) {
     VALUE rb_factors, rb_center;
     sfTransform* transform;
@@ -233,14 +354,39 @@ static VALUE Transform_scale_bang(int argc, VALUE* argv, VALUE self) {
 }
 
 /* Non-mutating forms: copy, then apply. */
+/* call-seq:
+ *   translate(offset) -> Transform
+ *
+ * Returns a copy translated by the given offsets.
+ *
+ * @return [Transform] a new transform, translated by +offset+
+ */
 static VALUE Transform_translate(VALUE self, VALUE rb_offset) {
     return Transform_translate_bang(Transform_copy(self), rb_offset);
 }
 
+/* call-seq:
+ *   rotate(angle)         -> Transform
+ *   rotate(angle, center) -> Transform
+ *
+ * Returns a copy rotated by +angle+ degrees, around +center+ if given.
+ *
+ * @return [Transform] a new transform, rotated by +angle+ degrees around
+ *   +center+ if given, otherwise around the origin
+ */
 static VALUE Transform_rotate(int argc, VALUE* argv, VALUE self) {
     return Transform_rotate_bang(argc, argv, Transform_copy(self));
 }
 
+/* call-seq:
+ *   scale(factors)         -> Transform
+ *   scale(factors, center) -> Transform
+ *
+ * Returns a copy scaled by +factors+, around +center+ if given.
+ *
+ * @return [Transform] a new transform, scaled by +factors+ around +center+
+ *   if given, otherwise around the origin
+ */
 static VALUE Transform_scale(int argc, VALUE* argv, VALUE self) {
     return Transform_scale_bang(argc, argv, Transform_copy(self));
 }
@@ -252,6 +398,15 @@ static VALUE Transform_scale(int argc, VALUE* argv, VALUE self) {
 /* Transform used to be a module whose two functions took and returned plain
    9-element Arrays. Both are kept, Array-in/Array-out, so existing callers are
    unaffected by the promotion to a class. */
+/* call-seq:
+ *   Transform.combine(array_a, array_b) -> Array<Float>
+ *
+ * Returns the transform that combines +array_a+ and +array_b+.
+ *
+ * @deprecated Use #combine on a Transform instead.
+ * @return [Array<Float>] the 9-element matrix of +array_a+ combined with
+ *   +array_b+
+ */
 static VALUE Transform_s_combine(VALUE klass, VALUE rb_arr_a, VALUE rb_arr_b) {
     sfTransform transform_a = Transform_ArrayToTransform(rb_arr_a);
     sfTransform transform_b = Transform_ArrayToTransform(rb_arr_b);
@@ -263,6 +418,14 @@ static VALUE Transform_s_combine(VALUE klass, VALUE rb_arr_a, VALUE rb_arr_b) {
     return Transform_MatrixToArray(transform_a.matrix);
 }
 
+/* call-seq:
+ *   Transform.inverse(array) -> Array<Float>
+ *
+ * Returns the inverse of the given transform.
+ *
+ * @deprecated Use #inverse on a Transform instead.
+ * @return [Array<Float>] the 9-element inverse matrix of +array+
+ */
 static VALUE Transform_s_inverse(VALUE klass, VALUE rb_matrix) {
     sfTransform transform = Transform_ArrayToTransform(rb_matrix);
 
@@ -271,8 +434,17 @@ static VALUE Transform_s_inverse(VALUE klass, VALUE rb_matrix) {
     return Transform_MatrixToArray(sfTransform_getInverse(&transform).matrix);
 }
 
-void Init_Transform(VALUE rb_module) {
-    rb_cTransform = rb_define_class_under(rb_module, "Transform", rb_cObject);
+/* Document-class: SFML::Transform
+ * A 3x3 matrix describing a 2D transformation (translation, rotation,
+ * scaling, or any combination). Used to build up and query the
+ * transformations applied by Sprite, Text and Transformable.
+ *
+ * @!attribute [r] matrix
+ *   The object's 3x3 transform matrix.
+ *   @return [Array<Float>] the 9 matrix elements, row-major (alias for #to_a)
+ */
+void Init_Transform(VALUE rb_mSFML) {
+    rb_cTransform = rb_define_class_under(rb_mSFML, "Transform", rb_cObject);
 
     rb_define_alloc_func(rb_cTransform, Transform_alloc);
     rb_define_method(rb_cTransform, "initialize", Transform_init, -1);
@@ -305,6 +477,7 @@ void Init_Transform(VALUE rb_module) {
     rb_define_method(rb_cTransform, "scale", Transform_scale, -1);
     rb_define_method(rb_cTransform, "scale!", Transform_scale_bang, -1);
 
+    /* The identity transform, frozen. */
     rb_define_const(rb_cTransform, "IDENTITY", rb_obj_freeze(Transform_wrap(sfTransform_Identity)));
 }
 

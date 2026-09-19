@@ -9,22 +9,25 @@
 
 static VALUE rb_cClock;
 
-static sfClock *Clock_create() {
+static sfClock* Clock_create() {
     return sfClock_create();
 }
 
-static void Clock_free(void *ptr) {
+static void Clock_free(void* ptr) {
     sfClock_destroy(ptr);
 }
 
 static const rb_data_type_t Clock_data_type = {
     .wrap_struct_name = "SFML::Clock",
     .function = {.dmark = NULL, .dfree = Clock_free, .dsize = NULL},
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY
-};
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
-static VALUE Clock_new_from(VALUE klass, sfClock *clock) {
+static VALUE Clock_new_from(VALUE klass, sfClock* clock) {
     VALUE self;
+
+    if (clock == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate clock");
+    }
 
     self = TypedData_Wrap_Struct(klass, &Clock_data_type, clock);
 
@@ -33,6 +36,13 @@ static VALUE Clock_new_from(VALUE klass, sfClock *clock) {
     return self;
 }
 
+/* call-seq:
+ *   Clock.new -> Clock
+ *
+ * Creates a new clock and starts it immediately.
+ *
+ * @return [Clock]
+ */
 static VALUE Clock_new(VALUE klass) {
     return Clock_new_from(klass, Clock_create());
 }
@@ -41,38 +51,87 @@ static VALUE Clock_init(VALUE self) {
     return self;
 }
 
+/* call-seq: elapsed_time -> Time
+ *
+ * Returns the time elapsed on the clock.
+ *
+ * @return [Time] time elapsed since the clock was created, started, or last
+ *   restarted/reset, whichever is most recent
+ */
 static VALUE Clock_get_elapsed_time(VALUE self) {
     return time_to_rb(sfClock_getElapsedTime(Get_Clock_Struct(self)));
 }
 
+/* call-seq: restart! -> Time
+ *
+ * Restarts the clock (equivalent to #reset! followed by #start!) and
+ * returns the time elapsed before restarting.
+ *
+ * @return [Time]
+ */
 static VALUE Clock_restart(VALUE self) {
     return time_to_rb(sfClock_restart(Get_Clock_Struct(self)));
 }
 
+/* call-seq: reset! -> Time
+ *
+ * Stops the clock and resets its elapsed time to zero, returning the time
+ * elapsed before resetting.
+ *
+ * @return [Time]
+ */
 static VALUE Clock_reset(VALUE self) {
     return time_to_rb(sfClock_reset(Get_Clock_Struct(self)));
 }
 
+/* call-seq: running? -> true or false
+ *
+ * Returns +true+ while the clock is running, +false+ once it is stopped.
+ *
+ * @return [Boolean]
+ */
 static VALUE Clock_is_running(VALUE self) {
     return BOOL2RB(sfClock_isRunning(Get_Clock_Struct(self)));
 }
 
+/* call-seq: start! -> self
+ *
+ * Resumes a stopped clock without resetting its elapsed time.
+ *
+ * @return [self]
+ */
 static VALUE Clock_start(VALUE self) {
     sfClock_start(Get_Clock_Struct(self));
     return self;
 }
 
+/* call-seq: stop! -> self
+ *
+ * Pauses the clock; #elapsed_time keeps returning the time at which it
+ * was stopped until #start! or #restart! is called.
+ *
+ * @return [self]
+ */
 static VALUE Clock_stop(VALUE self) {
     sfClock_stop(Get_Clock_Struct(self));
     return self;
 }
 
+/* call-seq: copy -> Clock
+ *
+ * Returns an independent copy of the clock.
+ *
+ * @return [Clock] an independent copy with the same elapsed/running state
+ */
 static VALUE Clock_copy(VALUE self) {
     return Clock_new_from(Get_Klass_Clock(), sfClock_copy(Get_Clock_Struct(self)));
 }
 
-void Init_Clock(VALUE rb_module) {
-    rb_cClock = rb_define_class_under(rb_module, "Clock", rb_cObject);
+/* Document-class: SFML::Clock
+ * A stopwatch for measuring elapsed time.
+ */
+void Init_Clock(VALUE rb_mSFML) {
+    rb_cClock = rb_define_class_under(rb_mSFML, "Clock", rb_cObject);
 
     rb_define_singleton_method(rb_cClock, "new", Clock_new, 0);
 
@@ -89,8 +148,8 @@ void Init_Clock(VALUE rb_module) {
     rb_define_method(rb_cClock, "running?", Clock_is_running, 0);
 }
 
-void *Get_Clock_Struct(VALUE self) {
-    sfClock *clock;
+void* Get_Clock_Struct(VALUE self) {
+    sfClock* clock;
     TypedData_Get_Struct(self, sfClock, &Clock_data_type, clock);
     return clock;
 }

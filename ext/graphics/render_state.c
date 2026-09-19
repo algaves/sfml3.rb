@@ -56,6 +56,17 @@ static VALUE RenderStates_wrap(VALUE klass, RenderStates* states) {
     return TypedData_Wrap_Struct(klass, &RenderStates_data_type, states);
 }
 
+/* call-seq:
+ *   RenderState.new         -> RenderState
+ *   RenderState.new(matrix) -> RenderState
+ *
+ * Creates a render state with SFML's default blend mode, stencil mode and
+ * coordinate type, and identity transform unless +matrix+ (a 3x3
+ * row-major Array, see Transform) is given.
+ *
+ * @return [RenderState]
+ * @raise [ArgumentError] if given more than one argument
+ */
 static VALUE RenderStates_new(int argc, VALUE* argv, VALUE klass) {
     RenderStates* states;
     VALUE self;
@@ -75,6 +86,14 @@ static VALUE RenderStates_new(int argc, VALUE* argv, VALUE klass) {
     return self;
 }
 
+/* call-seq:
+ *   transform=(matrix) -> self
+ *   matrix=(matrix) -> self
+ *
+ * +matrix+ is a 3x3 row-major Array, see Transform.
+ *
+ * @return [self]
+ */
 static VALUE RenderStates_set_transform(VALUE self, VALUE rb_matrix) {
     sfRenderStates* states = Get_RenderState_Struct(self);
 
@@ -83,32 +102,77 @@ static VALUE RenderStates_set_transform(VALUE self, VALUE rb_matrix) {
     return self;
 }
 
+/* call-seq: transform -> Array
+ *
+ * Also available as #matrix.
+ *
+ * @return [Array] the 3x3 row-major transform matrix
+ */
 static VALUE RenderStates_get_transform(VALUE self) {
     return Transform_MatrixToArray(Get_RenderState_Struct(self)->transform.matrix);
 }
 
+/* call-seq: blend_mode -> BlendMode
+ *
+ * Returns the state's blend mode.
+ *
+ * @return [BlendMode]
+ */
 static VALUE RenderStates_get_blend_mode(VALUE self) {
     return blend_mode_to_rb(Get_RenderState_Struct(self)->blendMode);
 }
 
+/* call-seq:
+ *   blend_mode=(value) -> BlendMode
+ *
+ * Sets the state's blend mode.
+ *
+ * @return [BlendMode] +value+
+ */
 static VALUE RenderStates_set_blend_mode(VALUE self, VALUE rb_mode) {
     Get_RenderState_Struct(self)->blendMode = blend_mode_from_rb(rb_mode);
     return rb_mode;
 }
 
+/* call-seq: stencil_mode -> StencilMode
+ *
+ * Returns the state's stencil mode.
+ *
+ * @return [StencilMode]
+ */
 static VALUE RenderStates_get_stencil_mode(VALUE self) {
     return stencil_mode_to_rb(Get_RenderState_Struct(self)->stencilMode);
 }
 
+/* call-seq:
+ *   stencil_mode=(value) -> StencilMode
+ *
+ * Sets the state's stencil mode.
+ *
+ * @return [StencilMode] +value+
+ */
 static VALUE RenderStates_set_stencil_mode(VALUE self, VALUE rb_mode) {
     Get_RenderState_Struct(self)->stencilMode = stencil_mode_from_rb(rb_mode);
     return rb_mode;
 }
 
+/* call-seq: coordinate_type -> Symbol
+ *
+ * Returns the state's texture coordinate type.
+ *
+ * @return [Symbol] either +:pixels+ or +:normalized+
+ */
 static VALUE RenderStates_get_coordinate_type(VALUE self) {
     return ID2SYM(rb_intern(coordinate_type_name(Get_RenderState_Struct(self)->coordinateType)));
 }
 
+/* call-seq:
+ *   coordinate_type=(value) -> Symbol
+ *
+ * +value+ is +:pixels+ or +:normalized+.
+ *
+ * @return [Symbol] +value+
+ */
 static VALUE RenderStates_set_coordinate_type(VALUE self, VALUE rb_type) {
     Get_RenderState_Struct(self)->coordinateType = coordinate_type_from_rb(rb_type);
     return rb_type;
@@ -119,10 +183,23 @@ static RenderStates* Get_RenderStates_Wrapper(VALUE self) {
     return (RenderStates*)Get_RenderState_Struct(self);
 }
 
+/* call-seq: texture -> Texture or nil
+ *
+ * Returns the object's texture, or +nil+ if it has none.
+ *
+ * @return [Texture, nil]
+ */
 static VALUE RenderStates_get_texture(VALUE self) {
     return Get_RenderStates_Wrapper(self)->rb_texture;
 }
 
+/* call-seq:
+ *   texture=(value) -> Texture or nil
+ *
+ * Sets the object's texture.
+ *
+ * @return [Texture, nil] +value+
+ */
 static VALUE RenderStates_set_texture(VALUE self, VALUE rb_texture) {
     RenderStates* states = Get_RenderStates_Wrapper(self);
 
@@ -142,10 +219,23 @@ static VALUE RenderStates_set_texture(VALUE self, VALUE rb_texture) {
     return rb_texture;
 }
 
+/* call-seq: shader -> Shader or nil
+ *
+ * Returns the state's shader, or +nil+ if it has none.
+ *
+ * @return [Shader, nil]
+ */
 static VALUE RenderStates_get_shader(VALUE self) {
     return Get_RenderStates_Wrapper(self)->rb_shader;
 }
 
+/* call-seq:
+ *   shader=(value) -> Shader or nil
+ *
+ * Sets the state's shader.
+ *
+ * @return [Shader, nil] +value+
+ */
 static VALUE RenderStates_set_shader(VALUE self, VALUE rb_shader) {
     RenderStates* states = Get_RenderStates_Wrapper(self);
 
@@ -165,8 +255,32 @@ static VALUE RenderStates_set_shader(VALUE self, VALUE rb_shader) {
     return rb_shader;
 }
 
-void Init_RenderState(VALUE rb_module) {
-    rb_cRenderState = rb_define_class_under(rb_module, "RenderState", rb_cObject);
+/* Document-class: SFML::RenderState
+ * The set of render states (transform, blend mode, stencil mode,
+ * coordinate type, texture, shader) applied when drawing a Drawable to a
+ * render target.
+ *
+ * @!attribute transform
+ *   The object's transform matrix.
+ *   @return [Array] the 3x3 row-major transform matrix
+ * @!attribute blend_mode
+ *   The blend mode applied to the draw.
+ *   @return [BlendMode]
+ * @!attribute stencil_mode
+ *   The stencil mode applied to the draw.
+ *   @return [StencilMode]
+ * @!attribute coordinate_type
+ *   The type of texture coordinates used.
+ *   @return [Symbol] either +:pixels+ or +:normalized+
+ * @!attribute texture
+ *   The object's texture, or +nil+ if it has none.
+ *   @return [Texture, nil]
+ * @!attribute shader
+ *   The shader applied to the draw, or +nil+ if none.
+ *   @return [Shader, nil]
+ */
+void Init_RenderState(VALUE rb_mSFML) {
+    rb_cRenderState = rb_define_class_under(rb_mSFML, "RenderState", rb_cObject);
 
     rb_define_singleton_method(rb_cRenderState, "new", RenderStates_new, -1);
 

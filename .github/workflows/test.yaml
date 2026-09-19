@@ -6,49 +6,13 @@ on:
 
 jobs:
   test:
-    name: Ruby ${{ matrix.ruby }}
-    runs-on: ubuntu-latest
-    # rubocop and rake-compiler-dock are host-only and rubocop's floor tracks
-    # the newest Ruby it supports, so leaving the group out is what lets the
-    # oldest matrix entry resolve at all.
-    env:
-      BUNDLE_WITHOUT: development
-      # Turns a warning back into a build failure, so the extension cannot drift
-      # back onto deprecated APIs (notably the untyped Data_Wrap_Struct family)
-      # without CI noticing.
-      SFML_STRICT: 1
     strategy:
       fail-fast: false
       matrix:
         # Exactly the ABI set the binary gems ship, so every Ruby that can
         # receive a precompiled gem is also proven to build from source.
         ruby: ['3.1', '3.2', '3.3', '3.4', '4.0']
-    steps:
-      - uses: actions/checkout@v4
-
-      # Only the X11/udev/GL stack comes from the system. FreeType, SFML and
-      # CSFML are built from pinned, checksummed source by `rake ports`, so no
-      # libcsfml package is involved -- the distro one is still CSFML 2.x and
-      # would not work anyway.
-      - name: Install SFML build dependencies
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y build-essential cmake \
-            libx11-dev libxrandr-dev libxcursor-dev libxi-dev libudev-dev libgl1-mesa-dev
-
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: ${{ matrix.ruby }}
-          bundler-cache: true
-
-      # Building SFML from source dominates the run time and the sources are
-      # pinned by checksum, so the recipe is the whole cache key. Deliberately
-      # no Ruby version in it: Ports.prefix is keyed by RbConfig's host triple,
-      # which is identical across these Rubies, so one prefix serves them all.
-      - uses: actions/cache@v4
-        with:
-          path: ports
-          key: ports-${{ runner.os }}-${{ hashFiles('ext/ports.rb') }}
-
-      - name: Run tests
-        run: bundle exec rake test
+    uses: ./.github/workflows/_test-reusable.yaml
+    with:
+      ruby-version: ${{ matrix.ruby }}
+      job-name: Ruby ${{ matrix.ruby }}

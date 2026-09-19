@@ -61,19 +61,31 @@ static VALUE Text_wrap(VALUE klass, sfText* text) {
     return TypedData_Wrap_Struct(klass, &Text_data_type, ptr);
 }
 
+/* call-seq:
+ *   Text.new(font)                        -> Text
+ *   Text.new(font, string)                -> Text
+ *   Text.new(font, string, character_size) -> Text
+ *
+ * CSFML requires a font at creation time -- its C API unconditionally
+ * dereferences a NULL font argument rather than tolerating one, so unlike
+ * most other constructors here, the font is not optional.
+ *
+ * @return [Text]
+ * @raise [ArgumentError] if +font+ is not a Font
+ */
 static VALUE Text_new(int argc, VALUE* argv, VALUE klass) {
     VALUE rb_font, rb_string, rb_size, self;
     Text* ptr;
 
-    rb_scan_args(argc, argv, "03", &rb_font, &rb_string, &rb_size);
+    rb_scan_args(argc, argv, "12", &rb_font, &rb_string, &rb_size);
 
-    if (!NIL_P(rb_font) && !rb_obj_is_kind_of(rb_font, Get_Klass_Font())) {
+    if (!rb_obj_is_kind_of(rb_font, Get_Klass_Font())) {
         raise_invalid_argument_class(Get_Klass_Font());
     }
 
     ptr = malloc(sizeof(Text));
-    ptr->text = sfText_create(NIL_P(rb_font) ? NULL : Get_Font_Struct(rb_font));
-    ptr->rb_font = NIL_P(rb_font) ? Qnil : rb_font;
+    ptr->text = sfText_create(Get_Font_Struct(rb_font));
+    ptr->rb_font = rb_font;
 
     if (ptr->text == NULL) {
         free(ptr);
@@ -93,6 +105,12 @@ static VALUE Text_new(int argc, VALUE* argv, VALUE klass) {
     return self;
 }
 
+/* call-seq: copy -> Text
+ *
+ * Returns a deep copy of the object.
+ *
+ * @return [Text] an independent copy
+ */
 static VALUE Text_copy(VALUE self) {
     Text* ptr = Get_Text(self);
     VALUE copy = Text_wrap(Get_Klass_Text(), sfText_copy(ptr->text));
@@ -103,6 +121,14 @@ static VALUE Text_copy(VALUE self) {
     return copy;
 }
 
+/* call-seq:
+ *   font=(value) -> Font or nil
+ *
+ * Sets the text's font.
+ *
+ * @return [Font, nil] +value+
+ * @raise [TypeError] if +value+ is neither nil nor a Font
+ */
 static VALUE Text_set_font(VALUE self, VALUE rb_font) {
     Text* ptr = Get_Text(self);
 
@@ -122,12 +148,25 @@ static VALUE Text_set_font(VALUE self, VALUE rb_font) {
     return rb_font;
 }
 
+/* call-seq: font -> Font or nil
+ *
+ * Returns the text's font.
+ *
+ * @return [Font, nil]
+ */
 static VALUE Text_get_font(VALUE self) {
     return Get_Text(self)->rb_font;
 }
 
 /* Through the UTF-32 entry points, not sfText_setString: that one decodes the
    bytes with the C locale and mangles anything outside ASCII. */
+/* call-seq:
+ *   string=(value) -> String
+ *
+ * Sets the displayed string.
+ *
+ * @return [String] +value+
+ */
 static VALUE Text_set_string(VALUE self, VALUE rb_string) {
     VALUE buffer = utf32_from_rb(rb_string);
 
@@ -138,144 +177,359 @@ static VALUE Text_set_string(VALUE self, VALUE rb_string) {
     return rb_string;
 }
 
+/* call-seq: string -> String
+ *
+ * Returns the displayed string.
+ *
+ * @return [String]
+ */
 static VALUE Text_get_string(VALUE self) {
     return utf32_to_rb(sfText_getUnicodeString(Get_Text_Struct(self)));
 }
 
+/* call-seq:
+ *   character_size=(value) -> Integer
+ *
+ * Sets the character size in pixels.
+ *
+ * @return [Integer] +value+
+ */
 static VALUE Text_set_character_size(VALUE self, VALUE rb_size) {
     sfText_setCharacterSize(Get_Text_Struct(self), (unsigned int)NUM2UINT(rb_size));
     return rb_size;
 }
 
+/* call-seq: character_size -> Integer
+ *
+ * Returns the character size in pixels.
+ *
+ * @return [Integer] in pixels
+ */
 static VALUE Text_get_character_size(VALUE self) {
     return UINT2NUM(sfText_getCharacterSize(Get_Text_Struct(self)));
 }
 
+/* call-seq:
+ *   style=(value) -> Integer or Symbol
+ *
+ * Accepts either a single style Symbol/Integer, or an Array of them, which
+ * are OR-ed together.
+ *
+ * @return [Integer, Symbol] +value+
+ */
 static VALUE Text_set_style(VALUE self, VALUE rb_style) {
     sfText_setStyle(Get_Text_Struct(self), text_style_from_rb(rb_style));
     return rb_style;
 }
 
+/* call-seq: style -> Integer
+ *
+ * Returns the text style flags.
+ *
+ * @return [Integer] a bitmask of the active style flags
+ */
 static VALUE Text_get_style(VALUE self) {
     return text_style_to_rb(sfText_getStyle(Get_Text_Struct(self)));
 }
 
+/* call-seq: fill_color -> Color
+ *
+ * Returns the shape's fill color.
+ *
+ * @return [Color]
+ */
 static VALUE Text_get_fill_color(VALUE self) {
     return color_to_rb(sfText_getFillColor(Get_Text_Struct(self)));
 }
 
+/* call-seq:
+ *   fill_color=(value) -> Color
+ *
+ * Sets the shape's fill color.
+ *
+ * @return [Color] +value+
+ */
 static VALUE Text_set_fill_color(VALUE self, VALUE rb_color) {
     sfText_setFillColor(Get_Text_Struct(self), color_from_rb(rb_color));
     return rb_color;
 }
 
+/* call-seq: outline_color -> Color
+ *
+ * Returns the shape's outline color.
+ *
+ * @return [Color]
+ */
 static VALUE Text_get_outline_color(VALUE self) {
     return color_to_rb(sfText_getOutlineColor(Get_Text_Struct(self)));
 }
 
+/* call-seq:
+ *   outline_color=(value) -> Color
+ *
+ * Sets the shape's outline color.
+ *
+ * @return [Color] +value+
+ */
 static VALUE Text_set_outline_color(VALUE self, VALUE rb_color) {
     sfText_setOutlineColor(Get_Text_Struct(self), color_from_rb(rb_color));
     return rb_color;
 }
 
+/* call-seq: outline_thickness -> Float
+ *
+ * Returns the shape's outline thickness.
+ *
+ * @return [Float]
+ */
 static VALUE Text_get_outline_thickness(VALUE self) {
     return DBL2NUM(sfText_getOutlineThickness(Get_Text_Struct(self)));
 }
 
+/* call-seq:
+ *   outline_thickness=(value) -> Float
+ *
+ * Sets the shape's outline thickness.
+ *
+ * @return [Float] +value+
+ */
 static VALUE Text_set_outline_thickness(VALUE self, VALUE rb_thickness) {
     sfText_setOutlineThickness(Get_Text_Struct(self), NUM2DBL(rb_thickness));
     return rb_thickness;
 }
 
+/* call-seq: letter_spacing -> Float
+ *
+ * Returns the spacing between letters.
+ *
+ * @return [Float] a multiplier of the font's default spacing (1.0 = default)
+ */
 static VALUE Text_get_letter_spacing(VALUE self) {
     return DBL2NUM(sfText_getLetterSpacing(Get_Text_Struct(self)));
 }
 
+/* call-seq:
+ *   letter_spacing=(value) -> Float
+ *
+ * Sets the spacing between letters.
+ *
+ * @return [Float] +value+
+ */
 static VALUE Text_set_letter_spacing(VALUE self, VALUE rb_spacing) {
     sfText_setLetterSpacing(Get_Text_Struct(self), NUM2DBL(rb_spacing));
     return rb_spacing;
 }
 
+/* call-seq: line_spacing -> Float
+ *
+ * Returns the line spacing multiplier.
+ *
+ * @return [Float] a multiplier of the font's default line spacing
+ */
 static VALUE Text_get_line_spacing(VALUE self) {
     return DBL2NUM(sfText_getLineSpacing(Get_Text_Struct(self)));
 }
 
+/* call-seq:
+ *   line_spacing=(value) -> Float
+ *
+ * Sets the spacing between lines.
+ *
+ * @return [Float] +value+
+ */
 static VALUE Text_set_line_spacing(VALUE self, VALUE rb_spacing) {
     sfText_setLineSpacing(Get_Text_Struct(self), NUM2DBL(rb_spacing));
     return rb_spacing;
 }
 
+/* call-seq: position -> Vector2
+ *
+ * Returns the object's position.
+ *
+ * @return [Vector2]
+ */
 static VALUE Text_get_position(VALUE self) {
     return vec2f_to_rb(sfText_getPosition(Get_Text_Struct(self)));
 }
 
+/* call-seq:
+ *   position=(value) -> Vector2
+ *
+ * Sets the object's position.
+ *
+ * @return [Vector2] +value+
+ */
 static VALUE Text_set_position(VALUE self, VALUE rb_position) {
     sfText_setPosition(Get_Text_Struct(self), vec2f_from_rb(rb_position));
     return rb_position;
 }
 
+/* call-seq: rotation -> Float
+ *
+ * Returns the object's rotation, in degrees.
+ *
+ * @return [Float] degrees
+ */
 static VALUE Text_get_rotation(VALUE self) {
     return DBL2NUM(sfText_getRotation(Get_Text_Struct(self)));
 }
 
+/* call-seq:
+ *   rotation=(value) -> Float
+ *
+ * Sets the object's rotation, in degrees.
+ *
+ * @return [Float] +value+
+ */
 static VALUE Text_set_rotation(VALUE self, VALUE rb_rotation) {
     sfText_setRotation(Get_Text_Struct(self), NUM2DBL(rb_rotation));
     return rb_rotation;
 }
 
+/* call-seq: scale -> Vector2
+ *
+ * Returns the object's scale factors.
+ *
+ * @return [Vector2]
+ */
 static VALUE Text_get_scale(VALUE self) {
     return vec2f_to_rb(sfText_getScale(Get_Text_Struct(self)));
 }
 
+/* call-seq:
+ *   scale=(value) -> Vector2
+ *
+ * Sets the object's scale factors.
+ *
+ * @return [Vector2] +value+
+ */
 static VALUE Text_set_scale(VALUE self, VALUE rb_scale) {
     sfText_setScale(Get_Text_Struct(self), vec2f_from_rb(rb_scale));
     return rb_scale;
 }
 
+/* call-seq: origin -> Vector2
+ *
+ * Returns the object's origin.
+ *
+ * @return [Vector2]
+ */
 static VALUE Text_get_origin(VALUE self) {
     return vec2f_to_rb(sfText_getOrigin(Get_Text_Struct(self)));
 }
 
+/* call-seq:
+ *   origin=(value) -> Vector2
+ *
+ * Sets the object's origin.
+ *
+ * @return [Vector2] +value+
+ */
 static VALUE Text_set_origin(VALUE self, VALUE rb_origin) {
     sfText_setOrigin(Get_Text_Struct(self), vec2f_from_rb(rb_origin));
     return rb_origin;
 }
 
+/* call-seq:
+ *   move(offset) -> self
+ *
+ * Moves the object by +offset+.
+ *
+ * @return [self]
+ */
 static VALUE Text_move(VALUE self, VALUE rb_offset) {
     sfText_move(Get_Text_Struct(self), vec2f_from_rb(rb_offset));
     return self;
 }
 
+/* call-seq:
+ *   rotate(angle) -> self
+ *
+ * Rotates the object by +angle+ degrees.
+ *
+ * @return [self]
+ */
 static VALUE Text_rotate(VALUE self, VALUE rb_angle) {
     sfText_rotate(Get_Text_Struct(self), NUM2DBL(rb_angle));
     return self;
 }
 
+/* call-seq:
+ *   scale!(factors) -> self
+ *
+ * Scales the object by +factors+ relative to its current scale.
+ *
+ * @return [self]
+ */
 static VALUE Text_scale(VALUE self, VALUE rb_factors) {
     sfText_scale(Get_Text_Struct(self), vec2f_from_rb(rb_factors));
     return self;
 }
 
+/* call-seq: transform -> Array<Float>
+ *
+ * Returns the object's 3x3 row-major transform matrix.
+ *
+ * @return [Array<Float>] the 9-element matrix (also available as #matrix)
+ */
 static VALUE Text_get_transform(VALUE self) {
     return Transform_MatrixToArray(sfText_getTransform(Get_Text_Struct(self)).matrix);
 }
 
+/* call-seq: inverse_transform -> Array<Float>
+ *
+ * Returns the 3x3 row-major inverse of the object's transform matrix.
+ *
+ * @return [Array<Float>] the inverse of #transform
+ */
 static VALUE Text_get_inverse_transform(VALUE self) {
     return Transform_MatrixToArray(sfText_getInverseTransform(Get_Text_Struct(self)).matrix);
 }
 
+/* call-seq:
+ *   find_character_pos(index) -> Vector2
+ *
+ * Returns the index of the character at the given position.
+ *
+ * @return [Vector2] the position of the +index+-th character, in global
+ *   (parent) coordinates
+ */
 static VALUE Text_find_character_pos(VALUE self, VALUE rb_index) {
     return vec2f_to_rb(sfText_findCharacterPos(Get_Text_Struct(self), (size_t)NUM2SIZET(rb_index)));
 }
 
+/* call-seq: local_bounds -> Rect
+ *
+ * Returns the bounding box in local (untransformed) coordinates.
+ *
+ * @return [Rect] the bounding box in local coordinates, before any
+ *   transform is applied
+ */
 static VALUE Text_get_local_bounds(VALUE self) {
     return rect_to_rb(sfText_getLocalBounds(Get_Text_Struct(self)));
 }
 
+/* call-seq: global_bounds -> Rect
+ *
+ * Returns the bounding box after the transform is applied.
+ *
+ * @return [Rect] the bounding box in the parent's coordinate system, after
+ *   the current transform is applied
+ */
 static VALUE Text_get_global_bounds(VALUE self) {
     return rect_to_rb(sfText_getGlobalBounds(Get_Text_Struct(self)));
 }
 
+/* call-seq:
+ *   draw(target, state) -> nil
+ *
+ * Part of the Drawable interface; call Target#draw instead of this
+ * directly.
+ *
+ * @return [nil]
+ * @raise [TypeError] if +target+ is not a Target or +state+ is not a
+ *   RenderState
+ */
 static VALUE Text_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
     if (!rb_obj_is_kind_of(rb_target, Get_Klass_Target())) {
         raise_invalid_argument_class(Get_Klass_Target());
@@ -291,8 +545,54 @@ static VALUE Text_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
     return Qnil;
 }
 
-void Init_Text(VALUE rb_module) {
-    rb_cText = rb_define_class_under(rb_module, "Text", rb_cObject);
+/* Document-class: SFML::Text
+ * A drawable string of characters, rendered using a Font, positioned,
+ * rotated, scaled and tinted like any other Transformable object.
+ *
+ * Includes +Drawable+.
+ *
+ * @!attribute font
+ *   The text's font.
+ *   @return [Font, nil]
+ * @!attribute string
+ *   The displayed string.
+ *   @return [String]
+ * @!attribute character_size
+ *   The character size in pixels.
+ *   @return [Integer] in pixels
+ * @!attribute style
+ *   The text style flags.
+ *   @return [Integer] a bitmask of style flags
+ * @!attribute fill_color
+ *   The object's fill color.
+ *   @return [Color]
+ * @!attribute outline_color
+ *   The object's outline color.
+ *   @return [Color]
+ * @!attribute outline_thickness
+ *   The object's outline thickness.
+ *   @return [Float]
+ * @!attribute letter_spacing
+ *   The spacing between letters.
+ *   @return [Float]
+ * @!attribute line_spacing
+ *   The spacing between lines.
+ *   @return [Float]
+ * @!attribute position
+ *   The object's position.
+ *   @return [Vector2]
+ * @!attribute rotation
+ *   The object's rotation, in degrees.
+ *   @return [Float] degrees
+ * @!attribute scale
+ *   The object's scale factors.
+ *   @return [Vector2]
+ * @!attribute origin
+ *   The object's origin.
+ *   @return [Vector2]
+ */
+void Init_Text(VALUE rb_mSFML) {
+    rb_cText = rb_define_class_under(rb_mSFML, "Text", rb_cObject);
 
     rb_include_module(rb_cText, Get_Module_Drawable());
 

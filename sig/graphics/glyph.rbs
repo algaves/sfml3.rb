@@ -1,0 +1,7 @@
+module SFML
+  class Glyph
+    def advance: () -> Float
+    def bounds: () -> Rect
+    def texture_rect: () -> Rect
+  end
+end

@@ -1,0 +1,16 @@
+module SFML
+  class VideoMode
+    def self.new: (Integer width, Integer height, Integer bits_per_pixel) -> VideoMode
+    def self.desktop_mode: () -> VideoMode
+    def self.fullscreen_modes: () -> Array[VideoMode]
+
+    def valid?: () -> bool
+    def available?: () -> bool
+    def size: () -> Vector2
+    def ==: (untyped other) -> bool
+
+    attr_reader width: Integer
+    attr_reader height: Integer
+    attr_reader bits: Integer
+  end
+end

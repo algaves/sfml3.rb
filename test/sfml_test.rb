@@ -757,8 +757,11 @@ class SfmlTest < Minitest::Test
 
   def test_sound_recorder_availability
     assert_includes [true, false], SoundRecorder.available?
-    assert_kind_of String, SoundRecorder.default_device
     assert_kind_of Array, SoundRecorder.available_devices
+
+    # A runner with no capture hardware reports no default device; CSFML
+    # returns NULL and the binding maps that to nil rather than raising.
+    assert_includes [String, NilClass], SoundRecorder.default_device.class
   end
 
   # --- Network ---------------------------------------------------------------

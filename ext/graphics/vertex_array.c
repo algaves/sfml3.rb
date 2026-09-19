@@ -14,17 +14,16 @@
 
 static VALUE rb_cVertexArray;
 
-static void VertexArray_free(void *ptr) {
+static void VertexArray_free(void* ptr) {
     sfVertexArray_destroy(ptr);
 }
 
 static const rb_data_type_t VertexArray_data_type = {
     .wrap_struct_name = "SFML::VertexArray",
     .function = {.dmark = NULL, .dfree = VertexArray_free, .dsize = NULL},
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY
-};
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
-static VALUE VertexArray_wrap(VALUE klass, sfVertexArray *array) {
+static VALUE VertexArray_wrap(VALUE klass, sfVertexArray* array) {
     if (array == NULL) {
         rb_raise(rb_eRuntimeError, "failed to create vertex array");
     }
@@ -32,61 +31,163 @@ static VALUE VertexArray_wrap(VALUE klass, sfVertexArray *array) {
     return TypedData_Wrap_Struct(klass, &VertexArray_data_type, array);
 }
 
-static sfVertexArray *Get_VertexArray_Struct(VALUE self) {
-    sfVertexArray *ptr;
+static sfVertexArray* Get_VertexArray_Struct(VALUE self) {
+    sfVertexArray* ptr;
     TypedData_Get_Struct(self, sfVertexArray, &VertexArray_data_type, ptr);
     return ptr;
 }
 
+/* call-seq:
+ *   VertexArray.new -> VertexArray
+ *
+ * Creates a vertex array using the given +primitive+ type.
+ *
+ * @return [VertexArray] an empty array of :points primitives
+ */
 static VALUE VertexArray_new(VALUE klass) {
     return VertexArray_wrap(klass, sfVertexArray_create());
 }
 
+/* call-seq: copy -> VertexArray
+ *
+ * Returns a deep copy of the object.
+ *
+ * @return [VertexArray] an independent copy
+ */
 static VALUE VertexArray_copy(VALUE self) {
-    return VertexArray_wrap(Get_Klass_VertexArray(), sfVertexArray_copy(Get_VertexArray_Struct(self)));
+    return VertexArray_wrap(Get_Klass_VertexArray(),
+                            sfVertexArray_copy(Get_VertexArray_Struct(self)));
 }
 
+/* call-seq: vertex_count -> Integer
+ *
+ * Returns the number of vertices stored.
+ *
+ * @return [Integer]
+ */
 static VALUE VertexArray_get_vertex_count(VALUE self) {
     return SIZET2NUM(sfVertexArray_getVertexCount(Get_VertexArray_Struct(self)));
 }
 
-static VALUE VertexArray_get_vertex(VALUE self, VALUE rb_index) {
-    return vertex_to_rb(*sfVertexArray_getVertex(Get_VertexArray_Struct(self), (size_t) NUM2SIZET(rb_index)));
+static size_t VertexArray_check_index(VALUE self, VALUE rb_index) {
+    void* array = Get_VertexArray_Struct(self);
+    size_t index = (size_t)NUM2SIZET(rb_index);
+    size_t count = sfVertexArray_getVertexCount(array);
+
+    if (index >= count) {
+        rb_raise(rb_eIndexError, "index %zu outside of vertex count %zu", index, count);
+    }
+
+    return index;
 }
 
+/* call-seq:
+ *   vertex(index) -> Vertex
+ *
+ * Returns the vertex at +index+.
+ *
+ * @return [Vertex] a copy of the vertex at +index+
+ * @raise [IndexError] if +index+ is out of range
+ */
+static VALUE VertexArray_get_vertex(VALUE self, VALUE rb_index) {
+    return vertex_to_rb(*sfVertexArray_getVertex(Get_VertexArray_Struct(self),
+                                                 VertexArray_check_index(self, rb_index)));
+}
+
+/* call-seq:
+ *   set_vertex(index, vertex) -> Vertex
+ *
+ * Replaces the vertex at +index+ with +vertex+.
+ *
+ * @return [Vertex] +vertex+
+ * @raise [IndexError] if +index+ is out of range
+ */
 static VALUE VertexArray_set_vertex(VALUE self, VALUE rb_index, VALUE rb_vertex) {
-    *sfVertexArray_getVertex(Get_VertexArray_Struct(self), (size_t) NUM2SIZET(rb_index)) = vertex_from_rb(rb_vertex);
+    *sfVertexArray_getVertex(Get_VertexArray_Struct(self),
+                             VertexArray_check_index(self, rb_index)) = vertex_from_rb(rb_vertex);
     return rb_vertex;
 }
 
+/* call-seq:
+ *   append(vertex) -> self
+ *
+ * Appends +vertex+ to the array.
+ *
+ * @return [self]
+ */
 static VALUE VertexArray_append(VALUE self, VALUE rb_vertex) {
     sfVertexArray_append(Get_VertexArray_Struct(self), vertex_from_rb(rb_vertex));
     return self;
 }
 
+/* call-seq: clear! -> self
+ *
+ * Removes all vertices.
+ *
+ * @return [self]
+ */
 static VALUE VertexArray_clear(VALUE self) {
     sfVertexArray_clear(Get_VertexArray_Struct(self));
     return self;
 }
 
+/* call-seq:
+ *   resize(count) -> self
+ *
+ * Grows or shrinks the array to +count+ vertices; new vertices are default
+ * ones.
+ *
+ * @return [self]
+ */
 static VALUE VertexArray_resize(VALUE self, VALUE rb_count) {
-    sfVertexArray_resize(Get_VertexArray_Struct(self), (size_t) NUM2SIZET(rb_count));
+    sfVertexArray_resize(Get_VertexArray_Struct(self), (size_t)NUM2SIZET(rb_count));
     return self;
 }
 
+/* call-seq: primitive -> Symbol
+ *
+ * Returns the primitive type used to draw the vertices.
+ *
+ * @return [Symbol] the primitive type vertices are interpreted as (e.g.
+ *   :points, :lines, :triangles)
+ */
 static VALUE VertexArray_get_primitive_type(VALUE self) {
-    return ID2SYM(rb_intern(primitive_type_name(sfVertexArray_getPrimitiveType(Get_VertexArray_Struct(self)))));
+    return ID2SYM(rb_intern(
+        primitive_type_name(sfVertexArray_getPrimitiveType(Get_VertexArray_Struct(self)))));
 }
 
+/* call-seq:
+ *   primitive=(value) -> Symbol
+ *
+ * Sets the primitive type used to draw the vertices.
+ *
+ * @return [Symbol] +value+
+ */
 static VALUE VertexArray_set_primitive_type(VALUE self, VALUE rb_type) {
     sfVertexArray_setPrimitiveType(Get_VertexArray_Struct(self), primitive_type_from_rb(rb_type));
     return rb_type;
 }
 
+/* call-seq: bounds -> Rect
+ *
+ * Returns the axis-aligned bounding box of all vertices.
+ *
+ * @return [Rect] the axis-aligned bounding box of all vertices
+ */
 static VALUE VertexArray_get_bounds(VALUE self) {
     return rect_to_rb(sfVertexArray_getBounds(Get_VertexArray_Struct(self)));
 }
 
+/* call-seq:
+ *   draw(target, state) -> nil
+ *
+ * Part of the Drawable interface; call Target#draw instead of this
+ * directly.
+ *
+ * @return [nil]
+ * @raise [TypeError] if +target+ is not a Target or +state+ is not a
+ *   RenderState
+ */
 static VALUE VertexArray_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
     if (!rb_obj_is_kind_of(rb_target, Get_Klass_Target())) {
         raise_invalid_argument_class(Get_Klass_Target());
@@ -96,14 +197,25 @@ static VALUE VertexArray_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
         raise_invalid_argument_class(Get_Klass_RenderState());
     }
 
-    TARGET_DRAW(Get_Target_Struct(rb_target), sfRenderWindow_drawVertexArray, sfRenderTexture_drawVertexArray,
-                Get_VertexArray_Struct(self), Get_RenderState_Struct(rb_state));
+    TARGET_DRAW(Get_Target_Struct(rb_target), sfRenderWindow_drawVertexArray,
+                sfRenderTexture_drawVertexArray, Get_VertexArray_Struct(self),
+                Get_RenderState_Struct(rb_state));
 
     return Qnil;
 }
 
-void Init_VertexArray(VALUE rb_module) {
-    rb_cVertexArray = rb_define_class_under(rb_module, "VertexArray", rb_cObject);
+/* Document-class: SFML::VertexArray
+ * A resizable, drawable set of Vertex objects interpreted as a given
+ * primitive type (points, lines, triangles, ...).
+ *
+ * Includes +Drawable+.
+ *
+ * @!attribute primitive
+ *   The primitive type used to draw the vertices.
+ *   @return [Symbol]
+ */
+void Init_VertexArray(VALUE rb_mSFML) {
+    rb_cVertexArray = rb_define_class_under(rb_mSFML, "VertexArray", rb_cObject);
 
     rb_include_module(rb_cVertexArray, Get_Module_Drawable());
 

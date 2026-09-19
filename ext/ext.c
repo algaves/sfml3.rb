@@ -84,6 +84,10 @@
 
 static VALUE rb_mExt;
 
+/* Document-module: SFML
+ * Ruby bindings for SFML 3, via its C API, CSFML. Every class and module in
+ * this library lives under this namespace.
+ */
 void Init_sfml_ext(void) {
     rb_mExt = rb_define_module("SFML");
 

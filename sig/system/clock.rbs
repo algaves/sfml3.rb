@@ -1,0 +1,13 @@
+module SFML
+  class Clock
+    def self.new: () -> Clock
+
+    def elapsed_time: () -> Time
+    def restart!: () -> Time
+    def reset!: () -> Time
+    def running?: () -> bool
+    def start!: () -> self
+    def stop!: () -> self
+    def copy: () -> Clock
+  end
+end

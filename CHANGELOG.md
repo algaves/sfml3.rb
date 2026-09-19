@@ -6,26 +6,52 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-### Added
-* **Full YARD API documentation and RBS type signatures**, covering every
-  bound class, module, method and constant. Doc comments live in-place in
-  the `ext/**/*.c` sources (YARD's C parser, the same convention RDoc uses),
-  so they're published automatically to
-  [rubydoc.info](https://rubydoc.info/gems/sfml3-rb) on release; `rake yard`
-  builds them locally into `doc/`. `sig/**/*.rbs` ships in the gem alongside
-  the extension sources, for IDE completion (Solargraph, RubyMine) and
-  static type-checking (Sorbet, Steep). Run `rake rbs` to validate the
-  signatures.
+## [0.3.0] - 2026-09-19
 
-## [0.2.2]
+### Added
+* **Four more experimental binary-gem targets**: `aarch64-linux-musl`, `arm-linux-gnu`
+  (ARMv7 hard-float), `arm-linux-musl`, and `aarch64-mingw-ucrt` (64-bit Windows on ARM).
+  All four ride the same rake-compiler-dock cross-compilation this project already uses for
+  its other targets; none has been run on its target hardware yet, so all are
+  `experimental` in `publish.yaml` like `aarch64-linux-gnu`, `x86_64-darwin` and
+  `arm64-darwin` already were. `script/provision.sh` gained matching cases for the two new
+  glibc/musl Linux targets.
+* `rakelib/package.rake`'s `EXPECTED_ABIS` gained an entry for `aarch64-mingw-ucrt`: its
+  rake-compiler-dock image carries no cross Ruby older than 3.4, so that gem has no floor
+  below it — the same kind of upstream gap `x86-mingw32` already has at the top end.
+* `aarch64-linux-gnu` is now additionally run — not just cross-compiled — by a new
+  `test-arm64.yaml` workflow, on GitHub's hosted `ubuntu-24.04-arm` runner. It stays
+  `experimental` in `publish.yaml` for now; this is the evidence that will eventually
+  justify dropping that flag.
+* ARMv6 (32-bit), RISC-V (rv64gc), PowerPC (ppc64le), and any BSD are deliberately not
+  covered by a binary gem: rake-compiler-dock ships no cross-compilation image for any of
+  them, and building custom cross-toolchain infrastructure for them is a much larger,
+  separate undertaking. The source-gem fallback remains the only path there, unchanged.
 
 ### Fixed
-* **The macOS binary gems now build.** SFML 3.0.2 defaults
-  `CMAKE_OSX_DEPLOYMENT_TARGET` to 13.0, but the osxcross SDK in the
-  rake-compiler-dock image is 11.1 and rejects a newer target, so both Darwin
-  builds aborted while configuring SFML. The ports toolchain now pins the
-  deployment target to macOS 11.0, which is the floor Apple Silicon requires
-  anyway.
+* **A GC race in the audio bindings aborted the process on arm64.** `Sound`, `Music` and
+  `SoundStream` released the GVL inside their `dfree`, but their data types were marked
+  `RUBY_TYPED_FREE_IMMEDIATELY`, so the free could run *during* garbage collection: another
+  thread (Ruby's `Timeout` thread, in the test suite) could then allocate while GC was mid-cycle
+  and Ruby aborted with "object allocation during garbage collection phase". Dropping the flag
+  defers the free to a safe point; releasing the GVL is still what keeps `sf*_destroy` from
+  deadlocking against the audio thread.
+
+### Documentation
+* **Every public class, module, method and constant is documented**, with the
+  result rendered on [rubydoc.info](https://rubydoc.info/gems/sfml3-rb). The
+  comments live beside each binding in `ext/**/*.c`; `rake yard` builds them
+  into `doc/`. Previously the comments carried `call-seq` and `@return` tags
+  but little prose, so rubydoc.info showed a signature with a blank
+  description; every such method now has a sentence of its own.
+* RBS type signatures for the same surface ship in `sig/**/*.rbs`, for IDE
+  completion (Solargraph, RubyMine) and static checking (Sorbet, Steep);
+  `rake rbs` validates them.
+* `.yardopts` ships in the gem, so rubydoc.info generates with the same title,
+  README and extra files as `rake yard`.
+* `rake doc:undoc` fails when a method is left without a description, so the
+  coverage cannot regress silently (`yard stats` uses `blank?` and passes for
+  tag-only comments, which is how the blanks went unnoticed).
 
 ## [0.2.1]
 

@@ -1,0 +1,9 @@
+--markup markdown
+--output-dir doc
+--title sfml3-rb
+--readme README.md
+ext/**/*.c
+-
+CHANGELOG.md
+TODO.md
+LICENSE.md

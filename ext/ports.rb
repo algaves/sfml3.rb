@@ -34,10 +34,17 @@ module Ports
     'x86-linux-gnu' => { triple: 'i686-linux-gnu', multiarch: 'i386-linux-gnu',
                          os: :linux, cpu: 'i686' },
     'aarch64-linux-gnu' => { triple: 'aarch64-linux-gnu', os: :linux, cpu: 'aarch64' },
+    'arm-linux-gnu' => { triple: 'arm-linux-gnueabihf', os: :linux, cpu: 'arm' },
     'x86_64-linux-musl' => { triple: 'x86_64-unknown-linux-musl', os: :linux, cpu: 'x86_64' },
     'x86-linux-musl' => { triple: 'i686-unknown-linux-musl', os: :linux, cpu: 'i686' },
+    # These two deliberately omit the -unknown- Debian-musl entries above use:
+    # the triple must match musl-cross-make's TARGET exactly, since that string
+    # is both the compiler prefix and the sysroot path (see musl_sysroot).
+    'aarch64-linux-musl' => { triple: 'aarch64-linux-musl', os: :linux, cpu: 'aarch64' },
+    'arm-linux-musl' => { triple: 'arm-linux-musleabihf', os: :linux, cpu: 'arm' },
     'x64-mingw-ucrt' => { triple: 'x86_64-w64-mingw32', os: :windows, cpu: 'x86_64' },
     'x86-mingw32' => { triple: 'i686-w64-mingw32', os: :windows, cpu: 'i686' },
+    'aarch64-mingw-ucrt' => { triple: 'aarch64-w64-mingw32', os: :windows, cpu: 'arm64' },
     'x86_64-darwin' => { triple: 'x86_64-apple-darwin', os: :darwin, cpu: 'x86_64' },
     'arm64-darwin' => { triple: 'aarch64-apple-darwin', os: :darwin, cpu: 'arm64' }
   }.freeze

@@ -1,0 +1,6 @@
+module SFML
+  class Cursor
+    def self.from_pixels: (String pixels, untyped size, untyped hotspot) -> Cursor
+    def self.from_system: (Symbol | Integer type) -> Cursor
+  end
+end
