@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+* **Four more experimental binary-gem targets**: `aarch64-linux-musl`, `arm-linux-gnu`
+  (ARMv7 hard-float), `arm-linux-musl`, and `aarch64-mingw-ucrt` (64-bit Windows on ARM).
+  All four ride the same rake-compiler-dock cross-compilation this project already uses for
+  its other targets; none has been run on its target hardware yet, so all are
+  `experimental` in `publish.yaml` like `aarch64-linux-gnu`, `x86_64-darwin` and
+  `arm64-darwin` already were. `script/provision.sh` gained matching cases for the two new
+  glibc/musl Linux targets.
+* `rakelib/package.rake`'s `EXPECTED_ABIS` gained an entry for `aarch64-mingw-ucrt`: its
+  rake-compiler-dock image carries no cross Ruby older than 3.4, so that gem has no floor
+  below it — the same kind of upstream gap `x86-mingw32` already has at the top end.
+* `aarch64-linux-gnu` is now additionally run — not just cross-compiled — by a new
+  `test-arm64.yaml` workflow, on GitHub's hosted `ubuntu-24.04-arm` runner. It stays
+  `experimental` in `publish.yaml` for now; this is the evidence that will eventually
+  justify dropping that flag.
+* ARMv6 (32-bit), RISC-V (rv64gc), PowerPC (ppc64le), and any BSD are deliberately not
+  covered by a binary gem: rake-compiler-dock ships no cross-compilation image for any of
+  them, and building custom cross-toolchain infrastructure for them is a much larger,
+  separate undertaking. The source-gem fallback remains the only path there, unchanged.
+
 ## [0.3.0] - 2026-09-18
 
 ### Documentation

@@ -52,11 +52,16 @@ already linked in — no toolchain, no build, nothing to install system-wide:
 | `x86-linux-musl` | 3.1 – 4.0 | 32-bit musl |
 | `x64-mingw-ucrt` | 3.1 – 4.0 | 64-bit Windows, RubyInstaller 3.1+ |
 | `x86-mingw32` | 3.1 – **3.4** | 32-bit Windows |
-| `aarch64-linux-gnu`, `x86_64-darwin`, `arm64-darwin` | 3.1 – 4.0 | experimental, not yet built |
+| `aarch64-linux-gnu` | 3.1 – 4.0 | experimental, cross-built and run on a native arm64 CI runner |
+| `aarch64-linux-musl`, `arm-linux-gnu`, `arm-linux-musl` | 3.1 – 4.0 | experimental, not yet built |
+| `aarch64-mingw-ucrt` | 3.4 – **4.0** | experimental, 64-bit Windows on ARM |
+| `x86_64-darwin`, `arm64-darwin` | 3.1 – 4.0 | experimental, not yet built |
 
-Each gem carries one extension per Ruby ABI. Two gaps come from upstream rather than from this
-project: **RubyInstaller publishes no 32-bit Ruby 4.0**, so `x86-mingw32` stops at 3.4; and 64-bit
-Windows before Ruby 3.1 used a different platform (`x64-mingw32`), which is not built.
+Each gem carries one extension per Ruby ABI. Three gaps come from upstream rather than from this
+project: **RubyInstaller publishes no 32-bit Ruby 4.0**, so `x86-mingw32` stops at 3.4; 64-bit
+Windows before Ruby 3.1 used a different platform (`x64-mingw32`), which is not built; and the
+cross-compilation image for `aarch64-mingw-ucrt` carries no cross Ruby older than 3.4, so that
+gem has no floor below it.
 
 ### Building from source
 

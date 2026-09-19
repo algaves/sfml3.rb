@@ -42,7 +42,22 @@ jobs:
           # No Ruby 4.0 here: RubyInstaller publishes no 32-bit 4.0 build, so
           # this gem stops at 3.4. rakelib/package.rake asserts that.
           - platform: x86-mingw32
+          # Cross-compiles cleanly but, like the other experimental platforms
+          # below, has never been run on its target hardware; see
+          # test-arm64.yaml for the one exception this repo can verify for
+          # real, on a hosted arm64 runner.
           - platform: aarch64-linux-gnu
+            experimental: true
+          - platform: aarch64-linux-musl
+            experimental: true
+          - platform: arm-linux-gnu
+            experimental: true
+          - platform: arm-linux-musl
+            experimental: true
+          # No Ruby below 3.4 here: the rake-compiler-dock image for this
+          # platform carries no cross ruby older than 3.4. rakelib/package.rake
+          # asserts that.
+          - platform: aarch64-mingw-ucrt
             experimental: true
           - platform: x86_64-darwin
             experimental: true

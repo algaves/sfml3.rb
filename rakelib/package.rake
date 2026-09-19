@@ -28,10 +28,15 @@ module CrossBuild
   # What each platform's gem must end up carrying. rake-compiler only *warns*
   # when the image has no cross ruby for a requested version and carries on
   # (extensiontask.rb:400-403), so without this check a gem missing an ABI
-  # would ship silently. Exactly one platform is legitimately short:
-  # RubyInstaller publishes no 32-bit Ruby 4.0, so x86-mingw32 stops at 3.4.
+  # would ship silently. Two platforms are legitimately short: RubyInstaller
+  # publishes no 32-bit Ruby 4.0, so x86-mingw32 stops at 3.4; and the
+  # rake-compiler-dock aarch64-mingw-ucrt image only carries cross rubies for
+  # 3.4 and 4.0, so it has no floor below that.
   DEFAULT_ABIS = %w[3.1 3.2 3.3 3.4 4.0].freeze
-  EXPECTED_ABIS = { 'x86-mingw32' => %w[3.1 3.2 3.3 3.4].freeze }.freeze
+  EXPECTED_ABIS = {
+    'x86-mingw32' => %w[3.1 3.2 3.3 3.4].freeze,
+    'aarch64-mingw-ucrt' => %w[3.4 4.0].freeze
+  }.freeze
 
   module_function
 
