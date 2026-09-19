@@ -29,6 +29,12 @@ typedef struct {
 
 static VALUE rb_cSoundRecorder;
 
+/* CSFML reports "no such device" as NULL; that is an absent name, not an
+   error, so it maps to nil rather than raising out of rb_str_new_cstr. */
+static VALUE SoundRecorder_nullable_string(const char* value) {
+    return value == NULL ? Qnil : rb_str_new_cstr(value);
+}
+
 static void SoundRecorder_mark(void* ptr) {
     SoundRecorder* recorder = ptr;
 
@@ -260,24 +266,26 @@ static VALUE SoundRecorder_available_devices(VALUE klass) {
     return rb_array;
 }
 
-/* call-seq: SoundRecorder.default_device -> String
+/* call-seq: SoundRecorder.default_device -> String or nil
  *
  * Returns the name of the system's default capture device.
  *
- * @return [String] the name of the system's default capture device
+ * @return [String, nil] the name of the system's default capture device, or
+ *   +nil+ when the system reports none
  */
 static VALUE SoundRecorder_default_device(VALUE klass) {
-    return rb_str_new_cstr(sfSoundRecorder_getDefaultDevice());
+    return SoundRecorder_nullable_string(sfSoundRecorder_getDefaultDevice());
 }
 
-/* call-seq: device -> String
+/* call-seq: device -> String or nil
  *
  * Returns the name of the capture device in use.
  *
- * @return [String] the name of the capture device in use
+ * @return [String, nil] the name of the capture device in use, or +nil+ when
+ *   the recorder has none
  */
 static VALUE SoundRecorder_device(VALUE self) {
-    return rb_str_new_cstr(sfSoundRecorder_getDevice(Get_SoundRecorder_Struct(self)));
+    return SoundRecorder_nullable_string(sfSoundRecorder_getDevice(Get_SoundRecorder_Struct(self)));
 }
 
 /* call-seq:
