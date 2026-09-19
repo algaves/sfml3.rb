@@ -1,25 +1,41 @@
 # sfml3.rb
 
-![Ruby](https://img.shields.io/badge/ruby-3.1%2B-red?style=flat-square)
-![GitHub Last Commit](https://img.shields.io/github/last-commit/algaves/sfml3.rb.svg?style=flat-square)
-![Gem Version](https://img.shields.io/gem/v/sfml3-rb?style=flat-square)
-![Gem Downloads (for latest version)](https://img.shields.io/gem/dtv/sfml3-rb?style=flat-square)
-![Gem download rank](https://img.shields.io/gem/rt/sfml3-rb?style=flat-square)
-![License](https://img.shields.io/badge/license-0BSD-green?style=flat-square)
-
 Ruby bindings for [SFML 3](https://www.sfml-dev.org/), via its C API, [CSFML](https://github.com/SFML/CSFML).
 
-## Status
+[![Ruby](https://img.shields.io/badge/ruby-3.1%2B-red?style=flat-square)](https://www.ruby-lang.org/)
+[![Test](https://github.com/algaves/sfml3.rb/actions/workflows/test.yaml/badge.svg)](https://github.com/algaves/sfml3.rb/actions/workflows/test.yaml)
+[![Check](https://github.com/algaves/sfml3.rb/actions/workflows/check.yaml/badge.svg)](https://github.com/algaves/sfml3.rb/actions/workflows/check.yaml)
+[![Gem Version](https://img.shields.io/gem/v/sfml3-rb?style=flat-square)](https://rubygems.org/gems/sfml3-rb)
+[![Gem Downloads](https://img.shields.io/gem/dt/sfml3-rb?style=flat-square)](https://rubygems.org/gems/sfml3-rb)
+[![License](https://img.shields.io/badge/license-0BSD-green?style=flat-square)](LICENSE.md)
 
-Latest release: **0.3.0**. Bound against **CSFML 3**. See [TODO.md](TODO.md) for which parts of the
-SFML 3 API are ported so far, and [CHANGELOG.md](CHANGELOG.md) for what changed recently.
+Latest release: **0.3.0**, bound against **CSFML 3**.
 
-API docs (every class, module, method and constant) are on
-[rubydoc.info](https://rubydoc.info/gems/sfml3-rb). The gem also ships RBS type signatures
-(`sig/**/*.rbs`) alongside the extension sources, for IDE completion (Solargraph, RubyMine) and
-static type-checking (Sorbet, Steep).
+## Features
 
-## Install
+* **Broad coverage of SFML 3**, bound through CSFML: windows and events, graphics, audio, network,
+  and the system layer, with every `sf*` entry point tracked in [TODO.md](TODO.md).
+* **Precompiled binary gems** for common platforms, with FreeType, SFML 3 and CSFML 3 statically
+  linked in — no toolchain and nothing to install system-wide.
+* **A source fallback everywhere else**, which downloads and builds the pinned, checksum-verified
+  dependencies at install time, so the gem works on macOS, ARM and the BSDs out of the box.
+* **Complete API documentation and types**: every class, module, method and constant is documented
+  on [rubydoc.info](https://rubydoc.info/gems/sfml3-rb) and covered by RBS signatures shipped in
+  the gem.
+* **A close fit to SFML's own model**: classes mirror the C++ types (Window, Texture, Sprite,
+  Sound, ...) minus the parts that only exist in C++, like `std::string` and exceptions.
+
+## Table of Contents
+
+* [Installation](#installation)
+* [Quick Start](#quick-start)
+* [Documentation](#documentation)
+* [Development](#development)
+* [Contributing](#contributing)
+* [Acknowledgements](#acknowledgements)
+* [License](#license)
+
+## Installation
 
 ```sh
 gem install sfml3-rb
@@ -42,6 +58,8 @@ Each gem carries one extension per Ruby ABI. Two gaps come from upstream rather 
 project: **RubyInstaller publishes no 32-bit Ruby 4.0**, so `x86-mingw32` stops at 3.4; and 64-bit
 Windows before Ruby 3.1 used a different platform (`x64-mingw32`), which is not built.
 
+### Building from source
+
 Anywhere else — macOS, ARM, the BSDs — RubyGems falls back to the source gem, which downloads and
 builds FreeType, SFML 3 and CSFML 3 from pinned, checksum-verified tarballs at install time. That
 takes a few minutes and needs:
@@ -49,21 +67,24 @@ takes a few minutes and needs:
 * Ruby >= 3.1
 * A C/C++ toolchain and CMake >= 3.22
 * On Linux, the X11/udev/OpenGL development headers SFML links against — these can't be bundled.
-  On Fedora:
 
-  ```sh
-  sudo dnf install cmake gcc-c++ libX11-devel \
-    libXrandr-devel libXcursor-devel libXi-devel systemd-devel libglvnd-devel
-  ```
+On Fedora:
 
-  or on Debian/Ubuntu:
+```sh
+sudo dnf install cmake gcc-c++ libX11-devel \
+  libXrandr-devel libXcursor-devel libXi-devel systemd-devel libglvnd-devel
+```
 
-  ```sh
-  sudo apt-get install cmake build-essential libx11-dev \
-    libxrandr-dev libxcursor-dev libxi-dev libudev-dev libgl1-mesa-dev
-  ```
+On Debian/Ubuntu:
+
+```sh
+sudo apt-get install cmake build-essential libx11-dev \
+  libxrandr-dev libxcursor-dev libxi-dev libudev-dev libgl1-mesa-dev
+```
 
 Each installed gem version builds its own copy; there's no build cache shared across versions.
+
+### Linking against system libraries
 
 To link against a system CSFML 3 instead (no download, no build):
 
@@ -71,14 +92,14 @@ To link against a system CSFML 3 instead (no download, no build):
 gem install sfml3-rb -- --enable-system-libraries
 ```
 
-## Usage
+## Quick Start
 
 ```ruby
 require 'sfml'
 include SFML
 
 window = Window.new VideoMode.new(640, 480, 32), 'SFML'
-event = Event.new
+event  = Event.new
 
 while window.is_open?
   while window.poll_event! event
@@ -90,7 +111,20 @@ while window.is_open?
 end
 ```
 
-See [`test/hello-world.rb`](test/hello-world.rb) for a fuller example with shapes and transforms.
+Event types are strings (`'closed'`, `'resized'`, `'key-pressed'`, ...); keys and buttons are enums.
+
+See [`test/hello-world.rb`](test/hello-world.rb) for a fuller example with shapes and transforms,
+and [`test/matrix-transformable.rb`](test/matrix-transformable.rb) for a visual demo. Neither is
+part of the test suite.
+
+## Documentation
+
+* [API reference](https://rubydoc.info/gems/sfml3-rb) — every class, module, method and constant,
+  built from the YARD comments in `ext/**/*.c`.
+* RBS type signatures (`sig/**/*.rbs`) ship in the gem for IDE completion (Solargraph, RubyMine)
+  and static type-checking (Sorbet, Steep). Validate them with `rake rbs`.
+* [CHANGELOG.md](CHANGELOG.md) — what changed in each release.
+* [TODO.md](TODO.md) — module-by-module porting coverage and what is deliberately unbound.
 
 ## Development
 
@@ -144,6 +178,28 @@ mingw toolchain and the osxcross SDK already provide.
 
 Binary gems carry one extension per Ruby ABI under `lib/sfml/<major.minor>/`; `lib/sfml.rb` prefers
 that and falls back to the single `lib/sfml/sfml_ext.so` a source build installs.
+
+## Contributing
+
+Bug reports and pull requests are welcome on
+[GitHub](https://github.com/algaves/sfml3.rb/issues). Before opening a pull request:
+
+```sh
+bundle install
+bundle exec rake test   # build the extension and run the suite
+bundle exec rubocop     # lint Ruby (CI enforces this)
+```
+
+Install the pre-commit hook with `bundle exec rake githooks:install` so staged Ruby is linted and
+staged C is formatted automatically. The C build is warning-clean under `SFML_STRICT=1`; keep it
+that way.
+
+## Acknowledgements
+
+This gem would not exist without [SFML](https://www.sfml-dev.org/) and its C binding,
+[CSFML](https://github.com/SFML/CSFML), both maintained by the SFML team. The source build also
+vendors and links FreeType, Ogg, Vorbis and FLAC; see [`ext/ports.rb`](ext/ports.rb) and the
+[LICENSE](LICENSE.md) for their terms.
 
 ## License
 
