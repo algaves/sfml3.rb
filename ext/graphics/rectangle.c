@@ -60,6 +60,27 @@ static VALUE RectangleShape_wrap(VALUE klass, sfRectangleShape* shape) {
     return TypedData_Wrap_Struct(klass, &RectangleShape_data_type, ptr);
 }
 
+static VALUE RectangleShape_alloc(VALUE klass) {
+    RectangleShape* ptr = malloc(sizeof(RectangleShape));
+    sfRectangleShape* shape;
+
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate rectangle shape");
+    }
+
+    shape = sfRectangleShape_create();
+
+    if (shape == NULL) {
+        free(ptr);
+        rb_raise(rb_eRuntimeError, "failed to create rectangle shape");
+    }
+
+    ptr->shape = shape;
+    ptr->rb_texture = Qnil;
+
+    return TypedData_Wrap_Struct(klass, &RectangleShape_data_type, ptr);
+}
+
 /* call-seq:
  *   RectangleShape.new(size = Vector2.new(0, 0)) -> RectangleShape
  *
@@ -67,17 +88,16 @@ static VALUE RectangleShape_wrap(VALUE klass, sfRectangleShape* shape) {
  *
  * @return [RectangleShape]
  */
-static VALUE RectangleShape_new(int argc, VALUE* argv, VALUE klass) {
-    sfRectangleShape* shape = sfRectangleShape_create();
+static VALUE RectangleShape_initialize(int argc, VALUE* argv, VALUE self) {
     VALUE rb_size;
 
     rb_scan_args(argc, argv, "01", &rb_size);
 
     if (!NIL_P(rb_size)) {
-        sfRectangleShape_setSize(shape, vec2f_from_rb(rb_size));
+        sfRectangleShape_setSize(Get_RectangleShape_Struct(self), vec2f_from_rb(rb_size));
     }
 
-    return RectangleShape_wrap(klass, shape);
+    return self;
 }
 
 /* call-seq: copy -> RectangleShape
@@ -504,9 +524,11 @@ static VALUE RectangleShape_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
 void Init_RectangleShape(VALUE rb_mSFML) {
     rb_cRectangleShape = rb_define_class_under(rb_mSFML, "RectangleShape", rb_cObject);
 
+    rb_define_alloc_func(rb_cRectangleShape, RectangleShape_alloc);
+
     rb_include_module(rb_cRectangleShape, Get_Module_Drawable());
 
-    rb_define_singleton_method(rb_cRectangleShape, "new", RectangleShape_new, -1);
+    rb_define_method(rb_cRectangleShape, "initialize", RectangleShape_initialize, -1);
 
     rb_define_method(rb_cRectangleShape, "copy", RectangleShape_copy, 0);
 

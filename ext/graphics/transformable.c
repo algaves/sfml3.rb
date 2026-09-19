@@ -24,31 +24,22 @@ static const rb_data_type_t Transformable_data_type = {
     .function = {.dmark = NULL, .dfree = Transformable_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
+static VALUE Transformable_alloc(VALUE klass) {
+    sfTransformable* transformable = Transformable_create();
+
+    if (transformable == NULL) {
+        rb_raise(rb_eRuntimeError, "failed to create transformable");
+    }
+
+    return TypedData_Wrap_Struct(klass, &Transformable_data_type, transformable);
+}
+
 /* call-seq:
  *   Transformable.new -> Transformable
  *
  * Creates a transformable object with a default position, rotation and scale.
  *
  * @return [Transformable]
- */
-static VALUE Transformable_new(VALUE klass) {
-    VALUE self;
-    sfTransformable* transformable;
-
-    transformable = Transformable_create();
-    self = TypedData_Wrap_Struct(klass, &Transformable_data_type, transformable);
-
-    rb_obj_call_init(self, 0, NULL);
-
-    return self;
-}
-
-/* call-seq: initialize -> self
- *
- * Initializes the transformable state, including position, rotation and scale.
- *
- * @private No-op; called internally by .new.
- * @return [self]
  */
 static VALUE Transformable_init(VALUE self) {
     return self;
@@ -258,7 +249,7 @@ static VALUE Transformable_copy(VALUE self) {
 void Init_Transformable(VALUE rb_mSFML) {
     rb_cTransformable = rb_define_class_under(rb_mSFML, "Transformable", rb_cObject);
 
-    rb_define_singleton_method(rb_cTransformable, "new", Transformable_new, 0);
+    rb_define_alloc_func(rb_cTransformable, Transformable_alloc);
     rb_define_method(rb_cTransformable, "initialize", Transformable_init, 0);
 
     rb_define_method(rb_cTransformable, "position=", Transformable_set_position, 1);

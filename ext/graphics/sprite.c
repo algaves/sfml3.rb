@@ -26,7 +26,10 @@ static void Sprite_mark(void* ptr) {
 }
 
 static void Sprite_free(void* ptr) {
-    sfSprite_destroy(((Sprite*)ptr)->sprite);
+    if (((Sprite*)ptr)->sprite != NULL) {
+        sfSprite_destroy(((Sprite*)ptr)->sprite);
+    }
+
     free(ptr);
 }
 
@@ -59,6 +62,24 @@ static VALUE Sprite_wrap(VALUE klass, sfSprite* sprite) {
     return TypedData_Wrap_Struct(klass, &Sprite_data_type, ptr);
 }
 
+static VALUE Sprite_initialize_copy(VALUE self, VALUE other) {
+    (void)other;
+    rb_raise(rb_eTypeError, "can't copy a %s", rb_obj_classname(self));
+}
+
+static VALUE Sprite_alloc(VALUE klass) {
+    Sprite* ptr = malloc(sizeof(Sprite));
+
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate sprite");
+    }
+
+    ptr->sprite = NULL;
+    ptr->rb_texture = Qnil;
+
+    return TypedData_Wrap_Struct(klass, &Sprite_data_type, ptr);
+}
+
 /* call-seq:
  *   Sprite.new(texture) -> Sprite
  *
@@ -69,19 +90,21 @@ static VALUE Sprite_wrap(VALUE klass, sfSprite* sprite) {
  * @return [Sprite]
  * @raise [ArgumentError] if +texture+ is not a Texture
  */
-static VALUE Sprite_new(VALUE klass, VALUE rb_texture) {
-    VALUE self;
+static VALUE Sprite_initialize(VALUE self, VALUE rb_texture) {
     Sprite* ptr;
 
     if (!rb_obj_is_kind_of(rb_texture, Get_Klass_Texture())) {
         raise_invalid_argument_class(Get_Klass_Texture());
     }
 
-    ptr = malloc(sizeof(Sprite));
+    TypedData_Get_Struct(self, Sprite, &Sprite_data_type, ptr);
+
     ptr->sprite = sfSprite_create(Get_Texture_Struct(rb_texture));
     ptr->rb_texture = rb_texture;
 
-    self = TypedData_Wrap_Struct(klass, &Sprite_data_type, ptr);
+    if (ptr->sprite == NULL) {
+        rb_raise(rb_eRuntimeError, "failed to create sprite");
+    }
 
     return self;
 }
@@ -402,9 +425,12 @@ static VALUE Sprite_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
 void Init_Sprite(VALUE rb_mSFML) {
     rb_cSprite = rb_define_class_under(rb_mSFML, "Sprite", rb_cObject);
 
+    rb_define_alloc_func(rb_cSprite, Sprite_alloc);
+
     rb_include_module(rb_cSprite, Get_Module_Drawable());
 
-    rb_define_singleton_method(rb_cSprite, "new", Sprite_new, 1);
+    rb_define_method(rb_cSprite, "initialize", Sprite_initialize, 1);
+    rb_define_private_method(rb_cSprite, "initialize_copy", Sprite_initialize_copy, 1);
 
     rb_define_method(rb_cSprite, "copy", Sprite_copy, 0);
 

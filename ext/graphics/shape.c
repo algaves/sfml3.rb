@@ -96,19 +96,13 @@ static sfVector2f CustomShape_get_point(size_t index, void* userData) {
     return vec2f_from_rb(point);
 }
 
-/* call-seq:
- *   Shape.new -> Shape
- *
- * A base class meant to be subclassed: override #point_count and #point(i)
- * in Ruby to define the shape's geometry, then call #update! whenever it
- * changes.
- *
- * @return [Shape]
- * @raise [RuntimeError] if the underlying shape cannot be created
- */
-static VALUE CustomShape_new(VALUE klass) {
+static VALUE CustomShape_alloc(VALUE klass) {
     CustomShape* ptr = malloc(sizeof(CustomShape));
     VALUE self;
+
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate shape");
+    }
 
     ptr->rb_self = Qnil;
     ptr->rb_texture = Qnil;
@@ -122,6 +116,19 @@ static VALUE CustomShape_new(VALUE klass) {
     self = TypedData_Wrap_Struct(klass, &CustomShape_data_type, ptr);
     ptr->rb_self = self;
 
+    return self;
+}
+
+/* call-seq:
+ *   Shape.new -> Shape
+ *
+ * A base class meant to be subclassed: override #point_count and #point(i)
+ * in Ruby to define the shape's geometry, then call #update! whenever it
+ * changes.
+ *
+ * @return [Shape]
+ */
+static VALUE CustomShape_initialize(VALUE self) {
     return self;
 }
 
@@ -495,9 +502,11 @@ static VALUE CustomShape_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
 void Init_Shape(VALUE rb_mSFML) {
     rb_cCustomShape = rb_define_class_under(rb_mSFML, "Shape", rb_cObject);
 
+    rb_define_alloc_func(rb_cCustomShape, CustomShape_alloc);
+
     rb_include_module(rb_cCustomShape, Get_Module_Drawable());
 
-    rb_define_singleton_method(rb_cCustomShape, "new", CustomShape_new, 0);
+    rb_define_method(rb_cCustomShape, "initialize", CustomShape_initialize, 0);
 
     rb_define_method(rb_cCustomShape, "update!", CustomShape_update, 0);
     rb_define_method(rb_cCustomShape, "position", CustomShape_get_position, 0);

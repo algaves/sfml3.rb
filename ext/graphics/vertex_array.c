@@ -37,6 +37,16 @@ static sfVertexArray* Get_VertexArray_Struct(VALUE self) {
     return ptr;
 }
 
+static VALUE VertexArray_alloc(VALUE klass) {
+    sfVertexArray* array = sfVertexArray_create();
+
+    if (array == NULL) {
+        rb_raise(rb_eRuntimeError, "failed to create vertex array");
+    }
+
+    return TypedData_Wrap_Struct(klass, &VertexArray_data_type, array);
+}
+
 /* call-seq:
  *   VertexArray.new -> VertexArray
  *
@@ -44,8 +54,8 @@ static sfVertexArray* Get_VertexArray_Struct(VALUE self) {
  *
  * @return [VertexArray] an empty array of :points primitives
  */
-static VALUE VertexArray_new(VALUE klass) {
-    return VertexArray_wrap(klass, sfVertexArray_create());
+static VALUE VertexArray_initialize(VALUE self) {
+    return self;
 }
 
 /* call-seq: copy -> VertexArray
@@ -217,9 +227,11 @@ static VALUE VertexArray_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
 void Init_VertexArray(VALUE rb_mSFML) {
     rb_cVertexArray = rb_define_class_under(rb_mSFML, "VertexArray", rb_cObject);
 
+    rb_define_alloc_func(rb_cVertexArray, VertexArray_alloc);
+
     rb_include_module(rb_cVertexArray, Get_Module_Drawable());
 
-    rb_define_singleton_method(rb_cVertexArray, "new", VertexArray_new, 0);
+    rb_define_method(rb_cVertexArray, "initialize", VertexArray_initialize, 0);
 
     rb_define_method(rb_cVertexArray, "copy", VertexArray_copy, 0);
     rb_define_method(rb_cVertexArray, "vertex_count", VertexArray_get_vertex_count, 0);

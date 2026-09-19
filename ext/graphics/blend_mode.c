@@ -80,6 +80,18 @@ static sfBlendEquation equation_from_rb(VALUE rb_equation) {
     return sfBlendEquationAdd;
 }
 
+static VALUE BlendMode_alloc(VALUE klass) {
+    BlendMode* ptr = malloc(sizeof(BlendMode));
+
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate blend mode");
+    }
+
+    ptr->mode = sfBlendAlpha;
+
+    return TypedData_Wrap_Struct(klass, &BlendMode_data_type, ptr);
+}
+
 /* call-seq:
  *   BlendMode.new -> BlendMode(ALPHA)
  *   BlendMode.new(color_src_factor, color_dst_factor, color_equation, alpha_src_factor,
@@ -95,9 +107,7 @@ static sfBlendEquation equation_from_rb(VALUE rb_equation) {
  * @return [BlendMode]
  * @raise [ArgumentError] if given an argument count other than 0 or 6
  */
-static VALUE BlendMode_new(int argc, VALUE* argv, VALUE klass) {
-    VALUE self;
-    BlendMode* ptr;
+static VALUE BlendMode_initialize(int argc, VALUE* argv, VALUE self) {
     sfBlendMode mode = sfBlendAlpha;
 
     if (argc == 6) {
@@ -108,10 +118,7 @@ static VALUE BlendMode_new(int argc, VALUE* argv, VALUE klass) {
         raise_invalid_arguments_excepted(6, argc);
     }
 
-    ptr = malloc(sizeof(BlendMode));
-    ptr->mode = mode;
-
-    self = TypedData_Wrap_Struct(klass, &BlendMode_data_type, ptr);
+    ((BlendMode*)Get_BlendMode_Struct(self))->mode = mode;
 
     return self;
 }
@@ -310,7 +317,8 @@ static VALUE BlendMode_eql(VALUE self, VALUE rb_other) {
 void Init_BlendMode(VALUE rb_mSFML) {
     rb_cBlendMode = rb_define_class_under(rb_mSFML, "BlendMode", rb_cObject);
 
-    rb_define_singleton_method(rb_cBlendMode, "new", BlendMode_new, -1);
+    rb_define_alloc_func(rb_cBlendMode, BlendMode_alloc);
+    rb_define_method(rb_cBlendMode, "initialize", BlendMode_initialize, -1);
 
     rb_define_method(rb_cBlendMode, "color_src_factor", BlendMode_get_color_src_factor, 0);
     rb_define_method(rb_cBlendMode, "color_dst_factor", BlendMode_get_color_dst_factor, 0);

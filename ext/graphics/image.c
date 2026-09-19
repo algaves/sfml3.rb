@@ -15,7 +15,9 @@
 static VALUE rb_cImage;
 
 static void Image_free(void* ptr) {
-    sfImage_destroy(ptr);
+    if (ptr != NULL) {
+        sfImage_destroy(ptr);
+    }
 }
 
 static const rb_data_type_t Image_data_type = {
@@ -31,6 +33,15 @@ static VALUE Image_wrap(VALUE klass, sfImage* image) {
     return TypedData_Wrap_Struct(klass, &Image_data_type, image);
 }
 
+static VALUE Image_initialize_copy(VALUE self, VALUE other) {
+    (void)other;
+    rb_raise(rb_eTypeError, "can't copy a %s", rb_obj_classname(self));
+}
+
+static VALUE Image_alloc(VALUE klass) {
+    return TypedData_Wrap_Struct(klass, &Image_data_type, NULL);
+}
+
 /* call-seq:
  *   Image.new(size) -> Image
  *
@@ -40,8 +51,16 @@ static VALUE Image_wrap(VALUE klass, sfImage* image) {
  * @return [Image]
  * @raise [RuntimeError] if the image cannot be created
  */
-static VALUE Image_new(VALUE klass, VALUE rb_size) {
-    return Image_wrap(klass, sfImage_create(vec2u_from_rb(rb_size)));
+static VALUE Image_initialize(VALUE self, VALUE rb_size) {
+    sfImage* image = sfImage_create(vec2u_from_rb(rb_size));
+
+    if (image == NULL) {
+        rb_raise(rb_eRuntimeError, "failed to create image");
+    }
+
+    DATA_PTR(self) = image;
+
+    return self;
 }
 
 /* call-seq:
@@ -313,7 +332,9 @@ static VALUE Image_flip_vertically(VALUE self) {
 void Init_Image(VALUE rb_mSFML) {
     rb_cImage = rb_define_class_under(rb_mSFML, "Image", rb_cObject);
 
-    rb_define_singleton_method(rb_cImage, "new", Image_new, 1);
+    rb_define_alloc_func(rb_cImage, Image_alloc);
+    rb_define_method(rb_cImage, "initialize", Image_initialize, 1);
+    rb_define_private_method(rb_cImage, "initialize_copy", Image_initialize_copy, 1);
     rb_define_singleton_method(rb_cImage, "from_color", Image_from_color, 2);
     rb_define_singleton_method(rb_cImage, "from_pixels", Image_from_pixels, 2);
     rb_define_singleton_method(rb_cImage, "from_file", Image_from_file, 1);

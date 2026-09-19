@@ -42,15 +42,14 @@ static VALUE View_new_from(VALUE klass, sfView* c_view) {
     return self;
 }
 
-/* call-seq:
- *   View.new -> View
- *
- * Creates a default view covering the (0, 0) - (1000, 1000) region.
- *
- * @return [View]
- */
-static VALUE View_new(VALUE klass) {
-    return View_new_from(klass, NULL);
+static VALUE View_alloc(VALUE klass) {
+    sfView* view = View_create();
+
+    if (view == NULL) {
+        rb_raise(rb_eRuntimeError, "failed to create view");
+    }
+
+    return TypedData_Wrap_Struct(klass, &View_data_type, view);
 }
 
 /* The rect is the visible area: position is the top-left corner, not the
@@ -67,6 +66,13 @@ static VALUE View_s_from_rect(VALUE klass, VALUE rb_rect) {
     return View_new_from(klass, sfView_createFromRect(rect_from_rb(rb_rect)));
 }
 
+/* call-seq:
+ *   View.new -> View
+ *
+ * Creates a default view covering the (0, 0) - (1000, 1000) region.
+ *
+ * @return [View]
+ */
 static VALUE View_init(VALUE self) {
     return self;
 }
@@ -257,7 +263,7 @@ static VALUE View_copy(VALUE self) {
 void Init_View(VALUE rb_mSFML) {
     rb_cView = rb_define_class_under(rb_mSFML, "View", rb_cObject);
 
-    rb_define_singleton_method(rb_cView, "new", View_new, 0);
+    rb_define_alloc_func(rb_cView, View_alloc);
     rb_define_singleton_method(rb_cView, "from_rect", View_s_from_rect, 1);
 
     // methods

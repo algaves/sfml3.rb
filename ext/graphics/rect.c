@@ -30,6 +30,18 @@ static VALUE Rect_wrap(sfFloatRect rect) {
     return TypedData_Wrap_Struct(rb_cRect, &Rect_data_type, ptr);
 }
 
+static VALUE Rect_alloc(VALUE klass) {
+    Rect* ptr = malloc(sizeof(Rect));
+
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate rect");
+    }
+
+    ptr->rect = (sfFloatRect){{0, 0}, {0, 0}};
+
+    return TypedData_Wrap_Struct(klass, &Rect_data_type, ptr);
+}
+
 /* call-seq:
  *   Rect.new                        -> Rect(0, 0, 0, 0)
  *   Rect.new(left, top)             -> Rect(left, top, 0, 0)
@@ -44,9 +56,7 @@ static VALUE Rect_wrap(sfFloatRect rect) {
  * @raise [ArgumentError] if given an Array shorter than 4 elements, or an
  *   argument count other than 0, 1, 2 or 4
  */
-static VALUE Rect_new(int argc, VALUE* argv, VALUE klass) {
-    VALUE self;
-    Rect* ptr;
+static VALUE Rect_initialize(int argc, VALUE* argv, VALUE self) {
     sfFloatRect rect = {{0, 0}, {0, 0}};
 
     if (argc == 1 && rb_obj_is_kind_of(argv[0], rb_cRect)) {
@@ -62,10 +72,7 @@ static VALUE Rect_new(int argc, VALUE* argv, VALUE klass) {
         raise_invalid_arguments_excepted(4, argc);
     }
 
-    ptr = malloc(sizeof(Rect));
-    ptr->rect = rect;
-
-    self = TypedData_Wrap_Struct(klass, &Rect_data_type, ptr);
+    ((Rect*)Get_Rect_Struct(self))->rect = rect;
 
     return self;
 }
@@ -362,7 +369,8 @@ void Init_Rect(VALUE rb_mSFML) {
 
     rb_include_module(rb_cRect, rb_mEnumerable);
 
-    rb_define_singleton_method(rb_cRect, "new", Rect_new, -1);
+    rb_define_alloc_func(rb_cRect, Rect_alloc);
+    rb_define_method(rb_cRect, "initialize", Rect_initialize, -1);
 
     rb_define_method(rb_cRect, "left", Rect_get_left, 0);
     rb_define_method(rb_cRect, "top", Rect_get_top, 0);

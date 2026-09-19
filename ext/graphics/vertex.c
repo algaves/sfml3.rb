@@ -31,6 +31,18 @@ static VALUE Vertex_wrap(sfVertex vertex) {
     return TypedData_Wrap_Struct(rb_cVertex, &Vertex_data_type, ptr);
 }
 
+static VALUE Vertex_alloc(VALUE klass) {
+    Vertex* ptr = malloc(sizeof(Vertex));
+
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate vertex");
+    }
+
+    ptr->vertex = (sfVertex){{0, 0}, {0, 0, 0, 0}, {0, 0}};
+
+    return TypedData_Wrap_Struct(klass, &Vertex_data_type, ptr);
+}
+
 /* call-seq:
  *   Vertex.new                              -> Vertex
  *   Vertex.new(position)                    -> Vertex
@@ -42,7 +54,7 @@ static VALUE Vertex_wrap(sfVertex vertex) {
  *
  * @return [Vertex]
  */
-static VALUE Vertex_new(int argc, VALUE* argv, VALUE klass) {
+static VALUE Vertex_initialize(int argc, VALUE* argv, VALUE self) {
     VALUE rb_position, rb_color, rb_tex_coords;
     sfVertex vertex = {{0, 0}, {255, 255, 255, 255}, {0, 0}};
 
@@ -60,7 +72,9 @@ static VALUE Vertex_new(int argc, VALUE* argv, VALUE klass) {
         vertex.texCoords = vec2f_from_rb(rb_tex_coords);
     }
 
-    return Vertex_wrap(vertex);
+    ((Vertex*)Get_Vertex_Struct(self))->vertex = vertex;
+
+    return self;
 }
 
 /* call-seq: position -> Vector2
@@ -181,7 +195,8 @@ static VALUE Vertex_eql(VALUE self, VALUE rb_other) {
 void Init_Vertex(VALUE rb_mSFML) {
     rb_cVertex = rb_define_class_under(rb_mSFML, "Vertex", rb_cObject);
 
-    rb_define_singleton_method(rb_cVertex, "new", Vertex_new, -1);
+    rb_define_alloc_func(rb_cVertex, Vertex_alloc);
+    rb_define_method(rb_cVertex, "initialize", Vertex_initialize, -1);
 
     rb_define_method(rb_cVertex, "position", Vertex_get_position, 0);
     rb_define_method(rb_cVertex, "color", Vertex_get_color, 0);

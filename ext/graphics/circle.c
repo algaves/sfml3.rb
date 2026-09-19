@@ -61,6 +61,27 @@ static VALUE Circle_wrap(VALUE klass, sfCircleShape* shape) {
     return TypedData_Wrap_Struct(klass, &Circle_data_type, ptr);
 }
 
+static VALUE Circle_alloc(VALUE klass) {
+    Circle* ptr = malloc(sizeof(Circle));
+    sfCircleShape* shape;
+
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate circle shape");
+    }
+
+    shape = sfCircleShape_create();
+
+    if (shape == NULL) {
+        free(ptr);
+        rb_raise(rb_eRuntimeError, "failed to create circle shape");
+    }
+
+    ptr->shape = shape;
+    ptr->rb_texture = Qnil;
+
+    return TypedData_Wrap_Struct(klass, &Circle_data_type, ptr);
+}
+
 /* call-seq:
  *   Circle.new(radius = 0) -> Circle
  *
@@ -68,19 +89,16 @@ static VALUE Circle_wrap(VALUE klass, sfCircleShape* shape) {
  *
  * @return [Circle]
  */
-static VALUE Circle_new(int argc, VALUE* argv, VALUE klass) {
+static VALUE Circle_initialize(int argc, VALUE* argv, VALUE self) {
     VALUE rb_radius;
-    sfCircleShape* shape;
 
     rb_scan_args(argc, argv, "01", &rb_radius);
 
-    shape = sfCircleShape_create();
-
     if (!NIL_P(rb_radius)) {
-        sfCircleShape_setRadius(shape, NUM2DBL(rb_radius));
+        sfCircleShape_setRadius(Get_Circle_Shape(self), NUM2DBL(rb_radius));
     }
 
-    return Circle_wrap(klass, shape);
+    return self;
 }
 
 /* call-seq: copy -> Circle
@@ -532,9 +550,11 @@ static VALUE Circle_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
 void Init_Circle(VALUE rb_mSFML) {
     rb_cCircle = rb_define_class_under(rb_mSFML, "Circle", rb_cObject);
 
+    rb_define_alloc_func(rb_cCircle, Circle_alloc);
+
     rb_include_module(rb_cCircle, Get_Module_Drawable());
 
-    rb_define_singleton_method(rb_cCircle, "new", Circle_new, -1);
+    rb_define_method(rb_cCircle, "initialize", Circle_initialize, -1);
 
     // methods
     rb_define_method(rb_cCircle, "copy", Circle_copy, 0);
