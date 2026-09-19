@@ -42,6 +42,18 @@ static const char* context_flag_name(VALUE value) {
     return StringValueCStr(value);
 }
 
+static VALUE ContextSettings_alloc(VALUE klass) {
+    ContextSettings* ptr = malloc(sizeof(ContextSettings));
+
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate context settings");
+    }
+
+    ptr->settings = (sfContextSettings){0, 0, 0, 1, 1, sfContextDefault, false};
+
+    return TypedData_Wrap_Struct(klass, &ContextSettings_data_type, ptr);
+}
+
 /* call-seq:
  *   ContextSettings.new(depth_bits = 0, stencil_bits = 0, antialiasing_level = 0, major_version =
  * 1, minor_version = 1, flags = :default, srgb_capable = false) -> ContextSettings
@@ -49,10 +61,9 @@ static const char* context_flag_name(VALUE value) {
  * @return [ContextSettings]
  * @raise [ArgumentError] if +flags+ contains an unknown attribute name
  */
-static VALUE ContextSettings_new(int argc, VALUE* argv, VALUE klass) {
+static VALUE ContextSettings_initialize(int argc, VALUE* argv, VALUE self) {
     sfContextSettings settings = {0, 0, 0, 1, 1, sfContextDefault, false};
     VALUE rb_depth, rb_stencil, rb_antialiasing, rb_major, rb_minor, rb_flags, rb_srgb;
-    VALUE self;
 
     rb_scan_args(argc, argv, "07", &rb_depth, &rb_stencil, &rb_antialiasing, &rb_major, &rb_minor,
                  &rb_flags, &rb_srgb);
@@ -108,7 +119,7 @@ static VALUE ContextSettings_new(int argc, VALUE* argv, VALUE klass) {
         settings.sRgbCapable = RTEST(rb_srgb);
     }
 
-    self = ContextSettings_wrap(settings);
+    ((ContextSettings*)Get_ContextSettings_Struct(self))->settings = settings;
 
     return self;
 }
@@ -248,7 +259,8 @@ static VALUE ContextSettings_set_srgb(VALUE self, VALUE rb_value) {
 void Init_ContextSettings(VALUE rb_mSFML) {
     rb_cContextSettings = rb_define_class_under(rb_mSFML, "ContextSettings", rb_cObject);
 
-    rb_define_singleton_method(rb_cContextSettings, "new", ContextSettings_new, -1);
+    rb_define_alloc_func(rb_cContextSettings, ContextSettings_alloc);
+    rb_define_method(rb_cContextSettings, "initialize", ContextSettings_initialize, -1);
 
     rb_define_method(rb_cContextSettings, "depth_bits", ContextSettings_get_depth_bits, 0);
     rb_define_method(rb_cContextSettings, "stencil_bits", ContextSettings_get_stencil_bits, 0);

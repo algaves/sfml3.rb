@@ -3,23 +3,26 @@
 #include <ruby.h>
 
 #include "window/window.h"
+#include "window/window_base.h"
 #include "system/vec2.h"
 #include "core/exceptions.h"
 #include "core/macros.h"
 #include "core/sfml.h"
 
-/* nil means desktop-relative. CSFML gives sfRenderWindow its own entry point,
-   so a window argument never has to be cast down to sfWindowBase. */
-static const sfRenderWindow* Touch_relative_window(VALUE rb_window) {
-    if (NIL_P(rb_window)) {
-        return NULL;
+/* A RenderWindow and a Window both wrap an sfRenderWindow; a WindowBase wraps
+   an sfWindowBase. CSFML ships a separate entry point for each, so pick the one
+   matching the handle rather than casting between them. */
+static sfVector2i Touch_relative_position(unsigned int finger, VALUE rb_window) {
+    if (rb_obj_is_kind_of(rb_window, Get_Klass_Window())) {
+        return sfTouch_getPositionRenderWindow(finger, Get_Window_Struct(rb_window));
     }
 
-    if (!rb_obj_is_kind_of(rb_window, Get_Klass_Window())) {
-        raise_invalid_argument_class(Get_Klass_Window());
+    if (rb_obj_is_kind_of(rb_window, Get_Klass_WindowBase())) {
+        return sfTouch_getPositionWindowBase(finger, Get_WindowBase_Struct(rb_window));
     }
 
-    return Get_Window_Struct(rb_window);
+    raise_invalid_argument_class(Get_Klass_WindowBase());
+    return (sfVector2i){0, 0};
 }
 
 /* call-seq:
@@ -49,8 +52,7 @@ static VALUE Touch_get_position(int argc, VALUE* argv, VALUE module) {
     if (NIL_P(rb_window)) {
         position = sfTouch_getPosition(NUM2UINT(rb_finger), NULL);
     } else {
-        position =
-            sfTouch_getPositionRenderWindow(NUM2UINT(rb_finger), Touch_relative_window(rb_window));
+        position = Touch_relative_position(NUM2UINT(rb_finger), rb_window);
     }
 
     return vec2f_to_rb((sfVector2f){(float)position.x, (float)position.y});

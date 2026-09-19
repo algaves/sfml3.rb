@@ -41,6 +41,35 @@ class SfmlTest < Minitest::Test
       Dir.glob('/usr/share/fonts/**/*.ttf').first
   end
 
+  # Window class hierarchy -- structure only, so it stays safe headless. None
+  # of these construct a window (which would SIGABRT without a display).
+  def test_window_base_is_the_root_of_the_window_hierarchy
+    assert_operator Window, :<, WindowBase
+    assert_operator RenderWindow, :<, Window
+    refute_operator WindowBase, :<, Window
+  end
+
+  def test_render_target_module_is_shared_by_render_window_and_render_texture
+    assert_includes RenderWindow.ancestors, RenderTarget
+    assert_includes RenderTexture.ancestors, RenderTarget
+    refute_includes Window.ancestors, RenderTarget
+  end
+
+  def test_window_base_methods_live_on_the_root
+    %i[is_open? close! poll_event! wait_event! position size title= native_handle].each do |name|
+      assert_includes WindowBase.instance_methods, name, "#{name} missing from WindowBase"
+    end
+  end
+
+  def test_window_only_methods_are_absent_from_window_base
+    # :display is deliberately left out: Object#display exists, so it would
+    # make the WindowBase assertion meaningless.
+    %i[clear active= settings frame_rate= vertical_sync_enabled=].each do |name|
+      assert_includes Window.instance_methods(false), name, "#{name} missing from Window"
+      refute_includes WindowBase.instance_methods(false), name, "#{name} leaked onto WindowBase"
+    end
+  end
+
   # Clock
   def test_elapsed_time_nonnegative
     clock = Clock.new
@@ -904,5 +933,33 @@ class SfmlTest < Minitest::Test
 
   def test_ftp_construction
     assert_kind_of Ftp, Ftp.new
+  end
+
+  # Ruby warns (and undefines #allocate) whenever a T_DATA class is wrapped
+  # without an allocator. Constructing every display-free class in a child
+  # process catches a binding that forgot rb_define_alloc_func; the graphics
+  # classes that open a context cannot be built here without a display.
+  def test_no_allocator_warnings_on_construction
+    lib = File.expand_path('../lib', __dir__)
+    script = <<~RUBY
+      require 'sfml'
+      SFML::Color.new(1, 2, 3)
+      SFML::BlendMode.new
+      SFML::IpAddress.new(1)
+      SFML::Vector2.new(1, 2)
+      SFML::Vector3.new(1, 2, 3)
+      SFML::Time.new(1)
+      SFML::Clock.new
+      SFML::View.new
+      SFML::Event.new
+      SFML::VideoMode.new(1, 2, 3)
+      SFML::RenderState.new
+      SFML::Transformable.new
+      SFML::Circle.new(1)
+    RUBY
+
+    output = IO.popen([RbConfig.ruby, "-I#{lib}", '-e', script], err: %i[child out], &:read)
+
+    refute_includes output, 'undefining the allocator'
   end
 end

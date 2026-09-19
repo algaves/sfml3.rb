@@ -66,6 +66,18 @@ static VALUE IpAddress_from_integer(VALUE klass, VALUE rb_integer) {
     return ip_address_to_rb(sfIpAddress_fromInteger((uint32_t)NUM2UINT(rb_integer)));
 }
 
+static VALUE IpAddress_alloc(VALUE klass) {
+    IpAddress* ptr = malloc(sizeof(IpAddress));
+
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate IP address");
+    }
+
+    ptr->address = sfIpAddress_None;
+
+    return TypedData_Wrap_Struct(klass, &IpAddress_data_type, ptr);
+}
+
 /* call-seq:
  *   IpAddress.new(address) -> IpAddress
  *
@@ -75,22 +87,20 @@ static VALUE IpAddress_from_integer(VALUE klass, VALUE rb_integer) {
  * @return [IpAddress]
  * @raise [TypeError] if +address+ is none of the above
  */
-static VALUE IpAddress_new(VALUE klass, VALUE rb_address) {
+static VALUE IpAddress_initialize(VALUE self, VALUE rb_address) {
+    IpAddress* ptr = (IpAddress*)Get_IpAddress_Struct(self);
+
     if (RB_INTEGER_TYPE_P(rb_address)) {
-        return IpAddress_from_integer(klass, rb_address);
+        ptr->address = sfIpAddress_fromInteger((uint32_t)NUM2UINT(rb_address));
+    } else if (RB_TYPE_P(rb_address, T_STRING)) {
+        ptr->address = sfIpAddress_fromString(StringValueCStr(rb_address));
+    } else if (rb_obj_is_kind_of(rb_address, rb_cIpAddress)) {
+        ptr->address = ((IpAddress*)Get_IpAddress_Struct(rb_address))->address;
+    } else {
+        raise_invalid_argument_class(rb_cIpAddress);
     }
 
-    if (RB_TYPE_P(rb_address, T_STRING)) {
-        return IpAddress_from_string(klass, rb_address);
-    }
-
-    if (rb_obj_is_kind_of(rb_address, rb_cIpAddress)) {
-        return ip_address_to_rb(((IpAddress*)Get_IpAddress_Struct(rb_address))->address);
-    }
-
-    raise_invalid_argument_class(rb_cIpAddress);
-
-    return Qnil;
+    return self;
 }
 
 /* call-seq:
@@ -185,8 +195,9 @@ static VALUE IpAddress_hash(VALUE self) {
  */
 void Init_IpAddress(VALUE rb_mSFML) {
     rb_cIpAddress = rb_define_class_under(rb_mSFML, "IpAddress", rb_cObject);
+    rb_define_alloc_func(rb_cIpAddress, IpAddress_alloc);
 
-    rb_define_singleton_method(rb_cIpAddress, "new", IpAddress_new, 1);
+    rb_define_method(rb_cIpAddress, "initialize", IpAddress_initialize, 1);
     rb_define_singleton_method(rb_cIpAddress, "from_string", IpAddress_from_string, 1);
     rb_define_singleton_method(rb_cIpAddress, "from_bytes", IpAddress_from_bytes, 4);
     rb_define_singleton_method(rb_cIpAddress, "from_integer", IpAddress_from_integer, 1);

@@ -36,6 +36,16 @@ static VALUE Clock_new_from(VALUE klass, sfClock* clock) {
     return self;
 }
 
+static VALUE Clock_alloc(VALUE klass) {
+    sfClock* clock = Clock_create();
+
+    if (clock == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate clock");
+    }
+
+    return TypedData_Wrap_Struct(klass, &Clock_data_type, clock);
+}
+
 /* call-seq:
  *   Clock.new -> Clock
  *
@@ -43,10 +53,6 @@ static VALUE Clock_new_from(VALUE klass, sfClock* clock) {
  *
  * @return [Clock]
  */
-static VALUE Clock_new(VALUE klass) {
-    return Clock_new_from(klass, Clock_create());
-}
-
 static VALUE Clock_init(VALUE self) {
     return self;
 }
@@ -133,7 +139,7 @@ static VALUE Clock_copy(VALUE self) {
 void Init_Clock(VALUE rb_mSFML) {
     rb_cClock = rb_define_class_under(rb_mSFML, "Clock", rb_cObject);
 
-    rb_define_singleton_method(rb_cClock, "new", Clock_new, 0);
+    rb_define_alloc_func(rb_cClock, Clock_alloc);
 
     // methods
     rb_define_method(rb_cClock, "initialize", Clock_init, 0);

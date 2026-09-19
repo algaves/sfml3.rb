@@ -17,7 +17,9 @@ static VALUE rb_cVertexBuffer;
 static const char* usage_names[] = {"stream", "dynamic", "static"};
 
 static void VertexBuffer_free(void* ptr) {
-    sfVertexBuffer_destroy(ptr);
+    if (ptr != NULL) {
+        sfVertexBuffer_destroy(ptr);
+    }
 }
 
 static const rb_data_type_t VertexBuffer_data_type = {
@@ -60,6 +62,15 @@ static sfVertexBufferUsage usage_from_rb(VALUE rb_usage) {
     return sfVertexBufferStatic;
 }
 
+static VALUE VertexBuffer_initialize_copy(VALUE self, VALUE other) {
+    (void)other;
+    rb_raise(rb_eTypeError, "can't copy a %s", rb_obj_classname(self));
+}
+
+static VALUE VertexBuffer_alloc(VALUE klass) {
+    return TypedData_Wrap_Struct(klass, &VertexBuffer_data_type, NULL);
+}
+
 /* call-seq:
  *   VertexBuffer.new                                    -> VertexBuffer
  *   VertexBuffer.new(count)                             -> VertexBuffer
@@ -74,11 +85,12 @@ static sfVertexBufferUsage usage_from_rb(VALUE rb_usage) {
  * @return [VertexBuffer]
  * @raise [RuntimeError] if creation fails
  */
-static VALUE VertexBuffer_new(int argc, VALUE* argv, VALUE klass) {
+static VALUE VertexBuffer_initialize(int argc, VALUE* argv, VALUE self) {
     VALUE rb_count, rb_primitive, rb_usage;
     size_t count = 0;
     sfPrimitiveType primitive = sfPoints;
     sfVertexBufferUsage usage = sfVertexBufferStatic;
+    sfVertexBuffer* buffer;
 
     rb_scan_args(argc, argv, "03", &rb_count, &rb_primitive, &rb_usage);
 
@@ -94,7 +106,15 @@ static VALUE VertexBuffer_new(int argc, VALUE* argv, VALUE klass) {
         usage = usage_from_rb(rb_usage);
     }
 
-    return VertexBuffer_wrap(klass, sfVertexBuffer_create(count, primitive, usage));
+    buffer = sfVertexBuffer_create(count, primitive, usage);
+
+    if (buffer == NULL) {
+        rb_raise(rb_eRuntimeError, "failed to create vertex buffer");
+    }
+
+    DATA_PTR(self) = buffer;
+
+    return self;
 }
 
 /* call-seq: copy -> VertexBuffer
@@ -277,17 +297,14 @@ static VALUE VertexBuffer_is_available(VALUE klass) {
  *   RenderState
  */
 static VALUE VertexBuffer_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
-    if (!rb_obj_is_kind_of(rb_target, Get_Klass_Target())) {
-        raise_invalid_argument_class(Get_Klass_Target());
-    }
+    TargetView view = Get_RenderTarget_View(rb_target);
 
     if (!rb_obj_is_kind_of(rb_state, Get_Klass_RenderState())) {
         raise_invalid_argument_class(Get_Klass_RenderState());
     }
 
-    TARGET_DRAW(Get_Target_Struct(rb_target), sfRenderWindow_drawVertexBuffer,
-                sfRenderTexture_drawVertexBuffer, Get_VertexBuffer_Struct(self),
-                Get_RenderState_Struct(rb_state));
+    TARGET_DRAW(view, sfRenderWindow_drawVertexBuffer, sfRenderTexture_drawVertexBuffer,
+                Get_VertexBuffer_Struct(self), Get_RenderState_Struct(rb_state));
 
     return Qnil;
 }
@@ -309,9 +326,12 @@ static VALUE VertexBuffer_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
 void Init_VertexBuffer(VALUE rb_mSFML) {
     rb_cVertexBuffer = rb_define_class_under(rb_mSFML, "VertexBuffer", rb_cObject);
 
+    rb_define_alloc_func(rb_cVertexBuffer, VertexBuffer_alloc);
+
     rb_include_module(rb_cVertexBuffer, Get_Module_Drawable());
 
-    rb_define_singleton_method(rb_cVertexBuffer, "new", VertexBuffer_new, -1);
+    rb_define_method(rb_cVertexBuffer, "initialize", VertexBuffer_initialize, -1);
+    rb_define_private_method(rb_cVertexBuffer, "initialize_copy", VertexBuffer_initialize_copy, 1);
     rb_define_singleton_method(rb_cVertexBuffer, "available?", VertexBuffer_is_available, 0);
 
     rb_define_method(rb_cVertexBuffer, "copy", VertexBuffer_copy, 0);

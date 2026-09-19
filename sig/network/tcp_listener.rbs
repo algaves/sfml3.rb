@@ -1,6 +1,6 @@
 module SFML
   class TcpListener
-    def self.new: () -> TcpListener
+    def initialize: () -> void
     def self.any_port: () -> Integer
 
     def blocking?: () -> bool

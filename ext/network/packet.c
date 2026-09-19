@@ -38,6 +38,10 @@ static VALUE Packet_wrap(VALUE klass, sfPacket* packet) {
     return TypedData_Wrap_Struct(klass, &Packet_data_type, ptr);
 }
 
+static VALUE Packet_alloc(VALUE klass) {
+    return Packet_wrap(klass, sfPacket_create());
+}
+
 /* call-seq:
  *   Packet.new -> Packet
  *
@@ -45,8 +49,8 @@ static VALUE Packet_wrap(VALUE klass, sfPacket* packet) {
  *
  * @return [Packet] a new, empty packet
  */
-static VALUE Packet_new(VALUE klass) {
-    return Packet_wrap(klass, sfPacket_create());
+static VALUE Packet_initialize(VALUE self) {
+    return self;
 }
 
 /* call-seq: copy -> Packet
@@ -230,8 +234,9 @@ static VALUE Packet_write_string(VALUE self, VALUE rb_value) {
  */
 void Init_Packet(VALUE rb_mSFML) {
     rb_cPacket = rb_define_class_under(rb_mSFML, "Packet", rb_cObject);
+    rb_define_alloc_func(rb_cPacket, Packet_alloc);
 
-    rb_define_singleton_method(rb_cPacket, "new", Packet_new, 0);
+    rb_define_method(rb_cPacket, "initialize", Packet_initialize, 0);
 
     rb_define_method(rb_cPacket, "copy", Packet_copy, 0);
     rb_define_method(rb_cPacket, "append", Packet_append, 1);

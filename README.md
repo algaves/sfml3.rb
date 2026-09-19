@@ -10,7 +10,7 @@ Ruby bindings for [SFML 3](https://www.sfml-dev.org/), via its C API, [CSFML](ht
 [![Gem Downloads](https://img.shields.io/gem/dt/sfml3-rb?style=flat-square)](https://rubygems.org/gems/sfml3-rb)
 [![License](https://img.shields.io/badge/license-0BSD-green?style=flat-square)](LICENSE.md)
 
-Latest release: **0.3.0**, bound against **CSFML 3**.
+Latest release: **0.3.1**, bound against **CSFML 3**.
 
 ## Features
 
@@ -23,8 +23,9 @@ Latest release: **0.3.0**, bound against **CSFML 3**.
 * **Complete API documentation and types**: every class, module, method and constant is documented
   on the [docs site](https://algaves.github.io/sfml3.rb/) and covered by RBS signatures shipped in
   the gem.
-* **A close fit to SFML's own model**: classes mirror the C++ types (Window, Texture, Sprite,
-  Sound, ...) minus the parts that only exist in C++, like `std::string` and exceptions.
+* **A close fit to SFML's own model**: classes mirror the C++ types (WindowBase, Window,
+  RenderWindow, Texture, Sprite, Sound, ...) minus the parts that only exist in C++, like
+  `std::string` and exceptions.
 
 ## Table of Contents
 
@@ -128,10 +129,26 @@ part of the test suite.
 * [API reference](https://algaves.github.io/sfml3.rb/) — every class, module, method and constant,
   built from the YARD comments in `ext/**/*.c` and deployed to GitHub Pages by CI. The same docs
   are also generated on [RubyDoc.info](https://rubydoc.info/gems/sfml3-rb).
-* RBS type signatures (`sig/**/*.rbs`) ship in the gem for IDE completion (Solargraph, RubyMine)
-  and static type-checking (Sorbet, Steep). Validate them with `rake rbs`.
+* RBS type signatures (`sig/**/*.rbs`) describe the whole API, including the native classes, for
+  RBS-aware editors. `rake rbs` validates the signatures and `rake steep` type-checks `lib/`
+  against them.
 * [CHANGELOG.md](CHANGELOG.md) — what changed in each release.
 * [TODO.md](TODO.md) — module-by-module porting coverage and what is deliberately unbound.
+
+### IDE setup (RubyMine)
+
+`sig/**/*.rbs` is the only machine-readable description of the API: the native extension cannot be
+introspected, so an editor either reads the signatures or sees nothing. RBS support lives in
+**RubyMine** (and IntelliJ IDEA Ultimate with the Ruby plugin); CLion and other C/C++ IDEs show
+`.rbs` files as plain text.
+
+1. Open the project in RubyMine and point **Settings → Languages & Frameworks → Ruby SDK** at the
+   interpreter you build against (Ruby 3.1+). Keep the C sources in CLion/clangd.
+2. Run `bundle install` so the `rbs` gem (3.2+) is available to that interpreter.
+3. RubyMine indexes `sig/` automatically; completion, type info (`Ctrl+Shift+P`), parameter info
+   and *Navigate → Type Signature* then work for `Window.new` and the rest of the API.
+4. For a full type check, run `steep check` from *Run anything* (`Ctrl` twice); `Steepfile` points
+   it at `lib/` and `sig/`.
 
 ## Development
 
@@ -142,6 +159,7 @@ rake test     # compile, then run the test suite
 rake gem      # build the source gem into pkg/
 rake yard     # build API docs into doc/
 rake rbs      # validate sig/**/*.rbs
+rake steep    # type-check lib/ against sig/**/*.rbs
 ```
 
 `rake githooks:install` points your checkout at the committed `.githooks/` pre-commit hook, which
@@ -157,9 +175,12 @@ side by side: `core/` (CSFML umbrella header, macros, exceptions, UTF-32 convers
 devices), `graphics/` (shapes, Color, Transform, View, Texture, Text, Shader, the render targets),
 `audio/` and `network/`. Includes are subsystem-relative, e.g. `#include "graphics/circle.h"`.
 
-Two `.inc` files hold method bodies shared by several classes and are included once per class with
-a different macro prefix: `audio/sound_source.inc` (Sound, Music, SoundStream) and
-`graphics/render_target.inc` (Window, RenderTexture).
+Three `.inc` files hold method bodies shared by several classes and are included once per class
+with a different macro prefix: `audio/sound_source.inc` (Sound, Music, SoundStream),
+`window/window_base.inc` (WindowBase, Window) and `graphics/render_target.inc` (Window,
+RenderTexture). `SFML::RenderWindow < SFML::Window < SFML::WindowBase` and includes the
+`SFML::RenderTarget` module, so a drawable's `#draw` accepts a `RenderWindow` or a
+`RenderTexture` directly; `SFML::Target` remains as the legacy generic wrapper.
 
 Note that mkmf flattens object files to their basenames, so every `.c` filename has to stay
 unique across the whole tree — and that `$srcs` is baked into the generated Makefile, so after

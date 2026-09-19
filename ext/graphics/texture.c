@@ -76,6 +76,24 @@ static const sfIntRect* Texture_area_ptr(VALUE rb_area, sfIntRect* storage) {
     return storage;
 }
 
+static VALUE Texture_initialize_copy(VALUE self, VALUE other) {
+    (void)other;
+    rb_raise(rb_eTypeError, "can't copy a %s", rb_obj_classname(self));
+}
+
+static VALUE Texture_alloc(VALUE klass) {
+    Texture* ptr = malloc(sizeof(Texture));
+
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate texture");
+    }
+
+    ptr->texture = NULL;
+    ptr->owns = false;
+
+    return TypedData_Wrap_Struct(klass, &Texture_data_type, ptr);
+}
+
 /* call-seq:
  *   Texture.new(size) -> Texture
  *
@@ -84,8 +102,19 @@ static const sfIntRect* Texture_area_ptr(VALUE rb_area, sfIntRect* storage) {
  * @return [Texture] an empty texture of +size+ (a Vector2 or 2-element Array)
  * @raise [RuntimeError] if creation fails
  */
-static VALUE Texture_new(VALUE klass, VALUE rb_size) {
-    return Texture_wrap(klass, sfTexture_create(vec2u_from_rb(rb_size)));
+static VALUE Texture_initialize(VALUE self, VALUE rb_size) {
+    Texture* ptr;
+    sfTexture* texture = sfTexture_create(vec2u_from_rb(rb_size));
+
+    if (texture == NULL) {
+        rb_raise(rb_eRuntimeError, "failed to create texture");
+    }
+
+    TypedData_Get_Struct(self, Texture, &Texture_data_type, ptr);
+    ptr->texture = texture;
+    ptr->owns = true;
+
+    return self;
 }
 
 /* call-seq:
@@ -590,7 +619,9 @@ static VALUE Texture_maximum_size(VALUE klass) {
 void Init_Texture(VALUE rb_mSFML) {
     rb_cTexture = rb_define_class_under(rb_mSFML, "Texture", rb_cObject);
 
-    rb_define_singleton_method(rb_cTexture, "new", Texture_new, 1);
+    rb_define_alloc_func(rb_cTexture, Texture_alloc);
+    rb_define_method(rb_cTexture, "initialize", Texture_initialize, 1);
+    rb_define_private_method(rb_cTexture, "initialize_copy", Texture_initialize_copy, 1);
     rb_define_singleton_method(rb_cTexture, "from_file", Texture_from_file, -1);
     rb_define_singleton_method(rb_cTexture, "from_memory", Texture_from_memory, -1);
     rb_define_singleton_method(rb_cTexture, "from_stream", Texture_from_stream, -1);

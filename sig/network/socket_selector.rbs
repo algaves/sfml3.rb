@@ -1,6 +1,6 @@
 module SFML
   class SocketSelector
-    def self.new: () -> SocketSelector
+    def initialize: () -> void
 
     def copy: () -> SocketSelector
     def add: (TcpListener | TcpSocket | UdpSocket socket) -> self

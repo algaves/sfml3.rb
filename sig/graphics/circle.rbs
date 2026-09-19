@@ -2,7 +2,7 @@ module SFML
   class Circle
     include Drawable
 
-    def self.new: (?Float radius) -> Circle
+    def initialize: (?Float radius) -> void
 
     def copy: () -> Circle
     def move: (Vector2 | Array[Float] offset) -> self

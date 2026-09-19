@@ -47,6 +47,10 @@ VALUE tcp_socket_from_handle(sfTcpSocket* socket) {
     return TcpSocket_wrap(rb_cTcpSocket, socket);
 }
 
+static VALUE TcpSocket_alloc(VALUE klass) {
+    return TcpSocket_wrap(klass, sfTcpSocket_create());
+}
+
 /* call-seq:
  *   TcpSocket.new -> TcpSocket
  *
@@ -54,8 +58,8 @@ VALUE tcp_socket_from_handle(sfTcpSocket* socket) {
  *
  * @return [TcpSocket] a new, unconnected socket
  */
-static VALUE TcpSocket_new(VALUE klass) {
-    return TcpSocket_wrap(klass, sfTcpSocket_create());
+static VALUE TcpSocket_initialize(VALUE self) {
+    return self;
 }
 
 /* call-seq: blocking? -> true or false
@@ -274,8 +278,9 @@ static VALUE TcpSocket_receive_packet(VALUE self, VALUE rb_packet) {
  */
 void Init_TcpSocket(VALUE rb_mSFML) {
     rb_cTcpSocket = rb_define_class_under(rb_mSFML, "TcpSocket", rb_cObject);
+    rb_define_alloc_func(rb_cTcpSocket, TcpSocket_alloc);
 
-    rb_define_singleton_method(rb_cTcpSocket, "new", TcpSocket_new, 0);
+    rb_define_method(rb_cTcpSocket, "initialize", TcpSocket_initialize, 0);
 
     rb_define_method(rb_cTcpSocket, "blocking?", TcpSocket_blocking, 0);
     rb_define_method(rb_cTcpSocket, "blocking=", TcpSocket_set_blocking, 1);

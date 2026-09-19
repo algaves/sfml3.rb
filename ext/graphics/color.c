@@ -54,6 +54,18 @@ static sfColor Color_from_integer(VALUE rb_integer) {
                      (unsigned char)((value >> 8) & 0xFF), (unsigned char)(value & 0xFF)};
 }
 
+static VALUE Color_alloc(VALUE klass) {
+    Color* ptr = malloc(sizeof(Color));
+
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate color");
+    }
+
+    ptr->color = (sfColor){0, 0, 0, 255};
+
+    return TypedData_Wrap_Struct(klass, &Color_data_type, ptr);
+}
+
 /* call-seq:
  *   Color.new                    -> Color(0, 0, 0, 255)
  *   Color.new(r, g, b, a=255)    -> Color(r, g, b, a)
@@ -70,9 +82,7 @@ static sfColor Color_from_integer(VALUE rb_integer) {
  * @raise [ArgumentError] if given an Array shorter than 3 elements, or an
  *   argument count other than 0, 1, 3 or 4
  */
-static VALUE Color_new(int argc, VALUE* argv, VALUE klass) {
-    VALUE self;
-    Color* ptr;
+static VALUE Color_initialize(int argc, VALUE* argv, VALUE self) {
     sfColor color = {0, 0, 0, 255};
 
     if (argc == 1 && rb_obj_is_kind_of(argv[0], rb_cColor)) {
@@ -90,10 +100,7 @@ static VALUE Color_new(int argc, VALUE* argv, VALUE klass) {
         raise_invalid_arguments_excepted(4, argc);
     }
 
-    ptr = malloc(sizeof(Color));
-    ptr->color = color;
-
-    self = TypedData_Wrap_Struct(klass, &Color_data_type, ptr);
+    ((Color*)Get_Color_Struct(self))->color = color;
 
     return self;
 }
@@ -344,7 +351,9 @@ static VALUE Color_to_s(VALUE self) {
 void Init_Color(VALUE rb_mSFML) {
     rb_cColor = rb_define_class_under(rb_mSFML, "Color", rb_cObject);
 
-    rb_define_singleton_method(rb_cColor, "new", Color_new, -1);
+    rb_define_alloc_func(rb_cColor, Color_alloc);
+    rb_define_method(rb_cColor, "initialize", Color_initialize, -1);
+
     rb_define_singleton_method(rb_cColor, "from_rgb", Color_from_rgb, 1);
     rb_define_singleton_method(rb_cColor, "from_rgba", Color_from_rgba, 1);
 

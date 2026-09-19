@@ -9,7 +9,7 @@
 
 static VALUE rb_cMode;
 
-static sfVideoMode* VideoMode_alloc(unsigned width, unsigned height, unsigned bits, int* created) {
+static sfVideoMode* VideoMode_create(unsigned width, unsigned height, unsigned bits, int* created) {
     sfVideoMode* mode = malloc(sizeof(sfVideoMode));
 
     if (mode == NULL) {
@@ -36,8 +36,14 @@ static const rb_data_type_t VideoMode_data_type = {
     .function = {.dmark = NULL, .dfree = VideoMode_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
+static VALUE VideoMode_alloc(VALUE klass) {
+    sfVideoMode* ptr = VideoMode_create(0, 0, 0, NULL);
+
+    return TypedData_Wrap_Struct(klass, &VideoMode_data_type, ptr);
+}
+
 static VALUE VideoMode_from_c(sfVideoMode mode) {
-    sfVideoMode* ptr = VideoMode_alloc(mode.size.x, mode.size.y, mode.bitsPerPixel, NULL);
+    sfVideoMode* ptr = VideoMode_create(mode.size.x, mode.size.y, mode.bitsPerPixel, NULL);
     VALUE self = TypedData_Wrap_Struct(rb_cMode, &VideoMode_data_type, ptr);
 
     rb_iv_set(self, "@width", UINT2NUM(mode.size.x));
@@ -54,28 +60,13 @@ static VALUE VideoMode_from_c(sfVideoMode mode) {
  *
  * @return [VideoMode]
  */
-static VALUE VideoMode_new(VALUE klass, VALUE rb_width, VALUE rb_height, VALUE rb_bits) {
-    VALUE self;
-    VALUE argv[] = {rb_width, rb_height, rb_bits};
+static VALUE VideoMode_initialize(VALUE self, VALUE rb_width, VALUE rb_height, VALUE rb_bits) {
+    sfVideoMode* mode = Get_Mode_Struct(self);
 
-    self = VideoMode_from_c(
-        (sfVideoMode){{(unsigned)NUM2UINT(rb_width), (unsigned)NUM2UINT(rb_height)},
-                      (unsigned)NUM2UINT(rb_bits)});
+    mode->size.x = (unsigned)NUM2UINT(rb_width);
+    mode->size.y = (unsigned)NUM2UINT(rb_height);
+    mode->bitsPerPixel = (unsigned)NUM2UINT(rb_bits);
 
-    rb_obj_call_init(self, 3, argv);
-
-    return self;
-}
-
-/* call-seq: initialize(width, height, bits) -> self
- *
- * Stores the mode's dimensions; called internally by .new.
- *
- * @private Sets the ivars backing the #width/#height/#bits readers; called
- *   internally by .new.
- * @return [self]
- */
-static VALUE VideoMode_init(VALUE self, VALUE rb_width, VALUE rb_height, VALUE rb_bits) {
     rb_iv_set(self, "@width", rb_width);
     rb_iv_set(self, "@height", rb_height);
     rb_iv_set(self, "@bits", rb_bits);
@@ -179,11 +170,11 @@ static VALUE VideoMode_eql(VALUE self, VALUE rb_other) {
 void Init_VideoMode(VALUE rb_mSFML) {
     rb_cMode = rb_define_class_under(rb_mSFML, "VideoMode", rb_cObject);
 
-    rb_define_singleton_method(rb_cMode, "new", VideoMode_new, 3);
+    rb_define_alloc_func(rb_cMode, VideoMode_alloc);
+    rb_define_method(rb_cMode, "initialize", VideoMode_initialize, 3);
+
     rb_define_singleton_method(rb_cMode, "desktop_mode", VideoMode_desktop_mode, 0);
     rb_define_singleton_method(rb_cMode, "fullscreen_modes", VideoMode_fullscreen_modes, 0);
-
-    rb_define_method(rb_cMode, "initialize", VideoMode_init, 3);
     rb_define_method(rb_cMode, "available?", VideoMode_is_available, 0);
     rb_define_method(rb_cMode, "valid?", VideoMode_is_available, 0);
     rb_define_method(rb_cMode, "size", VideoMode_get_size, 0);

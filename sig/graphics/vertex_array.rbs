@@ -1,6 +1,6 @@
 module SFML
   class VertexArray
-    def self.new: () -> VertexArray
+    def initialize: () -> void
 
     def copy: () -> VertexArray
     def vertex_count: () -> Integer

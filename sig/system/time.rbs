@@ -2,10 +2,10 @@ module SFML
   class Time
     include Comparable
 
-    def self.new: () -> Time
-                 | (Float seconds) -> Time
-                 | (Integer microseconds) -> Time
-                 | (Time other) -> Time
+    def initialize: () -> void
+                 | (Float seconds) -> void
+                 | (Integer microseconds) -> void
+                 | (Time other) -> void
     def self.seconds: (Float value) -> Time
     def self.milliseconds: (Integer value) -> Time
     def self.microseconds: (Integer value) -> Time

@@ -59,6 +59,27 @@ static VALUE ConvexShape_wrap(VALUE klass, sfConvexShape* shape) {
     return TypedData_Wrap_Struct(klass, &ConvexShape_data_type, ptr);
 }
 
+static VALUE ConvexShape_alloc(VALUE klass) {
+    ConvexShape* ptr = malloc(sizeof(ConvexShape));
+    sfConvexShape* shape;
+
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate convex shape");
+    }
+
+    shape = sfConvexShape_create();
+
+    if (shape == NULL) {
+        free(ptr);
+        rb_raise(rb_eRuntimeError, "failed to create convex shape");
+    }
+
+    ptr->shape = shape;
+    ptr->rb_texture = Qnil;
+
+    return TypedData_Wrap_Struct(klass, &ConvexShape_data_type, ptr);
+}
+
 /* call-seq:
  *   ConvexShape.new(point_count = 0) -> ConvexShape
  *
@@ -66,17 +87,17 @@ static VALUE ConvexShape_wrap(VALUE klass, sfConvexShape* shape) {
  *
  * @return [ConvexShape]
  */
-static VALUE ConvexShape_new(int argc, VALUE* argv, VALUE klass) {
-    sfConvexShape* shape = sfConvexShape_create();
+static VALUE ConvexShape_initialize(int argc, VALUE* argv, VALUE self) {
     VALUE rb_point_count;
 
     rb_scan_args(argc, argv, "01", &rb_point_count);
 
     if (!NIL_P(rb_point_count)) {
-        sfConvexShape_setPointCount(shape, (size_t)NUM2SIZET(rb_point_count));
+        sfConvexShape_setPointCount(Get_ConvexShape_Struct(self),
+                                    (size_t)NUM2SIZET(rb_point_count));
     }
 
-    return ConvexShape_wrap(klass, shape);
+    return self;
 }
 
 /* call-seq: copy -> ConvexShape
@@ -463,17 +484,14 @@ static VALUE ConvexShape_get_global_bounds(VALUE self) {
  * @return [nil]
  */
 static VALUE ConvexShape_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
-    if (!rb_obj_is_kind_of(rb_target, Get_Klass_Target())) {
-        raise_invalid_argument_class(Get_Klass_Target());
-    }
+    TargetView view = Get_RenderTarget_View(rb_target);
 
     if (!rb_obj_is_kind_of(rb_state, Get_Klass_RenderState())) {
         raise_invalid_argument_class(Get_Klass_RenderState());
     }
 
-    TARGET_DRAW(Get_Target_Struct(rb_target), sfRenderWindow_drawConvexShape,
-                sfRenderTexture_drawConvexShape, Get_ConvexShape_Struct(self),
-                Get_RenderState_Struct(rb_state));
+    TARGET_DRAW(view, sfRenderWindow_drawConvexShape, sfRenderTexture_drawConvexShape,
+                Get_ConvexShape_Struct(self), Get_RenderState_Struct(rb_state));
 
     return Qnil;
 }
@@ -520,9 +538,11 @@ static VALUE ConvexShape_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
 void Init_ConvexShape(VALUE rb_mSFML) {
     rb_cConvexShape = rb_define_class_under(rb_mSFML, "ConvexShape", rb_cObject);
 
+    rb_define_alloc_func(rb_cConvexShape, ConvexShape_alloc);
+
     rb_include_module(rb_cConvexShape, Get_Module_Drawable());
 
-    rb_define_singleton_method(rb_cConvexShape, "new", ConvexShape_new, -1);
+    rb_define_method(rb_cConvexShape, "initialize", ConvexShape_initialize, -1);
 
     rb_define_method(rb_cConvexShape, "copy", ConvexShape_copy, 0);
 

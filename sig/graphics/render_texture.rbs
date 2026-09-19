@@ -1,6 +1,8 @@
 module SFML
   class RenderTexture
-    def self.new: (Vector2 size, ?untyped settings) -> RenderTexture
+    include RenderTarget
+
+    def initialize: (Vector2 size, ?untyped settings) -> void
     def self.maximum_antialiasing_level: () -> Integer
 
     def size: () -> Vector2
@@ -20,7 +22,7 @@ module SFML
 
     def draw: (untyped drawable, ?untyped state) -> self
 
-    # Shared with Window via render_target.inc -- see ext/graphics/render_target.inc
+    # Shared with RenderWindow via render_target.inc -- see ext/graphics/render_target.inc
     def srgb?: () -> bool
     def clear_stencil: (Integer value) -> self
     def clear_color_and_stencil: (untyped color, Integer stencil) -> self

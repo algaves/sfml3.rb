@@ -51,9 +51,14 @@ Base module: time, vectors, clocks, streams.
 
 OpenGL-based windows, events, input handling.
 
-- [x] **Window** — `SFML::Window` (`ext/window/window.c`); wraps `sfRenderWindow`, so this single
-      class covers what SFML splits into `WindowBase` + `Window` + `RenderWindow`. Accepts style,
-      state and `ContextSettings`; exposes min/max size, icon, cursor, native handle, settings.
+- [x] **WindowBase** — `SFML::WindowBase` (`ext/window/window_base.c`); wraps `sfWindowBase`, an OS
+      window and event queue with no OpenGL context. The methods shared with `Window` are generated
+      from `ext/window/window_base.inc`.
+- [x] **Window** — `SFML::Window` (`ext/window/window.c`); wraps `sfRenderWindow` and derives from
+      `WindowBase`, overriding every base method with the matching `sfRenderWindow_*` entry point.
+      Accepts style, state and `ContextSettings`; exposes min/max size, icon, cursor, native handle,
+      settings, display, and the render-target surface. Deliberately still renderable, so existing
+      `Window.new(...).clear` code keeps working.
 - [x] **VideoMode** — `SFML::VideoMode` (`ext/window/video_mode.c`); includes `desktop_mode` and
       `fullscreen_modes`
 - [x] **Event** — `SFML::Event` (`ext/window/event.c`, `ext/window/event_name.c`); every payload is
@@ -87,13 +92,16 @@ OpenGL-based windows, events, input handling.
 - [x] **Drawable** — `SFML::Drawable` mixin (`ext/graphics/drawable.c`)
 - [x] **RenderStates** — `SFML::RenderState` (`ext/graphics/render_state.c`); blend mode, stencil
       mode, coordinate type, texture, shader and transform are all settable
-- [x] **RenderTarget** — `SFML::Target` (`ext/graphics/target.c`) dispatches to `sfRenderWindow_*`
-      or `sfRenderTexture_*` at runtime for `Drawable#draw`. The methods each concrete target owns
-      directly — `map_pixel_to_coords`, `map_coords_to_pixel`, `push_gl_states`, `pop_gl_states`,
+- [x] **RenderTarget** — `SFML::RenderTarget` module (`ext/graphics/target.c`), included by
+      `RenderWindow` and `RenderTexture`, so a drawable's `#draw` accepts either directly. The
+      methods — `map_pixel_to_coords`, `map_coords_to_pixel`, `push_gl_states`, `pop_gl_states`,
       `reset_gl_states`, `draw_primitives`, `draw_vertex_buffer_range`, `clear_stencil`,
       `clear_color_and_stencil`, `viewport`, `scissor`, `srgb?` — are generated once for both
-      `Window` and `RenderTexture` from `ext/graphics/render_target.inc`
-- [x] **RenderWindow** — folded into `SFML::Window` (see Window module above)
+      `Window` and `RenderTexture` from `ext/graphics/render_target.inc`. `SFML::Target` remains
+      as the legacy runtime-dispatch wrapper for `Drawable#draw`.
+- [x] **RenderWindow** — `SFML::RenderWindow` (`ext/graphics/render_window.c`); derives from
+      `Window` and includes `RenderTarget`. Creation, events and the window surface come from
+      `Window` / `WindowBase`.
 - [x] **RenderTexture** — `SFML::RenderTexture` (`ext/graphics/render_texture.c`)
 - [x] **View** — `SFML::View` (`ext/graphics/view.c`); including `View.from_rect` and
       `scissor`/`scissor=`
@@ -179,9 +187,8 @@ without re-deriving the reasoning each time.
 
 | Symbols | Why |
 | --- | --- |
-| `sfWindow_*`, `sfWindowBase_*` (~55 functions) | `SFML::Window` wraps `sfRenderWindow`, which subsumes both a plain window and a base window. |
-| `sfMouse_*WindowBase`, `sfTouch_getPositionWindowBase` | Superseded by the `*RenderWindow` forms, which need no downcast. |
-| `sfRenderWindow_create`, `sfText_getString`/`setString`, `sfRenderWindow_setTitle`, `sfFtpDirectoryResponse_getDirectory` | Superseded by their `*Unicode` counterparts; the narrow forms decode through the C locale and mangle non-ASCII. |
+| `sfWindow_*` (~26 functions) | A plain `sfWindow` (an OpenGL context with no render-target surface); `SFML::Window` wraps `sfRenderWindow` and `SFML::WindowBase` wraps `sfWindowBase`. |
+| `sfRenderWindow_create`, `sfWindowBase_create`, `sfText_getString`/`setString`, `sfRenderWindow_setTitle`, `sfWindowBase_setTitle`, `sfFtpDirectoryResponse_getDirectory` | Superseded by their `*Unicode` counterparts; the narrow forms decode through the C locale and mangle non-ASCII. |
 | `sfColor_add`/`subtract`/`modulate`/`fromRGB`/`fromRGBA`/`fromInteger`/`toInteger`, `sfIntRect_contains`/`intersects` | Reimplemented directly in C in `color.c` / `rect.c`; the Ruby methods exist. |
 | `sfSprite_getTexture`, `sfText_getFont`, `sf*Shape_getTexture` | The Ruby getters return the cached wrapper object. CSFML returns a non-owning pointer, so re-wrapping it would hand Ruby an object it must not free. |
 | `sfShape_getPoint`, `sfShape_getPointCount` | `SFML::Shape` reads these from the Ruby subclass, which is where they are defined. |

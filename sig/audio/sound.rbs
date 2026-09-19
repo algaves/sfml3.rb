@@ -1,6 +1,6 @@
 module SFML
   class Sound
-    def self.new: (SoundBuffer buffer) -> Sound
+    def initialize: (SoundBuffer buffer) -> void
 
     def copy: () -> Sound
     def buffer: () -> SoundBuffer

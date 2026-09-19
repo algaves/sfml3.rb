@@ -2,11 +2,11 @@ module SFML
   class Rect
     include Enumerable[Float]
 
-    def self.new: () -> Rect
-                 | (Float left, Float top) -> Rect
-                 | (Float left, Float top, Float width, Float height) -> Rect
-                 | (Array[Float] left_top_width_height) -> Rect
-                 | (Rect other) -> Rect
+    def initialize: () -> void
+                 | (Float left, Float top) -> void
+                 | (Float left, Float top, Float width, Float height) -> void
+                 | (Array[Float] left_top_width_height) -> void
+                 | (Rect other) -> void
 
     def left: () -> Float
     def left=: (Float value) -> Float

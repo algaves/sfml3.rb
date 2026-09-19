@@ -728,6 +728,11 @@ static VALUE Shader_set_uniform(VALUE self, VALUE rb_name, VALUE rb_value) {
     return self;
 }
 
+static VALUE Shader_alloc(VALUE klass) {
+    (void)klass;
+    rb_raise(rb_eNotImpError, "use Shader.from_file, Shader.from_memory or Shader.from_stream");
+}
+
 /* Document-class: SFML::Shader
  * A GLSL vertex/geometry/fragment shader program, uploaded to the GPU and
  * carried on RenderState#shader.
@@ -757,6 +762,7 @@ static VALUE Shader_set_uniform(VALUE self, VALUE rb_name, VALUE rb_value) {
  */
 void Init_Shader(VALUE rb_mSFML) {
     rb_cShader = rb_define_class_under(rb_mSFML, "Shader", rb_cObject);
+    rb_define_alloc_func(rb_cShader, Shader_alloc);
 
     rb_define_singleton_method(rb_cShader, "from_file", Shader_from_file, -1);
     rb_define_singleton_method(rb_cShader, "from_memory", Shader_from_memory, -1);

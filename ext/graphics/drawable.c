@@ -36,8 +36,9 @@ static VALUE Drawable_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
 }
 
 /* Document-module: SFML::Drawable
- * A mixin for anything that can be drawn to a render target (Window,
- * RenderTexture) via #draw(target, state).
+ * A mixin for anything that can be drawn to a render target (RenderWindow,
+ * RenderTexture -- both include RenderTarget -- or a legacy Target) via
+ * #draw(target, state).
  */
 void Init_Drawable(VALUE rb_mSFML) {
     rb_mDrawable = rb_define_module_under(rb_mSFML, "Drawable");

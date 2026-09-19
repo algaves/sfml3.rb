@@ -1,7 +1,7 @@
 module SFML
   class RenderState
-    def self.new: () -> RenderState
-                 | (Array[Array[Float]] | Array[Float] matrix) -> RenderState
+    def initialize: () -> void
+                 | (Array[Array[Float]] | Array[Float] matrix) -> void
 
     def transform: () -> Array[untyped]
     def transform=: (Array[Array[Float]] | Array[Float] matrix) -> self

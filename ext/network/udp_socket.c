@@ -42,6 +42,10 @@ static VALUE UdpSocket_wrap(VALUE klass, sfUdpSocket* handle) {
     return TypedData_Wrap_Struct(klass, &UdpSocket_data_type, ptr);
 }
 
+static VALUE UdpSocket_alloc(VALUE klass) {
+    return UdpSocket_wrap(klass, sfUdpSocket_create());
+}
+
 /* call-seq:
  *   UdpSocket.new -> UdpSocket
  *
@@ -49,8 +53,8 @@ static VALUE UdpSocket_wrap(VALUE klass, sfUdpSocket* handle) {
  *
  * @return [UdpSocket] a new, unbound socket
  */
-static VALUE UdpSocket_new(VALUE klass) {
-    return UdpSocket_wrap(klass, sfUdpSocket_create());
+static VALUE UdpSocket_initialize(VALUE self) {
+    return self;
 }
 
 /* call-seq:
@@ -259,8 +263,9 @@ static VALUE UdpSocket_receive_packet(VALUE self, VALUE rb_packet) {
  */
 void Init_UdpSocket(VALUE rb_mSFML) {
     rb_cUdpSocket = rb_define_class_under(rb_mSFML, "UdpSocket", rb_cObject);
+    rb_define_alloc_func(rb_cUdpSocket, UdpSocket_alloc);
 
-    rb_define_singleton_method(rb_cUdpSocket, "new", UdpSocket_new, 0);
+    rb_define_method(rb_cUdpSocket, "initialize", UdpSocket_initialize, 0);
     rb_define_singleton_method(rb_cUdpSocket, "any_port", UdpSocket_any_port, 0);
     rb_define_singleton_method(rb_cUdpSocket, "max_datagram_size", UdpSocket_max_datagram_size, 0);
 

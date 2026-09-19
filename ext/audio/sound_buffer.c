@@ -381,6 +381,13 @@ static VALUE SoundBuffer_duration(VALUE self) {
     return time_to_rb(sfSoundBuffer_getDuration(Get_SoundBuffer_Struct(self)));
 }
 
+static VALUE SoundBuffer_alloc(VALUE klass) {
+    (void)klass;
+    rb_raise(rb_eNotImpError,
+             "use SoundBuffer.from_file, SoundBuffer.from_memory, SoundBuffer.from_stream or "
+             "SoundBuffer.from_samples");
+}
+
 /* Document-class: SFML::SoundBuffer
  * Audio samples held fully decoded in memory, ready to be played through one
  * or more Sound instances (a single buffer may back several simultaneous
@@ -389,6 +396,7 @@ static VALUE SoundBuffer_duration(VALUE self) {
  */
 void Init_SoundBuffer(VALUE rb_mSFML) {
     rb_cSoundBuffer = rb_define_class_under(rb_mSFML, "SoundBuffer", rb_cObject);
+    rb_define_alloc_func(rb_cSoundBuffer, SoundBuffer_alloc);
 
     rb_define_singleton_method(rb_cSoundBuffer, "from_file", SoundBuffer_from_file, 1);
     rb_define_singleton_method(rb_cSoundBuffer, "from_memory", SoundBuffer_from_memory, 1);

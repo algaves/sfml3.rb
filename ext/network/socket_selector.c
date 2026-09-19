@@ -41,6 +41,10 @@ static VALUE SocketSelector_wrap(VALUE klass, sfSocketSelector* handle) {
     return TypedData_Wrap_Struct(klass, &SocketSelector_data_type, ptr);
 }
 
+static VALUE SocketSelector_alloc(VALUE klass) {
+    return SocketSelector_wrap(klass, sfSocketSelector_create());
+}
+
 /* call-seq:
  *   SocketSelector.new -> SocketSelector
  *
@@ -48,8 +52,8 @@ static VALUE SocketSelector_wrap(VALUE klass, sfSocketSelector* handle) {
  *
  * @return [SocketSelector]
  */
-static VALUE SocketSelector_new(VALUE klass) {
-    return SocketSelector_wrap(klass, sfSocketSelector_create());
+static VALUE SocketSelector_initialize(VALUE self) {
+    return self;
 }
 
 /* call-seq: copy -> SocketSelector
@@ -189,8 +193,9 @@ static VALUE SocketSelector_udp_socket_ready(VALUE self, VALUE rb_socket) {
  */
 void Init_SocketSelector(VALUE rb_mSFML) {
     rb_cSocketSelector = rb_define_class_under(rb_mSFML, "SocketSelector", rb_cObject);
+    rb_define_alloc_func(rb_cSocketSelector, SocketSelector_alloc);
 
-    rb_define_singleton_method(rb_cSocketSelector, "new", SocketSelector_new, 0);
+    rb_define_method(rb_cSocketSelector, "initialize", SocketSelector_initialize, 0);
 
     rb_define_method(rb_cSocketSelector, "copy", SocketSelector_copy, 0);
     rb_define_method(rb_cSocketSelector, "add", SocketSelector_add, 1);

@@ -39,7 +39,11 @@ static void Sound_free(void* ptr) {
        thread's effect_processor_acquire could reuse the slot number for an
        unrelated new source while this source's callback might still be
        executing against it. */
-    rb_thread_call_without_gvl(Sound_destroy_without_gvl, sound->source.handle, RUBY_UBF_IO, NULL);
+    if (sound->source.handle != NULL) {
+        rb_thread_call_without_gvl(Sound_destroy_without_gvl, sound->source.handle, RUBY_UBF_IO,
+                                   NULL);
+    }
+
     effect_processor_release(sound->source.effect_slot);
     free(sound);
 }
@@ -68,6 +72,25 @@ static VALUE Sound_wrap(VALUE klass, sfSound* handle, VALUE rb_buffer) {
     return TypedData_Wrap_Struct(klass, &Sound_data_type, ptr);
 }
 
+static VALUE Sound_initialize_copy(VALUE self, VALUE other) {
+    (void)other;
+    rb_raise(rb_eTypeError, "can't copy a %s", rb_obj_classname(self));
+}
+
+static VALUE Sound_alloc(VALUE klass) {
+    Sound* ptr = malloc(sizeof(Sound));
+
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate sound");
+    }
+
+    ptr->source.handle = NULL;
+    ptr->source.effect_slot = -1;
+    ptr->rb_buffer = Qnil;
+
+    return TypedData_Wrap_Struct(klass, &Sound_data_type, ptr);
+}
+
 /* call-seq:
  *   Sound.new(buffer) -> Sound
  *
@@ -76,12 +99,26 @@ static VALUE Sound_wrap(VALUE klass, sfSound* handle, VALUE rb_buffer) {
  * @return [Sound]
  * @raise [ArgumentError] if +buffer+ is not a SoundBuffer
  */
-static VALUE Sound_new(VALUE klass, VALUE rb_buffer) {
+static VALUE Sound_initialize(VALUE self, VALUE rb_buffer) {
+    Sound* sound;
+    sfSound* handle;
+
     if (!rb_obj_is_kind_of(rb_buffer, Get_Klass_SoundBuffer())) {
         raise_invalid_argument_class(Get_Klass_SoundBuffer());
     }
 
-    return Sound_wrap(klass, sfSound_create(Get_SoundBuffer_Struct(rb_buffer)), rb_buffer);
+    sound = (Sound*)Get_Sound_Struct(self);
+
+    handle = sfSound_create(Get_SoundBuffer_Struct(rb_buffer));
+
+    if (handle == NULL) {
+        rb_raise(rb_eRuntimeError, "failed to create sound");
+    }
+
+    sound->source.handle = handle;
+    sound->rb_buffer = rb_buffer;
+
+    return self;
 }
 
 /* call-seq: copy -> Sound
@@ -289,7 +326,9 @@ static VALUE Sound_set_buffer(VALUE self, VALUE rb_buffer) {
 void Init_Sound(VALUE rb_mSFML) {
     rb_cSound = rb_define_class_under(rb_mSFML, "Sound", rb_cObject);
 
-    rb_define_singleton_method(rb_cSound, "new", Sound_new, 1);
+    rb_define_alloc_func(rb_cSound, Sound_alloc);
+    rb_define_method(rb_cSound, "initialize", Sound_initialize, 1);
+    rb_define_private_method(rb_cSound, "initialize_copy", Sound_initialize_copy, 1);
 
     rb_define_method(rb_cSound, "copy", Sound_copy, 0);
     rb_define_method(rb_cSound, "buffer", Sound_get_buffer, 0);

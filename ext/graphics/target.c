@@ -5,15 +5,21 @@
 
 #include "graphics/render_state.h"
 #include "graphics/render_texture.h"
+#include "graphics/render_window.h"
 #include "graphics/view.h"
 #include "window/window.h"
 #include "core/exceptions.h"
 #include "core/macros.h"
 
 static VALUE rb_cTarget;
+static VALUE rb_mRenderTarget;
 
 static Target* Target_create(TargetType type, void* handle, VALUE rb_source) {
     Target* target = malloc(sizeof(Target));
+
+    if (target == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate render target");
+    }
 
     target->type = type;
     target->handle = handle;
@@ -35,6 +41,15 @@ static const rb_data_type_t RenderTarget_data_type = {
     .function = {.dmark = RenderTarget_mark, .dfree = RenderTarget_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
+static VALUE RenderTarget_wrap(VALUE klass, TargetType type, void* handle, VALUE rb_source) {
+    return TypedData_Wrap_Struct(klass, &RenderTarget_data_type,
+                                 Target_create(type, handle, rb_source));
+}
+
+static VALUE RenderTarget_alloc(VALUE klass) {
+    return RenderTarget_wrap(klass, SFML_TARGET_WINDOW, NULL, Qnil);
+}
+
 /* call-seq:
  *   Target.new(window) -> Target
  *
@@ -43,23 +58,18 @@ static const rb_data_type_t RenderTarget_data_type = {
  * @return [Target]
  * @raise [TypeError] if +window+ is not a Window
  */
-static VALUE RenderTarget_new(VALUE klass, VALUE rb_window) {
-    VALUE self;
+static VALUE RenderTarget_initialize(VALUE self, VALUE rb_window) {
     Target* target;
 
     if (!rb_obj_is_kind_of(rb_window, Get_Klass_Window())) {
         raise_invalid_argument_class(Get_Klass_Window());
     }
 
-    target = Target_create(SFML_TARGET_WINDOW, Get_Window_Struct(rb_window), rb_window);
-    self = TypedData_Wrap_Struct(klass, &RenderTarget_data_type, target);
+    target = Get_Target_Struct(self);
+    target->type = SFML_TARGET_WINDOW;
+    target->handle = Get_Window_Struct(rb_window);
+    target->rb_source = rb_window;
 
-    rb_obj_call_init(self, 0, NULL);
-
-    return self;
-}
-
-static VALUE RenderTarget_init(VALUE self) {
     return self;
 }
 
@@ -123,10 +133,38 @@ static VALUE RenderTarget_get_view(VALUE self) {
     return Get_Casting_View(view);
 }
 
+TargetView Get_RenderTarget_View(VALUE self) {
+    TargetView view;
+
+    if (rb_obj_is_kind_of(self, Get_Klass_Target())) {
+        Target* target = Get_Target_Struct(self);
+
+        view.type = target->type;
+        view.handle = target->handle;
+        return view;
+    }
+
+    if (rb_obj_is_kind_of(self, rb_mRenderTarget)) {
+        if (rb_obj_is_kind_of(self, Get_Klass_RenderWindow())) {
+            view.type = SFML_TARGET_WINDOW;
+            view.handle = Get_Window_Struct(self);
+        } else {
+            view.type = SFML_TARGET_TEXTURE;
+            view.handle = Get_RenderTexture_Struct(self);
+        }
+        return view;
+    }
+
+    rb_raise(rb_eArgError, "expected a RenderTarget (RenderWindow or RenderTexture)");
+}
+
 /* Document-class: SFML::Target
- * A generic handle onto whatever can be drawn to -- a Window or a
+ * A legacy generic handle onto whatever can be drawn to -- a Window or a
  * RenderTexture -- used by Drawable#draw so drawable objects don't need to
  * know which concrete kind of target they're being drawn onto.
+ *
+ * New code should pass a SFML::RenderWindow or SFML::RenderTexture (both
+ * include SFML::RenderTarget) straight to a drawable's #draw.
  *
  * @!attribute view
  *   The target's current view.
@@ -134,11 +172,12 @@ static VALUE RenderTarget_get_view(VALUE self) {
  */
 void Init_Target(VALUE rb_mSFML) {
     rb_cTarget = rb_define_class_under(rb_mSFML, "Target", rb_cObject);
+    rb_mRenderTarget = rb_define_module_under(rb_mSFML, "RenderTarget");
 
-    rb_define_singleton_method(rb_cTarget, "new", RenderTarget_new, 1);
+    rb_define_alloc_func(rb_cTarget, RenderTarget_alloc);
 
     // methods
-    rb_define_method(rb_cTarget, "initialize", RenderTarget_init, 0);
+    rb_define_method(rb_cTarget, "initialize", RenderTarget_initialize, 1);
     rb_define_method(rb_cTarget, "draw", RenderTarget_draw, 2);
 
     // setters
@@ -152,6 +191,10 @@ VALUE Get_Klass_Target(void) {
     return rb_cTarget;
 }
 
+VALUE Get_Module_RenderTarget(void) {
+    return rb_mRenderTarget;
+}
+
 Target* Get_Target_Struct(VALUE self) {
     Target* ptr;
     TypedData_Get_Struct(self, Target, &RenderTarget_data_type, ptr);
@@ -159,20 +202,10 @@ Target* Get_Target_Struct(VALUE self) {
 }
 
 VALUE Get_New_Target(VALUE rb_window) {
-    return RenderTarget_new(Get_Klass_Target(), rb_window);
-}
-
-VALUE Get_New_Target_From_RenderTexture(VALUE rb_render_texture) {
-    VALUE self;
-    Target* target;
-
-    if (!rb_obj_is_kind_of(rb_render_texture, Get_Klass_RenderTexture())) {
-        raise_invalid_argument_class(Get_Klass_RenderTexture());
+    if (!rb_obj_is_kind_of(rb_window, Get_Klass_Window())) {
+        raise_invalid_argument_class(Get_Klass_Window());
     }
 
-    target = Target_create(SFML_TARGET_TEXTURE, Get_RenderTexture_Struct(rb_render_texture),
-                           rb_render_texture);
-    self = TypedData_Wrap_Struct(rb_cTarget, &RenderTarget_data_type, target);
-
-    return self;
+    return RenderTarget_wrap(Get_Klass_Target(), SFML_TARGET_WINDOW, Get_Window_Struct(rb_window),
+                             rb_window);
 }

@@ -98,6 +98,20 @@ static VALUE HttpResponse_wrap(sfHttpResponse* handle) {
     return TypedData_Wrap_Struct(rb_cHttpResponse, &HttpResponse_data_type, ptr);
 }
 
+static VALUE Http_alloc(VALUE klass) {
+    return Http_wrap(klass, sfHttp_create());
+}
+
+static VALUE HttpRequest_alloc(VALUE klass) {
+    return HttpRequest_wrap(klass, sfHttpRequest_create());
+}
+
+static VALUE HttpResponse_alloc(VALUE klass) {
+    (void)klass;
+    rb_raise(rb_eNotImpError, "HTTP responses are returned by Http#send_request and cannot be "
+                              "constructed directly");
+}
+
 /* call-seq:
  *   Http.new -> Http
  *
@@ -105,8 +119,8 @@ static VALUE HttpResponse_wrap(sfHttpResponse* handle) {
  *
  * @return [Http]
  */
-static VALUE Http_new(VALUE klass) {
-    return Http_wrap(klass, sfHttp_create());
+static VALUE Http_initialize(VALUE self) {
+    return self;
 }
 
 /* call-seq:
@@ -159,8 +173,8 @@ static VALUE Http_send_request(int argc, VALUE* argv, VALUE self) {
  * @return [HttpRequest] a new request, defaulting to a GET of +"/"+ over
  *   HTTP/1.0 with no fields or body
  */
-static VALUE HttpRequest_new(VALUE klass) {
-    return HttpRequest_wrap(klass, sfHttpRequest_create());
+static VALUE HttpRequest_initialize(VALUE self) {
+    return self;
 }
 
 /* call-seq:
@@ -301,17 +315,20 @@ static VALUE HttpResponse_body(VALUE self) {
  */
 void Init_Http(VALUE rb_mSFML) {
     rb_cHttp = rb_define_class_under(rb_mSFML, "Http", rb_cObject);
+    rb_define_alloc_func(rb_cHttp, Http_alloc);
     /* Document-class: SFML::HttpRequest
      * An HTTP request to send via Http#send_request.
      */
     rb_cHttpRequest = rb_define_class_under(rb_mSFML, "HttpRequest", rb_cObject);
+    rb_define_alloc_func(rb_cHttpRequest, HttpRequest_alloc);
     /* Document-class: SFML::HttpResponse
      * The status, headers and body returned by Http#send_request.
      */
     rb_cHttpResponse = rb_define_class_under(rb_mSFML, "HttpResponse", rb_cObject);
+    rb_define_alloc_func(rb_cHttpResponse, HttpResponse_alloc);
 
-    rb_define_singleton_method(rb_cHttp, "new", Http_new, 0);
-    rb_define_singleton_method(rb_cHttpRequest, "new", HttpRequest_new, 0);
+    rb_define_method(rb_cHttp, "initialize", Http_initialize, 0);
+    rb_define_method(rb_cHttpRequest, "initialize", HttpRequest_initialize, 0);
 
     rb_define_method(rb_cHttp, "set_host", Http_set_host, 2);
     rb_define_method(rb_cHttp, "send_request", Http_send_request, -1);

@@ -2,10 +2,10 @@ module SFML
   class Vector2
     include Enumerable[Float]
 
-    def self.new: () -> Vector2
-                 | (Float x, Float y) -> Vector2
-                 | (Array[Float] xy) -> Vector2
-                 | (Vector2 other) -> Vector2
+    def initialize: () -> void
+                 | (Float x, Float y) -> void
+                 | (Array[Float] xy) -> void
+                 | (Vector2 other) -> void
 
     def x: () -> Float
     def x=: (Float value) -> Float

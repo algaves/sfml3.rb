@@ -1,6 +1,6 @@
 module SFML
   class BlendMode
-    def self.new: () -> BlendMode
+    def initialize: () -> void
                  | (Symbol | Integer color_src_factor, Symbol | Integer color_dst_factor,
                     Symbol | Integer color_equation, Symbol | Integer alpha_src_factor,
                     Symbol | Integer alpha_dst_factor, Symbol | Integer alpha_equation) -> BlendMode

@@ -1,7 +1,7 @@
 module SFML
   class Sprite
-    def self.new: () -> Sprite
-                 | (Texture texture) -> Sprite
+    def initialize: () -> void
+                 | (Texture texture) -> void
 
     def copy: () -> Sprite
 
