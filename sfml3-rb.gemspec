@@ -55,7 +55,12 @@ Gem::Specification.new do |s|
   # document; they apply regardless of how the extension was built, so unlike
   # `ext/**`, they aren't stripped from binary gems (see Rakefile's
   # `cross_compiling` hook).
+  #
+  # `.yardopts` ships so rubydoc.info renders with the same title, readme and
+  # extra files as `rake yard`; YARD's own default glob already picks up
+  # `ext/**/*.c`.
   s.files = Dir.glob('ext/**/*.{h,c,rb,inc}') +
+            ['.yardopts'] +
             Dir.glob('lib/**/*.rb') +
             Dir.glob('sig/**/*.rbs') +
             docs

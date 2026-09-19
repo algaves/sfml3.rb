@@ -4,8 +4,13 @@ Ruby bindings for [SFML 3](https://www.sfml-dev.org/), via its C API, [CSFML](ht
 
 ## Status
 
-Latest release: **0.2.1**. Bound against **CSFML 3**. See [TODO.md](TODO.md) for which parts of the
+Latest release: **0.3.0**. Bound against **CSFML 3**. See [TODO.md](TODO.md) for which parts of the
 SFML 3 API are ported so far, and [CHANGELOG.md](CHANGELOG.md) for what changed recently.
+
+API docs (every class, module, method and constant) are on
+[rubydoc.info](https://rubydoc.info/gems/sfml3-rb). The gem also ships RBS type signatures
+(`sig/**/*.rbs`) alongside the extension sources, for IDE completion (Solargraph, RubyMine) and
+static type-checking (Sorbet, Steep).
 
 ## Install
 
@@ -87,6 +92,8 @@ rake ports    # build the vendored FreeType + SFML 3 + CSFML 3 (rake compile doe
 rake compile  # build the C extension into lib/sfml/
 rake test     # compile, then run the test suite
 rake gem      # build the source gem into pkg/
+rake yard     # build API docs into doc/
+rake rbs      # validate sig/**/*.rbs
 ```
 
 `rake githooks:install` points your checkout at the committed `.githooks/` pre-commit hook, which
