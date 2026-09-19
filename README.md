@@ -3,8 +3,8 @@
 Ruby bindings for [SFML 3](https://www.sfml-dev.org/), via its C API, [CSFML](https://github.com/SFML/CSFML).
 
 [![Ruby](https://img.shields.io/badge/ruby-3.1%2B-red?style=flat-square)](https://www.ruby-lang.org/)
-[![Test](https://github.com/algaves/sfml3.rb/actions/workflows/test.yaml/badge.svg)](https://github.com/algaves/sfml3.rb/actions/workflows/test.yaml)
-[![Check](https://github.com/algaves/sfml3.rb/actions/workflows/check.yaml/badge.svg)](https://github.com/algaves/sfml3.rb/actions/workflows/check.yaml)
+[![Test](https://img.shields.io/github/actions/workflow/status/algaves/sfml3.rb/test.yaml?style=flat-square)](https://img.shields.io/github/actions/workflow/status/algaves/sfml3.rb/test.yaml?style=flat-square)
+[![Check](https://img.shields.io/github/actions/workflow/status/algaves/sfml3.rb/check.yaml?style=flat-square)](https://img.shields.io/github/actions/workflow/status/algaves/sfml3.rb/check.yaml?style=flat-square)
 [![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-4c9a2a?style=flat-square)](https://algaves.github.io/sfml3.rb/)
 [![Gem Version](https://img.shields.io/gem/v/sfml3-rb?style=flat-square)](https://rubygems.org/gems/sfml3-rb)
 [![Gem Downloads](https://img.shields.io/gem/dt/sfml3-rb?style=flat-square)](https://rubygems.org/gems/sfml3-rb)
