@@ -1,6 +1,6 @@
 module SFML
   class TcpSocket
-    def self.new: () -> TcpSocket
+    def initialize: () -> void
 
     def blocking?: () -> bool
     def blocking=: (bool value) -> bool

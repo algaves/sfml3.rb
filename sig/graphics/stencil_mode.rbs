@@ -1,7 +1,7 @@
 module SFML
   class StencilMode
-    def self.new: () -> StencilMode
-                 | (Symbol | Integer comparison, Symbol | Integer update_operation, Integer reference, Integer mask, bool stencil_only) -> StencilMode
+    def initialize: () -> void
+                 | (Symbol | Integer comparison, Symbol | Integer update_operation, Integer reference, Integer mask, bool stencil_only) -> void
 
     def comparison: () -> Symbol
     def comparison=: (Symbol | Integer value) -> (Symbol | Integer)

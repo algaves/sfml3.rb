@@ -1,6 +1,6 @@
 module SFML
   class Image
-    def self.new: (Vector2 | Array[Integer] size) -> Image
+    def initialize: (Vector2 | Array[Integer] size) -> void
     def self.from_color: (Vector2 | Array[Integer] size, Color color) -> Image
     def self.from_pixels: (Vector2 | Array[Integer] size, String pixels) -> Image
     def self.from_file: (String path) -> Image

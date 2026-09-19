@@ -1,6 +1,6 @@
 module SFML
   class Packet
-    def self.new: () -> Packet
+    def initialize: () -> void
 
     def copy: () -> Packet
     def append: (String data) -> self

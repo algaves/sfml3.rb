@@ -1,6 +1,6 @@
 module SFML
   class ContextSettings
-    def self.new: (?Integer depth_bits, ?Integer stencil_bits, ?Integer antialiasing_level, ?Integer major_version, ?Integer minor_version, ?(Symbol | Array[Symbol] | Integer) flags, ?bool srgb_capable) -> ContextSettings
+    def initialize: (?Integer depth_bits, ?Integer stencil_bits, ?Integer antialiasing_level, ?Integer major_version, ?Integer minor_version, ?(Symbol | Array[Symbol] | Integer) flags, ?bool srgb_capable) -> void
 
     def depth_bits: () -> Integer
     def depth_bits=: (Integer value) -> Integer

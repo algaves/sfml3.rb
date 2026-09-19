@@ -2,7 +2,9 @@ name: Check
 
 on:
   pull_request:
-    branches: [main]
+    # release/** too: PRs into a release branch get the same lint/type gate as
+    # main, instead of skipping CI entirely.
+    branches: [main, 'release/**']
 
 jobs:
   check:
@@ -17,6 +19,12 @@ jobs:
 
       - name: Run RuboCop
         run: bundle exec rubocop
+
+      - name: Validate RBS signatures
+        run: bundle exec rake rbs
+
+      - name: Type-check with Steep
+        run: bundle exec rake steep
 
       - name: Check shell scripts
         run: shellcheck script/provision.sh .githooks/pre-commit

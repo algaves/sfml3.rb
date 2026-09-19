@@ -1,9 +1,9 @@
 module SFML
   class Text
-    def self.new: () -> Text
-                 | (untyped font) -> Text
-                 | (untyped font, String string) -> Text
-                 | (untyped font, String string, Integer character_size) -> Text
+    def initialize: () -> void
+                 | (untyped font) -> void
+                 | (untyped font, String string) -> void
+                 | (untyped font, String string, Integer character_size) -> void
 
     def copy: () -> Text
     def font: () -> untyped

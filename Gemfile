@@ -20,5 +20,6 @@ group :development do
   gem 'rake-compiler-dock'
   gem 'rbs'
   gem 'rubocop'
+  gem 'steep'
   gem 'yard'
 end

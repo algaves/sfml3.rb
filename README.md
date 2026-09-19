@@ -129,10 +129,26 @@ part of the test suite.
 * [API reference](https://algaves.github.io/sfml3.rb/) — every class, module, method and constant,
   built from the YARD comments in `ext/**/*.c` and deployed to GitHub Pages by CI. The same docs
   are also generated on [RubyDoc.info](https://rubydoc.info/gems/sfml3-rb).
-* RBS type signatures (`sig/**/*.rbs`) ship in the gem for IDE completion (Solargraph, RubyMine)
-  and static type-checking (Sorbet, Steep). Validate them with `rake rbs`.
+* RBS type signatures (`sig/**/*.rbs`) describe the whole API, including the native classes, for
+  RBS-aware editors. `rake rbs` validates the signatures and `rake steep` type-checks `lib/`
+  against them.
 * [CHANGELOG.md](CHANGELOG.md) — what changed in each release.
 * [TODO.md](TODO.md) — module-by-module porting coverage and what is deliberately unbound.
+
+### IDE setup (RubyMine)
+
+`sig/**/*.rbs` is the only machine-readable description of the API: the native extension cannot be
+introspected, so an editor either reads the signatures or sees nothing. RBS support lives in
+**RubyMine** (and IntelliJ IDEA Ultimate with the Ruby plugin); CLion and other C/C++ IDEs show
+`.rbs` files as plain text.
+
+1. Open the project in RubyMine and point **Settings → Languages & Frameworks → Ruby SDK** at the
+   interpreter you build against (Ruby 3.1+). Keep the C sources in CLion/clangd.
+2. Run `bundle install` so the `rbs` gem (3.2+) is available to that interpreter.
+3. RubyMine indexes `sig/` automatically; completion, type info (`Ctrl+Shift+P`), parameter info
+   and *Navigate → Type Signature* then work for `Window.new` and the rest of the API.
+4. For a full type check, run `steep check` from *Run anything* (`Ctrl` twice); `Steepfile` points
+   it at `lib/` and `sig/`.
 
 ## Development
 
@@ -143,6 +159,7 @@ rake test     # compile, then run the test suite
 rake gem      # build the source gem into pkg/
 rake yard     # build API docs into doc/
 rake rbs      # validate sig/**/*.rbs
+rake steep    # type-check lib/ against sig/**/*.rbs
 ```
 
 `rake githooks:install` points your checkout at the committed `.githooks/` pre-commit hook, which

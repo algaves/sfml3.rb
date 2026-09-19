@@ -1,6 +1,6 @@
 module SFML
   class Buffer
-    def self.new: () -> Buffer
+    def initialize: () -> void
 
     def size: () -> Integer
     def length: () -> Integer

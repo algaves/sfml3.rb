@@ -1,10 +1,10 @@
 module SFML
   class Color
-    def self.new: () -> Color
-                 | (Integer r, Integer g, Integer b, ?Integer a) -> Color
-                 | (Array[Integer] rgb_or_rgba) -> Color
-                 | (Integer packed) -> Color
-                 | (Color other) -> Color
+    def initialize: () -> void
+                 | (Integer r, Integer g, Integer b, ?Integer a) -> void
+                 | (Array[Integer] rgb_or_rgba) -> void
+                 | (Integer packed) -> void
+                 | (Color other) -> void
     def self.from_rgb: (Integer rgb) -> Color
     def self.from_rgba: (Integer rgba) -> Color
     def self.from_integer: (Integer rgba) -> Color

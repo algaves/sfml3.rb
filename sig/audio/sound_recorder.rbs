@@ -1,6 +1,6 @@
 module SFML
   class SoundRecorder
-    def self.new: () -> SoundRecorder
+    def initialize: () -> void
     def self.available?: () -> bool
     def self.available_devices: () -> Array[String]
     def self.default_device: () -> String?

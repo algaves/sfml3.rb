@@ -2,7 +2,7 @@ module SFML
   class RectangleShape
     include Drawable
 
-    def self.new: (?(Vector2 | Array[Float]) size) -> RectangleShape
+    def initialize: (?(Vector2 | Array[Float]) size) -> void
 
     def copy: () -> RectangleShape
     def move: (Vector2 | Array[Float] offset) -> self

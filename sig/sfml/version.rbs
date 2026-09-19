@@ -1,0 +1,3 @@
+module SFML
+  VERSION: String
+end

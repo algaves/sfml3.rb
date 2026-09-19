@@ -1,6 +1,6 @@
 module SFML
   class Event
-    def self.new: () -> Event
+    def initialize: () -> void
 
     def type: () -> String
     def size: () -> Vector2
