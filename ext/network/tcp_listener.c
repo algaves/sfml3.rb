@@ -42,6 +42,10 @@ static VALUE TcpListener_wrap(VALUE klass, sfTcpListener* handle) {
     return TypedData_Wrap_Struct(klass, &TcpListener_data_type, ptr);
 }
 
+static VALUE TcpListener_alloc(VALUE klass) {
+    return TcpListener_wrap(klass, sfTcpListener_create());
+}
+
 /* call-seq:
  *   TcpListener.new -> TcpListener
  *
@@ -49,8 +53,8 @@ static VALUE TcpListener_wrap(VALUE klass, sfTcpListener* handle) {
  *
  * @return [TcpListener]
  */
-static VALUE TcpListener_new(VALUE klass) {
-    return TcpListener_wrap(klass, sfTcpListener_create());
+static VALUE TcpListener_initialize(VALUE self) {
+    return self;
 }
 
 /* call-seq:
@@ -151,8 +155,9 @@ static VALUE TcpListener_accept(VALUE self) {
  */
 void Init_TcpListener(VALUE rb_mSFML) {
     rb_cTcpListener = rb_define_class_under(rb_mSFML, "TcpListener", rb_cObject);
+    rb_define_alloc_func(rb_cTcpListener, TcpListener_alloc);
 
-    rb_define_singleton_method(rb_cTcpListener, "new", TcpListener_new, 0);
+    rb_define_method(rb_cTcpListener, "initialize", TcpListener_initialize, 0);
     rb_define_singleton_method(rb_cTcpListener, "any_port", TcpListener_any_port, 0);
 
     rb_define_method(rb_cTcpListener, "blocking?", TcpListener_blocking, 0);
