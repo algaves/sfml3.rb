@@ -4,6 +4,11 @@ on:
   release:
     types: [published]
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing release tag to attach the built gems to (leave empty to only build and push)'
+        type: string
+        required: false
 
 jobs:
   source:
@@ -148,12 +153,17 @@ jobs:
           merge-multiple: true
 
       # The same gems the RubyGems step pushes, so the release page carries
-      # every package. Guarded because workflow_dispatch runs have no release.
+      # every package. `--repo` is required because this job never checks out
+      # the repository, so gh has no git remote to infer it from. A
+      # workflow_dispatch run can attach to an existing release via `tag`.
       - name: Attach gems to the release
-        if: github.event_name == 'release'
+        if: github.event_name == 'release' || inputs.tag != ''
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "${{ github.event.release.tag_name }}" pkg/*.gem --clobber
+        run: |
+          gh release upload \
+            "${{ github.event.release.tag_name || inputs.tag }}" \
+            pkg/*.gem --clobber --repo "${{ github.repository }}"
 
       - name: Publish to RubyGems
         env:
