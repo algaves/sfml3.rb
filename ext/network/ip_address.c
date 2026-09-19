@@ -96,6 +96,8 @@ static VALUE IpAddress_new(VALUE klass, VALUE rb_address) {
 /* call-seq:
  *   IpAddress.local_address -> IpAddress
  *
+ * Returns the address of the local computer on its local network.
+ *
  * @return [IpAddress] the address of the local computer on the local
  *   network
  */
@@ -126,6 +128,8 @@ static VALUE IpAddress_public_address(int argc, VALUE* argv, VALUE klass) {
 
 /* call-seq: to_s -> String
  *
+ * Returns the address in dotted decimal notation.
+ *
  * @return [String] dotted decimal representation, e.g. +"192.168.1.1"+
  */
 static VALUE IpAddress_to_s(VALUE self) {
@@ -138,6 +142,8 @@ static VALUE IpAddress_to_s(VALUE self) {
 
 /* call-seq: to_integer -> Integer
  *
+ * Returns the address as a 32-bit integer.
+ *
  * @return [Integer] the 32-bit representation, in host byte order
  */
 static VALUE IpAddress_to_integer(VALUE self) {
@@ -146,6 +152,8 @@ static VALUE IpAddress_to_integer(VALUE self) {
 
 /* call-seq:
  *   self == other -> true or false
+ *
+ * Returns +true+ if +other+ is an IpAddress with the same value.
  *
  * @return [Boolean]
  */
@@ -163,6 +171,8 @@ static VALUE IpAddress_eql(VALUE self, VALUE rb_other) {
 }
 
 /* call-seq: hash -> Integer
+ *
+ * Returns a hash value consistent with #==, so addresses work as Hash keys.
  *
  * @return [Integer] a hash suitable for use as a Hash key, consistent with #==
  */

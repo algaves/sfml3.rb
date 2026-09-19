@@ -83,6 +83,8 @@ static VALUE RenderTarget_draw(VALUE self, VALUE rb_drawable, VALUE rb_state) {
 /* call-seq:
  *   view=(value) -> nil
  *
+ * Sets the target's current view.
+ *
  * @return [nil]
  * @raise [TypeError] if +value+ is not a View
  */
@@ -103,6 +105,8 @@ static VALUE RenderTarget_set_view(VALUE self, VALUE rb_view) {
 }
 
 /* call-seq: view -> View
+ *
+ * Returns the target's current view.
  *
  * @return [View] a copy of the target's current view
  */
@@ -125,6 +129,7 @@ static VALUE RenderTarget_get_view(VALUE self) {
  * know which concrete kind of target they're being drawn onto.
  *
  * @!attribute view
+ *   The target's current view.
  *   @return [View]
  */
 void Init_Target(VALUE rb_mSFML) {

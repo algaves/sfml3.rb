@@ -30,6 +30,8 @@ static VALUE Font_wrap(VALUE klass, sfFont* font) {
 /* call-seq:
  *   Font.from_file(path) -> Font
  *
+ * Loads a font from the font file at +filename+.
+ *
  * @return [Font]
  * @raise [RuntimeError] if the file cannot be loaded
  */
@@ -39,6 +41,8 @@ static VALUE Font_from_file(VALUE klass, VALUE rb_path) {
 
 /* call-seq:
  *   Font.from_memory(data) -> Font
+ *
+ * Loads a font from an in-memory font file buffer.
  *
  * @return [Font]
  * @raise [RuntimeError] if the font data cannot be parsed
@@ -70,6 +74,8 @@ static VALUE Font_from_stream(VALUE klass, VALUE rb_stream) {
 
 /* call-seq: copy -> Font
  *
+ * Returns a deep copy of the object.
+ *
  * @return [Font] an independent copy
  */
 static VALUE Font_copy(VALUE self) {
@@ -78,6 +84,8 @@ static VALUE Font_copy(VALUE self) {
 
 /* call-seq:
  *   glyph(codepoint, size, bold=false, outline_thickness=0) -> Glyph
+ *
+ * Returns the glyph for +codepoint+ at the given +character_size+.
  *
  * @return [Glyph]
  */
@@ -102,6 +110,8 @@ static VALUE Font_get_glyph(int argc, VALUE* argv, VALUE self) {
 
 /* call-seq: has_glyph?(codepoint) -> true or false
  *
+ * Returns +true+ if the font contains a glyph for +codepoint+.
+ *
  * @return [Boolean] whether this font has a glyph for the given Unicode
  *   codepoint
  */
@@ -110,6 +120,8 @@ static VALUE Font_has_glyph(VALUE self, VALUE rb_codepoint) {
 }
 
 /* call-seq: kerning(first, second, size) -> Float
+ *
+ * Returns the kerning between two code points at the given size.
  *
  * @return [Float] the kerning offset between two consecutive glyphs at the
  *   given character size
@@ -122,6 +134,8 @@ static VALUE Font_get_kerning(VALUE self, VALUE rb_first, VALUE rb_second, VALUE
 
 /* call-seq: bold_kerning(first, second, size) -> Float
  *
+ * Returns the kerning of the bold variant between two code points.
+ *
  * @return [Float] the kerning offset between two consecutive bold glyphs at
  *   the given character size
  */
@@ -133,6 +147,8 @@ static VALUE Font_get_bold_kerning(VALUE self, VALUE rb_first, VALUE rb_second, 
 
 /* call-seq: line_spacing(size) -> Float
  *
+ * Returns the line spacing for the given character size.
+ *
  * @return [Float] the distance between two consecutive lines at the given
  *   character size
  */
@@ -141,6 +157,8 @@ static VALUE Font_get_line_spacing(VALUE self, VALUE rb_size) {
 }
 
 /* call-seq: underline_position(size) -> Float
+ *
+ * Returns the position of the underline for the given size.
  *
  * @return [Float] the position of the underline, relative to the baseline,
  *   at the given character size
@@ -152,6 +170,8 @@ static VALUE Font_get_underline_position(VALUE self, VALUE rb_size) {
 
 /* call-seq: underline_thickness(size) -> Float
  *
+ * Returns the thickness of the underline for the given size.
+ *
  * @return [Float] the thickness of the underline at the given character size
  */
 static VALUE Font_get_underline_thickness(VALUE self, VALUE rb_size) {
@@ -160,6 +180,8 @@ static VALUE Font_get_underline_thickness(VALUE self, VALUE rb_size) {
 }
 
 /* call-seq: texture(size) -> Texture
+ *
+ * Returns the texture atlas holding rendered glyphs for the given size.
  *
  * @return [Texture] the texture atlas holding rendered glyphs for the given
  *   character size. Owned by the font; do not modify or free it directly.
@@ -172,6 +194,8 @@ static VALUE Font_get_texture(VALUE self, VALUE rb_size) {
 /* call-seq:
  *   smooth=(value) -> Boolean
  *
+ * Enables or disables smooth rendering.
+ *
  * @return [Boolean] +value+
  */
 static VALUE Font_set_smooth(VALUE self, VALUE rb_smooth) {
@@ -181,6 +205,8 @@ static VALUE Font_set_smooth(VALUE self, VALUE rb_smooth) {
 
 /* call-seq: smooth? -> true or false
  *
+ * Returns +true+ if smooth rendering is enabled.
+ *
  * @return [Boolean]
  */
 static VALUE Font_is_smooth(VALUE self) {
@@ -188,6 +214,8 @@ static VALUE Font_is_smooth(VALUE self) {
 }
 
 /* call-seq: info -> String
+ *
+ * Returns the font's family name.
  *
  * @return [String] the font family name
  */

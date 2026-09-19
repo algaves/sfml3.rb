@@ -64,6 +64,8 @@ VALUE sound_buffer_from_borrowed(const sfSoundBuffer* buffer) {
 /* call-seq:
  *   SoundBuffer.from_file(path) -> SoundBuffer
  *
+ * Loads and decodes an audio file into a buffer.
+ *
  * @return [SoundBuffer]
  * @raise [RuntimeError] if the file cannot be opened or decoded
  */
@@ -73,6 +75,8 @@ static VALUE SoundBuffer_from_file(VALUE klass, VALUE rb_path) {
 
 /* call-seq:
  *   SoundBuffer.from_memory(data) -> SoundBuffer
+ *
+ * Decodes audio held in a String into a buffer.
  *
  * @return [SoundBuffer]
  * @raise [RuntimeError] if +data+ cannot be decoded
@@ -86,6 +90,8 @@ static VALUE SoundBuffer_from_memory(VALUE klass, VALUE rb_data) {
 
 /* call-seq:
  *   SoundBuffer.from_stream(stream) -> SoundBuffer
+ *
+ * Decodes audio read from an SFML InputStream into a buffer.
  *
  * @return [SoundBuffer]
  * @raise [RuntimeError] if the stream cannot be decoded
@@ -262,6 +268,8 @@ static VALUE SoundBuffer_from_samples(int argc, VALUE* argv, VALUE klass) {
 
 /* call-seq: copy -> SoundBuffer
  *
+ * Creates an independent copy of the buffer.
+ *
  * @return [SoundBuffer] an independent copy
  */
 static VALUE SoundBuffer_copy(VALUE self) {
@@ -272,6 +280,8 @@ static VALUE SoundBuffer_copy(VALUE self) {
 /* call-seq:
  *   save_to_file(path) -> true or false
  *
+ * Writes the buffer to an audio file.
+ *
  * @return [Boolean] whether the file was written successfully
  */
 static VALUE SoundBuffer_save_to_file(VALUE self, VALUE rb_path) {
@@ -280,6 +290,8 @@ static VALUE SoundBuffer_save_to_file(VALUE self, VALUE rb_path) {
 }
 
 /* call-seq: samples -> Array<Integer>
+ *
+ * Returns the buffer's raw audio samples as Integers.
  *
  * @return [Array<Integer>] the raw int16 audio samples, interleaved by
  *   channel
@@ -305,6 +317,8 @@ static VALUE SoundBuffer_samples(VALUE self) {
 
 /* call-seq: sample_count -> Integer
  *
+ * Returns the total number of samples stored in the buffer.
+ *
  * @return [Integer] total number of int16 samples, across all channels
  */
 static VALUE SoundBuffer_sample_count(VALUE self) {
@@ -312,6 +326,8 @@ static VALUE SoundBuffer_sample_count(VALUE self) {
 }
 
 /* call-seq: sample_rate -> Integer
+ *
+ * Returns the buffer's sample rate in samples per second.
  *
  * @return [Integer]
  */
@@ -321,6 +337,8 @@ static VALUE SoundBuffer_sample_rate(VALUE self) {
 
 /* call-seq: channel_count -> Integer
  *
+ * Returns the number of audio channels in the buffer.
+ *
  * @return [Integer]
  */
 static VALUE SoundBuffer_channel_count(VALUE self) {
@@ -328,6 +346,8 @@ static VALUE SoundBuffer_channel_count(VALUE self) {
 }
 
 /* call-seq: channel_map -> Array<Symbol>
+ *
+ * Returns the channel layout of the buffer.
  *
  * @return [Array<Symbol>] one entry per channel, e.g.
  *   +[:front_left, :front_right]+
@@ -352,6 +372,8 @@ static VALUE SoundBuffer_channel_map(VALUE self) {
 }
 
 /* call-seq: duration -> Time
+ *
+ * Returns the buffer's total playing duration.
  *
  * @return [Time]
  */

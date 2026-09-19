@@ -7,6 +7,8 @@
 
 /* call-seq: global_volume -> Float
  *
+ * Returns the global volume applied to every sound source in the scene.
+ *
  * @return [Float] 0 to 100
  */
 static VALUE Listener_global_volume(VALUE module) {
@@ -15,6 +17,8 @@ static VALUE Listener_global_volume(VALUE module) {
 
 /* call-seq:
  *   global_volume=(value) -> Float
+ *
+ * Sets the global volume all sound sources are scaled by.
  *
  * @return [Float] +value+
  */
@@ -25,6 +29,8 @@ static VALUE Listener_set_global_volume(VALUE module, VALUE rb_value) {
 
 /* call-seq: position -> Vector3
  *
+ * Returns the listener's position in the 3D audio scene.
+ *
  * @return [Vector3]
  */
 static VALUE Listener_position(VALUE module) {
@@ -33,6 +39,8 @@ static VALUE Listener_position(VALUE module) {
 
 /* call-seq:
  *   position=(value) -> Vector3
+ *
+ * Sets the listener's position in the 3D audio scene.
  *
  * @return [Vector3] +value+
  */
@@ -43,6 +51,8 @@ static VALUE Listener_set_position(VALUE module, VALUE rb_value) {
 
 /* call-seq: direction -> Vector3
  *
+ * Returns the direction the listener is facing, used for spatialization.
+ *
  * @return [Vector3]
  */
 static VALUE Listener_direction(VALUE module) {
@@ -51,6 +61,8 @@ static VALUE Listener_direction(VALUE module) {
 
 /* call-seq:
  *   direction=(value) -> Vector3
+ *
+ * Sets the direction the listener is facing.
  *
  * @return [Vector3] +value+
  */
@@ -61,6 +73,8 @@ static VALUE Listener_set_direction(VALUE module, VALUE rb_value) {
 
 /* call-seq: velocity -> Vector3
  *
+ * Returns the listener's velocity, used for Doppler calculations.
+ *
  * @return [Vector3]
  */
 static VALUE Listener_velocity(VALUE module) {
@@ -69,6 +83,8 @@ static VALUE Listener_velocity(VALUE module) {
 
 /* call-seq:
  *   velocity=(value) -> Vector3
+ *
+ * Sets the listener's velocity for Doppler calculations.
  *
  * @return [Vector3] +value+
  */
@@ -79,6 +95,8 @@ static VALUE Listener_set_velocity(VALUE module, VALUE rb_value) {
 
 /* call-seq: up_vector -> Vector3
  *
+ * Returns the listener's up vector, defining its vertical orientation.
+ *
  * @return [Vector3]
  */
 static VALUE Listener_up_vector(VALUE module) {
@@ -88,6 +106,8 @@ static VALUE Listener_up_vector(VALUE module) {
 /* call-seq:
  *   up_vector=(value) -> Vector3
  *
+ * Sets the listener's up vector, defining its vertical orientation.
+ *
  * @return [Vector3] +value+
  */
 static VALUE Listener_set_up_vector(VALUE module, VALUE rb_value) {
@@ -96,6 +116,8 @@ static VALUE Listener_set_up_vector(VALUE module, VALUE rb_value) {
 }
 
 /* call-seq: cone -> SoundSourceCone
+ *
+ * Returns the listener's directional attenuation cone.
  *
  * @return [SoundSourceCone]
  */
@@ -108,6 +130,8 @@ static VALUE Listener_cone(VALUE module) {
 
 /* call-seq:
  *   cone=(value) -> SoundSourceCone
+ *
+ * Sets the listener's directional attenuation cone.
  *
  * @return [SoundSourceCone] +value+
  */

@@ -137,6 +137,8 @@ CONTEXT_SETTINGS_UINT_ACCESSOR(minor_version, minorVersion)
 /* Document-method: SFML::ContextSettings#attribute_flags
  * call-seq: attribute_flags -> Array<Symbol>
  *
+ * Returns the context attribute flags as a list of symbols.
+ *
  * @return [Array<Symbol>] a subset of +[:core, :debug]+, or +[:default]+ if
  *   neither is set
  */
@@ -161,6 +163,9 @@ static VALUE ContextSettings_get_attribute_flags(VALUE self) {
 
 /* Document-method: SFML::ContextSettings#attribute_flags=
  * call-seq: attribute_flags = value -> value
+ *
+ * Sets the context attribute flags from +value+, an Integer bitmask or a
+ * Symbol/Array of +:core+ and +:debug+.
  *
  * @return [Integer, Array<Symbol>] +value+
  */
@@ -194,6 +199,8 @@ static VALUE ContextSettings_set_attribute_flags(VALUE self, VALUE rb_value) {
 
 /* call-seq: srgb_capable? -> true or false
  *
+ * Returns +true+ if the context was created with sRGB-capable framebuffers.
+ *
  * @return [Boolean]
  */
 static VALUE ContextSettings_get_srgb(VALUE self) {
@@ -202,6 +209,8 @@ static VALUE ContextSettings_get_srgb(VALUE self) {
 
 /* call-seq:
  *   srgb_capable=(value) -> true or false
+ *
+ * Requests sRGB-capable framebuffers when +value+ is +true+.
  *
  * @return [Boolean] +value+
  */
@@ -221,14 +230,19 @@ static VALUE ContextSettings_set_srgb(VALUE self, VALUE rb_value) {
  * above their own definitions.
  *
  * @!attribute depth_bits
+ *   Number of bits per pixel requested for the depth buffer.
  *   @return [Integer] requested depth buffer bits per pixel
  * @!attribute stencil_bits
+ *   Number of bits per pixel requested for the stencil buffer.
  *   @return [Integer] requested stencil buffer bits per pixel
  * @!attribute antialiasing_level
+ *   Requested antialiasing level.
  *   @return [Integer] requested antialiasing level
  * @!attribute major_version
+ *   Requested OpenGL major version.
  *   @return [Integer] requested OpenGL major version
  * @!attribute minor_version
+ *   Requested OpenGL minor version.
  *   @return [Integer] requested OpenGL minor version
  */
 void Init_ContextSettings(VALUE rb_mSFML) {

@@ -47,6 +47,8 @@ static VALUE Image_new(VALUE klass, VALUE rb_size) {
 /* call-seq:
  *   Image.from_color(size, color) -> Image
  *
+ * Creates an image of the given +size+ filled with +color+.
+ *
  * @return [Image]
  * @raise [RuntimeError] if the image cannot be created
  */
@@ -95,6 +97,8 @@ static VALUE Image_from_pixels(VALUE klass, VALUE rb_size, VALUE rb_pixels) {
 /* call-seq:
  *   Image.from_file(path) -> Image
  *
+ * Loads an image from the image file at +filename+.
+ *
  * @return [Image]
  * @raise [RuntimeError] if the file cannot be loaded
  */
@@ -104,6 +108,8 @@ static VALUE Image_from_file(VALUE klass, VALUE rb_path) {
 
 /* call-seq:
  *   Image.from_memory(data) -> Image
+ *
+ * Loads an image from an in-memory image buffer.
  *
  * @return [Image]
  * @raise [RuntimeError] if the image data cannot be decoded
@@ -135,6 +141,8 @@ static VALUE Image_from_stream(VALUE klass, VALUE rb_stream) {
 
 /* call-seq: copy -> Image
  *
+ * Returns a deep copy of the object.
+ *
  * @return [Image] an independent copy
  */
 static VALUE Image_copy(VALUE self) {
@@ -142,6 +150,8 @@ static VALUE Image_copy(VALUE self) {
 }
 
 /* call-seq: size -> Vector2
+ *
+ * Returns the object's size.
  *
  * @return [Vector2] the image's dimensions in pixels
  */
@@ -231,6 +241,8 @@ static VALUE Image_copy_image(int argc, VALUE* argv, VALUE self) {
 
 /* call-seq: pixel(x, y) -> Color
  *
+ * Returns the color of the pixel at +x+, +y+.
+ *
  * @return [Color] the color of the pixel at (+x+, +y+)
  */
 static VALUE Image_get_pixel(VALUE self, VALUE rb_x, VALUE rb_y) {
@@ -242,6 +254,8 @@ static VALUE Image_get_pixel(VALUE self, VALUE rb_x, VALUE rb_y) {
 
 /* call-seq: set_pixel(x, y, color) -> self
  *
+ * Sets the color of the pixel at +x+, +y+.
+ *
  * @return [self]
  */
 static VALUE Image_set_pixel(VALUE self, VALUE rb_x, VALUE rb_y, VALUE rb_color) {
@@ -252,6 +266,8 @@ static VALUE Image_set_pixel(VALUE self, VALUE rb_x, VALUE rb_y, VALUE rb_color)
 }
 
 /* call-seq: pixels -> String
+ *
+ * Returns a flat array of the image's pixels.
  *
  * @return [String] the raw RGBA pixel data, +width * height * 4+ bytes,
  *   row-major starting from the top-left
@@ -270,6 +286,8 @@ static VALUE Image_get_pixels(VALUE self) {
 
 /* call-seq: flip_horizontally! -> self
  *
+ * Flips the image horizontally.
+ *
  * @return [self]
  */
 static VALUE Image_flip_horizontally(VALUE self) {
@@ -278,6 +296,8 @@ static VALUE Image_flip_horizontally(VALUE self) {
 }
 
 /* call-seq: flip_vertically! -> self
+ *
+ * Flips the image vertically.
  *
  * @return [self]
  */

@@ -114,6 +114,8 @@ static VALUE RenderStates_get_transform(VALUE self) {
 
 /* call-seq: blend_mode -> BlendMode
  *
+ * Returns the state's blend mode.
+ *
  * @return [BlendMode]
  */
 static VALUE RenderStates_get_blend_mode(VALUE self) {
@@ -122,6 +124,8 @@ static VALUE RenderStates_get_blend_mode(VALUE self) {
 
 /* call-seq:
  *   blend_mode=(value) -> BlendMode
+ *
+ * Sets the state's blend mode.
  *
  * @return [BlendMode] +value+
  */
@@ -132,6 +136,8 @@ static VALUE RenderStates_set_blend_mode(VALUE self, VALUE rb_mode) {
 
 /* call-seq: stencil_mode -> StencilMode
  *
+ * Returns the state's stencil mode.
+ *
  * @return [StencilMode]
  */
 static VALUE RenderStates_get_stencil_mode(VALUE self) {
@@ -141,6 +147,8 @@ static VALUE RenderStates_get_stencil_mode(VALUE self) {
 /* call-seq:
  *   stencil_mode=(value) -> StencilMode
  *
+ * Sets the state's stencil mode.
+ *
  * @return [StencilMode] +value+
  */
 static VALUE RenderStates_set_stencil_mode(VALUE self, VALUE rb_mode) {
@@ -149,6 +157,8 @@ static VALUE RenderStates_set_stencil_mode(VALUE self, VALUE rb_mode) {
 }
 
 /* call-seq: coordinate_type -> Symbol
+ *
+ * Returns the state's texture coordinate type.
  *
  * @return [Symbol] either +:pixels+ or +:normalized+
  */
@@ -175,6 +185,8 @@ static RenderStates* Get_RenderStates_Wrapper(VALUE self) {
 
 /* call-seq: texture -> Texture or nil
  *
+ * Returns the object's texture, or +nil+ if it has none.
+ *
  * @return [Texture, nil]
  */
 static VALUE RenderStates_get_texture(VALUE self) {
@@ -183,6 +195,8 @@ static VALUE RenderStates_get_texture(VALUE self) {
 
 /* call-seq:
  *   texture=(value) -> Texture or nil
+ *
+ * Sets the object's texture.
  *
  * @return [Texture, nil] +value+
  */
@@ -207,6 +221,8 @@ static VALUE RenderStates_set_texture(VALUE self, VALUE rb_texture) {
 
 /* call-seq: shader -> Shader or nil
  *
+ * Returns the state's shader, or +nil+ if it has none.
+ *
  * @return [Shader, nil]
  */
 static VALUE RenderStates_get_shader(VALUE self) {
@@ -215,6 +231,8 @@ static VALUE RenderStates_get_shader(VALUE self) {
 
 /* call-seq:
  *   shader=(value) -> Shader or nil
+ *
+ * Sets the state's shader.
  *
  * @return [Shader, nil] +value+
  */
@@ -243,16 +261,22 @@ static VALUE RenderStates_set_shader(VALUE self, VALUE rb_shader) {
  * render target.
  *
  * @!attribute transform
+ *   The object's transform matrix.
  *   @return [Array] the 3x3 row-major transform matrix
  * @!attribute blend_mode
+ *   The blend mode applied to the draw.
  *   @return [BlendMode]
  * @!attribute stencil_mode
+ *   The stencil mode applied to the draw.
  *   @return [StencilMode]
  * @!attribute coordinate_type
+ *   The type of texture coordinates used.
  *   @return [Symbol] either +:pixels+ or +:normalized+
  * @!attribute texture
+ *   The object's texture, or +nil+ if it has none.
  *   @return [Texture, nil]
  * @!attribute shader
+ *   The shader applied to the draw, or +nil+ if none.
  *   @return [Shader, nil]
  */
 void Init_RenderState(VALUE rb_mSFML) {

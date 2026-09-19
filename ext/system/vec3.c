@@ -27,6 +27,9 @@ static const rb_data_type_t Vector3_data_type = {
  *   Vector3.new([x, y, z])     -> Vector3(x, y, z)
  *   Vector3.new(other_vector3) -> copy of +other_vector3+
  *
+ * Creates a new 3D vector from three coordinates, a 3-element Array, or
+ * another Vector3.
+ *
  * @return [Vector3]
  * @raise [ArgumentError] if given an Array shorter than 3 elements, or an
  *   argument count other than 0, 1 or 3
@@ -76,6 +79,8 @@ static VALUE Vector3_new(int argc, VALUE* argv, VALUE klass) {
 
 /* call-seq: x -> Float
  *
+ * Returns the X component of the vector.
+ *
  * @return [Float] the X component
  */
 static VALUE Vector3_get_x(VALUE self) {
@@ -84,6 +89,8 @@ static VALUE Vector3_get_x(VALUE self) {
 
 /* call-seq: y -> Float
  *
+ * Returns the Y component of the vector.
+ *
  * @return [Float] the Y component
  */
 static VALUE Vector3_get_y(VALUE self) {
@@ -91,6 +98,8 @@ static VALUE Vector3_get_y(VALUE self) {
 }
 
 /* call-seq: z -> Float
+ *
+ * Returns the Z component of the vector.
  *
  * @return [Float] the Z component
  */
@@ -136,6 +145,8 @@ static VALUE Vector3_set_z(VALUE self, VALUE rb_z) {
 
 /* call-seq: to_a -> Array
  *
+ * Returns the vector's components as a three-element Array.
+ *
  * @return [Array<Float>] +[x, y, z]+
  */
 static VALUE Vector3_to_a(VALUE self) {
@@ -161,6 +172,8 @@ static VALUE Vector3_each(VALUE self) {
 }
 
 /* call-seq: size -> Integer
+ *
+ * Returns the number of components, always 3.
  *
  * @return [Integer] always 3
  */
@@ -221,6 +234,8 @@ static VALUE Vector3_sub(VALUE self, VALUE rb_other) {
 /* call-seq:
  *   self * scalar -> Vector3
  *
+ * Multiplies all three components by +scalar+.
+ *
  * @return [Vector3]
  */
 static VALUE Vector3_mul(VALUE self, VALUE rb_scalar) {
@@ -231,6 +246,8 @@ static VALUE Vector3_mul(VALUE self, VALUE rb_scalar) {
 }
 
 /* call-seq: to_s -> String
+ *
+ * Returns a human-readable +"(x, y, z)"+ representation.
  *
  * @return [String] +"(x, y, z)"+
  */
@@ -252,10 +269,16 @@ static VALUE Vector3_to_s(VALUE self) {
  * +[x, y, z]+ Array anywhere a Vector3 is accepted.
  *
  * @!attribute x
+ *   Returns the X component.
+ *
  *   @return [Float] the X component
  * @!attribute y
+ *   Returns the Y component.
+ *
  *   @return [Float] the Y component
  * @!attribute z
+ *   Returns the Z component.
+ *
  *   @return [Float] the Z component
  */
 void Init_Vector3(VALUE rb_mSFML) {

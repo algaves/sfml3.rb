@@ -47,6 +47,9 @@ static VALUE Context_new(VALUE klass) {
 /* call-seq:
  *   extension_available?(name) -> true or false
  *
+ * Returns +true+ if the OpenGL extension +name+ is available in the currently
+ * active context.
+ *
  * @return [Boolean] whether the OpenGL extension +name+ is available in the
  *   currently active context
  */
@@ -69,6 +72,9 @@ static VALUE Context_set_active(VALUE self, VALUE rb_active) {
 /* call-seq:
  *   function(name) -> Integer
  *
+ * Returns the address of the OpenGL function +name+ as an Integer, or 0 when
+ * it is not available.
+ *
  * @return [Integer] the address of the OpenGL function +name+, as a raw
  *   pointer value, or 0 if it is not available
  */
@@ -78,6 +84,8 @@ static VALUE Context_get_function(VALUE klass, VALUE rb_name) {
 
 /* call-seq: settings -> ContextSettings
  *
+ * Returns the settings this context was created with.
+ *
  * @return [ContextSettings] the settings this context was created with
  */
 static VALUE Context_get_settings(VALUE self) {
@@ -85,6 +93,9 @@ static VALUE Context_get_settings(VALUE self) {
 }
 
 /* call-seq: active_context_id -> Integer
+ *
+ * Returns the unique identifier of the currently active context on the
+ * calling thread, or 0 if none is active.
  *
  * @return [Integer] the unique identifier of the currently active context on
  *   the calling thread, or 0 if none is active

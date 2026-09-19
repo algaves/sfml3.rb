@@ -23,6 +23,8 @@ static VALUE Buffer_wrap(VALUE klass, sfBuffer* buffer) {
 /* call-seq:
  *   Buffer.new -> Buffer
  *
+ * Creates a new, empty byte buffer.
+ *
  * @return [Buffer] a new, empty buffer
  * @raise [NoMemoryError] if the underlying buffer could not be allocated
  */
@@ -41,6 +43,8 @@ static VALUE Buffer_new(VALUE klass) {
 
 /* call-seq: size -> Integer
  *
+ * Returns the size of the buffer in bytes.
+ *
  * @return [Integer] size in bytes
  */
 static VALUE Buffer_get_size(VALUE self) {
@@ -48,6 +52,8 @@ static VALUE Buffer_get_size(VALUE self) {
 }
 
 /* call-seq: data -> String
+ *
+ * Returns the raw bytes held by the buffer.
  *
  * @return [String] the raw bytes, as a binary String
  */
@@ -64,6 +70,8 @@ static VALUE Buffer_get_data(VALUE self) {
 }
 
 /* call-seq: empty? -> true or false
+ *
+ * Returns +true+ if the buffer holds no bytes.
  *
  * @return [Boolean]
  */

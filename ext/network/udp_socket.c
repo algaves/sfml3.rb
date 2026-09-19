@@ -45,6 +45,8 @@ static VALUE UdpSocket_wrap(VALUE klass, sfUdpSocket* handle) {
 /* call-seq:
  *   UdpSocket.new -> UdpSocket
  *
+ * Creates a new, unbound UDP socket.
+ *
  * @return [UdpSocket] a new, unbound socket
  */
 static VALUE UdpSocket_new(VALUE klass) {
@@ -53,6 +55,8 @@ static VALUE UdpSocket_new(VALUE klass) {
 
 /* call-seq:
  *   UdpSocket.any_port -> Integer
+ *
+ * Returns the port value that makes #bind bind to an OS-chosen port.
  *
  * @return [Integer] a port value that #bind interprets as "let the OS pick
  *   an available port"
@@ -64,6 +68,8 @@ static VALUE UdpSocket_any_port(VALUE klass) {
 /* call-seq:
  *   UdpSocket.max_datagram_size -> Integer
  *
+ * Returns the maximum size, in bytes, of a single UDP datagram.
+ *
  * @return [Integer] the maximum number of bytes that can be sent in a
  *   single UDP datagram (65507)
  */
@@ -72,6 +78,8 @@ static VALUE UdpSocket_max_datagram_size(VALUE klass) {
 }
 
 /* call-seq: blocking? -> true or false
+ *
+ * Returns +true+ if the socket is in blocking mode.
  *
  * @return [Boolean]
  */
@@ -82,6 +90,8 @@ static VALUE UdpSocket_blocking(VALUE self) {
 /* call-seq:
  *   blocking=(value) -> value
  *
+ * Enables or disables blocking mode according to +value+.
+ *
  * @return [Boolean] +value+
  */
 static VALUE UdpSocket_set_blocking(VALUE self, VALUE rb_value) {
@@ -90,6 +100,8 @@ static VALUE UdpSocket_set_blocking(VALUE self, VALUE rb_value) {
 }
 
 /* call-seq: local_port -> Integer
+ *
+ * Returns the local port the socket is bound to.
  *
  * @return [Integer] the port the socket is bound to, or 0 if not bound
  */
@@ -193,6 +205,8 @@ static VALUE UdpSocket_receive(int argc, VALUE* argv, VALUE self) {
 
 /* call-seq:
  *   send_packet(packet, address, port) -> Symbol
+ *
+ * Sends +packet+ as a datagram to the given +address+ and +port+.
  *
  * @return [Symbol] a SocketStatus name, +:done+ on success
  * @raise [TypeError] if +packet+ is not an SFML::Packet

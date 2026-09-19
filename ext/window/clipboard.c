@@ -29,6 +29,8 @@ static void unicode_char_to_utf8(sfChar32 code, char buffer[4], int* length) {
 
 /* call-seq: string -> String
  *
+ * Returns the current system clipboard contents as a plain String.
+ *
  * @return [String] the current system clipboard contents
  */
 static VALUE Clipboard_get_string(VALUE module) {
@@ -50,6 +52,8 @@ static VALUE Clipboard_set_string(VALUE module, VALUE rb_text) {
 }
 
 /* call-seq: unicode_string -> String
+ *
+ * Returns the current system clipboard contents, decoding UTF-32 to UTF-8.
  *
  * @return [String] the current system clipboard contents, decoded from
  *   UTF-32 to a UTF-8 Ruby String

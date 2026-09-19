@@ -36,6 +36,8 @@ static Glyph* Get_Glyph(VALUE self) {
 
 /* call-seq: advance -> Float
  *
+ * Returns the glyph's horizontal advance.
+ *
  * @return [Float] the horizontal offset to advance to the next character
  */
 static VALUE Glyph_get_advance(VALUE self) {
@@ -43,6 +45,8 @@ static VALUE Glyph_get_advance(VALUE self) {
 }
 
 /* call-seq: bounds -> Rect
+ *
+ * Returns the glyph's bounding box.
  *
  * @return [Rect] the glyph's bounding box, relative to the baseline and
  *   the cursor position
@@ -52,6 +56,8 @@ static VALUE Glyph_get_bounds(VALUE self) {
 }
 
 /* call-seq: texture_rect -> Rect
+ *
+ * Returns the sub-rectangle of the texture displayed on the object.
  *
  * @return [Rect] the sub-rectangle of the font's texture holding this
  *   glyph's pixels

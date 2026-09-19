@@ -53,6 +53,8 @@ static VALUE Clock_init(VALUE self) {
 
 /* call-seq: elapsed_time -> Time
  *
+ * Returns the time elapsed on the clock.
+ *
  * @return [Time] time elapsed since the clock was created, started, or last
  *   restarted/reset, whichever is most recent
  */
@@ -84,6 +86,8 @@ static VALUE Clock_reset(VALUE self) {
 
 /* call-seq: running? -> true or false
  *
+ * Returns +true+ while the clock is running, +false+ once it is stopped.
+ *
  * @return [Boolean]
  */
 static VALUE Clock_is_running(VALUE self) {
@@ -114,6 +118,8 @@ static VALUE Clock_stop(VALUE self) {
 }
 
 /* call-seq: copy -> Clock
+ *
+ * Returns an independent copy of the clock.
  *
  * @return [Clock] an independent copy with the same elapsed/running state
  */

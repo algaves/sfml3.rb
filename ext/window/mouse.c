@@ -26,6 +26,8 @@ static const sfRenderWindow* Mouse_relative_window(VALUE rb_window) {
 /* call-seq:
  *   button_pressed?(button) -> true or false
  *
+ * Returns +true+ if +button+ is currently pressed.
+ *
  * @return [Boolean] whether +button+ (a Symbol like +:left+, +:right+,
  *   +:middle+, or an Integer) is currently pressed
  */
@@ -35,6 +37,8 @@ static VALUE Mouse_is_button_pressed(VALUE module, VALUE rb_button) {
 
 /* call-seq:
  *   position(window = nil) -> Vector2
+ *
+ * Returns the mouse position in desktop coordinates, or relative to +window+.
  *
  * @return [Vector2] the mouse position in desktop coordinates, or relative
  *   to +window+'s client area when given

@@ -62,6 +62,8 @@ static VALUE ConvexShape_wrap(VALUE klass, sfConvexShape* shape) {
 /* call-seq:
  *   ConvexShape.new(point_count = 0) -> ConvexShape
  *
+ * Creates a convex shape with room for at least +point_count+ points.
+ *
  * @return [ConvexShape]
  */
 static VALUE ConvexShape_new(int argc, VALUE* argv, VALUE klass) {
@@ -78,6 +80,8 @@ static VALUE ConvexShape_new(int argc, VALUE* argv, VALUE klass) {
 }
 
 /* call-seq: copy -> ConvexShape
+ *
+ * Returns a deep copy of the object.
  *
  * @return [ConvexShape] an independent copy, including its texture reference
  */
@@ -97,6 +101,8 @@ static VALUE ConvexShape_copy(VALUE self) {
 
 /* call-seq: point_count -> Integer
  *
+ * Returns the number of points composing the shape.
+ *
  * @return [Integer]
  */
 static VALUE ConvexShape_get_point_count(VALUE self) {
@@ -105,6 +111,8 @@ static VALUE ConvexShape_get_point_count(VALUE self) {
 
 /* call-seq:
  *   point_count=(value) -> Integer
+ *
+ * Sets the number of points composing the shape.
  *
  * @return [Integer] +value+
  */
@@ -127,6 +135,8 @@ static size_t ConvexShape_check_index(VALUE self, VALUE rb_index) {
 
 /* call-seq: point(index) -> Vector2
  *
+ * Returns the local position of the point at +index+.
+ *
  * @return [Vector2] the local position of the point at +index+
  * @raise [IndexError] if +index+ is out of range
  */
@@ -136,6 +146,8 @@ static VALUE ConvexShape_get_point(VALUE self, VALUE rb_index) {
 }
 
 /* call-seq: set_point(index, point) -> Vector2
+ *
+ * Sets the position of the point at +index+.
  *
  * @return [Vector2] +point+
  * @raise [IndexError] if +index+ is out of range
@@ -148,6 +160,8 @@ static VALUE ConvexShape_set_point(VALUE self, VALUE rb_index, VALUE rb_point) {
 
 /* call-seq: position -> Vector2
  *
+ * Returns the object's position.
+ *
  * @return [Vector2]
  */
 static VALUE ConvexShape_get_position(VALUE self) {
@@ -156,6 +170,8 @@ static VALUE ConvexShape_get_position(VALUE self) {
 
 /* call-seq:
  *   position=(value) -> Vector2
+ *
+ * Sets the object's position.
  *
  * @return [Vector2] +value+
  */
@@ -166,6 +182,8 @@ static VALUE ConvexShape_set_position(VALUE self, VALUE rb_position) {
 
 /* call-seq: rotation -> Float
  *
+ * Returns the object's rotation, in degrees.
+ *
  * @return [Float]
  */
 static VALUE ConvexShape_get_rotation(VALUE self) {
@@ -174,6 +192,8 @@ static VALUE ConvexShape_get_rotation(VALUE self) {
 
 /* call-seq:
  *   rotation=(value) -> Float
+ *
+ * Sets the object's rotation, in degrees.
  *
  * @return [Float] +value+
  */
@@ -184,6 +204,8 @@ static VALUE ConvexShape_set_rotation(VALUE self, VALUE rb_rotation) {
 
 /* call-seq: scale -> Vector2
  *
+ * Returns the object's scale factors.
+ *
  * @return [Vector2]
  */
 static VALUE ConvexShape_get_scale(VALUE self) {
@@ -192,6 +214,8 @@ static VALUE ConvexShape_get_scale(VALUE self) {
 
 /* call-seq:
  *   scale=(value) -> Vector2
+ *
+ * Sets the object's scale factors.
  *
  * @return [Vector2] +value+
  */
@@ -202,6 +226,8 @@ static VALUE ConvexShape_set_scale(VALUE self, VALUE rb_scale) {
 
 /* call-seq: origin -> Vector2
  *
+ * Returns the object's origin.
+ *
  * @return [Vector2]
  */
 static VALUE ConvexShape_get_origin(VALUE self) {
@@ -210,6 +236,8 @@ static VALUE ConvexShape_get_origin(VALUE self) {
 
 /* call-seq:
  *   origin=(value) -> Vector2
+ *
+ * Sets the object's origin.
  *
  * @return [Vector2] +value+
  */
@@ -220,6 +248,8 @@ static VALUE ConvexShape_set_origin(VALUE self, VALUE rb_origin) {
 
 /* call-seq: move(offset) -> self
  *
+ * Moves the object by +offset+.
+ *
  * @return [self]
  */
 static VALUE ConvexShape_move(VALUE self, VALUE rb_offset) {
@@ -228,6 +258,8 @@ static VALUE ConvexShape_move(VALUE self, VALUE rb_offset) {
 }
 
 /* call-seq: rotate(angle) -> self
+ *
+ * Rotates the object by +angle+ degrees.
  *
  * @return [self]
  */
@@ -238,6 +270,8 @@ static VALUE ConvexShape_rotate(VALUE self, VALUE rb_angle) {
 
 /* call-seq:
  *   scale!(factors) -> self
+ *
+ * Scales the object by +factors+ relative to its current scale.
  *
  * @return [self]
  */
@@ -258,6 +292,8 @@ static VALUE ConvexShape_get_transform(VALUE self) {
 
 /* call-seq: inverse_transform -> Array
  *
+ * Returns the 3x3 row-major inverse of the object's transform matrix.
+ *
  * @return [Array] the 3x3 row-major inverse transform matrix
  */
 static VALUE ConvexShape_get_inverse_transform(VALUE self) {
@@ -266,6 +302,8 @@ static VALUE ConvexShape_get_inverse_transform(VALUE self) {
 }
 
 /* call-seq: fill_color -> Color
+ *
+ * Returns the shape's fill color.
  *
  * @return [Color]
  */
@@ -276,6 +314,8 @@ static VALUE ConvexShape_get_fill_color(VALUE self) {
 /* call-seq:
  *   fill_color=(value) -> Color
  *
+ * Sets the shape's fill color.
+ *
  * @return [Color] +value+
  */
 static VALUE ConvexShape_set_fill_color(VALUE self, VALUE rb_color) {
@@ -284,6 +324,8 @@ static VALUE ConvexShape_set_fill_color(VALUE self, VALUE rb_color) {
 }
 
 /* call-seq: outline_color -> Color
+ *
+ * Returns the shape's outline color.
  *
  * @return [Color]
  */
@@ -294,6 +336,8 @@ static VALUE ConvexShape_get_outline_color(VALUE self) {
 /* call-seq:
  *   outline_color=(value) -> Color
  *
+ * Sets the shape's outline color.
+ *
  * @return [Color] +value+
  */
 static VALUE ConvexShape_set_outline_color(VALUE self, VALUE rb_color) {
@@ -302,6 +346,8 @@ static VALUE ConvexShape_set_outline_color(VALUE self, VALUE rb_color) {
 }
 
 /* call-seq: outline_thickness -> Float
+ *
+ * Returns the shape's outline thickness.
  *
  * @return [Float]
  */
@@ -312,6 +358,8 @@ static VALUE ConvexShape_get_outline_thickness(VALUE self) {
 /* call-seq:
  *   outline_thickness=(value) -> Float
  *
+ * Sets the shape's outline thickness.
+ *
  * @return [Float] +value+
  */
 static VALUE ConvexShape_set_outline_thickness(VALUE self, VALUE rb_thickness) {
@@ -321,6 +369,8 @@ static VALUE ConvexShape_set_outline_thickness(VALUE self, VALUE rb_thickness) {
 
 /* call-seq:
  *   texture=(value) -> Texture or nil
+ *
+ * Sets the object's texture.
  *
  * @return [Texture, nil] +value+
  */
@@ -345,6 +395,8 @@ static VALUE ConvexShape_set_texture(VALUE self, VALUE rb_texture) {
 
 /* call-seq: texture -> Texture or nil
  *
+ * Returns the object's texture, or +nil+ if it has none.
+ *
  * @return [Texture, nil]
  */
 static VALUE ConvexShape_get_texture(VALUE self) {
@@ -352,6 +404,8 @@ static VALUE ConvexShape_get_texture(VALUE self) {
 }
 
 /* call-seq: texture_rect -> Rect
+ *
+ * Returns the sub-rectangle of the texture displayed on the object.
  *
  * @return [Rect] the sub-rectangle of the texture displayed on the shape
  */
@@ -362,6 +416,8 @@ static VALUE ConvexShape_get_texture_rect(VALUE self) {
 /* call-seq:
  *   texture_rect=(value) -> Rect
  *
+ * Sets the sub-rectangle of the texture displayed on the object.
+ *
  * @return [Rect] +value+
  */
 static VALUE ConvexShape_set_texture_rect(VALUE self, VALUE rb_rect) {
@@ -371,6 +427,8 @@ static VALUE ConvexShape_set_texture_rect(VALUE self, VALUE rb_rect) {
 
 /* call-seq: geometric_center -> Vector2
  *
+ * Returns the local position of the shape's geometric center.
+ *
  * @return [Vector2] the local position of the shape's geometric center
  */
 static VALUE ConvexShape_get_geometric_center(VALUE self) {
@@ -378,6 +436,8 @@ static VALUE ConvexShape_get_geometric_center(VALUE self) {
 }
 
 /* call-seq: local_bounds -> Rect
+ *
+ * Returns the bounding box in local (untransformed) coordinates.
  *
  * @return [Rect] the bounding box in local (untransformed) coordinates
  */
@@ -387,6 +447,8 @@ static VALUE ConvexShape_get_local_bounds(VALUE self) {
 
 /* call-seq: global_bounds -> Rect
  *
+ * Returns the bounding box after the transform is applied.
+ *
  * @return [Rect] the bounding box after transform is applied
  */
 static VALUE ConvexShape_get_global_bounds(VALUE self) {
@@ -395,6 +457,8 @@ static VALUE ConvexShape_get_global_bounds(VALUE self) {
 
 /* call-seq:
  *   draw(target, state) -> nil
+ *
+ * Draws the object onto +target+ using the given render +state+.
  *
  * @return [nil]
  */
@@ -423,24 +487,34 @@ static VALUE ConvexShape_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
  * shape produces undefined rendering.
  *
  * @!attribute point_count
+ *   The number of points composing the shape.
  *   @return [Integer]
  * @!attribute position
+ *   The object's position.
  *   @return [Vector2]
  * @!attribute rotation
+ *   The object's rotation, in degrees.
  *   @return [Float]
  * @!attribute scale
+ *   The object's scale factors.
  *   @return [Vector2]
  * @!attribute origin
+ *   The object's origin.
  *   @return [Vector2]
  * @!attribute fill_color
+ *   The object's fill color.
  *   @return [Color]
  * @!attribute outline_color
+ *   The object's outline color.
  *   @return [Color]
  * @!attribute outline_thickness
+ *   The object's outline thickness.
  *   @return [Float]
  * @!attribute texture
+ *   The object's texture, or +nil+ if it has none.
  *   @return [Texture, nil]
  * @!attribute texture_rect
+ *   The sub-rectangle of the texture displayed on the object.
  *   @return [Rect]
  */
 void Init_ConvexShape(VALUE rb_mSFML) {

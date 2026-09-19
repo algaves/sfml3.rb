@@ -40,6 +40,8 @@ static sfVertexArray* Get_VertexArray_Struct(VALUE self) {
 /* call-seq:
  *   VertexArray.new -> VertexArray
  *
+ * Creates a vertex array using the given +primitive+ type.
+ *
  * @return [VertexArray] an empty array of :points primitives
  */
 static VALUE VertexArray_new(VALUE klass) {
@@ -47,6 +49,8 @@ static VALUE VertexArray_new(VALUE klass) {
 }
 
 /* call-seq: copy -> VertexArray
+ *
+ * Returns a deep copy of the object.
  *
  * @return [VertexArray] an independent copy
  */
@@ -56,6 +60,8 @@ static VALUE VertexArray_copy(VALUE self) {
 }
 
 /* call-seq: vertex_count -> Integer
+ *
+ * Returns the number of vertices stored.
  *
  * @return [Integer]
  */
@@ -78,6 +84,8 @@ static size_t VertexArray_check_index(VALUE self, VALUE rb_index) {
 /* call-seq:
  *   vertex(index) -> Vertex
  *
+ * Returns the vertex at +index+.
+ *
  * @return [Vertex] a copy of the vertex at +index+
  * @raise [IndexError] if +index+ is out of range
  */
@@ -88,6 +96,8 @@ static VALUE VertexArray_get_vertex(VALUE self, VALUE rb_index) {
 
 /* call-seq:
  *   set_vertex(index, vertex) -> Vertex
+ *
+ * Replaces the vertex at +index+ with +vertex+.
  *
  * @return [Vertex] +vertex+
  * @raise [IndexError] if +index+ is out of range
@@ -100,6 +110,8 @@ static VALUE VertexArray_set_vertex(VALUE self, VALUE rb_index, VALUE rb_vertex)
 
 /* call-seq:
  *   append(vertex) -> self
+ *
+ * Appends +vertex+ to the array.
  *
  * @return [self]
  */
@@ -134,6 +146,8 @@ static VALUE VertexArray_resize(VALUE self, VALUE rb_count) {
 
 /* call-seq: primitive -> Symbol
  *
+ * Returns the primitive type used to draw the vertices.
+ *
  * @return [Symbol] the primitive type vertices are interpreted as (e.g.
  *   :points, :lines, :triangles)
  */
@@ -145,6 +159,8 @@ static VALUE VertexArray_get_primitive_type(VALUE self) {
 /* call-seq:
  *   primitive=(value) -> Symbol
  *
+ * Sets the primitive type used to draw the vertices.
+ *
  * @return [Symbol] +value+
  */
 static VALUE VertexArray_set_primitive_type(VALUE self, VALUE rb_type) {
@@ -153,6 +169,8 @@ static VALUE VertexArray_set_primitive_type(VALUE self, VALUE rb_type) {
 }
 
 /* call-seq: bounds -> Rect
+ *
+ * Returns the axis-aligned bounding box of all vertices.
  *
  * @return [Rect] the axis-aligned bounding box of all vertices
  */
@@ -193,6 +211,7 @@ static VALUE VertexArray_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
  * Includes +Drawable+.
  *
  * @!attribute primitive
+ *   The primitive type used to draw the vertices.
  *   @return [Symbol]
  */
 void Init_VertexArray(VALUE rb_mSFML) {

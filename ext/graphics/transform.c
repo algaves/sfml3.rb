@@ -105,6 +105,8 @@ static VALUE Transform_init(int argc, VALUE* argv, VALUE self) {
 /* call-seq:
  *   Transform.identity -> Transform
  *
+ * Returns the identity transform.
+ *
  * @return [Transform] a fresh identity transform
  */
 static VALUE Transform_s_identity(VALUE klass) {
@@ -114,6 +116,8 @@ static VALUE Transform_s_identity(VALUE klass) {
 
 /* call-seq:
  *   Transform.from_a(array_of_9) -> Transform
+ *
+ * Creates a transform from a nine-element array.
  *
  * @return [Transform]
  * @raise [ArgumentError] if the Array has fewer than 9 elements
@@ -129,6 +133,8 @@ static VALUE Transform_s_from_a(VALUE klass, VALUE rb_matrix) {
 
 /* call-seq: to_a -> Array<Float>
  *
+ * Returns the object as an Array.
+ *
  * @return [Array<Float>] the 9 matrix elements, row-major
  */
 static VALUE Transform_to_a(VALUE self) {
@@ -139,6 +145,8 @@ static VALUE Transform_to_a(VALUE self) {
    Deliberately not called #matrix: that name already means the 3x3 everywhere
    else in this binding (Sprite#matrix, Text#matrix, RenderState#matrix). */
 /* call-seq: gl_matrix -> Array<Float>
+ *
+ * Returns the transform as a 4x4 OpenGL matrix.
  *
  * @return [Array<Float>] the equivalent 16-element 4x4 matrix, ready for
  *   +glLoadMatrixf+
@@ -180,6 +188,8 @@ static VALUE Transform_eql(VALUE self, VALUE rb_other) {
 
 /* call-seq: to_s -> String
  *
+ * Returns a human-readable representation of the object.
+ *
  * @return [String]
  */
 static VALUE Transform_to_s(VALUE self) {
@@ -196,6 +206,8 @@ static VALUE Transform_to_s(VALUE self) {
 /* call-seq:
  *   transform_point(point) -> Vector2
  *
+ * Applies the transform to a point and returns the result.
+ *
  * @return [Vector2] +point+ transformed by this matrix
  */
 static VALUE Transform_transform_point(VALUE self, VALUE rb_point) {
@@ -208,6 +220,8 @@ static VALUE Transform_transform_point(VALUE self, VALUE rb_point) {
 /* call-seq:
  *   transform_rect(rect) -> Rect
  *
+ * Applies the transform to a rectangle and returns the result.
+ *
  * @return [Rect] the axis-aligned bounding box of +rect+ transformed by
  *   this matrix
  */
@@ -219,6 +233,8 @@ static VALUE Transform_transform_rect(VALUE self, VALUE rb_rect) {
 
 /* call-seq: inverse -> Transform
  *
+ * Returns the inverse of the transform.
+ *
  * @return [Transform] the inverse of this transform, or the identity if it
  *   is not invertible
  */
@@ -227,6 +243,8 @@ static VALUE Transform_get_inverse(VALUE self) {
 }
 
 /* call-seq: copy -> Transform
+ *
+ * Returns a deep copy of the object.
  *
  * @return [Transform] an independent copy
  */
@@ -275,6 +293,8 @@ static VALUE Transform_mul(VALUE self, VALUE rb_other) {
 
 /* call-seq:
  *   translate!(offset) -> self
+ *
+ * Applies a translation to the transform in place.
  *
  * @return [self]
  */
@@ -337,6 +357,8 @@ static VALUE Transform_scale_bang(int argc, VALUE* argv, VALUE self) {
 /* call-seq:
  *   translate(offset) -> Transform
  *
+ * Returns a copy translated by the given offsets.
+ *
  * @return [Transform] a new transform, translated by +offset+
  */
 static VALUE Transform_translate(VALUE self, VALUE rb_offset) {
@@ -346,6 +368,8 @@ static VALUE Transform_translate(VALUE self, VALUE rb_offset) {
 /* call-seq:
  *   rotate(angle)         -> Transform
  *   rotate(angle, center) -> Transform
+ *
+ * Returns a copy rotated by +angle+ degrees, around +center+ if given.
  *
  * @return [Transform] a new transform, rotated by +angle+ degrees around
  *   +center+ if given, otherwise around the origin
@@ -357,6 +381,8 @@ static VALUE Transform_rotate(int argc, VALUE* argv, VALUE self) {
 /* call-seq:
  *   scale(factors)         -> Transform
  *   scale(factors, center) -> Transform
+ *
+ * Returns a copy scaled by +factors+, around +center+ if given.
  *
  * @return [Transform] a new transform, scaled by +factors+ around +center+
  *   if given, otherwise around the origin
@@ -374,6 +400,8 @@ static VALUE Transform_scale(int argc, VALUE* argv, VALUE self) {
    unaffected by the promotion to a class. */
 /* call-seq:
  *   Transform.combine(array_a, array_b) -> Array<Float>
+ *
+ * Returns the transform that combines +array_a+ and +array_b+.
  *
  * @deprecated Use #combine on a Transform instead.
  * @return [Array<Float>] the 9-element matrix of +array_a+ combined with
@@ -393,6 +421,8 @@ static VALUE Transform_s_combine(VALUE klass, VALUE rb_arr_a, VALUE rb_arr_b) {
 /* call-seq:
  *   Transform.inverse(array) -> Array<Float>
  *
+ * Returns the inverse of the given transform.
+ *
  * @deprecated Use #inverse on a Transform instead.
  * @return [Array<Float>] the 9-element inverse matrix of +array+
  */
@@ -410,6 +440,7 @@ static VALUE Transform_s_inverse(VALUE klass, VALUE rb_matrix) {
  * transformations applied by Sprite, Text and Transformable.
  *
  * @!attribute [r] matrix
+ *   The object's 3x3 transform matrix.
  *   @return [Array<Float>] the 9 matrix elements, row-major (alias for #to_a)
  */
 void Init_Transform(VALUE rb_mSFML) {

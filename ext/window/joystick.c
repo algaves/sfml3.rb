@@ -9,6 +9,8 @@
 /* call-seq:
  *   connected?(joystick) -> true or false
  *
+ * Returns +true+ if joystick number +joystick+ is currently connected.
+ *
  * @return [Boolean] whether joystick number +joystick+ is currently
  *   connected
  */
@@ -19,6 +21,8 @@ static VALUE Joystick_is_connected(VALUE module, VALUE rb_joystick) {
 /* call-seq:
  *   button_count(joystick) -> Integer
  *
+ * Returns the number of buttons on joystick number +joystick+.
+ *
  * @return [Integer] number of buttons on joystick number +joystick+
  */
 static VALUE Joystick_get_button_count(VALUE module, VALUE rb_joystick) {
@@ -27,6 +31,8 @@ static VALUE Joystick_get_button_count(VALUE module, VALUE rb_joystick) {
 
 /* call-seq:
  *   has_axis?(joystick, axis) -> true or false
+ *
+ * Returns +true+ if joystick number +joystick+ has +axis+.
  *
  * @return [Boolean] whether joystick number +joystick+ has +axis+ (a Symbol
  *   like +:x+, +:y+, +:pov_x+, or an Integer)
@@ -38,6 +44,9 @@ static VALUE Joystick_has_axis(VALUE module, VALUE rb_joystick, VALUE rb_axis) {
 /* call-seq:
  *   button_pressed?(joystick, button) -> true or false
  *
+ * Returns +true+ if +button+ is currently pressed on joystick number
+ * +joystick+.
+ *
  * @return [Boolean] whether +button+ is currently pressed on joystick number
  *   +joystick+
  */
@@ -47,6 +56,9 @@ static VALUE Joystick_is_button_pressed(VALUE module, VALUE rb_joystick, VALUE r
 
 /* call-seq:
  *   axis_position(joystick, axis) -> Float
+ *
+ * Returns the current position of +axis+ on joystick number +joystick+,
+ * between -100 and 100.
  *
  * @return [Float] the current position of +axis+ on joystick number
  *   +joystick+, between -100 and 100
@@ -58,6 +70,9 @@ static VALUE Joystick_get_axis_position(VALUE module, VALUE rb_joystick, VALUE r
 
 /* call-seq:
  *   identification(joystick) -> Hash
+ *
+ * Returns the +:name+, +:vendor_id+ and +:product_id+ of joystick number
+ * +joystick+.
  *
  * @return [Hash] +:name+, +:vendor_id+, +:product_id+, for joystick number
  *   +joystick+

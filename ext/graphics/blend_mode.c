@@ -118,6 +118,8 @@ static VALUE BlendMode_new(int argc, VALUE* argv, VALUE klass) {
 
 /* call-seq: color_src_factor -> Symbol
  *
+ * Returns the source blend factor for color components.
+ *
  * @return [Symbol] the source blending factor for the color/RGB channels
  */
 static VALUE BlendMode_get_color_src_factor(VALUE self) {
@@ -126,6 +128,8 @@ static VALUE BlendMode_get_color_src_factor(VALUE self) {
 }
 
 /* call-seq: color_dst_factor -> Symbol
+ *
+ * Returns the destination blend factor for color components.
  *
  * @return [Symbol] the destination blending factor for the color/RGB channels
  */
@@ -136,6 +140,8 @@ static VALUE BlendMode_get_color_dst_factor(VALUE self) {
 
 /* call-seq: color_equation -> Symbol
  *
+ * Returns the blend equation for color components.
+ *
  * @return [Symbol] the blending equation for the color/RGB channels
  */
 static VALUE BlendMode_get_color_equation(VALUE self) {
@@ -144,6 +150,8 @@ static VALUE BlendMode_get_color_equation(VALUE self) {
 }
 
 /* call-seq: alpha_src_factor -> Symbol
+ *
+ * Returns the source blend factor for alpha.
  *
  * @return [Symbol] the source blending factor for the alpha channel
  */
@@ -154,6 +162,8 @@ static VALUE BlendMode_get_alpha_src_factor(VALUE self) {
 
 /* call-seq: alpha_dst_factor -> Symbol
  *
+ * Returns the destination blend factor for alpha.
+ *
  * @return [Symbol] the destination blending factor for the alpha channel
  */
 static VALUE BlendMode_get_alpha_dst_factor(VALUE self) {
@@ -162,6 +172,8 @@ static VALUE BlendMode_get_alpha_dst_factor(VALUE self) {
 }
 
 /* call-seq: alpha_equation -> Symbol
+ *
+ * Returns the blend equation for alpha.
  *
  * @return [Symbol] the blending equation for the alpha channel
  */
@@ -172,6 +184,8 @@ static VALUE BlendMode_get_alpha_equation(VALUE self) {
 
 /* call-seq:
  *   color_src_factor=(value) -> Symbol
+ *
+ * Sets the source blend factor for color components.
  *
  * @return [Symbol] +value+
  */
@@ -184,6 +198,8 @@ static VALUE BlendMode_set_color_src_factor(VALUE self, VALUE rb_value) {
 /* call-seq:
  *   color_dst_factor=(value) -> Symbol
  *
+ * Sets the destination blend factor for color components.
+ *
  * @return [Symbol] +value+
  */
 static VALUE BlendMode_set_color_dst_factor(VALUE self, VALUE rb_value) {
@@ -194,6 +210,8 @@ static VALUE BlendMode_set_color_dst_factor(VALUE self, VALUE rb_value) {
 
 /* call-seq:
  *   color_equation=(value) -> Symbol
+ *
+ * Sets the blend equation for color components.
  *
  * @return [Symbol] +value+
  */
@@ -206,6 +224,8 @@ static VALUE BlendMode_set_color_equation(VALUE self, VALUE rb_value) {
 /* call-seq:
  *   alpha_src_factor=(value) -> Symbol
  *
+ * Sets the source blend factor for alpha.
+ *
  * @return [Symbol] +value+
  */
 static VALUE BlendMode_set_alpha_src_factor(VALUE self, VALUE rb_value) {
@@ -216,6 +236,8 @@ static VALUE BlendMode_set_alpha_src_factor(VALUE self, VALUE rb_value) {
 
 /* call-seq:
  *   alpha_dst_factor=(value) -> Symbol
+ *
+ * Sets the destination blend factor for alpha.
  *
  * @return [Symbol] +value+
  */
@@ -228,6 +250,8 @@ static VALUE BlendMode_set_alpha_dst_factor(VALUE self, VALUE rb_value) {
 /* call-seq:
  *   alpha_equation=(value) -> Symbol
  *
+ * Sets the blend equation for alpha.
+ *
  * @return [Symbol] +value+
  */
 static VALUE BlendMode_set_alpha_equation(VALUE self, VALUE rb_value) {
@@ -238,6 +262,8 @@ static VALUE BlendMode_set_alpha_equation(VALUE self, VALUE rb_value) {
 
 /* call-seq:
  *   self == other -> true or false
+ *
+ * Returns +true+ if the two objects are equal.
  *
  * @return [Boolean]
  */
@@ -263,16 +289,22 @@ static VALUE BlendMode_eql(VALUE self, VALUE rb_other) {
  * the alpha channel.
  *
  * @!attribute color_src_factor
+ *   The source blend factor for color components.
  *   @return [Symbol] the source blending factor for the color channels
  * @!attribute color_dst_factor
+ *   The destination blend factor for color components.
  *   @return [Symbol] the destination blending factor for the color channels
  * @!attribute color_equation
+ *   The blend equation for color components.
  *   @return [Symbol] the blending equation for the color channels
  * @!attribute alpha_src_factor
+ *   The source blend factor for alpha.
  *   @return [Symbol] the source blending factor for the alpha channel
  * @!attribute alpha_dst_factor
+ *   The destination blend factor for alpha.
  *   @return [Symbol] the destination blending factor for the alpha channel
  * @!attribute alpha_equation
+ *   The blend equation for alpha.
  *   @return [Symbol] the blending equation for the alpha channel
  */
 void Init_BlendMode(VALUE rb_mSFML) {

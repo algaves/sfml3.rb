@@ -28,6 +28,9 @@ static const rb_data_type_t Vector2_data_type = {
  *   Vector2.new([x, y])        -> Vector2(x, y)
  *   Vector2.new(other_vector2) -> copy of +other_vector2+
  *
+ * Creates a new 2D vector from two coordinates, a 2-element Array, or
+ * another Vector2.
+ *
  * @return [Vector2]
  * @raise [ArgumentError] if given an Array shorter than 2 elements, or an
  *   argument count other than 0, 1 or 2
@@ -72,6 +75,8 @@ static VALUE Vector2_new(int argc, VALUE* argv, VALUE klass) {
 
 /* call-seq: x -> Float
  *
+ * Returns the X component of the vector.
+ *
  * @return [Float] the X component
  */
 static VALUE Vector2_get_x(VALUE self) {
@@ -79,6 +84,8 @@ static VALUE Vector2_get_x(VALUE self) {
 }
 
 /* call-seq: y -> Float
+ *
+ * Returns the Y component of the vector.
  *
  * @return [Float] the Y component
  */
@@ -112,6 +119,8 @@ static VALUE Vector2_set_y(VALUE self, VALUE rb_y) {
 
 /* call-seq: to_a -> [Float, Float]
  *
+ * Returns the vector's components as a two-element Array.
+ *
  * @return [Array<Float>] +[x, y]+
  */
 static VALUE Vector2_to_a(VALUE self) {
@@ -138,6 +147,8 @@ static VALUE Vector2_each(VALUE self) {
 /* call-seq:
  *   [](index) -> Float
  *
+ * Returns the component stored at +index+.
+ *
  * @return [Float] +x+ for index 0, +y+ for index 1
  */
 static VALUE Vector2_aref(VALUE self, VALUE rb_index) {
@@ -145,6 +156,8 @@ static VALUE Vector2_aref(VALUE self, VALUE rb_index) {
 }
 
 /* call-seq: size -> Integer
+ *
+ * Returns the number of components, always 2.
  *
  * @return [Integer] always 2
  */
@@ -205,6 +218,8 @@ static VALUE Vector2_sub(VALUE self, VALUE rb_other) {
 /* call-seq:
  *   self * scalar -> Vector2
  *
+ * Multiplies both components by +scalar+.
+ *
  * @return [Vector2]
  */
 static VALUE Vector2_mul(VALUE self, VALUE rb_scalar) {
@@ -215,6 +230,8 @@ static VALUE Vector2_mul(VALUE self, VALUE rb_scalar) {
 }
 
 /* call-seq: to_s -> String
+ *
+ * Returns a human-readable +"(x, y)"+ representation.
  *
  * @return [String] +"(x, y)"+
  */
@@ -236,8 +253,12 @@ static VALUE Vector2_to_s(VALUE self) {
  * +[x, y]+ Array anywhere a Vector2 is accepted.
  *
  * @!attribute x
+ *   Returns the X component.
+ *
  *   @return [Float] the X component
  * @!attribute y
+ *   Returns the Y component.
+ *
  *   @return [Float] the Y component
  */
 void Init_Vector2(VALUE rb_mSFML) {

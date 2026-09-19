@@ -45,6 +45,8 @@ static VALUE TcpListener_wrap(VALUE klass, sfTcpListener* handle) {
 /* call-seq:
  *   TcpListener.new -> TcpListener
  *
+ * Creates a new TCP listener that is not yet listening.
+ *
  * @return [TcpListener]
  */
 static VALUE TcpListener_new(VALUE klass) {
@@ -53,6 +55,8 @@ static VALUE TcpListener_new(VALUE klass) {
 
 /* call-seq:
  *   TcpListener.any_port -> Integer
+ *
+ * Returns the port value that makes #listen bind to an OS-chosen port.
  *
  * @return [Integer] a port value that #listen interprets as "let the OS
  *   pick an available port"
@@ -63,6 +67,8 @@ static VALUE TcpListener_any_port(VALUE klass) {
 
 /* call-seq: blocking? -> true or false
  *
+ * Returns +true+ if the listener is in blocking mode.
+ *
  * @return [Boolean]
  */
 static VALUE TcpListener_blocking(VALUE self) {
@@ -72,6 +78,8 @@ static VALUE TcpListener_blocking(VALUE self) {
 /* call-seq:
  *   blocking=(value) -> value
  *
+ * Enables or disables blocking mode according to +value+.
+ *
  * @return [Boolean] +value+
  */
 static VALUE TcpListener_set_blocking(VALUE self, VALUE rb_value) {
@@ -80,6 +88,8 @@ static VALUE TcpListener_set_blocking(VALUE self, VALUE rb_value) {
 }
 
 /* call-seq: local_port -> Integer
+ *
+ * Returns the port the listener is bound to, or 0 if it isn't listening.
  *
  * @return [Integer] the port the listener is bound to, or 0 if it isn't
  *   listening

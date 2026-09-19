@@ -224,6 +224,8 @@ static VALUE InputStream_new(VALUE klass, VALUE rb_io) {
 
 /* call-seq: io -> Object
  *
+ * Returns the IO-like object the stream was created from.
+ *
  * @return [Object] the wrapped IO-like object
  */
 static VALUE InputStream_get_io(VALUE self) {
