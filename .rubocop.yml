@@ -7,6 +7,10 @@ AllCops:
     - 'pkg/**/*'
     - 'tmp/**/*'
     - 'ports/**/*'
+    # Interactive demos, not part of `rake test`; they read as scripts, not
+    # library code, and their top-level `include SFML` is the point.
+    - 'test/hello-world.rb'
+    - 'test/matrix-transformable.rb'
 
 # mkmf drives the build through these globals ($INCFLAGS, $LDFLAGS, $libs);
 # an extconf.rb cannot set compiler flags without them.
@@ -18,14 +22,25 @@ Style/GlobalVars:
 # assertions, and splitting one into helpers to satisfy a line count makes the
 # failure harder to read, not the test better. The single test class is the
 # minitest convention.
+#
+# ext/extconf.rb is mkmf glue and ext/ports.rb is the vendored-dependency
+# recipe; both are long by nature and none of it is runtime API.
 Metrics/AbcSize:
   Exclude:
     - 'test/**/*'
+    - 'ext/extconf.rb'
+    - 'ext/ports.rb'
 
 Metrics/MethodLength:
   Exclude:
     - 'test/**/*'
+    - 'ext/extconf.rb'
+    - 'ext/ports.rb'
 
 Metrics/ClassLength:
   Exclude:
     - 'test/**/*'
+
+Metrics/ModuleLength:
+  Exclude:
+    - 'ext/ports.rb'

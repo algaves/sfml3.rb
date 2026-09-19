@@ -30,10 +30,13 @@ jobs:
       # CSFML are built from pinned, checksummed source by `rake ports`, so no
       # libcsfml package is involved -- the distro one is still CSFML 2.x and
       # would not work anyway.
+      # Xvfb gives the suite the X11 display SFML needs; a few bindings
+      # (Keyboard.delocalize, any window or texture construction) abort the
+      # process rather than raise when DISPLAY is unset.
       - name: Install SFML build dependencies
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y build-essential cmake \
+          sudo apt-get install -y build-essential cmake xvfb \
             libx11-dev libxrandr-dev libxcursor-dev libxi-dev libudev-dev libgl1-mesa-dev
 
       - uses: ruby/setup-ruby@v1
@@ -51,4 +54,4 @@ jobs:
           key: ports-${{ runner.os }}-${{ hashFiles('ext/ports.rb') }}
 
       - name: Run tests
-        run: bundle exec rake test
+        run: xvfb-run -a bundle exec rake test
