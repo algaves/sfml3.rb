@@ -1,12 +1,19 @@
 AllCops:
   TargetRubyVersion: 3.1
   NewCops: enable
-  # Build output, not source: both hold copies of lib/ and ext/ staged for
-  # packaging, so linting them double-counts every offence in the real files.
+  # Build output, not source: pkg/ and tmp/ hold copies of lib/ and ext/
+  # staged for packaging, so linting them double-counts every offence in the
+  # real files.
+  #
+  # Setting `Exclude` replaces RuboCop's defaults, so the vendored bundles must
+  # be named explicitly: on CI `bundle install` puts them in `vendor/bundle`,
+  # inside the tree RuboCop walks, and the `rbs` gem there ships a
+  # `.rubocop.yml` requiring its own plugins, which then fail to load.
   Exclude:
     - 'pkg/**/*'
     - 'tmp/**/*'
     - 'ports/**/*'
+    - 'vendor/**/*'
     # Interactive demos, not part of `rake test`; they read as scripts, not
     # library code, and their top-level `include SFML` is the point.
     - 'test/hello-world.rb'

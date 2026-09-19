@@ -757,8 +757,13 @@ class SfmlTest < Minitest::Test
 
   def test_sound_recorder_availability
     assert_includes [true, false], SoundRecorder.available?
-    assert_kind_of String, SoundRecorder.default_device
-    assert_kind_of Array, SoundRecorder.available_devices
+
+    devices = SoundRecorder.available_devices
+    assert_kind_of Array, devices
+
+    # A headless runner has no capture device, so CSFML reports no default
+    # and the name is only meaningful where one exists.
+    assert_kind_of String, SoundRecorder.default_device unless devices.empty?
   end
 
   # --- Network ---------------------------------------------------------------
