@@ -44,6 +44,8 @@ static VALUE SoundBufferRecorder_wrap(VALUE klass, sfSoundBufferRecorder* handle
 /* call-seq:
  *   SoundBufferRecorder.new -> SoundBufferRecorder
  *
+ * Creates a recorder that captures into a SoundBuffer.
+ *
  * @return [SoundBufferRecorder]
  * @raise [RuntimeError] if no capture device is available
  */
@@ -54,6 +56,8 @@ static VALUE SoundBufferRecorder_new(VALUE klass) {
 /* call-seq:
  *   start(sample_rate) -> true or false
  *
+ * Starts capturing audio at the given sample rate.
+ *
  * @return [Boolean] whether recording started successfully
  */
 static VALUE SoundBufferRecorder_start(VALUE self, VALUE rb_sample_rate) {
@@ -62,6 +66,8 @@ static VALUE SoundBufferRecorder_start(VALUE self, VALUE rb_sample_rate) {
 }
 
 /* call-seq: stop -> self
+ *
+ * Stops capturing audio.
  *
  * @return [self]
  */
@@ -72,6 +78,8 @@ static VALUE SoundBufferRecorder_stop(VALUE self) {
 
 /* call-seq: sample_rate -> Integer
  *
+ * Returns the sample rate used for capture.
+ *
  * @return [Integer]
  */
 static VALUE SoundBufferRecorder_sample_rate(VALUE self) {
@@ -79,6 +87,8 @@ static VALUE SoundBufferRecorder_sample_rate(VALUE self) {
 }
 
 /* call-seq: buffer -> SoundBuffer
+ *
+ * Returns the buffer holding the audio recorded so far.
  *
  * @return [SoundBuffer] the buffer containing the audio recorded so far
  */
@@ -88,6 +98,8 @@ static VALUE SoundBufferRecorder_buffer(VALUE self) {
 }
 
 /* call-seq: device -> String
+ *
+ * Returns the name of the capture device in use.
  *
  * @return [String] the name of the capture device in use
  */
@@ -109,6 +121,8 @@ static VALUE SoundBufferRecorder_set_device(VALUE self, VALUE rb_name) {
 }
 
 /* call-seq: channel_count -> Integer
+ *
+ * Returns the number of capture channels.
  *
  * @return [Integer]
  */

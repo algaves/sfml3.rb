@@ -32,6 +32,8 @@ static VALUE SoundSourceCone_wrap(sfSoundSourceCone cone) {
 /* call-seq:
  *   SoundSourceCone.new(inner_angle, outer_angle, outer_gain) -> SoundSourceCone
  *
+ * Creates a directional attenuation cone with the given angles and gain.
+ *
  * @return [SoundSourceCone]
  */
 static VALUE SoundSourceCone_new(VALUE klass, VALUE rb_inner, VALUE rb_outer, VALUE rb_gain) {
@@ -44,6 +46,8 @@ static VALUE SoundSourceCone_new(VALUE klass, VALUE rb_inner, VALUE rb_outer, VA
 
 /* call-seq: inner_angle -> Float
  *
+ * Returns the inner cone angle in degrees.
+ *
  * @return [Float] angle, in degrees, of the inner cone within which the
  *   source is heard at full volume
  */
@@ -52,6 +56,8 @@ static VALUE SoundSourceCone_get_inner_angle(VALUE self) {
 }
 
 /* call-seq: outer_angle -> Float
+ *
+ * Returns the outer cone angle in degrees.
  *
  * @return [Float] angle, in degrees, of the outer cone beyond which the
  *   source is heard at +outer_gain+ volume
@@ -62,6 +68,8 @@ static VALUE SoundSourceCone_get_outer_angle(VALUE self) {
 
 /* call-seq: outer_gain -> Float
  *
+ * Returns the gain applied outside the outer cone.
+ *
  * @return [Float] volume factor applied outside the outer cone
  */
 static VALUE SoundSourceCone_get_outer_gain(VALUE self) {
@@ -70,6 +78,8 @@ static VALUE SoundSourceCone_get_outer_gain(VALUE self) {
 
 /* call-seq:
  *   inner_angle=(value) -> Float
+ *
+ * Sets the inner cone angle in degrees.
  *
  * @return [Float] +value+
  */
@@ -82,6 +92,8 @@ static VALUE SoundSourceCone_set_inner_angle(VALUE self, VALUE rb_value) {
 /* call-seq:
  *   outer_angle=(value) -> Float
  *
+ * Sets the outer cone angle in degrees.
+ *
  * @return [Float] +value+
  */
 static VALUE SoundSourceCone_set_outer_angle(VALUE self, VALUE rb_value) {
@@ -93,6 +105,8 @@ static VALUE SoundSourceCone_set_outer_angle(VALUE self, VALUE rb_value) {
 /* call-seq:
  *   outer_gain=(value) -> Float
  *
+ * Sets the gain applied outside the outer cone.
+ *
  * @return [Float] +value+
  */
 static VALUE SoundSourceCone_set_outer_gain(VALUE self, VALUE rb_value) {
@@ -101,6 +115,8 @@ static VALUE SoundSourceCone_set_outer_gain(VALUE self, VALUE rb_value) {
 }
 
 /* call-seq: to_a -> [Float, Float, Float]
+ *
+ * Returns the cone's three components as an Array.
  *
  * @return [Array<Float>] +[inner_angle, outer_angle, outer_gain]+
  */
@@ -113,6 +129,8 @@ static VALUE SoundSourceCone_to_a(VALUE self) {
 
 /* call-seq:
  *   self == other -> true or false
+ *
+ * Returns +true+ if +other+ is a cone with the same angles and gain.
  *
  * @return [Boolean]
  */
@@ -138,12 +156,17 @@ static VALUE SoundSourceCone_eql(VALUE self, VALUE rb_other) {
  * between.
  *
  * @!attribute inner_angle
+ *   Angle, in degrees, of the inner cone within which the source is heard at
+ *   full volume.
  *   @return [Float] angle, in degrees, of the inner cone within which the
  *     source is heard at full volume
  * @!attribute outer_angle
+ *   Angle, in degrees, of the outer cone beyond which the source is heard at
+ *   +outer_gain+ volume.
  *   @return [Float] angle, in degrees, of the outer cone beyond which the
  *     source is heard at +outer_gain+ volume
  * @!attribute outer_gain
+ *   Volume factor applied outside the outer cone.
  *   @return [Float] volume factor applied outside the outer cone
  */
 void Init_SoundSourceCone(VALUE rb_mSFML) {

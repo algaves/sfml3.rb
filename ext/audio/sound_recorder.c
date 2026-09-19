@@ -194,6 +194,8 @@ static VALUE SoundRecorder_new(VALUE klass) {
 /* call-seq:
  *   start(sample_rate) -> true or false
  *
+ * Starts capturing audio at the given sample rate.
+ *
  * @return [Boolean] whether recording started successfully
  */
 static VALUE SoundRecorder_start(VALUE self, VALUE rb_sample_rate) {
@@ -202,6 +204,8 @@ static VALUE SoundRecorder_start(VALUE self, VALUE rb_sample_rate) {
 }
 
 /* call-seq: stop -> self
+ *
+ * Stops capturing audio.
  *
  * @return [self]
  */
@@ -212,6 +216,8 @@ static VALUE SoundRecorder_stop(VALUE self) {
 
 /* call-seq: sample_rate -> Integer
  *
+ * Returns the sample rate used for capture.
+ *
  * @return [Integer]
  */
 static VALUE SoundRecorder_sample_rate(VALUE self) {
@@ -220,6 +226,8 @@ static VALUE SoundRecorder_sample_rate(VALUE self) {
 
 /* call-seq: SoundRecorder.available? -> true or false
  *
+ * Returns +true+ if the audio backend supports capture.
+ *
  * @return [Boolean] whether the audio backend supports capture at all
  */
 static VALUE SoundRecorder_available(VALUE klass) {
@@ -227,6 +235,8 @@ static VALUE SoundRecorder_available(VALUE klass) {
 }
 
 /* call-seq: SoundRecorder.available_devices -> Array<String>
+ *
+ * Returns the names of the capture devices available on this system.
  *
  * @return [Array<String>] names of the capture devices available on this
  *   system
@@ -252,6 +262,8 @@ static VALUE SoundRecorder_available_devices(VALUE klass) {
 
 /* call-seq: SoundRecorder.default_device -> String
  *
+ * Returns the name of the system's default capture device.
+ *
  * @return [String] the name of the system's default capture device
  */
 static VALUE SoundRecorder_default_device(VALUE klass) {
@@ -259,6 +271,8 @@ static VALUE SoundRecorder_default_device(VALUE klass) {
 }
 
 /* call-seq: device -> String
+ *
+ * Returns the name of the capture device in use.
  *
  * @return [String] the name of the capture device in use
  */
@@ -281,6 +295,8 @@ static VALUE SoundRecorder_set_device(VALUE self, VALUE rb_name) {
 
 /* call-seq: channel_count -> Integer
  *
+ * Returns the number of capture channels.
+ *
  * @return [Integer]
  */
 static VALUE SoundRecorder_channel_count(VALUE self) {
@@ -301,6 +317,8 @@ static VALUE SoundRecorder_set_channel_count(VALUE self, VALUE rb_count) {
 }
 
 /* call-seq: channel_map -> Array<Symbol>
+ *
+ * Returns the channel layout of the recorder.
  *
  * @return [Array<Symbol>] one entry per channel, e.g.
  *   +[:front_left, :front_right]+
