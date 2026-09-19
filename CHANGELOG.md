@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+* **`SFML::WindowBase`, `SFML::RenderWindow` and the `SFML::RenderTarget` module**, mirroring
+  SFML 3's own hierarchy. `WindowBase` wraps `sfWindowBase` -- an OS window and event queue with
+  no OpenGL context -- and is constructible, with `Window` and `RenderWindow` derived from it.
+  `Window` keeps its existing `sfRenderWindow` behaviour; `RenderWindow` is the same renderable
+  window under the name that also includes `RenderTarget`. `RenderTexture` includes
+  `RenderTarget` too, so a drawable's `#draw` now accepts a `RenderWindow` or a `RenderTexture`
+  directly (the legacy `Target` still works). The shared window surface is generated once, in
+  `ext/window/window_base.inc`.
+
+### Changed
+* `Mouse.position`, `Mouse.set_position` and `Touch.position` dispatch to the
+  `*RenderWindow` or `*WindowBase` CSFML entry point depending on whether the argument is a
+  Window/RenderWindow or a WindowBase, instead of passing an `sfRenderWindow*` where an
+  `sfWindowBase*` is expected.
+
 ## [0.3.0] - 2026-09-19
 
 ### Added

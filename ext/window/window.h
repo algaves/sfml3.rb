@@ -3,10 +3,10 @@
 
 #include <ruby.h>
 
+#include "window/window_base.h"
+
 void Init_Window(VALUE rb_module);
 
-void *Get_Window_Struct(VALUE self);
+VALUE Get_Klass_Window(void);
 
-VALUE Get_Klass_Window();
-
-#endif //SFML_RB_WINDOW_WINDOW_H
+#endif // SFML_RB_WINDOW_WINDOW_H

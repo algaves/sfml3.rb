@@ -41,6 +41,35 @@ class SfmlTest < Minitest::Test
       Dir.glob('/usr/share/fonts/**/*.ttf').first
   end
 
+  # Window class hierarchy -- structure only, so it stays safe headless. None
+  # of these construct a window (which would SIGABRT without a display).
+  def test_window_base_is_the_root_of_the_window_hierarchy
+    assert_operator Window, :<, WindowBase
+    assert_operator RenderWindow, :<, Window
+    refute_operator WindowBase, :<, Window
+  end
+
+  def test_render_target_module_is_shared_by_render_window_and_render_texture
+    assert_includes RenderWindow.ancestors, RenderTarget
+    assert_includes RenderTexture.ancestors, RenderTarget
+    refute_includes Window.ancestors, RenderTarget
+  end
+
+  def test_window_base_methods_live_on_the_root
+    %i[is_open? close! poll_event! wait_event! position size title= native_handle].each do |name|
+      assert_includes WindowBase.instance_methods, name, "#{name} missing from WindowBase"
+    end
+  end
+
+  def test_window_only_methods_are_absent_from_window_base
+    # :display is deliberately left out: Object#display exists, so it would
+    # make the WindowBase assertion meaningless.
+    %i[clear active= settings frame_rate= vertical_sync_enabled=].each do |name|
+      assert_includes Window.instance_methods(false), name, "#{name} missing from Window"
+      refute_includes WindowBase.instance_methods(false), name, "#{name} leaked onto WindowBase"
+    end
+  end
+
   # Clock
   def test_elapsed_time_nonnegative
     clock = Clock.new

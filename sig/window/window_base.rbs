@@ -1,0 +1,33 @@
+module SFML
+  class WindowBase
+    def self.new: (VideoMode video_mode, String title, ?Symbol | Array[Symbol] | Integer style, ?Symbol state) -> WindowBase
+    def self.from_handle: (Integer handle) -> WindowBase
+
+    def is_open?: () -> bool
+    def close!: () -> self
+    def poll_event!: (Event event) -> bool
+    def wait_event!: (Event event) -> bool
+
+    def position: () -> Vector2
+    def size: () -> Vector2
+    def focus?: () -> bool
+    def native_handle: () -> Integer
+
+    def position=: (Vector2 | Array[Float] value) -> (Vector2 | Array[Float])
+    def size=: (Vector2 | Array[Float] value) -> self
+    def minimum_size=: (Vector2 | Array[Float] value) -> (Vector2 | Array[Float])
+    def maximum_size=: (Vector2 | Array[Float] value) -> (Vector2 | Array[Float])
+    def title=: (String value) -> self
+    def set_icon: (Vector2 | Array[Float] size, String pixels) -> String
+    def visible=: (bool value) -> self
+    def cursor_visible=: (bool value) -> self
+    def cursor_grabbed=: (bool value) -> self
+    def mouse_cursor=: (Cursor? value) -> Cursor?
+    def cursor=: (Cursor? value) -> Cursor?
+    def key_repeat_enabled=: (bool value) -> self
+    def joystick_threshold=: (Float value) -> Float
+
+    def request_focus: () -> self
+    def create_vulkan_surface: (Integer instance, ?Integer? allocator) -> Integer?
+  end
+end

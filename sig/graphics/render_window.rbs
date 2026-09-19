@@ -1,0 +1,7 @@
+module SFML
+  class RenderWindow < Window
+    include RenderTarget
+
+    def draw: (untyped drawable, ?untyped state) -> self
+  end
+end

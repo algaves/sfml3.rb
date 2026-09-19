@@ -251,8 +251,7 @@ static VALUE RenderTexture_draw(int argc, VALUE* argv, VALUE self) {
     rb_drawable = argv[0];
     rb_state = (argc == 2) ? argv[1] : Get_New_RenderState();
 
-    rb_funcall(Get_New_Target_From_RenderTexture(self), rb_intern("draw"), 2, rb_drawable,
-               rb_state);
+    rb_funcall(rb_drawable, rb_intern("draw"), 2, self, rb_state);
 
     return self;
 }
@@ -325,6 +324,8 @@ static VALUE RenderTexture_maximum_antialiasing_level(VALUE klass) {
  */
 void Init_RenderTexture(VALUE rb_mSFML) {
     rb_cRenderTexture = rb_define_class_under(rb_mSFML, "RenderTexture", rb_cObject);
+
+    rb_include_module(rb_cRenderTexture, Get_Module_RenderTarget());
 
     rb_define_alloc_func(rb_cRenderTexture, RenderTexture_alloc);
     rb_define_method(rb_cRenderTexture, "initialize", RenderTexture_initialize, -1);

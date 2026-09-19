@@ -23,8 +23,9 @@ Latest release: **0.3.0**, bound against **CSFML 3**.
 * **Complete API documentation and types**: every class, module, method and constant is documented
   on the [docs site](https://algaves.github.io/sfml3.rb/) and covered by RBS signatures shipped in
   the gem.
-* **A close fit to SFML's own model**: classes mirror the C++ types (Window, Texture, Sprite,
-  Sound, ...) minus the parts that only exist in C++, like `std::string` and exceptions.
+* **A close fit to SFML's own model**: classes mirror the C++ types (WindowBase, Window,
+  RenderWindow, Texture, Sprite, Sound, ...) minus the parts that only exist in C++, like
+  `std::string` and exceptions.
 
 ## Table of Contents
 
@@ -157,9 +158,12 @@ side by side: `core/` (CSFML umbrella header, macros, exceptions, UTF-32 convers
 devices), `graphics/` (shapes, Color, Transform, View, Texture, Text, Shader, the render targets),
 `audio/` and `network/`. Includes are subsystem-relative, e.g. `#include "graphics/circle.h"`.
 
-Two `.inc` files hold method bodies shared by several classes and are included once per class with
-a different macro prefix: `audio/sound_source.inc` (Sound, Music, SoundStream) and
-`graphics/render_target.inc` (Window, RenderTexture).
+Three `.inc` files hold method bodies shared by several classes and are included once per class
+with a different macro prefix: `audio/sound_source.inc` (Sound, Music, SoundStream),
+`window/window_base.inc` (WindowBase, Window) and `graphics/render_target.inc` (Window,
+RenderTexture). `SFML::RenderWindow < SFML::Window < SFML::WindowBase` and includes the
+`SFML::RenderTarget` module, so a drawable's `#draw` accepts a `RenderWindow` or a
+`RenderTexture` directly; `SFML::Target` remains as the legacy generic wrapper.
 
 Note that mkmf flattens object files to their basenames, so every `.c` filename has to stay
 unique across the whole tree — and that `$srcs` is baked into the generated Makefile, so after
