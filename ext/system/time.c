@@ -33,6 +33,18 @@ static VALUE Time_wrap(sfTime time) {
     return TypedData_Wrap_Struct(rb_cSFTime, &Time_data_type, ptr);
 }
 
+static VALUE Time_alloc(VALUE klass) {
+    Time* ptr = malloc(sizeof(Time));
+
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate time");
+    }
+
+    ptr->time = sfTime_Zero;
+
+    return TypedData_Wrap_Struct(klass, &Time_data_type, ptr);
+}
+
 /* call-seq:
  *   Time.new             -> Time(0)
  *   Time.new(seconds)    -> Time
@@ -46,9 +58,7 @@ static VALUE Time_wrap(sfTime time) {
  * @return [Time]
  * @raise [ArgumentError] if given more than one argument
  */
-static VALUE Time_new(int argc, VALUE* argv, VALUE klass) {
-    VALUE self;
-    Time* ptr;
+static VALUE Time_initialize(int argc, VALUE* argv, VALUE self) {
     sfTime time = sfTime_Zero;
 
     if (argc == 1 && rb_obj_is_kind_of(argv[0], rb_cSFTime)) {
@@ -61,15 +71,7 @@ static VALUE Time_new(int argc, VALUE* argv, VALUE klass) {
         raise_invalid_arguments_excepted(1, argc);
     }
 
-    ptr = malloc(sizeof(Time));
-
-    if (ptr == NULL) {
-        rb_raise(rb_eNoMemError, "failed to allocate time");
-    }
-
-    ptr->time = time;
-
-    self = TypedData_Wrap_Struct(klass, &Time_data_type, ptr);
+    ((Time*)Get_Time_Struct(self))->time = time;
 
     return self;
 }
@@ -302,7 +304,9 @@ void Init_Time(VALUE rb_mSFML) {
 
     rb_include_module(rb_cSFTime, rb_mComparable);
 
-    rb_define_singleton_method(rb_cSFTime, "new", Time_new, -1);
+    rb_define_alloc_func(rb_cSFTime, Time_alloc);
+    rb_define_method(rb_cSFTime, "initialize", Time_initialize, -1);
+
     rb_define_singleton_method(rb_cSFTime, "seconds", Time_seconds, 1);
     rb_define_singleton_method(rb_cSFTime, "milliseconds", Time_milliseconds, 1);
     rb_define_singleton_method(rb_cSFTime, "microseconds", Time_microseconds, 1);

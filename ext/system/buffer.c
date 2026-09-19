@@ -20,6 +20,16 @@ static VALUE Buffer_wrap(VALUE klass, sfBuffer* buffer) {
     return TypedData_Wrap_Struct(klass, &Buffer_data_type, buffer);
 }
 
+static VALUE Buffer_alloc(VALUE klass) {
+    sfBuffer* buffer = sfBuffer_create();
+
+    if (buffer == NULL) {
+        rb_raise(rb_eNoMemError, "could not create buffer");
+    }
+
+    return Buffer_wrap(klass, buffer);
+}
+
 /* call-seq:
  *   Buffer.new -> Buffer
  *
@@ -28,16 +38,7 @@ static VALUE Buffer_wrap(VALUE klass, sfBuffer* buffer) {
  * @return [Buffer] a new, empty buffer
  * @raise [NoMemoryError] if the underlying buffer could not be allocated
  */
-static VALUE Buffer_new(VALUE klass) {
-    VALUE self;
-    sfBuffer* buffer = sfBuffer_create();
-
-    if (buffer == NULL) {
-        rb_raise(rb_eNoMemError, "could not create buffer");
-    }
-
-    self = Buffer_wrap(klass, buffer);
-
+static VALUE Buffer_initialize(VALUE self) {
     return self;
 }
 
@@ -86,7 +87,8 @@ static VALUE Buffer_is_empty(VALUE self) {
 void Init_Buffer(VALUE rb_mSFML) {
     rb_cBuffer = rb_define_class_under(rb_mSFML, "Buffer", rb_cObject);
 
-    rb_define_singleton_method(rb_cBuffer, "new", Buffer_new, 0);
+    rb_define_alloc_func(rb_cBuffer, Buffer_alloc);
+    rb_define_method(rb_cBuffer, "initialize", Buffer_initialize, 0);
 
     rb_define_method(rb_cBuffer, "size", Buffer_get_size, 0);
     rb_define_method(rb_cBuffer, "length", Buffer_get_size, 0);

@@ -22,6 +22,19 @@ static const rb_data_type_t Vector2_data_type = {
     .function = {.dmark = NULL, .dfree = Vector2_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
+static VALUE Vector2_alloc(VALUE klass) {
+    Vector2* ptr = malloc(sizeof(Vector2));
+
+    if (ptr == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate vector");
+    }
+
+    ptr->vec.x = 0;
+    ptr->vec.y = 0;
+
+    return TypedData_Wrap_Struct(klass, &Vector2_data_type, ptr);
+}
+
 /* call-seq:
  *   Vector2.new                -> Vector2(0, 0)
  *   Vector2.new(x, y)          -> Vector2(x, y)
@@ -35,8 +48,7 @@ static const rb_data_type_t Vector2_data_type = {
  * @raise [ArgumentError] if given an Array shorter than 2 elements, or an
  *   argument count other than 0, 1 or 2
  */
-static VALUE Vector2_new(int argc, VALUE* argv, VALUE klass) {
-    VALUE self;
+static VALUE Vector2_initialize(int argc, VALUE* argv, VALUE self) {
     Vector2* ptr;
     float x = 0;
     float y = 0;
@@ -59,16 +71,9 @@ static VALUE Vector2_new(int argc, VALUE* argv, VALUE klass) {
         raise_invalid_arguments_excepted(2, argc);
     }
 
-    ptr = malloc(sizeof(Vector2));
-
-    if (ptr == NULL) {
-        rb_raise(rb_eNoMemError, "failed to allocate vector");
-    }
-
+    ptr = Get_Vector2_Struct(self);
     ptr->vec.x = x;
     ptr->vec.y = y;
-
-    self = TypedData_Wrap_Struct(klass, &Vector2_data_type, ptr);
 
     return self;
 }
@@ -266,7 +271,8 @@ void Init_Vector2(VALUE rb_mSFML) {
 
     rb_include_module(rb_cVector2, rb_mEnumerable);
 
-    rb_define_singleton_method(rb_cVector2, "new", Vector2_new, -1);
+    rb_define_alloc_func(rb_cVector2, Vector2_alloc);
+    rb_define_method(rb_cVector2, "initialize", Vector2_initialize, -1);
 
     rb_define_method(rb_cVector2, "x", Vector2_get_x, 0);
     rb_define_method(rb_cVector2, "y", Vector2_get_y, 0);
