@@ -22,6 +22,7 @@
 #include "graphics/target.h"
 #include "graphics/render_state.h"
 #include "window/event.h"
+#include "window/window_base.h"
 #include "window/window.h"
 #include "window/keyboard.h"
 #include "window/mouse.h"
@@ -47,6 +48,7 @@
 #include "graphics/font.h"
 #include "graphics/text.h"
 #include "graphics/render_texture.h"
+#include "graphics/render_window.h"
 #include "graphics/shader.h"
 #include "audio/effect_processor.h"
 #include "audio/audio_enums.h"
@@ -127,7 +129,9 @@ void Init_sfml_ext(void) {
     Init_Event(rb_mExt);
     Init_VideoMode(rb_mExt);
     Init_View(rb_mExt);
+    Init_WindowBase(rb_mExt);
     Init_Window(rb_mExt);
+    Init_RenderWindow(rb_mExt);
     Init_Keyboard(rb_mExt);
     Init_Mouse(rb_mExt);
     Init_Joystick(rb_mExt);

@@ -4,23 +4,41 @@
 
 #include "window/input_enums.h"
 #include "window/window.h"
+#include "window/window_base.h"
 #include "system/vec2.h"
 #include "core/exceptions.h"
 #include "core/macros.h"
 #include "core/sfml.h"
 
-/* nil means desktop-relative. CSFML gives sfRenderWindow its own entry points,
-   so a window argument never has to be cast down to sfWindowBase. */
-static const sfRenderWindow* Mouse_relative_window(VALUE rb_window) {
-    if (NIL_P(rb_window)) {
-        return NULL;
+/* A RenderWindow and a Window both wrap an sfRenderWindow; a WindowBase wraps
+   an sfWindowBase. CSFML ships a separate entry point for each, so pick the one
+   matching the handle -- casting an sfRenderWindow* down to sfWindowBase* would
+   rely on the base being at offset 0, which CSFML does not guarantee. */
+static sfVector2i Mouse_get_relative_position(VALUE rb_window) {
+    if (rb_obj_is_kind_of(rb_window, Get_Klass_Window())) {
+        return sfMouse_getPositionRenderWindow(Get_Window_Struct(rb_window));
     }
 
-    if (!rb_obj_is_kind_of(rb_window, Get_Klass_Window())) {
-        raise_invalid_argument_class(Get_Klass_Window());
+    if (rb_obj_is_kind_of(rb_window, Get_Klass_WindowBase())) {
+        return sfMouse_getPositionWindowBase(Get_WindowBase_Struct(rb_window));
     }
 
-    return Get_Window_Struct(rb_window);
+    raise_invalid_argument_class(Get_Klass_WindowBase());
+    return (sfVector2i){0, 0};
+}
+
+static void Mouse_set_relative_position(VALUE rb_window, sfVector2i position) {
+    if (rb_obj_is_kind_of(rb_window, Get_Klass_Window())) {
+        sfMouse_setPositionRenderWindow(position, Get_Window_Struct(rb_window));
+        return;
+    }
+
+    if (rb_obj_is_kind_of(rb_window, Get_Klass_WindowBase())) {
+        sfMouse_setPositionWindowBase(position, Get_WindowBase_Struct(rb_window));
+        return;
+    }
+
+    raise_invalid_argument_class(Get_Klass_WindowBase());
 }
 
 /* call-seq:
@@ -51,7 +69,7 @@ static VALUE Mouse_get_position(int argc, VALUE* argv, VALUE module) {
     if (NIL_P(rb_window)) {
         position = sfMouse_getPosition(NULL);
     } else {
-        position = sfMouse_getPositionRenderWindow(Mouse_relative_window(rb_window));
+        position = Mouse_get_relative_position(rb_window);
     }
 
     return vec2f_to_rb((sfVector2f){(float)position.x, (float)position.y});
@@ -72,8 +90,7 @@ static VALUE Mouse_set_position(int argc, VALUE* argv, VALUE module) {
     if (NIL_P(rb_window)) {
         sfMouse_setPosition(vec2i_from_rb(rb_position), NULL);
     } else {
-        sfMouse_setPositionRenderWindow(vec2i_from_rb(rb_position),
-                                        Mouse_relative_window(rb_window));
+        Mouse_set_relative_position(rb_window, vec2i_from_rb(rb_position));
     }
 
     return rb_position;
