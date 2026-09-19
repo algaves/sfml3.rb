@@ -484,17 +484,14 @@ static VALUE ConvexShape_get_global_bounds(VALUE self) {
  * @return [nil]
  */
 static VALUE ConvexShape_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
-    if (!rb_obj_is_kind_of(rb_target, Get_Klass_Target())) {
-        raise_invalid_argument_class(Get_Klass_Target());
-    }
+    TargetView view = Get_RenderTarget_View(rb_target);
 
     if (!rb_obj_is_kind_of(rb_state, Get_Klass_RenderState())) {
         raise_invalid_argument_class(Get_Klass_RenderState());
     }
 
-    TARGET_DRAW(Get_Target_Struct(rb_target), sfRenderWindow_drawConvexShape,
-                sfRenderTexture_drawConvexShape, Get_ConvexShape_Struct(self),
-                Get_RenderState_Struct(rb_state));
+    TARGET_DRAW(view, sfRenderWindow_drawConvexShape, sfRenderTexture_drawConvexShape,
+                Get_ConvexShape_Struct(self), Get_RenderState_Struct(rb_state));
 
     return Qnil;
 }
