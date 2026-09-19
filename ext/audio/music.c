@@ -49,10 +49,14 @@ static void Music_free(void* ptr) {
     free(music);
 }
 
+/* Deliberately no RUBY_TYPED_FREE_IMMEDIATELY: Music_free releases the GVL for
+   sfMusic_destroy, and freeing during GC (which the flag requests) would let
+   another thread allocate while GC is mid-cycle, which Ruby aborts on as
+   "object allocation during garbage collection phase". Deferred finalization
+   runs the same free with the GVL held and no GC in progress. */
 static const rb_data_type_t Music_data_type = {
     .wrap_struct_name = "SFML::Music",
-    .function = {.dmark = Music_mark, .dfree = Music_free, .dsize = NULL},
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY};
+    .function = {.dmark = Music_mark, .dfree = Music_free, .dsize = NULL}};
 
 static VALUE Music_wrap(VALUE klass, sfMusic* handle, VALUE rb_stream) {
     Music* ptr;

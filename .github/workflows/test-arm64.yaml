@@ -5,7 +5,11 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'ext/ports.rb'
+      # Any binding or test change can be arch-sensitive (the GC/free race that
+      # first surfaced here lived in ext/audio), so this is not narrowed to
+      # packaging files the way it used to be.
+      - 'ext/**'
+      - 'test/**'
       - 'script/provision.sh'
       - '.github/workflows/test-arm64.yaml'
       - '.github/workflows/_test-reusable.yaml'

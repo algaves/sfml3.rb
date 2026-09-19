@@ -44,10 +44,14 @@ static void Sound_free(void* ptr) {
     free(sound);
 }
 
+/* Deliberately no RUBY_TYPED_FREE_IMMEDIATELY: Sound_free releases the GVL for
+   sfSound_destroy, and freeing during GC (which the flag requests) would let
+   another thread allocate while GC is mid-cycle, which Ruby aborts on as
+   "object allocation during garbage collection phase". Deferred finalization
+   runs the same free with the GVL held and no GC in progress. */
 static const rb_data_type_t Sound_data_type = {
     .wrap_struct_name = "SFML::Sound",
-    .function = {.dmark = Sound_mark, .dfree = Sound_free, .dsize = NULL},
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY};
+    .function = {.dmark = Sound_mark, .dfree = Sound_free, .dsize = NULL}};
 
 static VALUE Sound_wrap(VALUE klass, sfSound* handle, VALUE rb_buffer) {
     Sound* ptr;

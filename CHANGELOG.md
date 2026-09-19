@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-19
+
 ### Added
 * **Four more experimental binary-gem targets**: `aarch64-linux-musl`, `arm-linux-gnu`
   (ARMv7 hard-float), `arm-linux-musl`, and `aarch64-mingw-ucrt` (64-bit Windows on ARM).
@@ -26,7 +28,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   them, and building custom cross-toolchain infrastructure for them is a much larger,
   separate undertaking. The source-gem fallback remains the only path there, unchanged.
 
-## [0.3.0] - 2026-09-18
+### Fixed
+* **A GC race in the audio bindings aborted the process on arm64.** `Sound`, `Music` and
+  `SoundStream` released the GVL inside their `dfree`, but their data types were marked
+  `RUBY_TYPED_FREE_IMMEDIATELY`, so the free could run *during* garbage collection: another
+  thread (Ruby's `Timeout` thread, in the test suite) could then allocate while GC was mid-cycle
+  and Ruby aborted with "object allocation during garbage collection phase". Dropping the flag
+  defers the free to a safe point; releasing the GVL is still what keeps `sf*_destroy` from
+  deadlocking against the audio thread.
 
 ### Documentation
 * **Every public class, module, method and constant is documented**, with the

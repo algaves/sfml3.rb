@@ -59,10 +59,15 @@ static void SoundStream_free(void* ptr) {
     free(stream);
 }
 
+/* Deliberately no RUBY_TYPED_FREE_IMMEDIATELY: SoundStream_free releases the
+   GVL for sfSoundStream_destroy, and freeing during GC (which the flag
+   requests) would let another thread allocate while GC is mid-cycle, which
+   Ruby aborts on as "object allocation during garbage collection phase".
+   Deferred finalization runs the same free with the GVL held and no GC in
+   progress. */
 static const rb_data_type_t SoundStream_data_type = {
     .wrap_struct_name = "SFML::SoundStream",
-    .function = {.dmark = SoundStream_mark, .dfree = SoundStream_free, .dsize = NULL},
-    .flags = RUBY_TYPED_FREE_IMMEDIATELY};
+    .function = {.dmark = SoundStream_mark, .dfree = SoundStream_free, .dsize = NULL}};
 
 /* Expands the stream's sample buffer if needed, then copies either a packed
    String of int16 or an Array of Integers into it. Returns the sample count. */
