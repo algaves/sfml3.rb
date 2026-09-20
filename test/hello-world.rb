@@ -11,7 +11,7 @@ def random_vec2(x = 640, y = 480)
   [rand(x), rand(y)]
 end
 
-class DrawableTest < Transformable
+class DrawableTest < Transformable::Instance
   include Drawable
 
   def initialize

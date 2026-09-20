@@ -3,8 +3,12 @@
 
 #include <ruby.h>
 
+#include "core/sfml.h"
+
 void Init_Text(VALUE rb_module);
 
 VALUE Get_Klass_Text(void);
 
-#endif //SFML_RB_GRAPHICS_TEXT_H
+sfText* Get_Text_Struct(VALUE self);
+
+#endif // SFML_RB_GRAPHICS_TEXT_H

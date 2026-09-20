@@ -7,6 +7,7 @@
 #include "graphics/target.h"
 #include "graphics/render_state.h"
 #include "graphics/transform.h"
+#include "graphics/transformable.h"
 #include "graphics/color.h"
 #include "graphics/rect.h"
 #include "graphics/font.h"
@@ -46,7 +47,7 @@ static Text* Get_Text(VALUE self) {
     return ptr;
 }
 
-static sfText* Get_Text_Struct(VALUE self) {
+sfText* Get_Text_Struct(VALUE self) {
     return Get_Text(self)->text;
 }
 
@@ -361,150 +362,6 @@ static VALUE Text_set_line_spacing(VALUE self, VALUE rb_spacing) {
     return rb_spacing;
 }
 
-/* call-seq: position -> Vector2
- *
- * Returns the object's position.
- *
- * @return [Vector2]
- */
-static VALUE Text_get_position(VALUE self) {
-    return vec2f_to_rb(sfText_getPosition(Get_Text_Struct(self)));
-}
-
-/* call-seq:
- *   position=(value) -> Vector2
- *
- * Sets the object's position.
- *
- * @return [Vector2] +value+
- */
-static VALUE Text_set_position(VALUE self, VALUE rb_position) {
-    sfText_setPosition(Get_Text_Struct(self), vec2f_from_rb(rb_position));
-    return rb_position;
-}
-
-/* call-seq: rotation -> Float
- *
- * Returns the object's rotation, in degrees.
- *
- * @return [Float] degrees
- */
-static VALUE Text_get_rotation(VALUE self) {
-    return DBL2NUM(sfText_getRotation(Get_Text_Struct(self)));
-}
-
-/* call-seq:
- *   rotation=(value) -> Float
- *
- * Sets the object's rotation, in degrees.
- *
- * @return [Float] +value+
- */
-static VALUE Text_set_rotation(VALUE self, VALUE rb_rotation) {
-    sfText_setRotation(Get_Text_Struct(self), NUM2DBL(rb_rotation));
-    return rb_rotation;
-}
-
-/* call-seq: scale -> Vector2
- *
- * Returns the object's scale factors.
- *
- * @return [Vector2]
- */
-static VALUE Text_get_scale(VALUE self) {
-    return vec2f_to_rb(sfText_getScale(Get_Text_Struct(self)));
-}
-
-/* call-seq:
- *   scale=(value) -> Vector2
- *
- * Sets the object's scale factors.
- *
- * @return [Vector2] +value+
- */
-static VALUE Text_set_scale(VALUE self, VALUE rb_scale) {
-    sfText_setScale(Get_Text_Struct(self), vec2f_from_rb(rb_scale));
-    return rb_scale;
-}
-
-/* call-seq: origin -> Vector2
- *
- * Returns the object's origin.
- *
- * @return [Vector2]
- */
-static VALUE Text_get_origin(VALUE self) {
-    return vec2f_to_rb(sfText_getOrigin(Get_Text_Struct(self)));
-}
-
-/* call-seq:
- *   origin=(value) -> Vector2
- *
- * Sets the object's origin.
- *
- * @return [Vector2] +value+
- */
-static VALUE Text_set_origin(VALUE self, VALUE rb_origin) {
-    sfText_setOrigin(Get_Text_Struct(self), vec2f_from_rb(rb_origin));
-    return rb_origin;
-}
-
-/* call-seq:
- *   move(offset) -> self
- *
- * Moves the object by +offset+.
- *
- * @return [self]
- */
-static VALUE Text_move(VALUE self, VALUE rb_offset) {
-    sfText_move(Get_Text_Struct(self), vec2f_from_rb(rb_offset));
-    return self;
-}
-
-/* call-seq:
- *   rotate(angle) -> self
- *
- * Rotates the object by +angle+ degrees.
- *
- * @return [self]
- */
-static VALUE Text_rotate(VALUE self, VALUE rb_angle) {
-    sfText_rotate(Get_Text_Struct(self), NUM2DBL(rb_angle));
-    return self;
-}
-
-/* call-seq:
- *   scale!(factors) -> self
- *
- * Scales the object by +factors+ relative to its current scale.
- *
- * @return [self]
- */
-static VALUE Text_scale(VALUE self, VALUE rb_factors) {
-    sfText_scale(Get_Text_Struct(self), vec2f_from_rb(rb_factors));
-    return self;
-}
-
-/* call-seq: transform -> Array<Float>
- *
- * Returns the object's 3x3 row-major transform matrix.
- *
- * @return [Array<Float>] the 9-element matrix (also available as #matrix)
- */
-static VALUE Text_get_transform(VALUE self) {
-    return Transform_MatrixToArray(sfText_getTransform(Get_Text_Struct(self)).matrix);
-}
-
-/* call-seq: inverse_transform -> Array<Float>
- *
- * Returns the 3x3 row-major inverse of the object's transform matrix.
- *
- * @return [Array<Float>] the inverse of #transform
- */
-static VALUE Text_get_inverse_transform(VALUE self) {
-    return Transform_MatrixToArray(sfText_getInverseTransform(Get_Text_Struct(self)).matrix);
-}
-
 /* call-seq:
  *   find_character_pos(index) -> Vector2
  *
@@ -566,7 +423,7 @@ static VALUE Text_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
  * A drawable string of characters, rendered using a Font, positioned,
  * rotated, scaled and tinted like any other Transformable object.
  *
- * Includes +Drawable+.
+ * Includes +Transformable+ and +Drawable+.
  *
  * @!attribute font
  *   The text's font.
@@ -614,6 +471,7 @@ void Init_Text(VALUE rb_mSFML) {
     rb_define_alloc_func(rb_cText, Text_alloc);
 
     rb_include_module(rb_cText, Get_Module_Drawable());
+    rb_include_module(rb_cText, Get_Module_Transformable());
 
     rb_define_method(rb_cText, "initialize", Text_initialize, -1);
     rb_define_private_method(rb_cText, "initialize_copy", Text_initialize_copy, 1);
@@ -628,13 +486,6 @@ void Init_Text(VALUE rb_mSFML) {
     rb_define_method(rb_cText, "outline_thickness", Text_get_outline_thickness, 0);
     rb_define_method(rb_cText, "letter_spacing", Text_get_letter_spacing, 0);
     rb_define_method(rb_cText, "line_spacing", Text_get_line_spacing, 0);
-    rb_define_method(rb_cText, "position", Text_get_position, 0);
-    rb_define_method(rb_cText, "rotation", Text_get_rotation, 0);
-    rb_define_method(rb_cText, "scale", Text_get_scale, 0);
-    rb_define_method(rb_cText, "origin", Text_get_origin, 0);
-    rb_define_method(rb_cText, "transform", Text_get_transform, 0);
-    rb_define_method(rb_cText, "inverse_transform", Text_get_inverse_transform, 0);
-    rb_define_method(rb_cText, "matrix", Text_get_transform, 0);
     rb_define_method(rb_cText, "find_character_pos", Text_find_character_pos, 1);
     rb_define_method(rb_cText, "local_bounds", Text_get_local_bounds, 0);
     rb_define_method(rb_cText, "global_bounds", Text_get_global_bounds, 0);
@@ -648,14 +499,7 @@ void Init_Text(VALUE rb_mSFML) {
     rb_define_method(rb_cText, "outline_thickness=", Text_set_outline_thickness, 1);
     rb_define_method(rb_cText, "letter_spacing=", Text_set_letter_spacing, 1);
     rb_define_method(rb_cText, "line_spacing=", Text_set_line_spacing, 1);
-    rb_define_method(rb_cText, "position=", Text_set_position, 1);
-    rb_define_method(rb_cText, "rotation=", Text_set_rotation, 1);
-    rb_define_method(rb_cText, "scale=", Text_set_scale, 1);
-    rb_define_method(rb_cText, "origin=", Text_set_origin, 1);
 
-    rb_define_method(rb_cText, "move", Text_move, 1);
-    rb_define_method(rb_cText, "rotate", Text_rotate, 1);
-    rb_define_method(rb_cText, "scale!", Text_scale, 1);
     rb_define_method(rb_cText, "draw", Text_draw, 2);
 }
 

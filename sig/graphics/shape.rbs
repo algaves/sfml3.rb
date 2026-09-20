@@ -1,6 +1,7 @@
 module SFML
   class Shape
     include Drawable
+    include Transformable
 
     def initialize: () -> void
 

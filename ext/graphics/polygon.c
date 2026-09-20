@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "graphics/drawable.h"
+#include "graphics/shape.h"
 #include "graphics/target.h"
 #include "graphics/render_state.h"
 #include "graphics/transform.h"
@@ -41,7 +42,7 @@ static ConvexShape* Get_ConvexShape(VALUE self) {
     return ptr;
 }
 
-static sfConvexShape* Get_ConvexShape_Struct(VALUE self) {
+sfConvexShape* Get_ConvexShape_Struct(VALUE self) {
     return Get_ConvexShape(self)->shape;
 }
 
@@ -177,149 +178,6 @@ static VALUE ConvexShape_set_point(VALUE self, VALUE rb_index, VALUE rb_point) {
     sfConvexShape_setPoint(Get_ConvexShape_Struct(self), ConvexShape_check_index(self, rb_index),
                            vec2f_from_rb(rb_point));
     return rb_point;
-}
-
-/* call-seq: position -> Vector2
- *
- * Returns the object's position.
- *
- * @return [Vector2]
- */
-static VALUE ConvexShape_get_position(VALUE self) {
-    return vec2f_to_rb(sfConvexShape_getPosition(Get_ConvexShape_Struct(self)));
-}
-
-/* call-seq:
- *   position=(value) -> Vector2
- *
- * Sets the object's position.
- *
- * @return [Vector2] +value+
- */
-static VALUE ConvexShape_set_position(VALUE self, VALUE rb_position) {
-    sfConvexShape_setPosition(Get_ConvexShape_Struct(self), vec2f_from_rb(rb_position));
-    return rb_position;
-}
-
-/* call-seq: rotation -> Float
- *
- * Returns the object's rotation, in degrees.
- *
- * @return [Float]
- */
-static VALUE ConvexShape_get_rotation(VALUE self) {
-    return DBL2NUM(sfConvexShape_getRotation(Get_ConvexShape_Struct(self)));
-}
-
-/* call-seq:
- *   rotation=(value) -> Float
- *
- * Sets the object's rotation, in degrees.
- *
- * @return [Float] +value+
- */
-static VALUE ConvexShape_set_rotation(VALUE self, VALUE rb_rotation) {
-    sfConvexShape_setRotation(Get_ConvexShape_Struct(self), NUM2DBL(rb_rotation));
-    return rb_rotation;
-}
-
-/* call-seq: scale -> Vector2
- *
- * Returns the object's scale factors.
- *
- * @return [Vector2]
- */
-static VALUE ConvexShape_get_scale(VALUE self) {
-    return vec2f_to_rb(sfConvexShape_getScale(Get_ConvexShape_Struct(self)));
-}
-
-/* call-seq:
- *   scale=(value) -> Vector2
- *
- * Sets the object's scale factors.
- *
- * @return [Vector2] +value+
- */
-static VALUE ConvexShape_set_scale(VALUE self, VALUE rb_scale) {
-    sfConvexShape_setScale(Get_ConvexShape_Struct(self), vec2f_from_rb(rb_scale));
-    return rb_scale;
-}
-
-/* call-seq: origin -> Vector2
- *
- * Returns the object's origin.
- *
- * @return [Vector2]
- */
-static VALUE ConvexShape_get_origin(VALUE self) {
-    return vec2f_to_rb(sfConvexShape_getOrigin(Get_ConvexShape_Struct(self)));
-}
-
-/* call-seq:
- *   origin=(value) -> Vector2
- *
- * Sets the object's origin.
- *
- * @return [Vector2] +value+
- */
-static VALUE ConvexShape_set_origin(VALUE self, VALUE rb_origin) {
-    sfConvexShape_setOrigin(Get_ConvexShape_Struct(self), vec2f_from_rb(rb_origin));
-    return rb_origin;
-}
-
-/* call-seq: move(offset) -> self
- *
- * Moves the object by +offset+.
- *
- * @return [self]
- */
-static VALUE ConvexShape_move(VALUE self, VALUE rb_offset) {
-    sfConvexShape_move(Get_ConvexShape_Struct(self), vec2f_from_rb(rb_offset));
-    return self;
-}
-
-/* call-seq: rotate(angle) -> self
- *
- * Rotates the object by +angle+ degrees.
- *
- * @return [self]
- */
-static VALUE ConvexShape_rotate(VALUE self, VALUE rb_angle) {
-    sfConvexShape_rotate(Get_ConvexShape_Struct(self), NUM2DBL(rb_angle));
-    return self;
-}
-
-/* call-seq:
- *   scale!(factors) -> self
- *
- * Scales the object by +factors+ relative to its current scale.
- *
- * @return [self]
- */
-static VALUE ConvexShape_scale(VALUE self, VALUE rb_factors) {
-    sfConvexShape_scale(Get_ConvexShape_Struct(self), vec2f_from_rb(rb_factors));
-    return self;
-}
-
-/* call-seq: transform -> Array
- *
- * Also available as #matrix.
- *
- * @return [Array] the 3x3 row-major transform matrix
- */
-static VALUE ConvexShape_get_transform(VALUE self) {
-    return Transform_MatrixToArray(sfConvexShape_getTransform(Get_ConvexShape_Struct(self)).matrix);
-}
-
-/* call-seq: inverse_transform -> Array
- *
- * Returns the 3x3 row-major inverse of the object's transform matrix.
- *
- * @return [Array] the 3x3 row-major inverse transform matrix
- */
-static VALUE ConvexShape_get_inverse_transform(VALUE self) {
-    return Transform_MatrixToArray(
-        sfConvexShape_getInverseTransform(Get_ConvexShape_Struct(self)).matrix);
 }
 
 /* call-seq: fill_color -> Color
@@ -536,11 +394,14 @@ static VALUE ConvexShape_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
  *   @return [Rect]
  */
 void Init_ConvexShape(VALUE rb_mSFML) {
-    rb_cConvexShape = rb_define_class_under(rb_mSFML, "ConvexShape", rb_cObject);
+    rb_cConvexShape = rb_define_class_under(rb_mSFML, "ConvexShape", Get_Klass_Shape());
 
     rb_define_alloc_func(rb_cConvexShape, ConvexShape_alloc);
 
     rb_include_module(rb_cConvexShape, Get_Module_Drawable());
+
+    /* Geometry comes from sfConvexShape, not the Shape callback surface. */
+    rb_undef_method(rb_cConvexShape, "update!");
 
     rb_define_method(rb_cConvexShape, "initialize", ConvexShape_initialize, -1);
 
@@ -548,10 +409,6 @@ void Init_ConvexShape(VALUE rb_mSFML) {
 
     rb_define_method(rb_cConvexShape, "point_count", ConvexShape_get_point_count, 0);
     rb_define_method(rb_cConvexShape, "point", ConvexShape_get_point, 1);
-    rb_define_method(rb_cConvexShape, "position", ConvexShape_get_position, 0);
-    rb_define_method(rb_cConvexShape, "rotation", ConvexShape_get_rotation, 0);
-    rb_define_method(rb_cConvexShape, "scale", ConvexShape_get_scale, 0);
-    rb_define_method(rb_cConvexShape, "origin", ConvexShape_get_origin, 0);
     rb_define_method(rb_cConvexShape, "fill_color", ConvexShape_get_fill_color, 0);
     rb_define_method(rb_cConvexShape, "outline_color", ConvexShape_get_outline_color, 0);
     rb_define_method(rb_cConvexShape, "outline_thickness", ConvexShape_get_outline_thickness, 0);
@@ -560,25 +417,15 @@ void Init_ConvexShape(VALUE rb_mSFML) {
     rb_define_method(rb_cConvexShape, "geometric_center", ConvexShape_get_geometric_center, 0);
     rb_define_method(rb_cConvexShape, "local_bounds", ConvexShape_get_local_bounds, 0);
     rb_define_method(rb_cConvexShape, "global_bounds", ConvexShape_get_global_bounds, 0);
-    rb_define_method(rb_cConvexShape, "transform", ConvexShape_get_transform, 0);
-    rb_define_method(rb_cConvexShape, "inverse_transform", ConvexShape_get_inverse_transform, 0);
-    rb_define_method(rb_cConvexShape, "matrix", ConvexShape_get_transform, 0);
 
     rb_define_method(rb_cConvexShape, "point_count=", ConvexShape_set_point_count, 1);
     rb_define_method(rb_cConvexShape, "set_point", ConvexShape_set_point, 2);
-    rb_define_method(rb_cConvexShape, "position=", ConvexShape_set_position, 1);
-    rb_define_method(rb_cConvexShape, "rotation=", ConvexShape_set_rotation, 1);
-    rb_define_method(rb_cConvexShape, "scale=", ConvexShape_set_scale, 1);
-    rb_define_method(rb_cConvexShape, "origin=", ConvexShape_set_origin, 1);
     rb_define_method(rb_cConvexShape, "fill_color=", ConvexShape_set_fill_color, 1);
     rb_define_method(rb_cConvexShape, "outline_color=", ConvexShape_set_outline_color, 1);
     rb_define_method(rb_cConvexShape, "outline_thickness=", ConvexShape_set_outline_thickness, 1);
     rb_define_method(rb_cConvexShape, "texture=", ConvexShape_set_texture, 1);
     rb_define_method(rb_cConvexShape, "texture_rect=", ConvexShape_set_texture_rect, 1);
 
-    rb_define_method(rb_cConvexShape, "move", ConvexShape_move, 1);
-    rb_define_method(rb_cConvexShape, "rotate", ConvexShape_rotate, 1);
-    rb_define_method(rb_cConvexShape, "scale!", ConvexShape_scale, 1);
     rb_define_method(rb_cConvexShape, "draw", ConvexShape_draw, 2);
 }
 

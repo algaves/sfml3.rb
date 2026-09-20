@@ -1,5 +1,7 @@
 module SFML
   class Sprite
+    include Transformable
+
     def initialize: () -> void
                  | (Texture texture) -> void
 

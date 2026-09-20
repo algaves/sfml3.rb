@@ -114,10 +114,10 @@ void Init_sfml_ext(void) {
     Init_Clock(rb_mExt);
     Init_Target(rb_mExt);
     Init_RenderState(rb_mExt);
+    Init_Shape(rb_mExt);
     Init_Circle(rb_mExt);
     Init_RectangleShape(rb_mExt);
     Init_ConvexShape(rb_mExt);
-    Init_Shape(rb_mExt);
     Init_Sprite(rb_mExt);
     Init_Vertex(rb_mExt);
     Init_VertexArray(rb_mExt);

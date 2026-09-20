@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "graphics/drawable.h"
+#include "graphics/shape.h"
 #include "graphics/target.h"
 #include "graphics/render_state.h"
 #include "core/exceptions.h"
@@ -33,7 +34,7 @@ static void Circle_free(void* ptr) {
 }
 
 static const rb_data_type_t Circle_data_type = {
-    .wrap_struct_name = "SFML::Circle",
+    .wrap_struct_name = "SFML::CircleShape",
     .function = {.dmark = Circle_mark, .dfree = Circle_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -109,7 +110,7 @@ static VALUE Circle_initialize(int argc, VALUE* argv, VALUE self) {
  */
 static VALUE Circle_copy(VALUE self) {
     Circle* ptr = Get_Circle(self);
-    VALUE copy = Circle_wrap(Get_Klass_Circle(), sfCircleShape_copy(ptr->shape));
+    VALUE copy = Circle_wrap(Get_Klass_CircleShape(), sfCircleShape_copy(ptr->shape));
 
     if (!NIL_P(ptr->rb_texture)) {
         Circle* copy_ptr = Get_Circle(copy);
@@ -199,54 +200,6 @@ static VALUE Circle_set_radius(VALUE self, VALUE rb_radius) {
     return rb_radius;
 }
 
-/* call-seq:
- *   position=(value) -> Vector2
- *
- * Sets the object's position.
- *
- * @return [Vector2] +value+
- */
-static VALUE Circle_set_position(VALUE self, VALUE rb_position) {
-    sfCircleShape_setPosition(Get_Circle_Shape(self), vec2f_from_rb(rb_position));
-    return rb_position;
-}
-
-/* call-seq:
- *   rotation=(value) -> Float
- *
- * Sets the object's rotation, in degrees.
- *
- * @return [Float] +value+
- */
-static VALUE Circle_set_rotation(VALUE self, VALUE rb_angle) {
-    sfCircleShape_setRotation(Get_Circle_Shape(self), NUM2DBL(rb_angle));
-    return rb_angle;
-}
-
-/* call-seq:
- *   origin=(value) -> Vector2
- *
- * Sets the object's origin.
- *
- * @return [Vector2] +value+
- */
-static VALUE Circle_set_origin(VALUE self, VALUE rb_origin) {
-    sfCircleShape_setOrigin(Get_Circle_Shape(self), vec2f_from_rb(rb_origin));
-    return rb_origin;
-}
-
-/* call-seq:
- *   scale=(value) -> Vector2
- *
- * Sets the object's scale factors.
- *
- * @return [Vector2] +value+
- */
-static VALUE Circle_set_scale(VALUE self, VALUE rb_scale) {
-    sfCircleShape_setScale(Get_Circle_Shape(self), vec2f_from_rb(rb_scale));
-    return rb_scale;
-}
-
 /* call-seq: radius -> Float
  *
  * Returns the circle's radius.
@@ -255,101 +208,6 @@ static VALUE Circle_set_scale(VALUE self, VALUE rb_scale) {
  */
 static VALUE Circle_get_radius(VALUE self) {
     return DBL2NUM(sfCircleShape_getRadius(Get_Circle_Shape(self)));
-}
-
-/* call-seq: position -> Vector2
- *
- * Returns the object's position.
- *
- * @return [Vector2]
- */
-static VALUE Circle_get_position(VALUE self) {
-    return vec2f_to_rb(sfCircleShape_getPosition(Get_Circle_Shape(self)));
-}
-
-/* call-seq: rotation -> Float
- *
- * Returns the object's rotation, in degrees.
- *
- * @return [Float]
- */
-static VALUE Circle_get_rotation(VALUE self) {
-    return DBL2NUM(sfCircleShape_getRotation(Get_Circle_Shape(self)));
-}
-
-/* call-seq: scale -> Vector2
- *
- * Returns the object's scale factors.
- *
- * @return [Vector2]
- */
-static VALUE Circle_get_scale(VALUE self) {
-    return vec2f_to_rb(sfCircleShape_getScale(Get_Circle_Shape(self)));
-}
-
-/* call-seq: origin -> Vector2
- *
- * Returns the object's origin.
- *
- * @return [Vector2]
- */
-static VALUE Circle_get_origin(VALUE self) {
-    return vec2f_to_rb(sfCircleShape_getOrigin(Get_Circle_Shape(self)));
-}
-
-/* call-seq: move(offset) -> self
- *
- * Moves the circle by +offset+.
- *
- * @return [self]
- */
-static VALUE Circle_move(VALUE self, VALUE rb_move) {
-    sfCircleShape_move(Get_Circle_Shape(self), vec2f_from_rb(rb_move));
-    return self;
-}
-
-/* call-seq: rotate(angle) -> self
- *
- * Rotates the circle by +angle+ degrees.
- *
- * @return [self]
- */
-static VALUE Circle_rotate(VALUE self, VALUE rb_angle) {
-    sfCircleShape_rotate(Get_Circle_Shape(self), NUM2DBL(rb_angle));
-    return self;
-}
-
-/* call-seq:
- *   scale!(factors) -> self
- *
- * Scales the circle by +factors+ relative to its current scale.
- *
- * @return [self]
- */
-static VALUE Circle_scale(VALUE self, VALUE rb_scale) {
-    sfCircleShape_scale(Get_Circle_Shape(self), vec2f_from_rb(rb_scale));
-    return self;
-}
-
-/* call-seq: transform -> Array
- *
- * Also available as #matrix.
- *
- * @return [Array] the 3x3 row-major transform matrix
- */
-static VALUE Circle_get_transform(VALUE self) {
-    return Transform_MatrixToArray(sfCircleShape_getTransform(Get_Circle_Shape(self)).matrix);
-}
-
-/* call-seq: inverse_transform -> Array
- *
- * Returns the 3x3 row-major inverse of the circle's transform matrix.
- *
- * @return [Array] the 3x3 row-major inverse transform matrix
- */
-static VALUE Circle_get_inverse_transform(VALUE self) {
-    return Transform_MatrixToArray(
-        sfCircleShape_getInverseTransform(Get_Circle_Shape(self)).matrix);
 }
 
 /* call-seq:
@@ -495,9 +353,10 @@ static VALUE Circle_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
     return Qnil;
 }
 
-/* Document-class: SFML::Circle
+/* Document-class: SFML::CircleShape
  * A circle shape, drawable, transformable and stylable like the other
- * SFML shapes. Includes Drawable.
+ * SFML shapes. Derives from Shape, and so includes Transformable and Drawable;
+ * also available under the SFML::Circle alias.
  *
  * @!attribute radius
  *   The circle's radius.
@@ -545,27 +404,26 @@ static VALUE Circle_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
  *   @return [Integer] the number of segments the circle is approximated with
  */
 void Init_Circle(VALUE rb_mSFML) {
-    rb_cCircle = rb_define_class_under(rb_mSFML, "Circle", rb_cObject);
+    rb_cCircle = rb_define_class_under(rb_mSFML, "CircleShape", Get_Klass_Shape());
+    rb_define_const(rb_mSFML, "Circle", rb_cCircle);
 
     rb_define_alloc_func(rb_cCircle, Circle_alloc);
 
     rb_include_module(rb_cCircle, Get_Module_Drawable());
 
+    /* CircleShape is not an SFML::Shape subclass in the callback sense: its
+       geometry comes from sfCircleShape, not #point_count/#point, so the
+       inherited custom-shape callback would read the wrong data type. */
+    rb_undef_method(rb_cCircle, "update!");
+
     rb_define_method(rb_cCircle, "initialize", Circle_initialize, -1);
 
     // methods
     rb_define_method(rb_cCircle, "copy", Circle_copy, 0);
-    rb_define_method(rb_cCircle, "move", Circle_move, 1);
-    rb_define_method(rb_cCircle, "rotate", Circle_rotate, 1);
-    rb_define_method(rb_cCircle, "scale!", Circle_scale, 1);
     rb_define_method(rb_cCircle, "draw", Circle_draw, 2);
 
     // setters
     rb_define_method(rb_cCircle, "radius=", Circle_set_radius, 1);
-    rb_define_method(rb_cCircle, "position=", Circle_set_position, 1);
-    rb_define_method(rb_cCircle, "rotation=", Circle_set_rotation, 1);
-    rb_define_method(rb_cCircle, "scale=", Circle_set_scale, 1);
-    rb_define_method(rb_cCircle, "origin=", Circle_set_origin, 1);
     rb_define_method(rb_cCircle, "fill_color=", Circle_set_fill_color, 1);
     rb_define_method(rb_cCircle, "outline_color=", Circle_set_outline_color, 1);
     rb_define_method(rb_cCircle, "outline_thickness=", Circle_set_outline_thickness, 1);
@@ -574,10 +432,6 @@ void Init_Circle(VALUE rb_mSFML) {
 
     // getters
     rb_define_method(rb_cCircle, "radius", Circle_get_radius, 0);
-    rb_define_method(rb_cCircle, "position", Circle_get_position, 0);
-    rb_define_method(rb_cCircle, "rotation", Circle_get_rotation, 0);
-    rb_define_method(rb_cCircle, "scale", Circle_get_scale, 0);
-    rb_define_method(rb_cCircle, "origin", Circle_get_origin, 0);
     rb_define_method(rb_cCircle, "fill_color", Circle_get_fill_color, 0);
     rb_define_method(rb_cCircle, "outline_color", Circle_get_outline_color, 0);
     rb_define_method(rb_cCircle, "outline_thickness", Circle_get_outline_thickness, 0);
@@ -589,15 +443,12 @@ void Init_Circle(VALUE rb_mSFML) {
     rb_define_method(rb_cCircle, "geometric_center", Circle_get_geometric_center, 0);
     rb_define_method(rb_cCircle, "local_bounds", Circle_get_local_bounds, 0);
     rb_define_method(rb_cCircle, "global_bounds", Circle_get_global_bounds, 0);
-    rb_define_method(rb_cCircle, "transform", Circle_get_transform, 0);
-    rb_define_method(rb_cCircle, "inverse_transform", Circle_get_inverse_transform, 0);
-    rb_define_method(rb_cCircle, "matrix", Circle_get_transform, 0);
 }
 
-void* Get_Circle_Struct(VALUE self) {
+sfCircleShape* Get_CircleShape_Struct(VALUE self) {
     return Get_Circle_Shape(self);
 }
 
-VALUE Get_Klass_Circle() {
+VALUE Get_Klass_CircleShape() {
     return rb_cCircle;
 }
