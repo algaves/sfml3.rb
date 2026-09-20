@@ -1,5 +1,6 @@
 #include "system/vec3.h"
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -187,6 +188,20 @@ static VALUE Vector3_size(VALUE self) {
     return INT2NUM(3);
 }
 
+/* call-seq: length -> Float
+ *
+ * Returns the Euclidean length (magnitude) of the vector, matching
+ * +sf::Vector3<T>::length()+.
+ *
+ * @return [Float] sqrt(x*x + y*y + z*z)
+ */
+static VALUE Vector3_length(VALUE self) {
+    Vector3* vec = Get_Vector3_Struct(self);
+
+    return DBL2NUM(sqrt((double)vec->vec.x * vec->vec.x + (double)vec->vec.y * vec->vec.y +
+                        (double)vec->vec.z * vec->vec.z));
+}
+
 /* call-seq:
  *   self == other -> true or false
  *
@@ -306,7 +321,7 @@ void Init_Vector3(VALUE rb_mSFML) {
     rb_define_method(rb_cVector3, "to_ary", Vector3_to_a, 0);
     rb_define_method(rb_cVector3, "each", Vector3_each, 0);
     rb_define_method(rb_cVector3, "size", Vector3_size, 0);
-    rb_define_method(rb_cVector3, "length", Vector3_size, 0);
+    rb_define_method(rb_cVector3, "length", Vector3_length, 0);
     rb_define_method(rb_cVector3, "==", Vector3_eql, 1);
     rb_define_method(rb_cVector3, "+", Vector3_add, 1);
     rb_define_method(rb_cVector3, "-", Vector3_sub, 1);

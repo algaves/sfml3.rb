@@ -170,6 +170,19 @@ static VALUE Vector2_size(VALUE self) {
     return INT2NUM(2);
 }
 
+/* call-seq: length -> Float
+ *
+ * Returns the Euclidean length (magnitude) of the vector, matching
+ * +sf::Vector2<T>::length()+.
+ *
+ * @return [Float] sqrt(x*x + y*y)
+ */
+static VALUE Vector2_length(VALUE self) {
+    Vector2* vec = Get_Vector2_Struct(self);
+
+    return DBL2NUM(sqrt((double)vec->vec.x * vec->vec.x + (double)vec->vec.y * vec->vec.y));
+}
+
 /* call-seq:
  *   self == other -> true or false
  *
@@ -284,7 +297,7 @@ void Init_Vector2(VALUE rb_mSFML) {
     rb_define_method(rb_cVector2, "each", Vector2_each, 0);
     rb_define_method(rb_cVector2, "[]", Vector2_aref, 1);
     rb_define_method(rb_cVector2, "size", Vector2_size, 0);
-    rb_define_method(rb_cVector2, "length", Vector2_size, 0);
+    rb_define_method(rb_cVector2, "length", Vector2_length, 0);
     rb_define_method(rb_cVector2, "==", Vector2_eql, 1);
     rb_define_method(rb_cVector2, "+", Vector2_add, 1);
     rb_define_method(rb_cVector2, "-", Vector2_sub, 1);
