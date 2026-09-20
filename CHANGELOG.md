@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+* **The graphics and audio class hierarchies now mirror SFML 3's own.** `SFML::Shape` is the base
+  of `SFML::CircleShape`, `SFML::RectangleShape` and `SFML::ConvexShape`; `SFML::Sprite` and
+  `SFML::Text` are `SFML::Transformable`; and `SFML::Sound`, `SFML::SoundStream` and `SFML::Music`
+  derive from the new `SFML::SoundSource`, with `SFML::Music < SFML::SoundStream` and
+  `SFML::SoundBufferRecorder < SFML::SoundRecorder`.
+
+### Changed
+* **`SFML::Transformable` is now a module**, mixed into `Sprite`, `Text` and `Shape`, rather than a
+  class. The position/rotation/scale/origin surface is implemented once and dispatched to each
+  class's concrete CSFML entry point, replacing thirteen duplicated copies. `Transformable.new`
+  still works and returns a `SFML::Transformable::Instance`, so standalone use and subclassing are
+  preserved.
+* **`SFML::Circle` is now `SFML::CircleShape`**, matching SFML's class name and its siblings. The
+  old `SFML::Circle` name remains as a constant alias.
+
 ## [0.3.1] - 2026-09-19
 
 ### Added

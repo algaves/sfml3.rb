@@ -182,6 +182,13 @@ RenderTexture). `SFML::RenderWindow < SFML::Window < SFML::WindowBase` and inclu
 `SFML::RenderTarget` module, so a drawable's `#draw` accepts a `RenderWindow` or a
 `RenderTexture` directly; `SFML::Target` remains as the legacy generic wrapper.
 
+The class hierarchy mirrors SFML's own. `SFML::Drawable` is a mixin included by every drawable;
+`SFML::Transformable` is a mixin included by `Sprite`, `Text` and `Shape`, whose position/rotation/
+scale/origin surface is implemented once and dispatched to each class's CSFML entry point. `Shape`
+is the base of `CircleShape` (also available as `Circle`), `RectangleShape` and `ConvexShape`. On
+the audio side `SFML::SoundSource` is the base of `Sound`, `SoundStream` and `Music`, and
+`SFML::Music < SFML::SoundStream`, with `SFML::SoundBufferRecorder < SFML::SoundRecorder`.
+
 Note that mkmf flattens object files to their basenames, so every `.c` filename has to stay
 unique across the whole tree — and that `$srcs` is baked into the generated Makefile, so after
 adding a `.c` file run `touch ext/extconf.rb && rake compile` (or `rake clean compile`), otherwise
