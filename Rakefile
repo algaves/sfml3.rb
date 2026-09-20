@@ -35,7 +35,7 @@ Gem::PackageTask.new(GEMSPEC).define
 
 Rake::TestTask.new(:test) do |t|
   t.libs << 'lib'
-  t.test_files = FileList['test/sfml_test.rb']
+  t.test_files = FileList['test/**/*_test.rb']
 end
 task test: :compile
 
