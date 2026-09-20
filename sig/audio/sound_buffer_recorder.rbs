@@ -1,5 +1,5 @@
 module SFML
-  class SoundBufferRecorder
+  class SoundBufferRecorder < SoundRecorder
     def initialize: () -> void
 
     def start: (Integer sample_rate) -> bool

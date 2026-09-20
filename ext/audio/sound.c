@@ -196,6 +196,7 @@ static VALUE Sound_set_buffer(VALUE self, VALUE rb_buffer) {
 /* Document-class: SFML::Sound
  * A sound playing directly from a SoundBuffer held fully in memory. Suited
  * to short effects; for long files prefer Music, which streams instead.
+ * Derives from SoundSource.
  *
  * @!method play
  *   Starts playback, or resumes it when paused.
@@ -324,7 +325,7 @@ static VALUE Sound_set_buffer(VALUE self, VALUE rb_buffer) {
  *   @return [Proc] +proc+
  */
 void Init_Sound(VALUE rb_mSFML) {
-    rb_cSound = rb_define_class_under(rb_mSFML, "Sound", rb_cObject);
+    rb_cSound = rb_define_class_under(rb_mSFML, "Sound", Get_Klass_SoundSource());
 
     rb_define_alloc_func(rb_cSound, Sound_alloc);
     rb_define_method(rb_cSound, "initialize", Sound_initialize, 1);

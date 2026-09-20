@@ -55,6 +55,7 @@
 #include "audio/sound_source_cone.h"
 #include "audio/listener.h"
 #include "audio/sound_buffer.h"
+#include "audio/sound_source.h"
 #include "audio/sound.h"
 #include "audio/music.h"
 #include "audio/sound_stream.h"
@@ -148,11 +149,12 @@ void Init_sfml_ext(void) {
     Init_SoundSourceCone(rb_mExt);
     Init_Listener(rb_mExt);
     Init_SoundBuffer(rb_mExt);
+    Init_SoundSource(rb_mExt);
     Init_Sound(rb_mExt);
-    Init_Music(rb_mExt);
     Init_SoundStream(rb_mExt);
-    Init_SoundBufferRecorder(rb_mExt);
+    Init_Music(rb_mExt);
     Init_SoundRecorder(rb_mExt);
+    Init_SoundBufferRecorder(rb_mExt);
 
     Init_NetworkEnums(rb_mExt);
     Init_IpAddress(rb_mExt);

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "audio/audio_enums.h"
+#include "audio/sound_recorder.h"
 #include "audio/sound_buffer.h"
 #include "core/macros.h"
 
@@ -148,15 +149,22 @@ static VALUE SoundBufferRecorder_set_channel_count(VALUE self, VALUE rb_count) {
 }
 
 /* Document-class: SFML::SoundBufferRecorder
- * Records audio from a capture device directly into a SoundBuffer. For
- * custom processing of captured samples as they arrive, subclass
- * SoundRecorder instead.
+ * Records audio from a capture device directly into a SoundBuffer. Derives
+ * from SoundRecorder. For custom processing of captured samples as they
+ * arrive, subclass SoundRecorder instead.
  */
 void Init_SoundBufferRecorder(VALUE rb_mSFML) {
-    rb_cSoundBufferRecorder = rb_define_class_under(rb_mSFML, "SoundBufferRecorder", rb_cObject);
+    rb_cSoundBufferRecorder =
+        rb_define_class_under(rb_mSFML, "SoundBufferRecorder", Get_Klass_SoundRecorder());
 
     rb_define_alloc_func(rb_cSoundBufferRecorder, SoundBufferRecorder_alloc);
     rb_define_method(rb_cSoundBufferRecorder, "initialize", SoundBufferRecorder_initialize, 0);
+
+    /* A SoundBufferRecorder captures into a buffer rather than exposing the
+       capture channel layout, and sfSoundBufferRecorder has no channel-map
+       entry point, so the inherited SoundRecorder#channel_map must not be
+       reachable here (it would read a SoundBufferRecorder as a SoundRecorder). */
+    rb_undef_method(rb_cSoundBufferRecorder, "channel_map");
 
     rb_define_method(rb_cSoundBufferRecorder, "start", SoundBufferRecorder_start, 1);
     rb_define_method(rb_cSoundBufferRecorder, "stop", SoundBufferRecorder_stop, 0);

@@ -322,7 +322,8 @@ static VALUE SoundStream_channel_map(VALUE self) {
 
 /* Document-class: SFML::SoundStream
  * Base class for a custom audio source that generates or decodes its own
- * samples on demand. Subclasses must implement +#on_get_data+, returning an
+ * samples on demand. Derives from SoundSource; Music derives from it.
+ * Subclasses must implement +#on_get_data+, returning an
  * Array of Integer samples or a packed String of int16 samples for the next
  * chunk (or +nil+/+false+ to signal end of stream), and may implement
  * +#on_seek(time)+ to support seeking.
@@ -454,7 +455,7 @@ static VALUE SoundStream_channel_map(VALUE self) {
  *   @return [Proc] +proc+
  */
 void Init_SoundStream(VALUE rb_mSFML) {
-    rb_cSoundStream = rb_define_class_under(rb_mSFML, "SoundStream", rb_cObject);
+    rb_cSoundStream = rb_define_class_under(rb_mSFML, "SoundStream", Get_Klass_SoundSource());
 
     rb_define_alloc_func(rb_cSoundStream, SoundStream_alloc);
     rb_define_method(rb_cSoundStream, "initialize", SoundStream_initialize, -1);

@@ -1,5 +1,5 @@
 module SFML
-  class Music
+  class Music < SoundStream
     def self.from_file: (String path) -> Music
     def self.from_memory: (String data) -> Music
     def self.from_stream: (untyped stream) -> Music
