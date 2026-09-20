@@ -1,7 +1,5 @@
 module SFML
-  class RectangleShape
-    include Drawable
-
+  class RectangleShape < Shape
     def initialize: (?(Vector2 | Array[Float]) size) -> void
 
     def copy: () -> RectangleShape

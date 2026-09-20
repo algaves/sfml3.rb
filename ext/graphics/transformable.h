@@ -5,9 +5,8 @@
 
 void Init_Transformable(VALUE rb_module);
 
-void *Get_Transformable_Struct(VALUE self);
+void* Get_Transformable_Struct(VALUE self);
 
+VALUE Get_Module_Transformable(void);
 
-VALUE Get_Klass_Transformable();
-
-#endif //SFML_RB_GRAPHICS_TRANSFORMABLE_H
+#endif // SFML_RB_GRAPHICS_TRANSFORMABLE_H

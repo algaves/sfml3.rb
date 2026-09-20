@@ -1,5 +1,7 @@
 module SFML
   class Text
+    include Transformable
+
     def initialize: () -> void
                  | (untyped font) -> void
                  | (untyped font, String string) -> void

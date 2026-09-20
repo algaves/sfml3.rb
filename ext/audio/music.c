@@ -7,6 +7,7 @@
 #include "audio/audio_enums.h"
 #include "audio/effect_processor.h"
 #include "audio/sound_source.h"
+#include "audio/sound_stream.h"
 #include "core/exceptions.h"
 #include "system/input_stream.h"
 #include "system/time.h"
@@ -224,7 +225,8 @@ static VALUE Music_alloc(VALUE klass) {
 /* Document-class: SFML::Music
  * Music streamed from a file, memory buffer or InputStream rather than held
  * fully decoded in memory, so it's suited to long tracks that would be
- * wasteful to load whole as a SoundBuffer.
+ * wasteful to load whole as a SoundBuffer. Derives from SoundStream (and so
+ * from SoundSource).
  *
  * @!method play
  *   Starts playback, or resumes it when paused.
@@ -353,7 +355,7 @@ static VALUE Music_alloc(VALUE klass) {
  *   @return [Proc] +proc+
  */
 void Init_Music(VALUE rb_mSFML) {
-    rb_cMusic = rb_define_class_under(rb_mSFML, "Music", rb_cObject);
+    rb_cMusic = rb_define_class_under(rb_mSFML, "Music", Get_Klass_SoundStream());
     rb_define_alloc_func(rb_cMusic, Music_alloc);
 
     rb_define_singleton_method(rb_cMusic, "from_file", Music_from_file, 1);

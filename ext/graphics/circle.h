@@ -3,10 +3,12 @@
 
 #include <ruby.h>
 
+#include "core/sfml.h"
+
 void Init_Circle(VALUE rb_module);
 
-void *Get_Circle_Struct(VALUE self);
+sfCircleShape* Get_CircleShape_Struct(VALUE self);
 
-VALUE Get_Klass_Circle();
+VALUE Get_Klass_CircleShape(void);
 
-#endif //SFML_RB_GRAPHICS_CIRCLE_H
+#endif // SFML_RB_GRAPHICS_CIRCLE_H

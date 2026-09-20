@@ -5,6 +5,7 @@
 
 #include "graphics/circle.h"
 #include "graphics/drawable.h"
+#include "graphics/shape.h"
 #include "graphics/target.h"
 #include "graphics/render_state.h"
 #include "graphics/transform.h"
@@ -42,7 +43,7 @@ static RectangleShape* Get_RectangleShape(VALUE self) {
     return ptr;
 }
 
-static sfRectangleShape* Get_RectangleShape_Struct(VALUE self) {
+sfRectangleShape* Get_RectangleShape_Struct(VALUE self) {
     return Get_RectangleShape(self)->shape;
 }
 
@@ -141,150 +142,6 @@ static VALUE RectangleShape_get_size(VALUE self) {
 static VALUE RectangleShape_set_size(VALUE self, VALUE rb_size) {
     sfRectangleShape_setSize(Get_RectangleShape_Struct(self), vec2f_from_rb(rb_size));
     return rb_size;
-}
-
-/* call-seq: position -> Vector2
- *
- * Returns the object's position.
- *
- * @return [Vector2]
- */
-static VALUE RectangleShape_get_position(VALUE self) {
-    return vec2f_to_rb(sfRectangleShape_getPosition(Get_RectangleShape_Struct(self)));
-}
-
-/* call-seq:
- *   position=(value) -> Vector2
- *
- * Sets the object's position.
- *
- * @return [Vector2] +value+
- */
-static VALUE RectangleShape_set_position(VALUE self, VALUE rb_position) {
-    sfRectangleShape_setPosition(Get_RectangleShape_Struct(self), vec2f_from_rb(rb_position));
-    return rb_position;
-}
-
-/* call-seq: rotation -> Float
- *
- * Returns the object's rotation, in degrees.
- *
- * @return [Float]
- */
-static VALUE RectangleShape_get_rotation(VALUE self) {
-    return DBL2NUM(sfRectangleShape_getRotation(Get_RectangleShape_Struct(self)));
-}
-
-/* call-seq:
- *   rotation=(value) -> Float
- *
- * Sets the object's rotation, in degrees.
- *
- * @return [Float] +value+
- */
-static VALUE RectangleShape_set_rotation(VALUE self, VALUE rb_rotation) {
-    sfRectangleShape_setRotation(Get_RectangleShape_Struct(self), NUM2DBL(rb_rotation));
-    return rb_rotation;
-}
-
-/* call-seq: scale -> Vector2
- *
- * Returns the object's scale factors.
- *
- * @return [Vector2]
- */
-static VALUE RectangleShape_get_scale(VALUE self) {
-    return vec2f_to_rb(sfRectangleShape_getScale(Get_RectangleShape_Struct(self)));
-}
-
-/* call-seq:
- *   scale=(value) -> Vector2
- *
- * Sets the object's scale factors.
- *
- * @return [Vector2] +value+
- */
-static VALUE RectangleShape_set_scale(VALUE self, VALUE rb_scale) {
-    sfRectangleShape_setScale(Get_RectangleShape_Struct(self), vec2f_from_rb(rb_scale));
-    return rb_scale;
-}
-
-/* call-seq: origin -> Vector2
- *
- * Returns the object's origin.
- *
- * @return [Vector2]
- */
-static VALUE RectangleShape_get_origin(VALUE self) {
-    return vec2f_to_rb(sfRectangleShape_getOrigin(Get_RectangleShape_Struct(self)));
-}
-
-/* call-seq:
- *   origin=(value) -> Vector2
- *
- * Sets the object's origin.
- *
- * @return [Vector2] +value+
- */
-static VALUE RectangleShape_set_origin(VALUE self, VALUE rb_origin) {
-    sfRectangleShape_setOrigin(Get_RectangleShape_Struct(self), vec2f_from_rb(rb_origin));
-    return rb_origin;
-}
-
-/* call-seq: move(offset) -> self
- *
- * Moves the object by +offset+.
- *
- * @return [self]
- */
-static VALUE RectangleShape_move(VALUE self, VALUE rb_offset) {
-    sfRectangleShape_move(Get_RectangleShape_Struct(self), vec2f_from_rb(rb_offset));
-    return self;
-}
-
-/* call-seq: rotate(angle) -> self
- *
- * Rotates the object by +angle+ degrees.
- *
- * @return [self]
- */
-static VALUE RectangleShape_rotate(VALUE self, VALUE rb_angle) {
-    sfRectangleShape_rotate(Get_RectangleShape_Struct(self), NUM2DBL(rb_angle));
-    return self;
-}
-
-/* call-seq:
- *   scale!(factors) -> self
- *
- * Scales the object by +factors+ relative to its current scale.
- *
- * @return [self]
- */
-static VALUE RectangleShape_scale(VALUE self, VALUE rb_factors) {
-    sfRectangleShape_scale(Get_RectangleShape_Struct(self), vec2f_from_rb(rb_factors));
-    return self;
-}
-
-/* call-seq: transform -> Array
- *
- * Also available as #matrix.
- *
- * @return [Array] the 3x3 row-major transform matrix
- */
-static VALUE RectangleShape_get_transform(VALUE self) {
-    return Transform_MatrixToArray(
-        sfRectangleShape_getTransform(Get_RectangleShape_Struct(self)).matrix);
-}
-
-/* call-seq: inverse_transform -> Array
- *
- * Returns the 3x3 row-major inverse of the object's transform matrix.
- *
- * @return [Array] the 3x3 row-major inverse transform matrix
- */
-static VALUE RectangleShape_get_inverse_transform(VALUE self) {
-    return Transform_MatrixToArray(
-        sfRectangleShape_getInverseTransform(Get_RectangleShape_Struct(self)).matrix);
 }
 
 /* call-seq: fill_color -> Color
@@ -519,21 +376,20 @@ static VALUE RectangleShape_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
  *   @return [Rect]
  */
 void Init_RectangleShape(VALUE rb_mSFML) {
-    rb_cRectangleShape = rb_define_class_under(rb_mSFML, "RectangleShape", rb_cObject);
+    rb_cRectangleShape = rb_define_class_under(rb_mSFML, "RectangleShape", Get_Klass_Shape());
 
     rb_define_alloc_func(rb_cRectangleShape, RectangleShape_alloc);
 
     rb_include_module(rb_cRectangleShape, Get_Module_Drawable());
+
+    /* Geometry comes from sfRectangleShape, not the Shape callback surface. */
+    rb_undef_method(rb_cRectangleShape, "update!");
 
     rb_define_method(rb_cRectangleShape, "initialize", RectangleShape_initialize, -1);
 
     rb_define_method(rb_cRectangleShape, "copy", RectangleShape_copy, 0);
 
     rb_define_method(rb_cRectangleShape, "size", RectangleShape_get_size, 0);
-    rb_define_method(rb_cRectangleShape, "position", RectangleShape_get_position, 0);
-    rb_define_method(rb_cRectangleShape, "rotation", RectangleShape_get_rotation, 0);
-    rb_define_method(rb_cRectangleShape, "scale", RectangleShape_get_scale, 0);
-    rb_define_method(rb_cRectangleShape, "origin", RectangleShape_get_origin, 0);
     rb_define_method(rb_cRectangleShape, "fill_color", RectangleShape_get_fill_color, 0);
     rb_define_method(rb_cRectangleShape, "outline_color", RectangleShape_get_outline_color, 0);
     rb_define_method(rb_cRectangleShape, "outline_thickness", RectangleShape_get_outline_thickness,
@@ -546,16 +402,8 @@ void Init_RectangleShape(VALUE rb_mSFML) {
                      0);
     rb_define_method(rb_cRectangleShape, "local_bounds", RectangleShape_get_local_bounds, 0);
     rb_define_method(rb_cRectangleShape, "global_bounds", RectangleShape_get_global_bounds, 0);
-    rb_define_method(rb_cRectangleShape, "transform", RectangleShape_get_transform, 0);
-    rb_define_method(rb_cRectangleShape, "inverse_transform", RectangleShape_get_inverse_transform,
-                     0);
-    rb_define_method(rb_cRectangleShape, "matrix", RectangleShape_get_transform, 0);
 
     rb_define_method(rb_cRectangleShape, "size=", RectangleShape_set_size, 1);
-    rb_define_method(rb_cRectangleShape, "position=", RectangleShape_set_position, 1);
-    rb_define_method(rb_cRectangleShape, "rotation=", RectangleShape_set_rotation, 1);
-    rb_define_method(rb_cRectangleShape, "scale=", RectangleShape_set_scale, 1);
-    rb_define_method(rb_cRectangleShape, "origin=", RectangleShape_set_origin, 1);
     rb_define_method(rb_cRectangleShape, "fill_color=", RectangleShape_set_fill_color, 1);
     rb_define_method(rb_cRectangleShape, "outline_color=", RectangleShape_set_outline_color, 1);
     rb_define_method(rb_cRectangleShape, "outline_thickness=", RectangleShape_set_outline_thickness,
@@ -563,9 +411,6 @@ void Init_RectangleShape(VALUE rb_mSFML) {
     rb_define_method(rb_cRectangleShape, "texture=", RectangleShape_set_texture, 1);
     rb_define_method(rb_cRectangleShape, "texture_rect=", RectangleShape_set_texture_rect, 1);
 
-    rb_define_method(rb_cRectangleShape, "move", RectangleShape_move, 1);
-    rb_define_method(rb_cRectangleShape, "rotate", RectangleShape_rotate, 1);
-    rb_define_method(rb_cRectangleShape, "scale!", RectangleShape_scale, 1);
     rb_define_method(rb_cRectangleShape, "draw", RectangleShape_draw, 2);
 }
 

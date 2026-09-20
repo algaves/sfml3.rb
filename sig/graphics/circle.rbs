@@ -1,10 +1,8 @@
 module SFML
-  class Circle
-    include Drawable
-
+  class CircleShape < Shape
     def initialize: (?Float radius) -> void
 
-    def copy: () -> Circle
+    def copy: () -> CircleShape
     def move: (Vector2 | Array[Float] offset) -> self
     def rotate: (Float angle) -> self
     def scale!: (Vector2 | Array[Float] factors) -> self
@@ -41,4 +39,6 @@ module SFML
     def inverse_transform: () -> Array[untyped]
     def matrix: () -> Array[untyped]
   end
+
+  class Circle = CircleShape
 end

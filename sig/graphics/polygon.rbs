@@ -1,7 +1,5 @@
 module SFML
-  class ConvexShape
-    include Drawable
-
+  class ConvexShape < Shape
     def initialize: (?Integer point_count) -> void
 
     def copy: () -> ConvexShape

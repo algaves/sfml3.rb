@@ -1,5 +1,5 @@
 module SFML
-  class Sound
+  class Sound < SoundSource
     def initialize: (SoundBuffer buffer) -> void
 
     def copy: () -> Sound

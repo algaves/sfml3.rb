@@ -120,9 +120,11 @@ end
 
 Event types are strings (`'closed'`, `'resized'`, `'key-pressed'`, ...); keys and buttons are enums.
 
-See [`test/hello-world.rb`](test/hello-world.rb) for a fuller example with shapes and transforms,
-and [`test/matrix-transformable.rb`](test/matrix-transformable.rb) for a visual demo. Neither is
-part of the test suite.
+See [`examples/hello_shapes.rb`](examples/hello_shapes.rb) for a minimal walkthrough of the five
+building blocks (window, events, transformables, drawables, primitive shapes), and
+[`examples/bouncing_shapes.rb`](examples/bouncing_shapes.rb) for an interactive take on the same
+components. [`examples/README.md`](examples/README.md) documents how they compose. Both need a
+display (`xvfb-run -a` headlessly) and are not part of the test suite.
 
 ## Documentation
 
@@ -181,6 +183,13 @@ with a different macro prefix: `audio/sound_source.inc` (Sound, Music, SoundStre
 RenderTexture). `SFML::RenderWindow < SFML::Window < SFML::WindowBase` and includes the
 `SFML::RenderTarget` module, so a drawable's `#draw` accepts a `RenderWindow` or a
 `RenderTexture` directly; `SFML::Target` remains as the legacy generic wrapper.
+
+The class hierarchy mirrors SFML's own. `SFML::Drawable` is a mixin included by every drawable;
+`SFML::Transformable` is a mixin included by `Sprite`, `Text` and `Shape`, whose position/rotation/
+scale/origin surface is implemented once and dispatched to each class's CSFML entry point. `Shape`
+is the base of `CircleShape` (also available as `Circle`), `RectangleShape` and `ConvexShape`. On
+the audio side `SFML::SoundSource` is the base of `Sound`, `SoundStream` and `Music`, and
+`SFML::Music < SFML::SoundStream`, with `SFML::SoundBufferRecorder < SFML::SoundRecorder`.
 
 Note that mkmf flattens object files to their basenames, so every `.c` filename has to stay
 unique across the whole tree — and that `$srcs` is baked into the generated Makefile, so after

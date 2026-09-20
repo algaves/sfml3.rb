@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-require 'sfml'
-require 'minitest/autorun'
+require_relative 'test_helper'
 require 'stringio'
 require 'tmpdir'
 require 'fileutils'
@@ -9,22 +8,7 @@ require 'timeout'
 
 class SfmlTest < Minitest::Test
   include SFML
-
-  def assert_vec_in_epsilon(expected, actual, epsilon = 0.01)
-    expected.zip(actual).each do |e, a|
-      assert_in_epsilon e, a, epsilon
-    end
-  end
-
-  # assert_in_epsilon is relative, so it can never accept a near-zero result
-  # against an exact 0 -- which is most of any transform matrix. Matrices are
-  # compared with an absolute tolerance instead.
-  def assert_matrix_in_delta(expected, actual, delta = 1e-5)
-    assert_equal expected.length, actual.length
-    expected.zip(actual).each_with_index do |(e, a), i|
-      assert_in_delta e, a, delta, "element #{i}"
-    end
-  end
+  include SFMLTestHelpers
 
   # Text needs a real font file and CI images do not all ship one, so every
   # font-dependent test skips rather than fails when none is found.
@@ -39,35 +23,6 @@ class SfmlTest < Minitest::Test
 
     candidates.find { |path| File.exist?(path) } ||
       Dir.glob('/usr/share/fonts/**/*.ttf').first
-  end
-
-  # Window class hierarchy -- structure only, so it stays safe headless. None
-  # of these construct a window (which would SIGABRT without a display).
-  def test_window_base_is_the_root_of_the_window_hierarchy
-    assert_operator Window, :<, WindowBase
-    assert_operator RenderWindow, :<, Window
-    refute_operator WindowBase, :<, Window
-  end
-
-  def test_render_target_module_is_shared_by_render_window_and_render_texture
-    assert_includes RenderWindow.ancestors, RenderTarget
-    assert_includes RenderTexture.ancestors, RenderTarget
-    refute_includes Window.ancestors, RenderTarget
-  end
-
-  def test_window_base_methods_live_on_the_root
-    %i[is_open? close! poll_event! wait_event! position size title= native_handle].each do |name|
-      assert_includes WindowBase.instance_methods, name, "#{name} missing from WindowBase"
-    end
-  end
-
-  def test_window_only_methods_are_absent_from_window_base
-    # :display is deliberately left out: Object#display exists, so it would
-    # make the WindowBase assertion meaningless.
-    %i[clear active= settings frame_rate= vertical_sync_enabled=].each do |name|
-      assert_includes Window.instance_methods(false), name, "#{name} missing from Window"
-      refute_includes WindowBase.instance_methods(false), name, "#{name} leaked onto WindowBase"
-    end
   end
 
   # Clock
@@ -193,85 +148,6 @@ class SfmlTest < Minitest::Test
     assert_nil r.intersection(Rect.new(20, 20, 5, 5))
   end
 
-  # Transformable
-  def test_transformable_defaults
-    t = Transformable.new
-    assert_vec_in_epsilon [0, 0], t.position
-    assert_in_epsilon 0, t.rotation, 0.01
-    assert_vec_in_epsilon [1, 1], t.scale
-    assert_vec_in_epsilon [0, 0], t.origin
-  end
-
-  def test_transformable_setters_getters
-    t = Transformable.new
-    t.position = [5, 10]
-    assert_vec_in_epsilon [5, 10], t.position
-
-    t.rotation = 45
-    assert_in_epsilon 45, t.rotation, 0.01
-
-    t.scale = [2, 3]
-    assert_vec_in_epsilon [2, 3], t.scale
-
-    t.origin = [1, 1]
-    assert_vec_in_epsilon [1, 1], t.origin
-  end
-
-  def test_transformable_move
-    t = Transformable.new
-    t.move [10, 20]
-    assert_vec_in_epsilon [10, 20], t.position
-    t.move [5, 5]
-    assert_vec_in_epsilon [15, 25], t.position
-  end
-
-  def test_transformable_rotate
-    t = Transformable.new
-    t.rotate 30
-    assert_in_epsilon 30, t.rotation, 0.01
-    t.rotate 20
-    assert_in_epsilon 50, t.rotation, 0.01
-  end
-
-  def test_transformable_scale_offset
-    t = Transformable.new
-    t.scale! [2, 2]
-    assert_vec_in_epsilon [2, 2], t.scale
-    t.scale! [3, 3]
-    assert_vec_in_epsilon [6, 6], t.scale
-  end
-
-  def test_transformable_matrix_identity_length
-    t = Transformable.new
-    matrix = t.transform
-    assert_kind_of Array, matrix
-    assert_equal 9, matrix.length, "matrix should have 9 elements (3x3), got #{matrix.length}"
-    assert_equal matrix, t.matrix
-  end
-
-  def test_transformable_inverse_transform
-    t = Transformable.new
-    t.position = [10, 20]
-
-    inverse = t.inverse_transform
-    assert_equal 9, inverse.length
-    # The inverse must undo the transform, which is what makes it usable for
-    # turning a world point back into local space.
-    assert_matrix_in_delta Transform.identity.to_a,
-                           (Transform.from_a(t.transform) * Transform.from_a(inverse)).to_a
-  end
-
-  def test_transformable_copy_is_independent
-    t = Transformable.new
-    t.position = [3, 4]
-
-    copy = t.copy
-    assert_vec_in_epsilon [3, 4], copy.position
-
-    copy.position = [9, 9]
-    assert_vec_in_epsilon [3, 4], t.position
-  end
-
   # Circle
   def test_circle_default_radius
     c = Circle.new
@@ -285,24 +161,6 @@ class SfmlTest < Minitest::Test
 
   def test_circle_too_many_args
     assert_raises(ArgumentError) { Circle.new 1, 2 }
-  end
-
-  def test_circle_position_roundtrip
-    c = Circle.new 10
-    c.position = [3.5, 7.2]
-    assert_vec_in_epsilon [3.5, 7.2], c.position
-  end
-
-  def test_circle_scale_getter_returns_scale
-    c = Circle.new 10
-    c.scale = [2, 5]
-    assert_vec_in_epsilon [2, 5], c.scale, 0.01
-  end
-
-  def test_circle_rotation
-    c = Circle.new 10
-    c.rotation = 33
-    assert_in_epsilon 33, c.rotation, 0.01
   end
 
   def test_circle_point_count_setter

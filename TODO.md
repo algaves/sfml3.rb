@@ -87,8 +87,12 @@ OpenGL-based windows, events, input handling.
       functions `Transform.combine`/`Transform.inverse` remain, Array-in/Array-out. Every class
       that exposes `#transform` still returns a plain 9-element Array, and anything that *takes*
       a transform accepts either form
-- [x] **Transformable** — `SFML::Transformable` (`ext/graphics/transformable.c`); including
-      `inverse_transform` and `copy`
+- [x] **Transformable** — `SFML::Transformable` (`ext/graphics/transformable.c`); a **module**
+      (Ruby has no multiple inheritance, so every drawable mixes it in) providing position,
+      rotation, scale, origin, `move`/`rotate`/`scale!`, `transform`/`matrix`/`inverse_transform`.
+      The methods are implemented once and dispatched to the receiver's concrete `sf*` entry point;
+      the standalone object is `SFML::Transformable::Instance` (returned by `Transformable.new`;
+      internal, not part of the public surface)
 - [x] **Drawable** — `SFML::Drawable` mixin (`ext/graphics/drawable.c`)
 - [x] **RenderStates** — `SFML::RenderState` (`ext/graphics/render_state.c`); blend mode, stencil
       mode, coordinate type, texture, shader and transform are all settable
@@ -105,16 +109,19 @@ OpenGL-based windows, events, input handling.
 - [x] **RenderTexture** — `SFML::RenderTexture` (`ext/graphics/render_texture.c`)
 - [x] **View** — `SFML::View` (`ext/graphics/view.c`); including `View.from_rect` and
       `scissor`/`scissor=`
-- [x] **CircleShape** — `SFML::Circle` (`ext/graphics/circle.c`)
-- [x] **RectangleShape** — `SFML::RectangleShape` (`ext/graphics/rectangle.c`)
-- [x] **ConvexShape** — `SFML::ConvexShape` (`ext/graphics/polygon.c`)
-- [x] **Shape** — `SFML::Shape` (`ext/graphics/shape.c`); subclass and define `point_count`/`point`
-- [x] **Sprite** — `SFML::Sprite` (`ext/graphics/sprite.c`)
+- [x] **CircleShape** — `SFML::CircleShape` (`ext/graphics/circle.c`), also available as the
+      `SFML::Circle` alias; derives from `Shape`
+- [x] **RectangleShape** — `SFML::RectangleShape` (`ext/graphics/rectangle.c`); derives from `Shape`
+- [x] **ConvexShape** — `SFML::ConvexShape` (`ext/graphics/polygon.c`); derives from `Shape`
+- [x] **Shape** — `SFML::Shape` (`ext/graphics/shape.c`); the base of the built-in shapes, mixing in
+      `Transformable` and `Drawable`. Subclass it and define `point_count`/`point` for a custom shape
+- [x] **Sprite** — `SFML::Sprite` (`ext/graphics/sprite.c`); mixes in `Transformable` and `Drawable`
 - [x] **Texture** — `SFML::Texture` (`ext/graphics/texture.c`); every constructor in both linear
       and sRGB form, plus `resize`/`resize_srgb` and `swap`
 - [x] **Image** — `SFML::Image` (`ext/graphics/image.c`)
 - [x] **Font** — `SFML::Font` (`ext/graphics/font.c`)
-- [x] **Text** — `SFML::Text` (`ext/graphics/text.c`); `#string` goes through the UTF-32 entry
+- [x] **Text** — `SFML::Text` (`ext/graphics/text.c`); mixes in `Transformable` and `Drawable`;
+      `#string` goes through the UTF-32 entry
       points, so non-ASCII round-trips exactly
 - [x] **Glyph** — `SFML::Glyph` (`ext/graphics/glyph.c`)
 - [x] **Shader** — `SFML::Shader` (`ext/graphics/shader.c`); scalar/vector/color/int/bool/matrix
@@ -132,21 +139,24 @@ Sounds, streaming, recording, spatialization.
 - [x] **Listener** — `SFML::Listener` (`ext/audio/listener.c`); global volume plus
       position/direction/velocity/up-vector/cone
 - [x] **ListenerCone** / **SoundSourceCone** — `SFML::SoundSourceCone` (`ext/audio/sound_source_cone.c`)
-- [x] **SoundSource** — the shared play/pause/stop/status, pitch, pan, volume, spatialization,
-      position/direction/velocity, cone, doppler/directional-attenuation, min/max distance/gain,
-      attenuation, playing-offset and effect-processor surface, generated per class from
-      `ext/audio/sound_source.inc`
+- [x] **SoundSource** — `SFML::SoundSource` (`ext/audio/sound_source.c`), the base class of
+      `Sound`, `SoundStream` and `Music`; the shared play/pause/stop/status, pitch, pan, volume,
+      spatialization, position/direction/velocity, cone, doppler/directional-attenuation, min/max
+      distance/gain, attenuation, playing-offset and effect-processor surface is generated per class
+      from `ext/audio/sound_source.inc`
 - [x] **SoundStatus** / **SoundChannel** — `SFML::SoundStatus`, `SFML::SoundChannel`
       (`ext/audio/audio_enums.c`)
 - [x] **SoundBuffer** — `SFML::SoundBuffer` (`ext/audio/sound_buffer.c`); loading from file, memory,
       stream and raw samples, saving, sample access and channel map
-- [x] **Sound** — `SFML::Sound` (`ext/audio/sound.c`)
-- [x] **SoundStream** — `SFML::SoundStream` (`ext/audio/sound_stream.c`); subclass and implement
-      `#on_get_data` (and optionally `#on_seek`)
-- [x] **SoundBufferRecorder** — `SFML::SoundBufferRecorder` (`ext/audio/sound_buffer_recorder.c`)
+- [x] **Sound** — `SFML::Sound` (`ext/audio/sound.c`); derives from `SoundSource`
+- [x] **SoundStream** — `SFML::SoundStream` (`ext/audio/sound_stream.c`); derives from `SoundSource`,
+      subclass and implement `#on_get_data` (and optionally `#on_seek`)
 - [x] **SoundRecorder** — `SFML::SoundRecorder` (`ext/audio/sound_recorder.c`); subclass and
       implement `#on_process` (and optionally `#on_start`/`#on_stop`)
-- [x] **Music** — `SFML::Music` (`ext/audio/music.c`); file, memory and stream sources, loop points
+- [x] **SoundBufferRecorder** — `SFML::SoundBufferRecorder`
+      (`ext/audio/sound_buffer_recorder.c`); derives from `SoundRecorder`
+- [x] **Music** — `SFML::Music` (`ext/audio/music.c`); derives from `SoundStream`; file, memory and
+      stream sources, loop points
 - [x] **EffectProcessor** — `SFML::SoundSource#effect_processor=`; a Ruby proc is dispatched through
       a bounded pool of C thunks (`ext/audio/effect_processor.c`), because `sfEffectProcessor` has
       no `userData` to identify the source
