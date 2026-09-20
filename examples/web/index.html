@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>sfml3-rb on WebAssembly (headless System + Audio)</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; padding: 1.5rem; font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+         background: #0f1115; color: #d7dae0; }
+  h1 { font: 600 1.1rem/1.4 ui-sans-serif, system-ui, sans-serif; margin: 0 0 .25rem; }
+  .sub { color: #8b929e; margin: 0 0 1rem; font-family: ui-sans-serif, system-ui, sans-serif; }
+  #status { display: inline-block; padding: .15rem .5rem; border-radius: 999px; background: #232833; color: #a9b1bd; }
+  #status.done { background: #14351f; color: #5fd08a; }
+  #status.failed { background: #3a1717; color: #ff7b7b; }
+  pre { margin: 1rem 0 0; padding: 1rem; background: #141821; border: 1px solid #232833;
+        border-radius: 8px; white-space: pre-wrap; word-break: break-word; }
+  .ok { color: #5fd08a; }
+  .pass { color: #7cc4ff; font-weight: 600; }
+  .err { color: #ff7b7b; }
+</style>
+</head>
+<body>
+<h1>sfml3-rb on WebAssembly</h1>
+<p class="sub">headless build: System + Audio only &middot; wasm32-unknown-emscripten &middot; Emscripten 3.1.54</p>
+<p id="status">loading&hellip;</p>
+<pre id="out"></pre>
+
+<script>
+const outEl = document.getElementById('out');
+const statusEl = document.getElementById('status');
+let statusText = '';
+
+function emit(line) {
+  const s = String(line);
+  console.log('[sfml-demo] ' + s);
+  const span = document.createElement('span');
+  if (s.startsWith('ok: ')) span.className = 'ok';
+  else if (s.includes('ALL SFML WASM TESTS PASS')) span.className = 'pass';
+  else if (s.startsWith('ERROR') || s.includes('raise') || s.includes('Error')) span.className = 'err';
+  span.textContent = s + '\n';
+  outEl.appendChild(span);
+}
+
+function setStatus(s) {
+  statusText = s || '';
+  statusEl.textContent = statusText || 'running…';
+}
+
+(async () => {
+  const tests = await (await fetch('tests.rb')).text();
+
+  const RubyModule = {
+    locateFile: (p) => new URL(p, location.href).href,
+    print: emit,
+    printErr: emit,
+    setStatus,
+    arguments: ['--disable-gems', '-I', '/usr/local/lib', '-e', tests],
+  };
+
+  // ruby_stdlib.js (file_packager output) is a classic script that resolves a
+  // bare `Module`, so expose the instance globally before loading it.
+  globalThis.Module = RubyModule;
+  globalThis.__ruby_module = RubyModule;
+
+  await new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'ruby_stdlib.js';
+    s.onload = resolve;
+    s.onerror = () => reject(new Error('failed to load ruby_stdlib.js'));
+    document.head.appendChild(s);
+  });
+
+  // The Emscripten glue (MODULARIZE) assigns its top-level `var Module`. Run it
+  // inside a function so that binding stays local and cannot clobber the
+  // instance object above; its CommonJS export is the module factory.
+  const glueSrc = await (await fetch('ruby.js')).text();
+  const shim = { exports: {} };
+  new Function('module', 'exports', 'require', glueSrc)(shim, shim.exports, undefined);
+  const createRubyModule = shim.exports;
+  if (typeof createRubyModule !== 'function') {
+    throw new Error('Emscripten glue did not export a module factory');
+  }
+
+  setStatus('running…');
+  await createRubyModule(RubyModule);
+  statusEl.classList.add('done');
+  setStatus('done');
+})().catch((e) => {
+  statusEl.classList.remove('done');
+  statusEl.classList.add('failed');
+  setStatus('failed');
+  emit('ERROR: ' + ((e && e.stack) || e));
+});
+</script>
+</body>
+</html>

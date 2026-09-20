@@ -18,6 +18,9 @@ AllCops:
     # library code, and their top-level `include SFML` is the point.
     - 'test/hello-world.rb'
     - 'test/matrix-transformable.rb'
+    # Browser demo: a standalone Ruby script run inside ruby.wasm, written as
+    # top-level assertions for the console/HTML output, not library code.
+    - 'examples/**/*'
 
 # mkmf drives the build through these globals ($INCFLAGS, $LDFLAGS, $libs);
 # an extconf.rb cannot set compiler flags without them.

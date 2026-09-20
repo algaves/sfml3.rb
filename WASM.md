@@ -19,8 +19,8 @@ end if SFML.platform == :wasm
 sources under `ports/build/<target>/SFML-3.0.2/` have no
 `src/SFML/Window/Emscripten/` directory and `cmake/Config.cmake` `FATAL_ERROR`s
 on any OS other than Windows/Linux/BSD/macOS/iOS/Android. This must be added
-(a vendored patch under `ports/patches/`) before anything can link. See the plan
-in the branch history for the full phased port.
+(a vendored patch under `script/wasm/patches/`) before anything can link. See
+the plan in the branch history for the full phased port.
 
 ## Pinned toolchain (validated)
 
@@ -113,6 +113,25 @@ Findings:
   block, matching SFML's own C++ examples.
 - `emscripten_set_main_loop_arg` is available to the extension because the
   Emscripten runtime provides it; no extra library to link.
+
+## Current state: System + Audio reach the browser (validated)
+
+The first working slice is committed on this branch:
+
+- `ext/extconf.rb` builds the wasm source list from `SFML_WASM_PREFIX` (headers
+  only) and defines `SFML_RB_WASM`; `ext/ext.c` and `ext/core/sfml.h` register
+  only the System and device-free Audio bindings under that guard. The
+  audio-thread bindings are excluded because they wrap pthreads.
+- The upstream SFML 3.0.2 / CSFML 3.0.0 Emscripten edits are vendored as
+  `script/wasm/patches/SFML-3.0.2-emscripten.patch` and
+  `script/wasm/patches/CSFML-3.0.0-emscripten.patch` (OS branch plus the
+  `SFML_SYSTEM_EMSCRIPTEN` / `CSFML_SYSTEM_EMSCRIPTEN` macros).
+- `examples/web/` is a browser demo that loads the resulting `ruby.wasm` and
+  runs `tests.rb`. It was verified in headless Chrome 153: every assertion
+  passes and the page prints `ALL SFML WASM TESTS PASS`.
+
+There is still no `Window`/`Graphics`/`Network`, and no `SFML.emscripten_loop`:
+the Emscripten window/GL backend remains the critical path.
 
 ## Open items carried into the implementation milestones
 

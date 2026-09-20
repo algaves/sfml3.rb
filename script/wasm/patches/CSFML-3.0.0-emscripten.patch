@@ -1,0 +1,37 @@
+# Emscripten (WebAssembly) support for the pinned CSFML 3.0.0.
+# Add the OS branch and compiler macro upstream lacks. Apply with:
+#   patch -p1 -d CSFML-3.0.0 < CSFML-3.0.0-emscripten.patch
+
+--- a/cmake/Config.cmake
++++ b/cmake/Config.cmake
+@@ -7,6 +7,8 @@
+     set(SFML_OS_FREEBSD 1)
+ elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+     set(SFML_OS_MACOSX 1)
++elseif(${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
++    set(SFML_OS_EMSCRIPTEN 1)
+ else()
+     message(FATAL_ERROR "Unsupported operating system")
+     return()
+@@ -45,6 +47,6 @@
+ # define the install directory for miscellaneous files
+ if(SFML_OS_WINDOWS)
+     set(INSTALL_MISC_DIR .)
+-elseif(SFML_OS_LINUX OR SFML_OS_FREEBSD OR SFML_OS_MACOSX)
++elseif(SFML_OS_LINUX OR SFML_OS_FREEBSD OR SFML_OS_MACOSX OR SFML_OS_EMSCRIPTEN)
+     set(INSTALL_MISC_DIR share/CSFML)
+ endif()
+--- a/include/CSFML/Config.h
++++ b/include/CSFML/Config.h
+@@ -73,6 +73,11 @@
+ // FreeBSD
+ #define CSFML_SYSTEM_FREEBSD
+ 
++#elif defined(__EMSCRIPTEN__)
++
++// Emscripten
++#define CSFML_SYSTEM_EMSCRIPTEN
++
+ #else
+ 
+ // Unsupported system
