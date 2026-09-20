@@ -2,10 +2,31 @@
 #include <stdio.h>
 
 #include "core/macros.h"
-#include "core/foreign_thread.h"
+
 #include "system/vec2.h"
 #include "system/vec3.h"
 #include "system/time.h"
+#include "system/clock.h"
+#include "system/sleep.h"
+#include "system/buffer.h"
+#include "system/input_stream.h"
+
+#include "audio/audio_enums.h"
+#include "audio/sound_source_cone.h"
+#include "audio/listener.h"
+#include "audio/sound_buffer.h"
+
+// The Emscripten/WebAssembly port (SFML_RB_WASM, set from extconf.rb when
+// SFML_WASM_PREFIX is given) has no SFML window/graphics/network archives to
+// link against, and the audio-thread bindings (Sound/Music/SoundStream/
+// SoundRecorder/effect-processor pool) would drag in pthread-based
+// core/foreign_thread.c, which the browser build cannot provide. Under wasm
+// the extension therefore registers only the System and the remaining
+// device-free Audio bindings. extconf.rb mirrors this exactly in its source
+// list, so every guarded Init_ has a corresponding excluded source file.
+#ifndef SFML_RB_WASM
+#include "core/foreign_thread.h"
+
 #include "graphics/transform.h"
 #include "graphics/drawable.h"
 #include "graphics/color.h"
@@ -15,10 +36,6 @@
 #include "graphics/image.h"
 #include "graphics/texture.h"
 #include "graphics/transformable.h"
-#include "system/clock.h"
-#include "system/sleep.h"
-#include "system/buffer.h"
-#include "system/input_stream.h"
 #include "graphics/target.h"
 #include "graphics/render_state.h"
 #include "window/event.h"
@@ -51,10 +68,6 @@
 #include "graphics/render_window.h"
 #include "graphics/shader.h"
 #include "audio/effect_processor.h"
-#include "audio/audio_enums.h"
-#include "audio/sound_source_cone.h"
-#include "audio/listener.h"
-#include "audio/sound_buffer.h"
 #include "audio/sound.h"
 #include "audio/music.h"
 #include "audio/sound_stream.h"
@@ -69,6 +82,7 @@
 #include "network/socket_selector.h"
 #include "network/http.h"
 #include "network/ftp.h"
+#endif // !SFML_RB_WASM
 
 //  C Naming Convention:
 //
@@ -93,14 +107,22 @@ static VALUE rb_mExt;
 void Init_sfml_ext(void) {
     rb_mExt = rb_define_module("SFML");
 
-    Init_ForeignThread();
-
     Init_Vector2(rb_mExt);
     Init_Vector3(rb_mExt);
     Init_Time(rb_mExt);
     Init_Sleep(rb_mExt);
     Init_Buffer(rb_mExt);
     Init_InputStream(rb_mExt);
+    Init_Clock(rb_mExt);
+
+    Init_AudioEnums(rb_mExt);
+    Init_SoundSourceCone(rb_mExt);
+    Init_Listener(rb_mExt);
+    Init_SoundBuffer(rb_mExt);
+
+#ifndef SFML_RB_WASM
+    Init_ForeignThread();
+
     Init_Color(rb_mExt);
     Init_Rect(rb_mExt);
     Init_BlendMode(rb_mExt);
@@ -110,7 +132,6 @@ void Init_sfml_ext(void) {
     Init_Drawable(rb_mExt);
     Init_Transform(rb_mExt);
     Init_Transformable(rb_mExt);
-    Init_Clock(rb_mExt);
     Init_Target(rb_mExt);
     Init_RenderState(rb_mExt);
     Init_Circle(rb_mExt);
@@ -144,10 +165,6 @@ void Init_sfml_ext(void) {
     Init_Vulkan(rb_mExt);
 
     Init_EffectProcessor();
-    Init_AudioEnums(rb_mExt);
-    Init_SoundSourceCone(rb_mExt);
-    Init_Listener(rb_mExt);
-    Init_SoundBuffer(rb_mExt);
     Init_Sound(rb_mExt);
     Init_Music(rb_mExt);
     Init_SoundStream(rb_mExt);
@@ -163,4 +180,5 @@ void Init_sfml_ext(void) {
     Init_SocketSelector(rb_mExt);
     Init_Http(rb_mExt);
     Init_Ftp(rb_mExt);
+#endif // !SFML_RB_WASM
 }

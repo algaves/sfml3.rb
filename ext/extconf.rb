@@ -3,6 +3,17 @@
 require 'mkmf'
 require_relative 'ports'
 
+# The Emscripten/WebAssembly port (see WASM.md). ruby.wasm builds the extension
+# statically into ruby.wasm: mkmf's `make static` only archives the objects, so
+# SFML/CSFML are needed here for their headers alone. The wasm static archives
+# themselves are injected into the final emcc link by rbwasm through
+# RUBY_WASM_EMCC_LDFLAGS (or a pre-created link.filelist); linking them from
+# this Makefile would only bake host toolchain search paths that the final link
+# never uses. SFML_WASM_PREFIX must point at a prefix that has both the
+# CSFML and SFML wasm headers installed (that is, the merged SFML+CSFML wasm
+# prefix produced by the port build).
+WASM_PREFIX = ENV.fetch('SFML_WASM_PREFIX', nil)
+
 # Warnings are on everywhere: a user's build log is the only diagnostic anyone
 # gets when an install fails on a platform we never tested.
 $CFLAGS = "#{$CFLAGS} -Wall -Wextra -Wno-unused-parameter"
@@ -59,6 +70,11 @@ def use_vendored_ports
   ].join(' ')
 end
 
+def use_wasm_ports
+  $INCFLAGS = "-I#{WASM_PREFIX}/include #{$INCFLAGS}"
+  $defs.push('-DSFML_RB_WASM')
+end
+
 def use_system_csfml
   missing = SYSTEM_CSFML_LIBS.reject { |l| have_library(l) }
   return if missing.empty?
@@ -75,12 +91,16 @@ def use_system_csfml
 end
 
 # Resolution order:
-#   1. --enable-system-libraries -> link a system CSFML 3 (offline-capable)
-#   2. an already-built ports prefix -> reuse it (fast path for development,
+#   1. SFML_WASM_PREFIX -> Emscripten/WebAssembly cross build (headers only;
+#      the SFML/CSFML archives come from the rbwasm final link)
+#   2. --enable-system-libraries -> link a system CSFML 3 (offline-capable)
+#   3. an already-built ports prefix -> reuse it (fast path for development,
 #      and the path cross builds take, since rake-compiler-dock builds the
 #      ports before invoking the extension build)
-#   3. otherwise -> download and build FreeType, SFML 3 and CSFML 3, then link
-if enable_config('system-libraries', ENV.fetch('SFML_USE_SYSTEM_LIBRARIES', nil))
+#   4. otherwise -> download and build FreeType, SFML 3 and CSFML 3, then link
+if WASM_PREFIX
+  use_wasm_ports
+elsif enable_config('system-libraries', ENV.fetch('SFML_USE_SYSTEM_LIBRARIES', nil))
   use_system_csfml
 else
   Ports.build! unless Ports.built?
@@ -117,7 +137,31 @@ end
 # That flattening also means every .c basename must be unique across the whole
 # tree. mkmf enforces it, aborting with "source files duplication", so a
 # collision fails the build loudly rather than dropping a file.
-sources = Dir.glob("#{$srcdir}/**/*.c")
+sources = if WASM_PREFIX
+            # The Emscripten port only builds the System and Audio bindings: upstream
+            # SFML 3.0.2/CSFML 3.0.0 have no Emscripten backend, so the window/graphics/
+            # network archives do not exist to link against. The audio-thread files are
+            # dropped too -- they wrap pthreads via core/foreign_thread.c, and there is no
+            # pthread support in the browser build; SFML::Sound/Music also pull the
+            # effect-processor pool (see ext.c's SFML_RB_WASM guards). ext.c (the entry
+            # point, Init_sfml_ext) lives at the top level and is not covered by any
+            # subsystem glob, so it is listed explicitly.
+            [File.join($srcdir, 'ext.c')] +
+              (Dir.glob("#{$srcdir}/core/**/*.c") +
+               Dir.glob("#{$srcdir}/system/**/*.c") +
+               Dir.glob("#{$srcdir}/audio/**/*.c")) -
+              %w[
+                core/foreign_thread.c
+                audio/effect_processor.c
+                audio/sound.c
+                audio/music.c
+                audio/sound_stream.c
+                audio/sound_buffer_recorder.c
+                audio/sound_recorder.c
+              ].map { |f| File.join($srcdir, f) }
+          else
+            Dir.glob("#{$srcdir}/**/*.c")
+          end
 $srcs = sources
 $VPATH.concat(
   sources.map { |file| File.dirname(file) }
