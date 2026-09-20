@@ -63,6 +63,8 @@ Gem::Specification.new do |s|
             ['.yardopts'] +
             Dir.glob('lib/**/*.rb') +
             Dir.glob('sig/**/*.rbs') +
+            Dir.glob('examples/**/*.rb') +
+            Dir.glob('examples/**/*.md') +
             docs
 
   s.extra_rdoc_files = docs

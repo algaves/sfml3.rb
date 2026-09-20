@@ -120,9 +120,11 @@ end
 
 Event types are strings (`'closed'`, `'resized'`, `'key-pressed'`, ...); keys and buttons are enums.
 
-See [`test/hello-world.rb`](test/hello-world.rb) for a fuller example with shapes and transforms,
-and [`test/matrix-transformable.rb`](test/matrix-transformable.rb) for a visual demo. Neither is
-part of the test suite.
+See [`examples/hello_shapes.rb`](examples/hello_shapes.rb) for a minimal walkthrough of the five
+building blocks (window, events, transformables, drawables, primitive shapes), and
+[`examples/bouncing_shapes.rb`](examples/bouncing_shapes.rb) for an interactive take on the same
+components. [`examples/README.md`](examples/README.md) documents how they compose. Both need a
+display (`xvfb-run -a` headlessly) and are not part of the test suite.
 
 ## Documentation
 

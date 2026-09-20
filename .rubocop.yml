@@ -14,16 +14,23 @@ AllCops:
     - 'tmp/**/*'
     - 'ports/**/*'
     - 'vendor/**/*'
-    # Interactive demos, not part of `rake test`; they read as scripts, not
-    # library code, and their top-level `include SFML` is the point.
-    - 'test/hello-world.rb'
-    - 'test/matrix-transformable.rb'
 
 # mkmf drives the build through these globals ($INCFLAGS, $LDFLAGS, $libs);
 # an extconf.rb cannot set compiler flags without them.
 Style/GlobalVars:
   Exclude:
     - 'ext/extconf.rb'
+
+# Examples are runnable scripts, not library code: a top-level `include SFML`
+# and the window -> poll -> case -> branch render loop are both the point, so
+# the mixin and block-nesting cops do not apply.
+Style/MixinUsage:
+  Exclude:
+    - 'examples/**/*'
+
+Metrics/BlockNesting:
+  Exclude:
+    - 'examples/**/*'
 
 # Test methods legitimately run long: a round-trip check is a linear sequence of
 # assertions, and splitting one into helpers to satisfy a line count makes the
