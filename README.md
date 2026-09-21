@@ -15,7 +15,7 @@ Latest release: **0.3.1**, bound against **CSFML 3**.
 ## Features
 
 * **Broad coverage of SFML 3**, bound through CSFML: windows and events, graphics, audio, network,
-  and the system layer, with every `sf*` entry point tracked in [TODO.md](TODO.md).
+  and the system layer, with every `sf*` entry point tracked in [ROADMAP.md](ROADMAP.md).
 * **Precompiled binary gems** for common platforms, with FreeType, SFML 3 and CSFML 3 statically
   linked in — no toolchain and nothing to install system-wide.
 * **A source fallback everywhere else**, which downloads and builds the pinned, checksum-verified
@@ -218,8 +218,13 @@ kind has a predicate — `event.closed?`, `event.key_pressed?`, `event.mouse_mov
 See [`examples/hello_shapes.rb`](examples/hello_shapes.rb) for a minimal walkthrough of the five
 building blocks (window, events, transformables, drawables, primitive shapes), and
 [`examples/bouncing_shapes.rb`](examples/bouncing_shapes.rb) for an interactive take on the same
-components. [`examples/README.md`](examples/README.md) documents how they compose. Both need a
-display (`xvfb-run -a` headlessly) and are not part of the test suite.
+components. [`examples/subsystems/`](examples/subsystems) has one demo per module (Listener, GLSL,
+Clipboard, Joystick, Keyboard, Mouse, Sensor, Touch, Vulkan, window styles, DNS, audio devices, and
+sprites/textures/images), and [`examples/games/`](examples/games) has eleven playable games --
+Snake, Breakout, Asteroids, Platformer, Tron, Flappy Bird, Doodle Jump, Xonix, Tetris, Racing and
+Chess -- plus a small GUI toolkit (`examples/menu.rb`) and a control-panel demo. [`examples/README.md`](examples/README.md)
+documents them all. They need a display (`xvfb-run -a` headlessly), run without interacting when
+`SFML_EXAMPLE_FRAMES` is set, and are not part of the test suite.
 
 ## Documentation
 
@@ -230,7 +235,8 @@ display (`xvfb-run -a` headlessly) and are not part of the test suite.
   RBS-aware editors. `rake rbs` validates the signatures and `rake steep` type-checks `lib/`
   against them.
 * [CHANGELOG.md](CHANGELOG.md) — what changed in each release.
-* [TODO.md](TODO.md) — module-by-module porting coverage and what is deliberately unbound.
+* [ROADMAP.md](ROADMAP.md) — module-by-module porting coverage, what is deliberately unbound, and
+  the SFML 3.1.0 elements still pending upstream.
 
 ### IDE setup (RubyMine)
 

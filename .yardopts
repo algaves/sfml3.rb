@@ -6,5 +6,5 @@ ext/**/*.c
 lib/**/*.rb
 -
 CHANGELOG.md
-TODO.md
+ROADMAP.md
 LICENSE.md

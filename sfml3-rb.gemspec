@@ -41,9 +41,10 @@ Gem::Specification.new do |s|
     'rubygems_mfa_required' => 'true'
   }
 
-  # TODO.md ships because it is the module-by-module record of what is actually
-  # bound, which is what someone needs to decide whether this gem covers them.
-  docs = %w[README.md CHANGELOG.md LICENSE.md TODO.md]
+  # ROADMAP.md ships because it is the module-by-module record of what is actually
+  # bound, plus the SFML 3.1.0 elements still pending upstream, which is what someone
+  # needs to decide whether this gem covers them.
+  docs = %w[README.md CHANGELOG.md LICENSE.md ROADMAP.md]
 
   # Globbed rather than taken from `git ls-files`: packaging stays independent of
   # git and of the checkout's state, which matters because `rake gem` also runs
@@ -65,6 +66,7 @@ Gem::Specification.new do |s|
             Dir.glob('sig/**/*.rbs') +
             Dir.glob('examples/**/*.rb') +
             Dir.glob('examples/**/*.md') +
+            Dir.glob('examples/**/*.{ttf,wav,txt,png}') +
             docs
 
   s.extra_rdoc_files = docs
