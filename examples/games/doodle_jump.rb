@@ -28,7 +28,6 @@ end
 
 window = Window.new(VideoMode.new(WIDTH, HEIGHT, 32), 'SFML doodle jump')
 window.frame_rate = 60
-event = Event.new
 bounce_sound = ExampleSupport.sound('jump', volume: 45)
 spring_sound = ExampleSupport.sound('shoot', volume: 45)
 fall_sound = ExampleSupport.sound('explode', volume: 50)
@@ -77,12 +76,12 @@ end
 start.call
 
 loop do
-  while window.poll_event!(event)
+  window.poll_events! do |event|
     case event.type
     when 'closed'
       window.close!
     when 'key-pressed'
-      key = event.key[:code]
+      key = event.code
       if key == :escape
         window.close!
       elsif state == :game_over && key == :r
@@ -92,10 +91,10 @@ loop do
   end
 
   if state == :playing
-    dx = -MOVE if Keyboard.pressed?(:Left) || Keyboard.pressed?(:a)
-    dx = MOVE if Keyboard.pressed?(:Right) || Keyboard.pressed?(:d)
-    dx *= 0.9 unless Keyboard.pressed?(:Left) || Keyboard.pressed?(:a) ||
-                     Keyboard.pressed?(:Right) || Keyboard.pressed?(:d)
+    dx = -MOVE if Keyboard.key_pressed?(:Left) || Keyboard.key_pressed?(:a)
+    dx = MOVE if Keyboard.key_pressed?(:Right) || Keyboard.key_pressed?(:d)
+    dx *= 0.9 unless Keyboard.key_pressed?(:Left) || Keyboard.key_pressed?(:a) ||
+                     Keyboard.key_pressed?(:Right) || Keyboard.key_pressed?(:d)
     facing = -1 if dx.negative?
     facing = 1 if dx.positive?
 
@@ -117,10 +116,10 @@ loop do
 
       if platform[:spring]
         dy = -SPRING_BOUNCE
-        spring_sound.play
+        spring_sound.play!
       else
         dy = -BOUNCE
-        bounce_sound.play
+        bounce_sound.play!
       end
       platform[:gone] = true if platform[:kind] == :breakable
       break
@@ -141,7 +140,7 @@ loop do
     platforms.reject! { |platform| platform[:y] > camera.center.y + (HEIGHT / 2) - 40 }
 
     if doodler.position.y > camera.center.y + (HEIGHT / 2) + 40
-      fall_sound.play
+      fall_sound.play!
       best = [best, score].max
       state = :game_over
     end
@@ -150,7 +149,7 @@ loop do
   doodler.scale = [3 * facing, 3]
 
   window.view = camera
-  window.clear([36, 46, 70, 255])
+  window.clear!([36, 46, 70, 255])
 
   platforms.each do |platform|
     next if platform[:gone]
@@ -180,7 +179,7 @@ loop do
                                     size: 24, position: [70, 280]))
   end
 
-  window.display
+  window.display!
   frame += 1
   break if ExampleSupport.auto_close?(frame)
 end

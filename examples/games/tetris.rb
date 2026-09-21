@@ -215,7 +215,6 @@ end
 
 window = Window.new(VideoMode.new(BOARD_W + SIDEBAR, BOARD_H + HUD, 32), 'SFML tetris')
 window.frame_rate = 60
-event = Event.new
 clock = Clock.new
 rotate_sound = ExampleSupport.sound('beep', volume: 30)
 clear_sound = ExampleSupport.sound('eat', volume: 45)
@@ -243,12 +242,12 @@ def draw_cell(window, sprite_name, column, row, alpha = 255)
 end
 
 loop do
-  while window.poll_event!(event)
+  window.poll_events! do |event|
     case event.type
     when 'closed'
       window.close!
     when 'key-pressed'
-      key = event.key[:code]
+      key = event.code
       if key == :escape
         window.close!
       else
@@ -257,8 +256,8 @@ loop do
         when :Left then game.move(-1)
         when :Right then game.move(1)
         when :Down then game.soft_drop
-        when :Up, :x then rotate_sound.play if game.rotate(1)
-        when :z then rotate_sound.play if game.rotate(-1)
+        when :Up, :x then rotate_sound.play! if game.rotate(1)
+        when :z then rotate_sound.play! if game.rotate(-1)
         when :Space then game.hard_drop
         when :c then game.hold
         when :p then game.toggle_pause
@@ -267,11 +266,11 @@ loop do
     end
   end
 
-  window.clear([12, 14, 22, 255])
+  window.clear!([12, 14, 22, 255])
 
   game.update(clock.restart!.as_seconds)
-  clear_sound.play if game.lines > last_lines
-  over_sound.play if game.state == :game_over && last_game_state != :game_over
+  clear_sound.play! if game.lines > last_lines
+  over_sound.play! if game.state == :game_over && last_game_state != :game_over
   last_lines = game.lines
   last_game_state = game.state
 
@@ -326,7 +325,7 @@ loop do
     window.draw(ExampleSupport.text('PAUSED -- P resumes', size: 24, position: [40, HUD + (BOARD_H / 2)]))
   end
 
-  window.display
+  window.display!
   frame += 1
   break if ExampleSupport.auto_close?(frame)
 end

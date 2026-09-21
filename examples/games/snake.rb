@@ -137,7 +137,6 @@ end
 
 window = Window.new(VideoMode.new(COLS * CELL, (ROWS * CELL) + 30, 32), 'SFML snake')
 window.frame_rate = 60
-event = Event.new
 game = Snake.new
 hud = ExampleSupport.text('', size: 16, position: [8, (ROWS * CELL) + 5])
 eat_sound = ExampleSupport.sound('eat')
@@ -146,12 +145,12 @@ frame = 0
 
 loop do
   restart = false
-  while window.poll_event!(event)
+  window.poll_events! do |event|
     case event.type
     when 'closed'
       window.close!
     when 'key-pressed'
-      key = event.key[:code]
+      key = event.code
       window.close! if key == :escape
       restart = true if key == :r
       direction = DIRECTIONS[key]
@@ -161,14 +160,14 @@ loop do
   game.reset if restart
 
   result = game.update
-  eat_sound.play if result == :ate
-  death_sound.play if result == :dead
+  eat_sound.play! if result == :ate
+  death_sound.play! if result == :dead
 
   hud.string = game.to_hud
-  window.clear([18, 22, 30, 255])
+  window.clear!([18, 22, 30, 255])
   game.draw(window)
   window.draw(hud)
-  window.display
+  window.display!
 
   frame += 1
   break if ExampleSupport.auto_close?(frame)

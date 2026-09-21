@@ -97,7 +97,6 @@ end
 
 window = Window.new(VideoMode.new(WIDTH, HEIGHT, 32), 'SFML racing')
 window.frame_rate = 60
-event = Event.new
 clock = Clock.new
 camera = View.new
 camera.size = [WIDTH, HEIGHT]
@@ -121,12 +120,12 @@ end
 start_race.call(false)
 
 loop do
-  while window.poll_event!(event)
+  window.poll_events! do |event|
     case event.type
     when 'closed'
       window.close!
     when 'key-pressed'
-      case event.key[:code]
+      case event.code
       when :escape then window.close!
       when :m then start_race.call(!cars[1].ai)
       when :r then start_race.call(cars[1].ai)
@@ -142,18 +141,18 @@ loop do
       throttle, turn = ai_controls(car)
     elsif index.zero?
       throttle = 0.0
-      throttle = 1.0 if Keyboard.pressed?(:Up)
-      throttle = -1.0 if Keyboard.pressed?(:Down)
+      throttle = 1.0 if Keyboard.key_pressed?(:Up)
+      throttle = -1.0 if Keyboard.key_pressed?(:Down)
       turn = 0.0
-      turn -= 1.0 if Keyboard.pressed?(:Left)
-      turn += 1.0 if Keyboard.pressed?(:Right)
+      turn -= 1.0 if Keyboard.key_pressed?(:Left)
+      turn += 1.0 if Keyboard.key_pressed?(:Right)
     else
       throttle = 0.0
-      throttle = 1.0 if Keyboard.pressed?(:w)
-      throttle = -1.0 if Keyboard.pressed?(:s)
+      throttle = 1.0 if Keyboard.key_pressed?(:w)
+      throttle = -1.0 if Keyboard.key_pressed?(:s)
       turn = 0.0
-      turn -= 1.0 if Keyboard.pressed?(:a)
-      turn += 1.0 if Keyboard.pressed?(:d)
+      turn -= 1.0 if Keyboard.key_pressed?(:a)
+      turn += 1.0 if Keyboard.key_pressed?(:d)
     end
     steer_car(car, throttle, turn, delta)
     advance_checkpoints(car)
@@ -163,7 +162,7 @@ loop do
   camera.center = [leader.x, leader.y]
 
   window.view = camera
-  window.clear([44, 90, 52, 255])
+  window.clear!([44, 90, 52, 255])
 
   background = RectangleShape.new([4000, 3000])
   background.origin = [2000, 1500]
@@ -210,7 +209,7 @@ loop do
     window.draw(big)
   end
 
-  window.display
+  window.display!
   frame += 1
   break if ExampleSupport.auto_close?(frame)
 end

@@ -163,7 +163,6 @@ end
 
 window = Window.new(VideoMode.new(COLS * CELL, (ROWS * CELL) + HUD, 32), 'SFML tron')
 window.frame_rate = 60
-event = Event.new
 clock = Clock.new
 crash_sound = ExampleSupport.sound('explode', volume: 45)
 score_sound = ExampleSupport.sound('beep', volume: 45)
@@ -177,12 +176,12 @@ last_state = nil
 clock.restart!
 
 loop do
-  while window.poll_event!(event)
+  window.poll_events! do |event|
     case event.type
     when 'closed'
       window.close!
     when 'key-pressed'
-      key = event.key[:code]
+      key = event.code
       if key == :escape
         window.close!
       elsif key == :m
@@ -202,12 +201,12 @@ loop do
     end
   end
 
-  window.clear([10, 12, 20, 255])
+  window.clear!([10, 12, 20, 255])
 
   game.update(clock.restart!.as_seconds)
   total = game.score.sum
-  score_sound.play if total > last_total
-  crash_sound.play if game.state == :round_over && last_state != :round_over
+  score_sound.play! if total > last_total
+  crash_sound.play! if game.state == :round_over && last_state != :round_over
   last_total = total
   last_state = game.state
 
@@ -226,7 +225,7 @@ loop do
                end
   window.draw(hud)
 
-  window.display
+  window.display!
   frame += 1
   break if ExampleSupport.auto_close?(frame)
 end

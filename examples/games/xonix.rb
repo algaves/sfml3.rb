@@ -214,7 +214,6 @@ end
 
 window = Window.new(VideoMode.new(COLS * CELL, (ROWS * CELL) + HUD, 32), 'SFML xonix')
 window.frame_rate = 60
-event = Event.new
 clock = Clock.new
 death_sound = ExampleSupport.sound('explode', volume: 45)
 fill_sound = ExampleSupport.sound('beep', volume: 40)
@@ -227,12 +226,12 @@ last_game_state = nil
 clock.restart!
 
 loop do
-  while window.poll_event!(event)
+  window.poll_events! do |event|
     case event.type
     when 'closed'
       window.close!
     when 'key-pressed'
-      key = event.key[:code]
+      key = event.code
       if key == :escape
         window.close!
       elsif key == :r
@@ -244,27 +243,27 @@ loop do
     end
   end
 
-  window.clear([8, 10, 16, 255])
+  window.clear!([8, 10, 16, 255])
 
   direction = nil
-  direction = [0, -1] if Keyboard.pressed?(:Up)
-  direction = [0, 1] if Keyboard.pressed?(:Down)
-  direction = [-1, 0] if Keyboard.pressed?(:Left)
-  direction = [1, 0] if Keyboard.pressed?(:Right)
+  direction = [0, -1] if Keyboard.key_pressed?(:Up)
+  direction = [0, 1] if Keyboard.key_pressed?(:Down)
+  direction = [-1, 0] if Keyboard.key_pressed?(:Left)
+  direction = [1, 0] if Keyboard.key_pressed?(:Right)
 
   game.update(clock.restart!.as_seconds, direction)
   game.draw(window)
 
-  death_sound.play if game.lives < last_lives
+  death_sound.play! if game.lives < last_lives
   last_lives = game.lives
-  fill_sound.play if game.state == :won && last_game_state != :won
+  fill_sound.play! if game.state == :won && last_game_state != :won
   last_game_state = game.state
 
   hud.string = "filled #{game.score_percent}%   lives #{game.lives}   " \
                "#{game.state == :playing ? 'arrows carve, escape quits' : game.state.to_s.upcase}"
   window.draw(hud)
 
-  window.display
+  window.display!
   frame += 1
   break if ExampleSupport.auto_close?(frame)
 end

@@ -66,7 +66,7 @@ def handle_hits(game, boom_sound)
 
     rock = game[:asteroids].delete_at(index)
     game[:score] += SCORES[rock[:size]]
-    boom_sound.play
+    boom_sound.play!
     split(game, rock) unless rock[:size] == :small
     true
   end
@@ -108,7 +108,6 @@ end
 
 window = Window.new(VideoMode.new(WIDTH, HEIGHT, 32), 'SFML asteroids')
 window.frame_rate = 60
-event = Event.new
 hud = ExampleSupport.text('', size: 16, position: [10, 8])
 shoot_sound = ExampleSupport.sound('shoot')
 boom_sound = ExampleSupport.sound('explode')
@@ -129,12 +128,12 @@ reset.call
 
 loop do
   restart = false
-  while window.poll_event!(event)
+  window.poll_events! do |event|
     case event.type
     when 'closed'
       window.close!
     when 'key-pressed'
-      key = event.key[:code]
+      key = event.code
       window.close! if key == :escape
       restart = true if key == :r
       if key == :Space && game[:state] == :playing
@@ -142,7 +141,7 @@ loop do
         radians = ship[:angle] * Math::PI / 180
         game[:bullets] << { x: ship[:x], y: ship[:y], vx: (Math.cos(radians) * 9) + ship[:vx],
                             vy: (Math.sin(radians) * 9) + ship[:vy], life: 70 }
-        shoot_sound.play
+        shoot_sound.play!
       end
     end
   end
@@ -151,13 +150,13 @@ loop do
   ship = game[:ship]
 
   if game[:state] == :playing
-    ship[:angle] -= 4.5 if Keyboard.pressed?(:Left)
-    ship[:angle] += 4.5 if Keyboard.pressed?(:Right)
-    if Keyboard.pressed?(:Up)
+    ship[:angle] -= 4.5 if Keyboard.key_pressed?(:Left)
+    ship[:angle] += 4.5 if Keyboard.key_pressed?(:Right)
+    if Keyboard.key_pressed?(:Up)
       radians = ship[:angle] * Math::PI / 180
       ship[:vx] += Math.cos(radians) * 0.16
       ship[:vy] += Math.sin(radians) * 0.16
-      thump_sound.play if (frame % 8).zero?
+      thump_sound.play! if (frame % 8).zero?
     end
     ship[:vx] *= 0.992
     ship[:vy] *= 0.992
@@ -179,7 +178,7 @@ loop do
     if game[:asteroids].empty?
       game[:state] = :won
     elsif ship_hit?(ship, game[:asteroids]) && ship[:invulnerable] <= 0
-      boom_sound.play
+      boom_sound.play!
       game[:lives] -= 1
       if game[:lives].zero?
         game[:state] = :game_over
@@ -191,14 +190,14 @@ loop do
     end
   end
 
-  window.clear([12, 14, 22, 255])
+  window.clear!([12, 14, 22, 255])
   game[:asteroids].each { |rock| draw_asteroid(window, rock) }
   game[:bullets].each { |bullet| draw_bullet(window, bullet) }
   draw_ship(window, ship) if game[:state] == :playing && (!ship[:invulnerable].positive? || (frame % 10 < 5))
   hud.string = "score #{game[:score]}   lives #{game[:lives]}   rocks #{game[:asteroids].length}   " \
                "#{game[:state] == :playing ? 'arrows thrust/rotate, space fires' : game[:state].to_s.upcase}"
   window.draw(hud)
-  window.display
+  window.display!
 
   frame += 1
   break if ExampleSupport.auto_close?(frame)
