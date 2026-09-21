@@ -2,15 +2,16 @@
 
 require_relative 'test_helper'
 
-# The pure-Ruby idiomatic sugar layer (lib/sfml/sugar.rb): predicate (`?`) and
-# mutator (`!`) spellings, block helpers, and the deprecated aliases that keep
-# the pre-sugar names working. Hardware-free where possible: `allocate` gives
-# window objects whose Ruby-only methods can run without a display.
-class SugarTest < Minitest::Test
+# The pure-Ruby Rubyesque (Matz-like) layer (lib/sfml/rubyesque.rb): predicate
+# (`?`) and mutator (`!`) spellings, block helpers, and the deprecated aliases
+# that keep the pre-Rubyesque names working. Hardware-free where possible:
+# `allocate` gives window objects whose Ruby-only methods can run without a
+# display.
+class RubyesqueTest < Minitest::Test
   include SFML
   include SFMLTestHelpers
 
-  def test_window_classes_expose_the_primary_sugar_names
+  def test_window_classes_expose_the_primary_rubyesque_names
     %i[open? focused? visible? request_focus! poll_events!].each do |name|
       assert_includes WindowBase.instance_methods, name, "#{name} missing from WindowBase"
     end
@@ -24,7 +25,7 @@ class SugarTest < Minitest::Test
     assert_includes RenderWindow.instance_methods, :render!
   end
 
-  def test_window_sugar_wins_over_the_deprecated_names
+  def test_window_rubyesque_names_win_over_the_deprecated_names
     assert_equal WindowBase, WindowBase.instance_method(:open?).owner
     assert_equal Window, Window.instance_method(:open?).owner
     assert_equal Window, RenderWindow.instance_method(:open?).owner
@@ -67,7 +68,7 @@ class SugarTest < Minitest::Test
     assert_respond_to SoundBufferRecorder, :record!
   end
 
-  def test_device_modules_expose_the_sugar
+  def test_device_modules_expose_the_rubyesque_names
     assert_respond_to Sensor, :enable!
     assert_respond_to Sensor, :disable!
     assert_respond_to Joystick, :axis?
@@ -89,8 +90,8 @@ class SugarTest < Minitest::Test
     assert_respond_to Clipboard, :has_text?
     assert_respond_to Clipboard, :clear!
 
-    Clipboard.content = 'sfml sugar'
-    assert_equal 'sfml sugar', Clipboard.content
+    Clipboard.content = 'sfml rubyesque'
+    assert_equal 'sfml rubyesque', Clipboard.content
     assert Clipboard.has_text?
 
     Clipboard.clear!

@@ -24,7 +24,7 @@ class AudioTest < Minitest::Test
   def test_sound_source_carries_the_shared_playback_predicates
     # The native surface is generated per concrete subclass from
     # ext/audio/sound_source.inc, because each dispatches to a different CSFML
-    # entry point. The idiomatic predicates are the one shared addition: they
+    # entry point. The Rubyesque predicates are the one shared addition: they
     # read #status, which every concrete subclass provides.
     %i[playing? paused? stopped?].each do |name|
       assert_includes SoundSource.instance_methods(false), name, "#{name} missing from SoundSource"

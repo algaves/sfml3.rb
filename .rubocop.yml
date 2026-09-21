@@ -96,7 +96,7 @@ Metrics/AbcSize:
     - 'test/**/*'
     - 'ext/extconf.rb'
     - 'ext/ports.rb'
-    - 'lib/sfml/sugar.rb'
+    - 'lib/sfml/rubyesque.rb'
     - 'examples/**/*'
     - 'script/**/*'
 
@@ -105,7 +105,7 @@ Metrics/MethodLength:
     - 'test/**/*'
     - 'ext/extconf.rb'
     - 'ext/ports.rb'
-    - 'lib/sfml/sugar.rb'
+    - 'lib/sfml/rubyesque.rb'
     - 'examples/**/*'
     - 'script/**/*'
 
@@ -115,17 +115,17 @@ Metrics/ClassLength:
     - 'examples/**/*'
     - 'script/**/*'
 
-# lib/sfml/sugar.rb reopens every class it sugars and so reads as one long
+# lib/sfml/rubyesque.rb reopens every class it extends and so reads as one long
 # module; the same reason ext/ports.rb is exempt.
 Metrics/ModuleLength:
   Exclude:
     - 'ext/ports.rb'
-    - 'lib/sfml/sugar.rb'
+    - 'lib/sfml/rubyesque.rb'
     - 'examples/**/*'
     - 'script/**/*'
 
-# The sugar layer deliberately keeps the pre-existing spellings alive as
-# deprecated aliases, which trip the is_/has_ predicate-prefix rule.
+# The Rubyesque (Matz-like) layer deliberately keeps the pre-existing spellings
+# alive as deprecated aliases, which trip the is_/has_ predicate-prefix rule.
 Naming/PredicatePrefix:
   AllowedMethods:
     - is_a?
