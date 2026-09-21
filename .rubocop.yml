@@ -1,3 +1,12 @@
+# Merge `Exclude` lists with RuboCop's defaults instead of replacing them.
+# Without this, naming `examples/**/*` as an exclusion for a cop (say
+# Metrics/BlockLength) would silently drop that cop's built-in defaults
+# (`**/*.gemspec`, `Rakefile`, ...) and start flagging files the stock config
+# ignores.
+inherit_mode:
+  merge:
+    - Exclude
+
 AllCops:
   TargetRubyVersion: 3.1
   NewCops: enable
@@ -21,16 +30,59 @@ Style/GlobalVars:
   Exclude:
     - 'ext/extconf.rb'
 
-# Examples are runnable scripts, not library code: a top-level `include SFML`
-# and the window -> poll -> case -> branch render loop are both the point, so
-# the mixin and block-nesting cops do not apply.
+# Examples are runnable scripts, not library code: a top-level `include SFML`,
+# the window -> poll -> case -> branch render loop, and single-file games whose
+# update/draw methods are honestly long are all the point. Holding them to the
+# library's metric and documentation cops would only contort them.
 Style/MixinUsage:
   Exclude:
     - 'examples/**/*'
+    - 'script/**/*'
+
+Style/Documentation:
+  Exclude:
+    - 'examples/**/*'
+    - 'script/**/*'
+
+Naming/MethodParameterName:
+  Exclude:
+    - 'examples/**/*'
+    - 'script/**/*'
+
+Naming/PredicateMethod:
+  Exclude:
+    - 'examples/**/*'
+    - 'script/**/*'
+
+Metrics/ParameterLists:
+  Exclude:
+    - 'examples/**/*'
+    - 'script/**/*'
+
+Lint/ConstantDefinitionInBlock:
+  Exclude:
+    - 'examples/**/*'
+    - 'script/**/*'
 
 Metrics/BlockNesting:
   Exclude:
     - 'examples/**/*'
+    - 'script/**/*'
+
+Metrics/BlockLength:
+  Exclude:
+    - 'examples/**/*'
+    - 'script/**/*'
+
+Metrics/CyclomaticComplexity:
+  Exclude:
+    - 'examples/**/*'
+    - 'script/**/*'
+
+Metrics/PerceivedComplexity:
+  Exclude:
+    - 'examples/**/*'
+    - 'script/**/*'
 
 # Test methods legitimately run long: a round-trip check is a linear sequence of
 # assertions, and splitting one into helpers to satisfy a line count makes the
@@ -44,17 +96,25 @@ Metrics/AbcSize:
     - 'test/**/*'
     - 'ext/extconf.rb'
     - 'ext/ports.rb'
+    - 'examples/**/*'
+    - 'script/**/*'
 
 Metrics/MethodLength:
   Exclude:
     - 'test/**/*'
     - 'ext/extconf.rb'
     - 'ext/ports.rb'
+    - 'examples/**/*'
+    - 'script/**/*'
 
 Metrics/ClassLength:
   Exclude:
     - 'test/**/*'
+    - 'examples/**/*'
+    - 'script/**/*'
 
 Metrics/ModuleLength:
   Exclude:
     - 'ext/ports.rb'
+    - 'examples/**/*'
+    - 'script/**/*'
