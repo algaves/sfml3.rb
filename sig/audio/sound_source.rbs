@@ -1,6 +1,11 @@
 module SFML
-  # The common base of the playable audio classes. Its surface is generated per
-  # concrete class from ext/audio/sound_source.inc, so it declares no methods.
+  # The common base of the playable audio classes. Its native surface is
+  # generated per concrete class from ext/audio/sound_source.inc; the idiomatic
+  # predicates below are defined once in Ruby and shared by all of them.
   class SoundSource
+    def status: () -> (:stopped | :paused | :playing)
+    def playing?: () -> bool
+    def paused?: () -> bool
+    def stopped?: () -> bool
   end
 end

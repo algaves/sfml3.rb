@@ -7,6 +7,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ## [Unreleased]
 
 ### Added
+* **An idiomatic pure-Ruby sugar layer** (`lib/sfml/sugar.rb`), loaded by `require 'sfml'`.
+  Predicate methods end in `?` (`window.open?`, `window.focused?`, `window.visible?`,
+  `sound.playing?`, `Keyboard.key_pressed?`, `Clipboard.has_text?`), state-changing methods end
+  in `!` (`window.close!`, `clear!`, `display!`, `play!`, `pause!`, `stop!`), and block-scoped
+  helpers manage resources: `RenderWindow.open`, `window.poll_events!`, `window.render!`,
+  `SoundBufferRecorder.record!` and `Clock.measure`. Event kinds gain predicates
+  (`event.closed?`, `event.key_pressed?`, ...) and `event.code` is the `event.key[:code]`
+  shortcut.
 * **The graphics and audio class hierarchies now mirror SFML 3's own.** `SFML::Shape` is the base
   of `SFML::CircleShape`, `SFML::RectangleShape` and `SFML::ConvexShape`; `SFML::Sprite` and
   `SFML::Text` are `SFML::Transformable`; and `SFML::Sound`, `SFML::SoundStream` and `SFML::Music`
@@ -14,6 +22,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   `SFML::SoundBufferRecorder < SFML::SoundRecorder`.
 
 ### Changed
+* **The idiomatic names are now primary**, with the pre-sugar spellings kept as deprecated
+  aliases that warn: `is_open?`, `focus?`, `request_focus`, `clear`, `display`,
+  `play`/`pause`/`stop`, `Keyboard.pressed?`, `Joystick.has_axis?`, `Clipboard.string`/`string=`
+  and `SFML.sleep`. Code written against the old names keeps working unchanged.
 * **`SFML::Transformable` is now a module**, mixed into `Sprite`, `Text` and `Shape`, rather than a
   class. The position/rotation/scale/origin surface is implemented once and dispatched to each
   class's concrete CSFML entry point, replacing thirteen duplicated copies. `Transformable.new`
@@ -21,6 +33,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   preserved.
 * **`SFML::Circle` is now `SFML::CircleShape`**, matching SFML's class name and its siblings. The
   old `SFML::Circle` name remains as a constant alias.
+
+### Deprecated
+* The pre-sugar method names listed under **Changed**. They behave exactly as before and print a
+  one-line warning pointing at the replacement; they will be removed in a future major release.
 
 ## [0.3.1] - 2026-09-19
 

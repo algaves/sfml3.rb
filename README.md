@@ -31,6 +31,7 @@ Latest release: **0.3.1**, bound against **CSFML 3**.
 
 * [Installation](#installation)
 * [Quick Start](#quick-start)
+* [Idiomatic Ruby sugar](#idiomatic-ruby-sugar)
 * [Documentation](#documentation)
 * [Development](#development)
 * [Contributing](#contributing)
@@ -108,17 +109,111 @@ include SFML
 window = Window.new VideoMode.new(640, 480, 32), 'SFML'
 event  = Event.new
 
-while window.is_open?
+while window.open?
   while window.poll_event! event
-    window.close! if event.type == 'closed'
+    window.close! if event.closed?
   end
 
-  window.clear [51, 76, 102, 255] # [r, g, b, a], 0-255
-  window.display
+  window.clear! [51, 76, 102, 255] # [r, g, b, a], 0-255
+  window.display!
 end
 ```
 
-Event types are strings (`'closed'`, `'resized'`, `'key-pressed'`, ...); keys and buttons are enums.
+The idiomatic spellings (`open?`, `clear!`, `display!`, ...) are pure-Ruby sugar over the
+native API. The names that shipped before them (`is_open?`, `clear`, `display`, ...) still
+work but warn that they are deprecated.
+
+## Idiomatic Ruby sugar
+
+`lib/sfml/sugar.rb` layers idiomatic Ruby on top of the raw CSFML binding: predicate methods
+end in `?`, methods that change state end in `!`, and block-scoped helpers handle setup and
+teardown. Nothing is lost — the native surface is still there, unchanged.
+
+### Windows: scoped setup, block events, scoped frames
+
+```ruby
+# The window is closed automatically when the block returns or raises.
+RenderWindow.open(VideoMode.new(640, 480, 32), 'Game Title') do |window|
+  window.poll_events! do |event|          # yields every pending event
+    window.close! if event.closed?
+    puts "Key pressed: #{event.code}" if event.key_pressed?
+  end
+
+  window.render!(clear_color: Color::BLACK) do |target|
+    target.draw sprite
+    target.draw text
+  end
+end
+```
+
+`poll_events!` returns an `Enumerator` without a block; `render!` clears, yields the window,
+then presents. `window.open?`, `window.focused?` and `window.visible?` are the predicates.
+
+### Audio: predicates, banged playback, scoped recording
+
+```ruby
+music.play! if music.stopped?
+music.pause! if music.playing? && pause_condition
+
+if sound.playing? || sound.paused?
+  sound.stop!
+end
+
+# Records until the block returns and returns the resulting SoundBuffer.
+buffer = SoundBufferRecorder.record!(sample_rate: 44_100, device: nil) do |recorder|
+  # capture happens while the block runs
+end
+Sound.new(buffer)
+```
+
+`SoundSource#playing?`, `#paused?` and `#stopped?` are shared by `Sound`, `SoundStream` and
+`Music`; `play!`, `pause!` and `stop!` are their mutating counterparts.
+
+### Sensors and input devices
+
+```ruby
+if Sensor.available?(:gyroscope)
+  Sensor.enable!(:gyroscope)
+  rotation = Sensor.value(:gyroscope)
+  Sensor.disable!(:gyroscope)
+end
+
+Joystick.connected?(0)                # => true/false
+Joystick.button_count(0)
+Joystick.button_pressed?(0, 0)
+Joystick.axis?(0, :z)
+
+Keyboard.key_pressed?(:space)
+Touch.down?(0)
+Touch.position(0, relative_to: window)
+```
+
+### Clipboard
+
+```ruby
+Clipboard.content = 'Copy this text'
+puts Clipboard.content if Clipboard.has_text?
+Clipboard.clear!
+```
+
+### System: clocks and sleep
+
+```ruby
+elapsed = Clock.measure do
+  SFML::Sleep.sleep!(Time.seconds(0.5))
+end
+
+puts "Executed in #{elapsed.as_seconds}s"
+```
+
+`clock.restart!` and `clock.running?` are on every `Clock`.
+
+### Events
+
+Event types are strings (`'closed'`, `'resized'`, `'key-pressed'`, ...) and every payload is a
+Hash (`event.key[:code]`, `event.mouse_button[:button]`, ...), as before. On top of that every
+kind has a predicate — `event.closed?`, `event.key_pressed?`, `event.mouse_moved?`,
+`event.touch_began?`, ... — and `event.code` is the `event.key[:code]` shortcut.
 
 See [`examples/hello_shapes.rb`](examples/hello_shapes.rb) for a minimal walkthrough of the five
 building blocks (window, events, transformables, drawables, primitive shapes), and

@@ -320,8 +320,8 @@ class SfmlTest < Minitest::Test
 
   # Sleep, Buffer, InputStream
   def test_sleep_accepts_time_and_number
-    assert_in_epsilon 0.0, SFML.sleep(0), 0.001
-    assert_kind_of Time, SFML.sleep(Time.zero)
+    assert_in_epsilon 0.0, SFML.sleep!(0), 0.001
+    assert_kind_of Time, SFML.sleep!(Time.zero)
   end
 
   def test_buffer_new_is_empty
@@ -488,8 +488,8 @@ class SfmlTest < Minitest::Test
   end
 
   def test_clipboard_roundtrip
-    Clipboard.string = 'sfml clipboard'
-    assert_equal 'sfml clipboard', Clipboard.string
+    Clipboard.content = 'sfml clipboard'
+    assert_equal 'sfml clipboard', Clipboard.content
   end
 
   def test_vulkan_available_is_boolean

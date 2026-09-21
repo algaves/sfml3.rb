@@ -1,6 +1,7 @@
 module SFML
   class Clock
     def initialize: () -> void
+    def self.measure: () { () -> untyped } -> Time
 
     def elapsed_time: () -> Time
     def restart!: () -> Time

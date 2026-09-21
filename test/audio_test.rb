@@ -21,11 +21,14 @@ class AudioTest < Minitest::Test
     assert_equal Object, SoundSource.superclass
   end
 
-  def test_sound_source_declares_no_methods_of_its_own
-    # The surface is generated per concrete subclass from
+  def test_sound_source_carries_the_shared_playback_predicates
+    # The native surface is generated per concrete subclass from
     # ext/audio/sound_source.inc, because each dispatches to a different CSFML
-    # entry point.
-    assert_empty SoundSource.instance_methods(false)
+    # entry point. The idiomatic predicates are the one shared addition: they
+    # read #status, which every concrete subclass provides.
+    %i[playing? paused? stopped?].each do |name|
+      assert_includes SoundSource.instance_methods(false), name, "#{name} missing from SoundSource"
+    end
   end
 
   def test_playable_classes_share_the_sound_source_surface

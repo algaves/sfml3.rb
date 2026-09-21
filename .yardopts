@@ -3,6 +3,7 @@
 --title sfml3-rb
 --readme README.md
 ext/**/*.c
+lib/**/*.rb
 -
 CHANGELOG.md
 TODO.md

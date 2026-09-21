@@ -3,6 +3,7 @@ module SFML
     def initialize: () -> void
 
     def type: () -> String
+    def code: () -> Symbol
     def size: () -> Vector2
     def key: () -> Hash[Symbol, untyped]
     def text: () -> String
@@ -16,5 +17,29 @@ module SFML
     def joystick_connect: () -> Hash[Symbol, untyped]
     def touch: () -> Hash[Symbol, untyped]
     def sensor: () -> Hash[Symbol, untyped]
+
+    def closed?: () -> bool
+    def resized?: () -> bool
+    def lost_focus?: () -> bool
+    def gained_focus?: () -> bool
+    def text_entered?: () -> bool
+    def key_pressed?: () -> bool
+    def key_released?: () -> bool
+    def mouse_wheel_scrolled?: () -> bool
+    def mouse_button_pressed?: () -> bool
+    def mouse_button_released?: () -> bool
+    def mouse_moved?: () -> bool
+    def mouse_moved_raw?: () -> bool
+    def mouse_entered?: () -> bool
+    def mouse_left?: () -> bool
+    def joystick_button_pressed?: () -> bool
+    def joystick_button_released?: () -> bool
+    def joystick_moved?: () -> bool
+    def joystick_connected?: () -> bool
+    def joystick_disconnected?: () -> bool
+    def touch_began?: () -> bool
+    def touch_moved?: () -> bool
+    def touch_ended?: () -> bool
+    def sensor_changed?: () -> bool
   end
 end

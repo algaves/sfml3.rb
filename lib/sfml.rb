@@ -9,3 +9,7 @@ begin
 rescue LoadError
   require 'sfml/sfml_ext'
 end
+
+# Pure-Ruby idiomatic sugar over the native API. Loaded after the extension so
+# it can reopen the classes it defines.
+require 'sfml/sugar'

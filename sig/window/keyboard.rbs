@@ -1,6 +1,7 @@
 module SFML
   module Keyboard
     def self.pressed?: (Symbol | String | Integer key) -> bool
+    def self.key_pressed?: (Symbol | String | Integer key) -> bool
     def self.scancode_pressed?: (Integer scancode) -> bool
     def self.localize: (Integer scancode) -> Symbol
     def self.delocalize: (Symbol | String | Integer key) -> Integer

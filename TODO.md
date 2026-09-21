@@ -206,6 +206,15 @@ without re-deriving the reasoning each time.
 | `sfFree` | CSFML's allocator hook; nothing in a Ruby binding should call it. |
 | `sfGlslVec4_fromsfColor`, `sfGlslIvec4_fromsfColor` | Documentation-only helpers; `Shader#set_color` does the conversion. |
 
+## Ruby sugar
+
+The coverage above is the native, 1:1 CSFML surface. `lib/sfml/sugar.rb` adds an idiomatic
+pure-Ruby layer on top of it — predicates (`?`), mutators (`!`), block iterators
+(`poll_events!`, `render!`) and scoped resources (`RenderWindow.open`,
+`SoundBufferRecorder.record!`, `Clock.measure`) — without changing or removing any binding.
+The names that shipped before it stay as deprecated aliases. See the README's
+"Idiomatic Ruby sugar" section.
+
 ## References
 
 - [SFML 3.1.0 module topics](https://www.sfml-dev.org/documentation/3.1.0/topics.html)
