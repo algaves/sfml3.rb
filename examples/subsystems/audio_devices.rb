@@ -26,7 +26,6 @@ recorder = SoundBufferRecorder.new
 recorder.channel_count = 1
 recorder.device = SoundRecorder.default_device if SoundRecorder.default_device
 
-event = Event.new
 clock = Clock.new
 frame = 0
 state = 'idle'
@@ -34,12 +33,12 @@ recorded = nil
 playback = nil
 
 loop do
-  while window.poll_event!(event)
+  window.poll_events! do |event|
     case event.type
     when 'closed'
       window.close!
     when 'key-pressed'
-      key = event.key[:code]
+      key = event.code
       window.close! if key == :escape
       if key == :r && state != 'recording'
         state = recorder.start(44_100) ? 'recording' : 'could not start'
@@ -57,7 +56,7 @@ loop do
     recorder.stop
     recorded = recorder.buffer
     playback = Sound.new(recorded)
-    playback.play
+    playback.play!
     state = 'playing back'
   end
 
@@ -72,13 +71,13 @@ loop do
   devices.each_with_index { |device, index| lines << "  #{index + 1}. #{device}" }
   lines << '  (none reported)' if devices.empty?
 
-  window.clear([22, 26, 34, 255])
+  window.clear!([22, 26, 34, 255])
   window.draw(ExampleSupport.text(lines.join("\n"), size: 16))
   window.draw(ExampleSupport.text(
                 'R records 3 s then plays it back; press 1-9 to pick a device; escape quits.',
                 size: 14, position: [20, 390]
               ))
-  window.display
+  window.display!
 
   frame += 1
   break if ExampleSupport.auto_close?(frame)

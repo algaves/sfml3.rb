@@ -21,17 +21,16 @@ COLORS = [[230, 90, 90], [90, 200, 130], [90, 170, 230], [235, 200, 90], [180, 1
 
 window = Window.new(VideoMode.new(640, 420, 32), 'SFML touch')
 window.frame_rate = 60
-event = Event.new
 frame = 0
 last = 'no touch events yet'
 
 loop do
-  while window.poll_event!(event)
+  window.poll_events! do |event|
     case event.type
     when 'closed'
       window.close!
     when 'key-pressed'
-      window.close! if event.key[:code] == :escape
+      window.close! if event.code == :escape
     when 'touch-began', 'touch-moved', 'touch-ended'
       touch = event.touch
       last = "#{event.type}  finger #{touch[:finger]} at " \
@@ -39,7 +38,7 @@ loop do
     end
   end
 
-  window.clear([22, 26, 34, 255])
+  window.clear!([22, 26, 34, 255])
   window.draw(ExampleSupport.text(
                 "Real-time fingers (Touch.down? / Touch.position)\n" \
                 "events: #{last}\nescape quits",
@@ -70,7 +69,7 @@ loop do
                                                         position: [point.x + 38, point.y - 8]))
   end
 
-  window.display
+  window.display!
   frame += 1
   break if ExampleSupport.auto_close?(frame)
 end

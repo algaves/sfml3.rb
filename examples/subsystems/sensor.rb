@@ -49,31 +49,30 @@ end
 
 window = Window.new(VideoMode.new(700, 440, 32), 'SFML sensor')
 window.frame_rate = 60
-event = Event.new
 frame = 0
 last_event = 'move the device (or watch for "unavailable")'
 
 loop do
-  while window.poll_event!(event)
+  window.poll_events! do |event|
     case event.type
     when 'closed'
       window.close!
     when 'key-pressed'
-      window.close! if event.key[:code] == :escape
+      window.close! if event.code == :escape
     when 'sensor-changed'
       change = event.sensor
       last_event = "sensor-changed #{change[:type]} -> #{change[:value]}"
     end
   end
 
-  window.clear([22, 26, 34, 255])
+  window.clear!([22, 26, 34, 255])
   window.draw(ExampleSupport.text(
                 "SFML::Sensor -- availability and values (#{last_event})\n" \
                 'sensors are enabled on entry; escape quits',
                 size: 16, position: [24, 16]
               ))
   TYPES.each_with_index { |type, index| draw_sensor(window, type, index) }
-  window.display
+  window.display!
 
   frame += 1
   break if ExampleSupport.auto_close?(frame)

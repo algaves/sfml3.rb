@@ -72,18 +72,17 @@ render_offscreen(render_texture, 0.0)
 offscreen = Sprite.new(render_texture.texture)
 offscreen.position = [520, 250]
 
-event = Event.new
 frame = 0
 animation = Clock.new
 frame_index = 0
 
 loop do
-  while window.poll_event!(event)
+  window.poll_events! do |event|
     case event.type
     when 'closed'
       window.close!
     when 'key-pressed'
-      key = event.key[:code]
+      key = event.code
       window.close! if key == :escape
       if key == :s
         checker.smooth = !checker.smooth?
@@ -104,7 +103,7 @@ loop do
 
   render_offscreen(render_texture, offscreen_clock.elapsed_time.as_seconds)
 
-  window.clear([14, 16, 24, 255])
+  window.clear!([14, 16, 24, 255])
   window.draw(backdrop)
   window.draw(bird)
   window.draw(gem)
@@ -122,7 +121,7 @@ loop do
               ))
   window.draw(ExampleSupport.text('S smoothing, P repeating, escape quits',
                                   size: 14, position: [40, 370]))
-  window.display
+  window.display!
 
   frame += 1
   break if ExampleSupport.auto_close?(frame)

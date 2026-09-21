@@ -40,18 +40,17 @@ end
 
 window = Window.new(VideoMode.new(720, 480, 32), 'SFML mouse')
 window.frame_rate = 60
-event = Event.new
 ripples = []
 frame = 0
 colors = button_colors
 
 loop do
-  while window.poll_event!(event)
+  window.poll_events! do |event|
     case event.type
     when 'closed'
       window.close!
     when 'key-pressed'
-      key = event.key[:code]
+      key = event.code
       window.close! if key == :escape
       center = [window.size.x / 2, window.size.y / 2]
       Mouse.set_position(center, window) if key == :c
@@ -66,7 +65,7 @@ loop do
   end
   ripples.reject! { |ripple| ripple.life <= 0 }
 
-  window.clear([22, 26, 34, 255])
+  window.clear!([22, 26, 34, 255])
 
   ripples.each do |ripple|
     ring = CircleShape.new(ripple.radius)
@@ -90,7 +89,7 @@ loop do
   end
 
   draw_hud(window, ripples, Mouse.position(window), Mouse.position)
-  window.display
+  window.display!
 
   frame += 1
   break if ExampleSupport.auto_close?(frame)

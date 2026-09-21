@@ -45,7 +45,6 @@ lines = [
 
 window = Window.new(VideoMode.new(720, 520, 32), 'SFML literals')
 window.frame_rate = 60
-event = Event.new
 frame = 0
 
 triangle = ConvexShape.new(3)
@@ -60,16 +59,16 @@ shapes = [
 ]
 
 loop do
-  while window.poll_event!(event)
+  window.poll_events! do |event|
     case event.type
     when 'closed'
       window.close!
     when 'key-pressed'
-      window.close! if event.key[:code] == :escape
+      window.close! if event.code == :escape
     end
   end
 
-  window.clear([22, 26, 34, 255])
+  window.clear!([22, 26, 34, 255])
 
   shapes.each do |shape, color, corner|
     shape.fill_color = color
@@ -82,7 +81,7 @@ loop do
   end
   window.draw(ExampleSupport.text('Literals accepted anywhere SFML takes a struct. Escape quits.',
                                   size: 16, position: [24, 495]))
-  window.display
+  window.display!
 
   frame += 1
   break if ExampleSupport.auto_close?(frame)

@@ -144,26 +144,25 @@ rescue StandardError => e
   puts "\nVulkan window setup failed: #{e.class}: #{e.message}"
 end
 
-event = Event.new
 frame = 0
 
 loop do
-  while window.poll_event!(event)
+  window.poll_events! do |event|
     case event.type
     when 'closed'
       window.close!
     when 'key-pressed'
-      window.close! if event.key[:code] == :escape
+      window.close! if event.code == :escape
     end
   end
 
-  window.clear([18, 20, 30, 255])
+  window.clear!([18, 20, 30, 255])
   window.draw(ExampleSupport.text(
                 "SFML::Vulkan probe complete -- see the console for details.\n" \
                 "#{extensions.size} required instance extension(s). Escape quits.",
                 size: 16
               ))
-  window.display
+  window.display!
 
   frame += 1
   break if ExampleSupport.auto_close?(frame)

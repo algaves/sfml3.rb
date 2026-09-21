@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # SFML::Joystick: the real-time state of every gamepad. `Joystick.update!`
-# refreshes the cached state; `connected?`/`button_count`/`has_axis?` describe
+# refreshes the cached state; `connected?`/`button_count`/`axis?` describe
 # what is plugged in, `axis_position` and `button_pressed?` read it, and
 # `identification` returns the name and vendor/product ids. R rescans (for
 # hot-plugging), escape quits. The event queue also reports connection changes.
@@ -18,7 +18,7 @@ AXES = %i[x y z r u v pov_x pov_y].freeze
 
 def draw_axes(window, joystick, y)
   AXES.each_with_index do |axis, index|
-    next unless Joystick.has_axis?(joystick, axis)
+    next unless Joystick.axis?(joystick, axis)
 
     row = y + (index * 22)
     value = Joystick.axis_position(joystick, axis)
@@ -67,18 +67,17 @@ end
 
 window = Window.new(VideoMode.new(680, 440, 32), 'SFML joystick')
 window.frame_rate = 60
-event = Event.new
 frame = 0
 connected = nil
 
 loop do
-  while window.poll_event!(event)
+  window.poll_events! do |event|
     case event.type
     when 'closed'
       window.close!
     when 'key-pressed'
-      window.close! if event.key[:code] == :escape
-      connected = nil if event.key[:code] == :r # force a rescan
+      window.close! if event.code == :escape
+      connected = nil if event.code == :r # force a rescan
     when 'joystick-connected', 'joystick-disconnected'
       connected = nil
     end
@@ -87,7 +86,7 @@ loop do
   Joystick.update!
   connected ||= (0...Joystick::COUNT).find { |id| Joystick.connected?(id) }
 
-  window.clear([22, 26, 34, 255])
+  window.clear!([22, 26, 34, 255])
   if connected
     draw_joystick(window, connected)
   else
@@ -98,7 +97,7 @@ loop do
                   size: 18, position: [30, 80]
                 ))
   end
-  window.display
+  window.display!
 
   frame += 1
   break if ExampleSupport.auto_close?(frame)

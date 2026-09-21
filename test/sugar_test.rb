@@ -21,7 +21,7 @@ class SugarTest < Minitest::Test
 
     assert_respond_to Window, :open
     assert_respond_to RenderWindow, :open
-    assert_respond_to RenderWindow, :render!
+    assert_includes RenderWindow.instance_methods, :render!
   end
 
   def test_window_sugar_wins_over_the_deprecated_names
