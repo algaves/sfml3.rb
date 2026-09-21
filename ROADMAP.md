@@ -1,6 +1,9 @@
 # Roadmap: SFML 3 API port to Ruby
 
-Tracks porting coverage of the SFML 3 API into this gem, module by module and class by class.
+Tracks porting coverage of the SFML 3 API into this gem, module by module and class by class, plus
+what is still ahead of it. Coverage is measured against **CSFML 3.0.0** — the C API this gem
+actually links — while the missing-elements list at the bottom is read against **SFML 3.1.0**, the
+latest upstream release.
 
 This binding wraps **CSFML 3** (the C API), not SFML's C++ API directly, so the scope below is
 CSFML 3.0.0's actual header set — not every C++-only construct in the
@@ -9,11 +12,14 @@ reason: `String`/`Utf`/`Literals` (SFML C++ uses `std::string`; CSFML takes plai
 `Exception` (CSFML reports errors via return codes, not C++ exceptions), and C++-utility-only types
 (`SuspendAwareClock`, `TimeoutWithPredicate`, `U8StringCharTraits`). `Glsl` is handled as plain
 `set_*_uniform` calls (its types are CSFML structs, not a templated class), and `InputStream`'s C
-struct form *is* bound (`SFML::InputStream`). `Sftp` is also out of scope: it was added to SFML in
-3.1, and the CSFML 3.0.0 this gem vendors predates it.
+struct form *is* bound (`SFML::InputStream`). Types that SFML 3 models as dedicated C++ classes but
+CSFML models as plain C scalars need no class of their own here: `Angle` is a `Float` (degrees),
+`StencilValue` is an `Integer`, `RenderStates` is `SFML::RenderState`, and the vector types are
+plain `[x, y]` / `[x, y, z]` arrays.
 
 Status legend: `[x]` bound and tested · `[~]` compiled but not exposed to Ruby, or exposed as an
-internal helper only · `[ ]` not started.
+internal helper only · `[ ]` not started · `[!]` exists in SFML upstream but has no CSFML entry
+point yet (blocked on a CSFML release).
 
 **Coverage is tracked per function, not per class.** Every `sf*` entry point in
 `ports/<target>/include/CSFML` is accounted for: bound, or listed in "Deliberately unbound" at the
@@ -66,7 +72,7 @@ OpenGL-based windows, events, input handling.
 - [x] **Keyboard** — `SFML::Keyboard` (`ext/window/keyboard.c`); real-time `pressed?`,
       `scancode_pressed?`, `localize`, `delocalize`, `description`, virtual-keyboard toggle
 - [x] **Mouse** — `SFML::Mouse` (`ext/window/mouse.c`)
-- [x] **Joystick** — `SFML::Joystick` (`ext/window/joystick.c`)
+- [x] **Joystick** — `SFML::Joystick` (`ext/window/joystick.c`); includes `identification`
 - [x] **Touch** — `SFML::Touch` (`ext/window/touch.c`)
 - [x] **Sensor** — `SFML::Sensor` (`ext/window/sensor.c`)
 - [x] **Clipboard** — `SFML::Clipboard` (`ext/window/clipboard.c`)
@@ -119,13 +125,14 @@ OpenGL-based windows, events, input handling.
 - [x] **Texture** — `SFML::Texture` (`ext/graphics/texture.c`); every constructor in both linear
       and sRGB form, plus `resize`/`resize_srgb` and `swap`
 - [x] **Image** — `SFML::Image` (`ext/graphics/image.c`)
-- [x] **Font** — `SFML::Font` (`ext/graphics/font.c`)
+- [x] **Font** — `SFML::Font` (`ext/graphics/font.c`); `info` returns the family name
 - [x] **Text** — `SFML::Text` (`ext/graphics/text.c`); mixes in `Transformable` and `Drawable`;
       `#string` goes through the UTF-32 entry
       points, so non-ASCII round-trips exactly
 - [x] **Glyph** — `SFML::Glyph` (`ext/graphics/glyph.c`)
 - [x] **Shader** — `SFML::Shader` (`ext/graphics/shader.c`); scalar/vector/color/int/bool/matrix
-      uniforms, all six array uniforms (float, vec2-4, mat3, mat4), plus a generic `uniform=`
+      uniforms, all six array uniforms (float, vec2-4, mat3, mat4), `set_current_texture`, plus a
+      generic `uniform=`
 - [x] **Color** — `SFML::Color` (`ext/graphics/color.c`)
 - [x] **Rect** — `SFML::Rect` (`ext/graphics/rect.c`); `sfFloatRect` and `sfIntRect`
 - [x] **BlendMode** — `SFML::BlendMode` (`ext/graphics/blend_mode.c`)
@@ -190,6 +197,41 @@ Socket-based communication and higher-level protocols.
 Note that CSFML exposes no `sfSocket` base class, so there is nothing to bind for "Socket base" —
 only the concrete TCP/UDP sockets and the selector.
 
+## Pending upstream: SFML 3.1.0
+
+Everything above is the complete CSFML 3.0.0 surface. The gem vendors **SFML 3.0.2 + CSFML 3.0.0**
+(`ext/ports.rb`); CSFML's latest release is still **3.0.0**, so the SFML 3.1.0 additions below have
+no C entry point to bind yet. They unblock together when a CSFML 3.1 is vendored — the extension
+links CSFML and SFML statically, so a CSFML bump carries the matching SFML into every binary gem.
+
+Some of these land in two buckets:
+
+- **Needs a new CSFML binding** — new C entry points the gem would wrap in new `.c` files:
+  - **Dns** — new `SFML::Dns` module mirroring `sf::Dns`: `resolve`, `query_ns`, `query_mx`,
+    `query_srv`, `query_txt`, `get_public_address`, plus `SFML::Dns::MxRecord` /
+    `SFML::Dns::SrvRecord`.
+  - **Sftp** — new `SFML::Sftp` client (and its `Result`/`PathResult`/`Attributes`/
+    `AttributesResult`/`ListingResult`/`SessionInfo`/`HostKey` types). Upstream positions SFTP as
+    the replacement for FTP.
+  - **PlaybackDevice** — a `SFML::PlaybackDevice` module for `sf::PlaybackDevice`, notably
+    `get_device_sample_rate`.
+  - **version()** — runtime `SFML.version` / library-version constant backed by `sf::version()`
+    (today `SFML::VERSION` is only the gem's own version).
+- **Arrives with the SFML bump, no new binding work** — behavior gained by linking the newer SFML,
+  surfacing through entry points already bound:
+  - **TLS / HTTPS** in `Http` (SFML 3.1 makes `sf::Http` TLS-capable).
+  - **IPv6** in `IpAddress`, `TcpSocket`, `UdpSocket`, `SocketSelector` (SFML 3.1's sockets and
+    `IpAddress` understand IPv6).
+  - **QOI image format** in `Image` load/save — SFML 3.1 adds QOI support; `sfImage_loadFromFile`
+    / `saveToFile` pick it up from the extension.
+  - **Shaped text** (SFML 3.1's revamped HarfBuzz-based text engine). SFML's `sf::Text` renders
+    complex layouts natively; whether glyph-level shaping (`sf::Text::ShapedGlyph`) is reachable
+    depends on what CSFML 3.1 chooses to expose.
+
+C++-only or platform-only 3.1 changes never surface in a bindable way: non-const
+`Event::getIf`/`visit` overloads, `Event::visit`, the Android/iOS window and joystick fixes, and
+the `sf::Style` namespace (already handled as window-style symbols in `SFML::Window`'s constructor).
+
 ## Deliberately unbound
 
 These CSFML entry points have no Ruby surface on purpose. Listed so a coverage diff can be read
@@ -211,6 +253,8 @@ without re-deriving the reasoning each time.
 - [SFML 3.1.0 module topics](https://www.sfml-dev.org/documentation/3.1.0/topics.html)
 - [SFML 3.1.0 class index](https://www.sfml-dev.org/documentation/3.1.0/annotated.html)
 - [SFML 3.1.0 namespace index](https://www.sfml-dev.org/documentation/3.1.0/namespaces.html)
+- [SFML 3.1.0 release notes](https://github.com/SFML/SFML/releases/tag/3.1.0) — what the "Pending
+  upstream" section is tracking
 - [CSFML 3.0.0 headers](https://github.com/SFML/CSFML/tree/3.0.0/include/CSFML) — the actual C API
   surface this gem binds against, vendored locally under `ports/<target>/include/CSFML/`
-  once `rake ports` has run
+  once `rake ports` has run (CSFML has no 3.1 release yet)

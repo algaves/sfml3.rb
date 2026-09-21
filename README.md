@@ -15,7 +15,7 @@ Latest release: **0.3.1**, bound against **CSFML 3**.
 ## Features
 
 * **Broad coverage of SFML 3**, bound through CSFML: windows and events, graphics, audio, network,
-  and the system layer, with every `sf*` entry point tracked in [TODO.md](TODO.md).
+  and the system layer, with every `sf*` entry point tracked in [ROADMAP.md](ROADMAP.md).
 * **Precompiled binary gems** for common platforms, with FreeType, SFML 3 and CSFML 3 statically
   linked in — no toolchain and nothing to install system-wide.
 * **A source fallback everywhere else**, which downloads and builds the pinned, checksum-verified
@@ -135,7 +135,8 @@ display (`xvfb-run -a` headlessly) and are not part of the test suite.
   RBS-aware editors. `rake rbs` validates the signatures and `rake steep` type-checks `lib/`
   against them.
 * [CHANGELOG.md](CHANGELOG.md) — what changed in each release.
-* [TODO.md](TODO.md) — module-by-module porting coverage and what is deliberately unbound.
+* [ROADMAP.md](ROADMAP.md) — module-by-module porting coverage, what is deliberately unbound, and
+  the SFML 3.1.0 elements still pending upstream.
 
 ### IDE setup (RubyMine)
 
