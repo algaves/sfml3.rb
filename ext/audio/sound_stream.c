@@ -328,16 +328,17 @@ static VALUE SoundStream_channel_map(VALUE self) {
  * chunk (or +nil+/+false+ to signal end of stream), and may implement
  * +#on_seek(time)+ to support seeking.
  *
- * @!method play
- *   Starts playback, or resumes it when paused.
+ * @!method play!
+ *   Starts playback, or resumes it when paused. +play+ is a deprecated alias.
  *   @return [self]
- * @!method pause
- *   Pauses playback, keeping the current playing offset.
+ * @!method pause!
+ *   Pauses playback, keeping the current playing offset. +pause+ is a
+ *   deprecated alias.
  *   @return [self]
- * @!method stop
+ * @!method stop!
  *   Stops playback and rewinds to the beginning. May briefly block the
  *   calling thread if an audio-thread callback for this source is in
- *   flight.
+ *   flight. +stop+ is a deprecated alias.
  *   @return [self]
  * @!method status
  *   Returns the current playback status.

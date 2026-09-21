@@ -62,6 +62,13 @@ static sfVertexBufferUsage usage_from_rb(VALUE rb_usage) {
     return sfVertexBufferStatic;
 }
 
+/* call-seq: initialize_copy(other) -> self
+ *
+ * Copy construction is not supported: a VertexBuffer wraps a native resource
+ * that cannot be duplicated, so this always raises.
+ *
+ * @raise [TypeError] always
+ */
 static VALUE VertexBuffer_initialize_copy(VALUE self, VALUE other) {
     (void)other;
     rb_raise(rb_eTypeError, "can't copy a %s", rb_obj_classname(self));

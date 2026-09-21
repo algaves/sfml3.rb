@@ -31,6 +31,13 @@ sfRenderTexture* Get_RenderTexture_Struct(VALUE self) {
     return ptr;
 }
 
+/* call-seq: initialize_copy(other) -> self
+ *
+ * Copy construction is not supported: a RenderTexture wraps a native resource
+ * that cannot be duplicated, so this always raises.
+ *
+ * @raise [TypeError] always
+ */
 static VALUE RenderTexture_initialize_copy(VALUE self, VALUE other) {
     (void)other;
     rb_raise(rb_eTypeError, "can't copy a %s", rb_obj_classname(self));

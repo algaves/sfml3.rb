@@ -38,8 +38,10 @@ static VALUE Touch_is_down(VALUE module, VALUE rb_finger) {
 
 /* call-seq:
  *   position(finger, window = nil) -> Vector2
+ *   position(finger, relative_to: window) -> Vector2
  *
- * Returns the position of touch point +finger+.
+ * Returns the position of touch point +finger+. The Rubyesque (Matz-like) layer
+ * accepts the window either positionally or as the +relative_to:+ keyword.
  *
  * @return [Vector2] the position of touch point +finger+, in desktop
  *   coordinates, or relative to +window+'s client area when given

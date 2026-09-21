@@ -76,6 +76,13 @@ static const sfIntRect* Texture_area_ptr(VALUE rb_area, sfIntRect* storage) {
     return storage;
 }
 
+/* call-seq: initialize_copy(other) -> self
+ *
+ * Copy construction is not supported: a Texture wraps a native resource that
+ * cannot be duplicated, so this always raises.
+ *
+ * @raise [TypeError] always
+ */
 static VALUE Texture_initialize_copy(VALUE self, VALUE other) {
     (void)other;
     rb_raise(rb_eTypeError, "can't copy a %s", rb_obj_classname(self));

@@ -228,16 +228,17 @@ static VALUE Music_alloc(VALUE klass) {
  * wasteful to load whole as a SoundBuffer. Derives from SoundStream (and so
  * from SoundSource).
  *
- * @!method play
- *   Starts playback, or resumes it when paused.
+ * @!method play!
+ *   Starts playback, or resumes it when paused. +play+ is a deprecated alias.
  *   @return [self]
- * @!method pause
- *   Pauses playback, keeping the current playing offset.
+ * @!method pause!
+ *   Pauses playback, keeping the current playing offset. +pause+ is a
+ *   deprecated alias.
  *   @return [self]
- * @!method stop
+ * @!method stop!
  *   Stops playback and rewinds to the beginning. May briefly block the
  *   calling thread if an audio-thread callback for this source is in
- *   flight.
+ *   flight. +stop+ is a deprecated alias.
  *   @return [self]
  * @!method status
  *   Returns the current playback status.

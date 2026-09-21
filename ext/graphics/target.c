@@ -158,6 +158,12 @@ TargetView Get_RenderTarget_View(VALUE self) {
     rb_raise(rb_eArgError, "expected a RenderTarget (RenderWindow or RenderTexture)");
 }
 
+/* Document-module: SFML::RenderTarget
+ * Marker module included by both objects a Drawable#draw accepts:
+ * SFML::RenderWindow and SFML::RenderTexture. It has no methods of its own; the
+ * draw surface is generated per class from ext/graphics/render_target.inc, so
+ * include this module to duck-type "something you can draw onto".
+ */
 /* Document-class: SFML::Target
  * A legacy generic handle onto whatever can be drawn to -- a Window or a
  * RenderTexture -- used by Drawable#draw so drawable objects don't need to

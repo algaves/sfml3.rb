@@ -82,12 +82,13 @@ static VALUE Window_initialize(int argc, VALUE* argv, VALUE self) {
     return self;
 }
 
-/* Adopts an existing OS window by its native handle -- the Integer that
-   Window#native_handle returns, or one obtained from a GUI toolkit. The window
-   is not owned by the toolkit afterwards: destroying it stays the toolkit's
-   job, and closing the Ruby object only tears down the render context. */
 /* call-seq:
  *   Window.from_handle(handle, settings = nil) -> Window
+ *
+ * Adopts an existing OS window by its native handle -- the Integer that
+ * Window#native_handle returns, or one obtained from a GUI toolkit. The window
+ * is not owned by the toolkit afterwards: destroying it stays the toolkit's
+ * job, and closing the Ruby object only tears down the render context.
  *
  * @return [Window]
  * @raise [RuntimeError] if window creation fails

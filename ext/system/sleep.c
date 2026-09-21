@@ -6,10 +6,11 @@
 #include "core/sfml.h"
 
 /* call-seq:
- *   SFML.sleep(duration) -> duration
+ *   SFML.sleep!(duration) -> duration
  *
  * Blocks the calling thread for +duration+, which may be a Time, a number
- * of seconds, or anything #to_f-convertible.
+ * of seconds, or anything #to_f-convertible. +SFML.sleep+ is a deprecated
+ * alias, and +SFML::Sleep.sleep!+ is the namespace-style spelling.
  *
  * @return [Time, Numeric] +duration+
  */

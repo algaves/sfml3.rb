@@ -30,9 +30,10 @@ static VALUE Joystick_get_button_count(VALUE module, VALUE rb_joystick) {
 }
 
 /* call-seq:
- *   has_axis?(joystick, axis) -> true or false
+ *   axis?(joystick, axis) -> true or false
  *
- * Returns +true+ if joystick number +joystick+ has +axis+.
+ * Returns +true+ if joystick number +joystick+ has +axis+. +has_axis?+ is a
+ * deprecated alias.
  *
  * @return [Boolean] whether joystick number +joystick+ has +axis+ (a Symbol
  *   like +:x+, +:y+, +:pov_x+, or an Integer)

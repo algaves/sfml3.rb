@@ -72,6 +72,13 @@ static VALUE Sound_wrap(VALUE klass, sfSound* handle, VALUE rb_buffer) {
     return TypedData_Wrap_Struct(klass, &Sound_data_type, ptr);
 }
 
+/* call-seq: initialize_copy(other) -> self
+ *
+ * Copy construction is not supported: a Sound wraps a native resource that
+ * cannot be duplicated, so this always raises.
+ *
+ * @raise [TypeError] always
+ */
 static VALUE Sound_initialize_copy(VALUE self, VALUE other) {
     (void)other;
     rb_raise(rb_eTypeError, "can't copy a %s", rb_obj_classname(self));
@@ -198,16 +205,17 @@ static VALUE Sound_set_buffer(VALUE self, VALUE rb_buffer) {
  * to short effects; for long files prefer Music, which streams instead.
  * Derives from SoundSource.
  *
- * @!method play
- *   Starts playback, or resumes it when paused.
+ * @!method play!
+ *   Starts playback, or resumes it when paused. +play+ is a deprecated alias.
  *   @return [self]
- * @!method pause
- *   Pauses playback, keeping the current playing offset.
+ * @!method pause!
+ *   Pauses playback, keeping the current playing offset. +pause+ is a
+ *   deprecated alias.
  *   @return [self]
- * @!method stop
+ * @!method stop!
  *   Stops playback and rewinds to the beginning. May briefly block the
  *   calling thread if an audio-thread callback for this source is in
- *   flight.
+ *   flight. +stop+ is a deprecated alias.
  *   @return [self]
  * @!method status
  *   Returns the current playback status.
