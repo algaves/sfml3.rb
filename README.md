@@ -16,6 +16,11 @@ Latest release: **0.3.1**, bound against **CSFML 3**.
 
 * **Broad coverage of SFML 3**, bound through CSFML: windows and events, graphics, audio, network,
   and the system layer, with every `sf*` entry point tracked in [ROADMAP.md](ROADMAP.md).
+* **A Rubyesque (Matz-like) layer** over that raw binding, in
+  [`lib/sfml/rubyesque.rb`](lib/sfml/rubyesque.rb): `?` predicates, `!` mutators, block iterators
+  (`poll_events!`, `render!`) and scoped resources (`WindowBase.open`,
+  `SoundBufferRecorder.record!`, `Clock.measure`). The pre-Rubyesque names remain as deprecated
+  aliases, so nothing breaks. See [below](#rubyesque-matz-like-layer).
 * **Precompiled binary gems** for common platforms, with FreeType, SFML 3 and CSFML 3 statically
   linked in — no toolchain and nothing to install system-wide.
 * **A source fallback everywhere else**, which downloads and builds the pinned, checksum-verified
@@ -31,7 +36,7 @@ Latest release: **0.3.1**, bound against **CSFML 3**.
 
 * [Installation](#installation)
 * [Quick Start](#quick-start)
-* [Idiomatic Ruby sugar](#idiomatic-ruby-sugar)
+* [Rubyesque (Matz-like) layer](#rubyesque-matz-like-layer)
 * [Documentation](#documentation)
 * [Development](#development)
 * [Contributing](#contributing)
@@ -107,10 +112,9 @@ require 'sfml'
 include SFML
 
 window = Window.new VideoMode.new(640, 480, 32), 'SFML'
-event  = Event.new
 
 while window.open?
-  while window.poll_event! event
+  window.poll_events! do |event|
     window.close! if event.closed?
   end
 
@@ -119,15 +123,15 @@ while window.open?
 end
 ```
 
-The idiomatic spellings (`open?`, `clear!`, `display!`, ...) are pure-Ruby sugar over the
-native API. The names that shipped before them (`is_open?`, `clear`, `display`, ...) still
+The primary spellings (`open?`, `clear!`, `display!`, ...) are pure-Ruby Rubyesque (Matz-like)
+over the native API. The names that shipped before them (`is_open?`, `clear`, `display`, ...) still
 work but warn that they are deprecated.
 
-## Idiomatic Ruby sugar
+## Rubyesque (Matz-like) layer
 
-`lib/sfml/sugar.rb` layers idiomatic Ruby on top of the raw CSFML binding: predicate methods
-end in `?`, methods that change state end in `!`, and block-scoped helpers handle setup and
-teardown. Nothing is lost — the native surface is still there, unchanged.
+`lib/sfml/rubyesque.rb` layers the Rubyesque (Matz-like) API on top of the raw CSFML binding:
+predicate methods end in `?`, methods that change state end in `!`, and block-scoped helpers handle
+setup and teardown. Nothing is lost — the native surface is still there, unchanged.
 
 ### Windows: scoped setup, block events, scoped frames
 
@@ -147,7 +151,10 @@ end
 ```
 
 `poll_events!` returns an `Enumerator` without a block; `render!` clears, yields the window,
-then presents. `window.open?`, `window.focused?` and `window.visible?` are the predicates.
+then presents. `window.open?`, `window.focused?` and `window.visible?` are the predicates;
+`request_focus!` asks the window manager for focus, and `close!` closes the window. The scoped
+constructor lives on `WindowBase`, so `WindowBase.open`, `Window.open` and `RenderWindow.open`
+all behave the same way and return the open window when called without a block.
 
 ### Audio: predicates, banged playback, scoped recording
 
@@ -215,10 +222,37 @@ Hash (`event.key[:code]`, `event.mouse_button[:button]`, ...), as before. On top
 kind has a predicate — `event.closed?`, `event.key_pressed?`, `event.mouse_moved?`,
 `event.touch_began?`, ... — and `event.code` is the `event.key[:code]` shortcut.
 
+### Name changes at a glance
+
+Nothing is removed: the pre-Rubyesque spelling keeps working and warns once with the line that
+called it. The primary names are the right-hand column.
+
+| Before (deprecated)             | Now (primary)                                 |
+| ------------------------------- | --------------------------------------------- |
+| `window.is_open?`               | `window.open?`                                |
+| `window.focus?`                 | `window.focused?`                             |
+| `window.request_focus`          | `window.request_focus!`                       |
+| `window.clear`                  | `window.clear!`                               |
+| `window.display`                | `window.display!`                             |
+| `window.poll_event!(event)`     | `window.poll_events! { \|event\| }`           |
+| `sound.play` / `pause` / `stop` | `sound.play!` / `pause!` / `stop!`            |
+| `sound.status == :playing`      | `sound.playing?` (also `paused?`, `stopped?`) |
+| `Keyboard.pressed?`             | `Keyboard.key_pressed?`                       |
+| `Joystick.has_axis?`            | `Joystick.axis?`                              |
+| `Clipboard.string` / `string=`  | `Clipboard.content` / `content=`              |
+| `SFML.sleep`                    | `SFML.sleep!` (or `SFML::Sleep.sleep!`)       |
+
+The Rubyesque layer also fills gaps the native surface leaves: `WindowBase.open` and `window.render!`,
+`SoundBufferRecorder.record!`, `Clock.measure`, `Sensor.enable!`/`disable!`,
+`Clipboard.has_text?`/`clear!`, `Touch.position(finger, relative_to: window)` and every
+`event.*?` predicate are new, with no pre-Rubyesque equivalent.
+
 See [`examples/hello_shapes.rb`](examples/hello_shapes.rb) for a minimal walkthrough of the five
 building blocks (window, events, transformables, drawables, primitive shapes), and
 [`examples/bouncing_shapes.rb`](examples/bouncing_shapes.rb) for an interactive take on the same
-components. [`examples/subsystems/`](examples/subsystems) has one demo per module (Listener, GLSL,
+components. [`examples/rubyesque/`](examples/rubyesque) is one small teaching script per slice of
+the Rubyesque layer -- window, events, audio, input, system and the deprecation path -- with the
+same cheat sheet as above. [`examples/subsystems/`](examples/subsystems) has one demo per module (Listener, GLSL,
 Clipboard, Joystick, Keyboard, Mouse, Sensor, Touch, Vulkan, window styles, DNS, audio devices, and
 sprites/textures/images), and [`examples/games/`](examples/games) has eleven playable games --
 Snake, Breakout, Asteroids, Platformer, Tron, Flappy Bird, Doodle Jump, Xonix, Tetris, Racing and
