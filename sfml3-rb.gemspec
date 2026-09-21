@@ -66,6 +66,7 @@ Gem::Specification.new do |s|
             Dir.glob('sig/**/*.rbs') +
             Dir.glob('examples/**/*.rb') +
             Dir.glob('examples/**/*.md') +
+            Dir.glob('examples/**/*.{ttf,wav,txt,png}') +
             docs
 
   s.extra_rdoc_files = docs

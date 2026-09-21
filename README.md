@@ -123,8 +123,13 @@ Event types are strings (`'closed'`, `'resized'`, `'key-pressed'`, ...); keys an
 See [`examples/hello_shapes.rb`](examples/hello_shapes.rb) for a minimal walkthrough of the five
 building blocks (window, events, transformables, drawables, primitive shapes), and
 [`examples/bouncing_shapes.rb`](examples/bouncing_shapes.rb) for an interactive take on the same
-components. [`examples/README.md`](examples/README.md) documents how they compose. Both need a
-display (`xvfb-run -a` headlessly) and are not part of the test suite.
+components. [`examples/subsystems/`](examples/subsystems) has one demo per module (Listener, GLSL,
+Clipboard, Joystick, Keyboard, Mouse, Sensor, Touch, Vulkan, window styles, DNS, audio devices, and
+sprites/textures/images), and [`examples/games/`](examples/games) has eleven playable games --
+Snake, Breakout, Asteroids, Platformer, Tron, Flappy Bird, Doodle Jump, Xonix, Tetris, Racing and
+Chess -- plus a small GUI toolkit (`examples/menu.rb`) and a control-panel demo. [`examples/README.md`](examples/README.md)
+documents them all. They need a display (`xvfb-run -a` headlessly), run without interacting when
+`SFML_EXAMPLE_FRAMES` is set, and are not part of the test suite.
 
 ## Documentation
 
