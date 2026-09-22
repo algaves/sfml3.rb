@@ -85,84 +85,96 @@
 //    Local variables     lower_case or lowerCase
 //    Global variables    g_lowerCase or g_lower_case (searchable by g_ prefix)
 
-static VALUE rb_mExt;
+static VALUE rb_mSF;
 
-/* Document-module: SFML
+/* Document-module: SF
  * Ruby bindings for SFML 3, via its C API, CSFML. Every class and module in
- * this library lives under this namespace.
+ * this library lives under one of the subsystem modules of this namespace.
  */
 void Init_sfml_ext(void) {
-    rb_mExt = rb_define_module("SFML");
+    VALUE rb_mSystem;
+    VALUE rb_mGraphics;
+    VALUE rb_mWindow;
+    VALUE rb_mAudio;
+    VALUE rb_mNetwork;
+
+    rb_mSF = rb_define_module("SF");
+
+    rb_mSystem = rb_define_module_under(rb_mSF, "System");
+    rb_mGraphics = rb_define_module_under(rb_mSF, "Graphics");
+    rb_mWindow = rb_define_module_under(rb_mSF, "Window");
+    rb_mAudio = rb_define_module_under(rb_mSF, "Audio");
+    rb_mNetwork = rb_define_module_under(rb_mSF, "Network");
 
     Init_ForeignThread();
 
-    Init_Vector2(rb_mExt);
-    Init_Vector3(rb_mExt);
-    Init_Time(rb_mExt);
-    Init_Sleep(rb_mExt);
-    Init_Buffer(rb_mExt);
-    Init_InputStream(rb_mExt);
-    Init_Color(rb_mExt);
-    Init_Rect(rb_mExt);
-    Init_BlendMode(rb_mExt);
-    Init_StencilMode(rb_mExt);
-    Init_Image(rb_mExt);
-    Init_Texture(rb_mExt);
-    Init_Drawable(rb_mExt);
-    Init_Transform(rb_mExt);
-    Init_Transformable(rb_mExt);
-    Init_Clock(rb_mExt);
-    Init_Target(rb_mExt);
-    Init_RenderState(rb_mExt);
-    Init_Shape(rb_mExt);
-    Init_Circle(rb_mExt);
-    Init_RectangleShape(rb_mExt);
-    Init_ConvexShape(rb_mExt);
-    Init_Sprite(rb_mExt);
-    Init_Vertex(rb_mExt);
-    Init_VertexArray(rb_mExt);
-    Init_VertexBuffer(rb_mExt);
-    Init_Glyph(rb_mExt);
-    Init_Font(rb_mExt);
-    Init_Text(rb_mExt);
-    Init_RenderTexture(rb_mExt);
-    Init_Shader(rb_mExt);
-    Init_Event(rb_mExt);
-    Init_VideoMode(rb_mExt);
-    Init_View(rb_mExt);
-    Init_WindowBase(rb_mExt);
-    Init_Window(rb_mExt);
-    Init_RenderWindow(rb_mExt);
-    Init_Keyboard(rb_mExt);
-    Init_Mouse(rb_mExt);
-    Init_Joystick(rb_mExt);
-    Init_Touch(rb_mExt);
-    Init_Sensor(rb_mExt);
-    Init_Clipboard(rb_mExt);
-    Init_Cursor(rb_mExt);
-    Init_ContextSettings(rb_mExt);
-    Init_Context(rb_mExt);
-    Init_Vulkan(rb_mExt);
+    Init_Vector2(rb_mSystem);
+    Init_Vector3(rb_mSystem);
+    Init_Time(rb_mSystem);
+    Init_Sleep(rb_mSystem);
+    Init_Buffer(rb_mSystem);
+    Init_InputStream(rb_mSystem);
+    Init_Color(rb_mGraphics);
+    Init_Rect(rb_mGraphics);
+    Init_BlendMode(rb_mGraphics);
+    Init_StencilMode(rb_mGraphics);
+    Init_Image(rb_mGraphics);
+    Init_Texture(rb_mGraphics);
+    Init_Drawable(rb_mGraphics);
+    Init_Transform(rb_mGraphics);
+    Init_Transformable(rb_mGraphics);
+    Init_Clock(rb_mSystem);
+    Init_Target(rb_mGraphics);
+    Init_RenderState(rb_mGraphics);
+    Init_Shape(rb_mGraphics);
+    Init_Circle(rb_mGraphics);
+    Init_RectangleShape(rb_mGraphics);
+    Init_ConvexShape(rb_mGraphics);
+    Init_Sprite(rb_mGraphics);
+    Init_Vertex(rb_mGraphics);
+    Init_VertexArray(rb_mGraphics);
+    Init_VertexBuffer(rb_mGraphics);
+    Init_Glyph(rb_mGraphics);
+    Init_Font(rb_mGraphics);
+    Init_Text(rb_mGraphics);
+    Init_RenderTexture(rb_mGraphics);
+    Init_Shader(rb_mGraphics);
+    Init_Event(rb_mWindow);
+    Init_VideoMode(rb_mWindow);
+    Init_View(rb_mGraphics);
+    Init_WindowBase(rb_mWindow);
+    Init_Window(rb_mWindow);
+    Init_RenderWindow(rb_mGraphics);
+    Init_Keyboard(rb_mWindow);
+    Init_Mouse(rb_mWindow);
+    Init_Joystick(rb_mWindow);
+    Init_Touch(rb_mWindow);
+    Init_Sensor(rb_mWindow);
+    Init_Clipboard(rb_mWindow);
+    Init_Cursor(rb_mWindow);
+    Init_ContextSettings(rb_mWindow);
+    Init_Context(rb_mWindow);
+    Init_Vulkan(rb_mWindow);
 
     Init_EffectProcessor();
-    Init_AudioEnums(rb_mExt);
-    Init_SoundSourceCone(rb_mExt);
-    Init_Listener(rb_mExt);
-    Init_SoundBuffer(rb_mExt);
-    Init_SoundSource(rb_mExt);
-    Init_Sound(rb_mExt);
-    Init_SoundStream(rb_mExt);
-    Init_Music(rb_mExt);
-    Init_SoundRecorder(rb_mExt);
-    Init_SoundBufferRecorder(rb_mExt);
+    Init_AudioEnums(rb_mAudio);
+    Init_SoundSourceCone(rb_mAudio);
+    Init_Listener(rb_mAudio);
+    Init_SoundBuffer(rb_mAudio);
+    Init_SoundSource(rb_mAudio);
+    Init_Sound(rb_mAudio);
+    Init_SoundStream(rb_mAudio);
+    Init_Music(rb_mAudio);
+    Init_SoundRecorder(rb_mAudio);
+    Init_SoundBufferRecorder(rb_mAudio);
 
-    Init_NetworkEnums(rb_mExt);
-    Init_IpAddress(rb_mExt);
-    Init_Packet(rb_mExt);
-    Init_TcpSocket(rb_mExt);
-    Init_TcpListener(rb_mExt);
-    Init_UdpSocket(rb_mExt);
-    Init_SocketSelector(rb_mExt);
-    Init_Http(rb_mExt);
-    Init_Ftp(rb_mExt);
+    Init_NetworkEnums(rb_mNetwork);
+    Init_IpAddress(rb_mNetwork);
+    Init_Packet(rb_mNetwork);
+    Init_TcpSocket(rb_mNetwork);
+    Init_TcpListener(rb_mNetwork);
+    Init_UdpSocket(rb_mNetwork);
+    Init_SocketSelector(rb_mNetwork);
+    Init_Http(rb_mNetwork);
+    Init_Ftp(rb_mNetwork);
 }

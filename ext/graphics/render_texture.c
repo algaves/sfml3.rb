@@ -21,7 +21,7 @@ static void RenderTexture_free(void* ptr) {
 }
 
 static const rb_data_type_t RenderTexture_data_type = {
-    .wrap_struct_name = "SFML::RenderTexture",
+    .wrap_struct_name = "SF::Graphics::RenderTexture",
     .function = {.dmark = NULL, .dfree = RenderTexture_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -282,7 +282,7 @@ static VALUE RenderTexture_maximum_antialiasing_level(VALUE klass) {
 #undef RT_METHOD
 #undef RT_HANDLE
 
-/* Document-class: SFML::RenderTexture
+/* Document-class: SF::Graphics::RenderTexture
  * An off-screen render target backed by a Texture: anything drawable can be
  * drawn onto it, then read back via #texture (after #display).
  *
@@ -329,8 +329,8 @@ static VALUE RenderTexture_maximum_antialiasing_level(VALUE klass) {
  *   Draws a range of vertices from a VertexBuffer.
  *   @return [self]
  */
-void Init_RenderTexture(VALUE rb_mSFML) {
-    rb_cRenderTexture = rb_define_class_under(rb_mSFML, "RenderTexture", rb_cObject);
+void Init_RenderTexture(VALUE rb_mGraphics) {
+    rb_cRenderTexture = rb_define_class_under(rb_mGraphics, "RenderTexture", rb_cObject);
 
     rb_include_module(rb_cRenderTexture, Get_Module_RenderTarget());
 

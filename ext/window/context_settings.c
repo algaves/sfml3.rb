@@ -18,7 +18,7 @@ static void ContextSettings_free(void* ptr) {
 }
 
 static const rb_data_type_t ContextSettings_data_type = {
-    .wrap_struct_name = "SFML::ContextSettings",
+    .wrap_struct_name = "SF::Window::ContextSettings",
     .function = {.dmark = NULL, .dfree = ContextSettings_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -145,7 +145,7 @@ CONTEXT_SETTINGS_UINT_ACCESSOR(antialiasing_level, antiAliasingLevel)
 CONTEXT_SETTINGS_UINT_ACCESSOR(major_version, majorVersion)
 CONTEXT_SETTINGS_UINT_ACCESSOR(minor_version, minorVersion)
 
-/* Document-method: SFML::ContextSettings#attribute_flags
+/* Document-method: SF::Window::ContextSettings#attribute_flags
  * call-seq: attribute_flags -> Array<Symbol>
  *
  * Returns the context attribute flags as a list of symbols.
@@ -172,7 +172,7 @@ static VALUE ContextSettings_get_attribute_flags(VALUE self) {
     return array;
 }
 
-/* Document-method: SFML::ContextSettings#attribute_flags=
+/* Document-method: SF::Window::ContextSettings#attribute_flags=
  * call-seq: attribute_flags = value -> value
  *
  * Sets the context attribute flags from +value+, an Integer bitmask or a
@@ -231,7 +231,7 @@ static VALUE ContextSettings_set_srgb(VALUE self, VALUE rb_value) {
     return rb_value;
 }
 
-/* Document-class: SFML::ContextSettings
+/* Document-class: SF::Window::ContextSettings
  * Settings requested when creating a Window or Context: depth/stencil buffer
  * sizes, antialiasing level, requested OpenGL version, and attribute flags.
  *
@@ -256,8 +256,8 @@ static VALUE ContextSettings_set_srgb(VALUE self, VALUE rb_value) {
  *   Requested OpenGL minor version.
  *   @return [Integer] requested OpenGL minor version
  */
-void Init_ContextSettings(VALUE rb_mSFML) {
-    rb_cContextSettings = rb_define_class_under(rb_mSFML, "ContextSettings", rb_cObject);
+void Init_ContextSettings(VALUE rb_mWindow) {
+    rb_cContextSettings = rb_define_class_under(rb_mWindow, "ContextSettings", rb_cObject);
 
     rb_define_alloc_func(rb_cContextSettings, ContextSettings_alloc);
     rb_define_method(rb_cContextSettings, "initialize", ContextSettings_initialize, -1);

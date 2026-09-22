@@ -18,7 +18,7 @@ static void Color_free(void* ptr) {
 }
 
 static const rb_data_type_t Color_data_type = {
-    .wrap_struct_name = "SFML::Color",
+    .wrap_struct_name = "SF::Graphics::Color",
     .function = {.dmark = NULL, .dfree = Color_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -332,7 +332,7 @@ static VALUE Color_to_s(VALUE self) {
     return rb_str_new2(buffer);
 }
 
-/* Document-class: SFML::Color
+/* Document-class: SF::Graphics::Color
  * An RGBA color, each channel an Integer 0..255.
  *
  * @!attribute r
@@ -348,8 +348,8 @@ static VALUE Color_to_s(VALUE self) {
  *   The alpha component.
  *   @return [Integer] the alpha channel, 0..255
  */
-void Init_Color(VALUE rb_mSFML) {
-    rb_cColor = rb_define_class_under(rb_mSFML, "Color", rb_cObject);
+void Init_Color(VALUE rb_mGraphics) {
+    rb_cColor = rb_define_class_under(rb_mGraphics, "Color", rb_cObject);
 
     rb_define_alloc_func(rb_cColor, Color_alloc);
     rb_define_method(rb_cColor, "initialize", Color_initialize, -1);

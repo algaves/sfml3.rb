@@ -5,13 +5,13 @@
 
 #include "core/sfml.h"
 
-/* Which CSFML handle a wrapper owns. SFML::Window and SFML::RenderWindow wrap
+/* Which CSFML handle a wrapper owns. SF::Window::Window and SF::Graphics::RenderWindow wrap
    an sfRenderWindow and share every method with sfWindowBase_, but CSFML keys
    its destroy off the concrete type, so dfree has to know which one to call. */
 typedef enum { SFML_WINDOW_KIND_BASE, SFML_WINDOW_KIND_WINDOW } WindowKind;
 
-/* One C struct backs every window class. SFML::WindowBase owns an
-   sfWindowBase* and SFML::Window/RenderWindow an sfRenderWindow*; the handle is
+/* One C struct backs every window class. SF::Window::WindowBase owns an
+   sfWindowBase* and SF::Window::Window/RenderWindow an sfRenderWindow*; the handle is
    stored as void* and read back through the typed accessors below, one per
    class, so no cast ever crosses the two. */
 typedef struct {

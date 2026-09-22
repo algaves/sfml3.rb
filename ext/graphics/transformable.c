@@ -15,14 +15,14 @@
 #include "core/macros.h"
 #include "core/sfml.h"
 
-/* SFML::Transformable is a module, because in Ruby a type can only have one
+/* SF::Graphics::Transformable is a module, because in Ruby a type can only have one
    superclass: every drawable mixes it in for the spatial state that sf::Sprite,
-   sf::Text and the shapes each carry, while SFML::Drawable is the other mixin.
+   sf::Text and the shapes each carry, while SF::Graphics::Drawable is the other mixin.
    The methods are implemented once here and dispatched to the receiver's
    concrete CSFML entry points, so Sprite, Text, Shape and every shape subclass
    share a single body instead of thirteen copies apiece.
 
-   The standalone object is SFML::Transformable::Instance, an sfTransformable
+   The standalone object is SF::Graphics::Transformable::Instance, an sfTransformable
    wrapper that includes the module, and Transformable.new returns one so the
    old `Transformable.new` / `class X < Transformable` usage keeps working. */
 static VALUE rb_mTransformable;
@@ -38,7 +38,7 @@ static void TransformableInstance_free(void* ptr) {
 }
 
 static const rb_data_type_t TransformableInstance_data_type = {
-    .wrap_struct_name = "SFML::Transformable::Instance",
+    .wrap_struct_name = "SF::Graphics::Transformable::Instance",
     .function = {.dmark = NULL, .dfree = TransformableInstance_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -405,22 +405,22 @@ static VALUE TransformableInstance_initialize(VALUE self) {
     return self;
 }
 
-/* Document-class: SFML::Transformable::Instance
+/* Document-class: SF::Graphics::Transformable::Instance
  * @private
  *
  * The concrete standalone transformable behind Transformable.new. It is an
- * implementation detail: mix SFML::Transformable into your own class, or call
+ * implementation detail: mix SF::Graphics::Transformable into your own class, or call
  * Transformable.new, rather than referencing this class directly.
  */
 
-/* Document-module: SFML::Transformable
+/* Document-module: SF::Graphics::Transformable
  * A mixin providing the spatial state every drawable in SFML carries --
  * position, rotation, scale and origin, with the #move/#rotate/#scale!
  * mutators and the #transform/#inverse_transform matrices. Included by
- * SFML::Sprite, SFML::Text and SFML::Shape (and so by CircleShape,
+ * SF::Graphics::Sprite, SF::Graphics::Text and SF::Graphics::Shape (and so by CircleShape,
  * RectangleShape and ConvexShape).
  *
- * The standalone SFML::Transformable::Instance (returned by Transformable.new) is
+ * The standalone SF::Graphics::Transformable::Instance (returned by Transformable.new) is
  * the same state decoupled from any drawable.
  *
  * @!attribute position
@@ -436,8 +436,8 @@ static VALUE TransformableInstance_initialize(VALUE self) {
  *   The object's origin, the center of rotation and scaling.
  *   @return [Vector2]
  */
-void Init_Transformable(VALUE rb_mSFML) {
-    rb_mTransformable = rb_define_module_under(rb_mSFML, "Transformable");
+void Init_Transformable(VALUE rb_mGraphics) {
+    rb_mTransformable = rb_define_module_under(rb_mGraphics, "Transformable");
     rb_cTransformableInstance = rb_define_class_under(rb_mTransformable, "Instance", rb_cObject);
 
     rb_include_module(rb_cTransformableInstance, rb_mTransformable);

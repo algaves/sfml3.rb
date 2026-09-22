@@ -6,7 +6,7 @@
 
    CSFML gives sfRenderWindow and sfRenderTexture identical render-target
    surfaces under two name prefixes, so RT_FN is the only thing that differs.
-   SFML::Target still exists for the runtime-dispatch case (Drawable#draw); this
+   SF::Graphics::Target still exists for the runtime-dispatch case (Drawable#draw); this
    file is about the methods each concrete target owns directly. */
 
 #include "graphics/enums.h"

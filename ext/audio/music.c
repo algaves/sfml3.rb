@@ -56,7 +56,7 @@ static void Music_free(void* ptr) {
    "object allocation during garbage collection phase". Deferred finalization
    runs the same free with the GVL held and no GC in progress. */
 static const rb_data_type_t Music_data_type = {
-    .wrap_struct_name = "SFML::Music",
+    .wrap_struct_name = "SF::Audio::Music",
     .function = {.dmark = Music_mark, .dfree = Music_free, .dsize = NULL}};
 
 static VALUE Music_wrap(VALUE klass, sfMusic* handle, VALUE rb_stream) {
@@ -175,7 +175,7 @@ static VALUE Music_channel_map(VALUE self) {
 }
 
 /* Loop points are an offset plus a length, matching sfTimeSpan. Returned as a
-   two-element [offset, length] pair of SFML::Time. */
+   two-element [offset, length] pair of SF::System::Time. */
 /* call-seq: loop_points -> [Time, Time]
  *
  * Returns the loop points as an +[offset, length]+ pair.
@@ -222,7 +222,7 @@ static VALUE Music_alloc(VALUE klass) {
     rb_raise(rb_eNotImpError, "use Music.from_file, Music.from_memory or Music.from_stream");
 }
 
-/* Document-class: SFML::Music
+/* Document-class: SF::Audio::Music
  * Music streamed from a file, memory buffer or InputStream rather than held
  * fully decoded in memory, so it's suited to long tracks that would be
  * wasteful to load whole as a SoundBuffer. Derives from SoundStream (and so
@@ -355,8 +355,8 @@ static VALUE Music_alloc(VALUE klass) {
  *   Installs a Proc that post-processes this source's audio in real time.
  *   @return [Proc] +proc+
  */
-void Init_Music(VALUE rb_mSFML) {
-    rb_cMusic = rb_define_class_under(rb_mSFML, "Music", Get_Klass_SoundStream());
+void Init_Music(VALUE rb_mAudio) {
+    rb_cMusic = rb_define_class_under(rb_mAudio, "Music", Get_Klass_SoundStream());
     rb_define_alloc_func(rb_cMusic, Music_alloc);
 
     rb_define_singleton_method(rb_cMusic, "from_file", Music_from_file, 1);

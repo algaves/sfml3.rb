@@ -16,7 +16,7 @@ static void Glyph_free(void* ptr) {
 }
 
 static const rb_data_type_t Glyph_data_type = {
-    .wrap_struct_name = "SFML::Glyph",
+    .wrap_struct_name = "SF::Graphics::Glyph",
     .function = {.dmark = NULL, .dfree = Glyph_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -72,12 +72,12 @@ static VALUE Glyph_alloc(VALUE klass) {
              "glyph objects are returned by Font#glyph and cannot be constructed directly");
 }
 
-/* Document-class: SFML::Glyph
+/* Document-class: SF::Graphics::Glyph
  * A single character's rendering metrics and texture location, as returned
  * by Font#glyph. Read-only.
  */
-void Init_Glyph(VALUE rb_mSFML) {
-    rb_cGlyph = rb_define_class_under(rb_mSFML, "Glyph", rb_cObject);
+void Init_Glyph(VALUE rb_mGraphics) {
+    rb_cGlyph = rb_define_class_under(rb_mGraphics, "Glyph", rb_cObject);
     rb_define_alloc_func(rb_cGlyph, Glyph_alloc);
 
     rb_define_method(rb_cGlyph, "advance", Glyph_get_advance, 0);

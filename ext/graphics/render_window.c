@@ -35,14 +35,14 @@ static VALUE RenderWindow_draw(int argc, VALUE* argv, VALUE self) {
     return self;
 }
 
-/* Document-class: SFML::RenderWindow
- * A SFML::Window that is also a SFML::RenderTarget, so it can be handed
+/* Document-class: SF::Graphics::RenderWindow
+ * A SF::Window::Window that is also a SF::Graphics::RenderTarget, so it can be handed
  * directly to a drawable's #draw as well as drawn into with #draw. Creation,
  * events and every window method come from Window (and WindowBase); the
- * render-target surface is listed on SFML::RenderTarget.
+ * render-target surface is listed on SF::Graphics::RenderTarget.
  */
-void Init_RenderWindow(VALUE rb_mSFML) {
-    rb_cRenderWindow = rb_define_class_under(rb_mSFML, "RenderWindow", Get_Klass_Window());
+void Init_RenderWindow(VALUE rb_mGraphics) {
+    rb_cRenderWindow = rb_define_class_under(rb_mGraphics, "RenderWindow", Get_Klass_Window());
 
     rb_define_alloc_func(rb_cRenderWindow, Window_alloc);
     rb_define_method(rb_cRenderWindow, "draw", RenderWindow_draw, -1);

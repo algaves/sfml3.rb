@@ -19,7 +19,7 @@ static void VertexArray_free(void* ptr) {
 }
 
 static const rb_data_type_t VertexArray_data_type = {
-    .wrap_struct_name = "SFML::VertexArray",
+    .wrap_struct_name = "SF::Graphics::VertexArray",
     .function = {.dmark = NULL, .dfree = VertexArray_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -211,7 +211,7 @@ static VALUE VertexArray_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
     return Qnil;
 }
 
-/* Document-class: SFML::VertexArray
+/* Document-class: SF::Graphics::VertexArray
  * A resizable, drawable set of Vertex objects interpreted as a given
  * primitive type (points, lines, triangles, ...).
  *
@@ -221,8 +221,8 @@ static VALUE VertexArray_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
  *   The primitive type used to draw the vertices.
  *   @return [Symbol]
  */
-void Init_VertexArray(VALUE rb_mSFML) {
-    rb_cVertexArray = rb_define_class_under(rb_mSFML, "VertexArray", rb_cObject);
+void Init_VertexArray(VALUE rb_mGraphics) {
+    rb_cVertexArray = rb_define_class_under(rb_mGraphics, "VertexArray", rb_cObject);
 
     rb_define_alloc_func(rb_cVertexArray, VertexArray_alloc);
 

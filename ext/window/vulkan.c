@@ -58,12 +58,12 @@ static VALUE Vulkan_get_graphics_required_instance_extensions(VALUE module) {
     return array;
 }
 
-/* Document-module: SFML::Vulkan
+/* Document-module: SF::Window::Vulkan
  * Vulkan support queries. Vulkan handles (instances, surfaces, allocators)
  * cross this binding as plain Integers; see Window#create_vulkan_surface.
  */
-void Init_Vulkan(VALUE rb_mSFML) {
-    VALUE rb_mVulkan = rb_define_module_under(rb_mSFML, "Vulkan");
+void Init_Vulkan(VALUE rb_mWindow) {
+    VALUE rb_mVulkan = rb_define_module_under(rb_mWindow, "Vulkan");
 
     rb_define_module_function(rb_mVulkan, "available?", Vulkan_is_available, -1);
     rb_define_module_function(rb_mVulkan, "function", Vulkan_get_function, 1);

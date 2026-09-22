@@ -32,7 +32,7 @@ static void VideoMode_free(void* ptr) {
 }
 
 static const rb_data_type_t VideoMode_data_type = {
-    .wrap_struct_name = "SFML::VideoMode",
+    .wrap_struct_name = "SF::Window::VideoMode",
     .function = {.dmark = NULL, .dfree = VideoMode_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -147,7 +147,7 @@ static VALUE VideoMode_eql(VALUE self, VALUE rb_other) {
                    a.bitsPerPixel == b.bitsPerPixel);
 }
 
-/* Document-class: SFML::VideoMode
+/* Document-class: SF::Window::VideoMode
  * A width/height/bits-per-pixel triple describing a display mode, as used
  * for fullscreen windows.
  *
@@ -167,8 +167,8 @@ static VALUE VideoMode_eql(VALUE self, VALUE rb_other) {
  *   Bits per pixel.
  *   @return [Integer] bits per pixel
  */
-void Init_VideoMode(VALUE rb_mSFML) {
-    rb_cMode = rb_define_class_under(rb_mSFML, "VideoMode", rb_cObject);
+void Init_VideoMode(VALUE rb_mWindow) {
+    rb_cMode = rb_define_class_under(rb_mWindow, "VideoMode", rb_cObject);
 
     rb_define_alloc_func(rb_cMode, VideoMode_alloc);
     rb_define_method(rb_cMode, "initialize", VideoMode_initialize, 3);

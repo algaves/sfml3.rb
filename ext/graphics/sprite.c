@@ -35,7 +35,7 @@ static void Sprite_free(void* ptr) {
 }
 
 static const rb_data_type_t Sprite_data_type = {
-    .wrap_struct_name = "SFML::Sprite",
+    .wrap_struct_name = "SF::Graphics::Sprite",
     .function = {.dmark = Sprite_mark, .dfree = Sprite_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -255,7 +255,7 @@ static VALUE Sprite_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
     return Qnil;
 }
 
-/* Document-class: SFML::Sprite
+/* Document-class: SF::Graphics::Sprite
  * A drawable representation of a Texture (or a sub-rectangle of one),
  * positioned, rotated, scaled and tinted like any other Transformable
  * object.
@@ -284,8 +284,8 @@ static VALUE Sprite_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
  *   The object's origin.
  *   @return [Vector2]
  */
-void Init_Sprite(VALUE rb_mSFML) {
-    rb_cSprite = rb_define_class_under(rb_mSFML, "Sprite", rb_cObject);
+void Init_Sprite(VALUE rb_mGraphics) {
+    rb_cSprite = rb_define_class_under(rb_mGraphics, "Sprite", rb_cObject);
 
     rb_define_alloc_func(rb_cSprite, Sprite_alloc);
 

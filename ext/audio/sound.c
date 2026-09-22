@@ -54,7 +54,7 @@ static void Sound_free(void* ptr) {
    "object allocation during garbage collection phase". Deferred finalization
    runs the same free with the GVL held and no GC in progress. */
 static const rb_data_type_t Sound_data_type = {
-    .wrap_struct_name = "SFML::Sound",
+    .wrap_struct_name = "SF::Audio::Sound",
     .function = {.dmark = Sound_mark, .dfree = Sound_free, .dsize = NULL}};
 
 static VALUE Sound_wrap(VALUE klass, sfSound* handle, VALUE rb_buffer) {
@@ -200,7 +200,7 @@ static VALUE Sound_set_buffer(VALUE self, VALUE rb_buffer) {
 #undef SS_FN
 #undef SS_METHOD
 
-/* Document-class: SFML::Sound
+/* Document-class: SF::Audio::Sound
  * A sound playing directly from a SoundBuffer held fully in memory. Suited
  * to short effects; for long files prefer Music, which streams instead.
  * Derives from SoundSource.
@@ -332,8 +332,8 @@ static VALUE Sound_set_buffer(VALUE self, VALUE rb_buffer) {
  *   Installs a Proc that post-processes this source's audio in real time.
  *   @return [Proc] +proc+
  */
-void Init_Sound(VALUE rb_mSFML) {
-    rb_cSound = rb_define_class_under(rb_mSFML, "Sound", Get_Klass_SoundSource());
+void Init_Sound(VALUE rb_mAudio) {
+    rb_cSound = rb_define_class_under(rb_mAudio, "Sound", Get_Klass_SoundSource());
 
     rb_define_alloc_func(rb_cSound, Sound_alloc);
     rb_define_method(rb_cSound, "initialize", Sound_initialize, 1);

@@ -42,7 +42,7 @@ static VALUE Sensor_get_value(VALUE module, VALUE rb_type) {
     return vec3f_to_rb(sfSensor_getValue(sensor_type_from_rb(rb_type)));
 }
 
-/* Document-module: SFML::Sensor
+/* Document-module: SF::Window::Sensor
  * Access to hardware sensors (accelerometer, gyroscope, etc.), mainly
  * relevant on mobile platforms.
  *
@@ -53,8 +53,8 @@ static VALUE Sensor_get_value(VALUE module, VALUE rb_type) {
  *   Disables sensor +type+. Rubyesque (Matz-like) over +set_enabled(type, false)+.
  *   @return [Boolean] +false+
  */
-void Init_Sensor(VALUE rb_mSFML) {
-    VALUE rb_mSensor = rb_define_module_under(rb_mSFML, "Sensor");
+void Init_Sensor(VALUE rb_mWindow) {
+    VALUE rb_mSensor = rb_define_module_under(rb_mWindow, "Sensor");
 
     rb_define_module_function(rb_mSensor, "available?", Sensor_is_available, 1);
     rb_define_module_function(rb_mSensor, "set_enabled", Sensor_set_enabled, 2);

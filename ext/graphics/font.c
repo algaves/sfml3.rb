@@ -15,7 +15,7 @@ static void Font_free(void* ptr) {
 }
 
 static const rb_data_type_t Font_data_type = {
-    .wrap_struct_name = "SFML::Font",
+    .wrap_struct_name = "SF::Graphics::Font",
     .function = {.dmark = NULL, .dfree = Font_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -230,12 +230,12 @@ static VALUE Font_alloc(VALUE klass) {
     rb_raise(rb_eNotImpError, "use Font.from_file, Font.from_memory or Font.from_stream");
 }
 
-/* Document-class: SFML::Font
+/* Document-class: SF::Graphics::Font
  * A font face used to render text, loaded from a file, memory buffer or
  * stream. Glyphs are rasterized and cached lazily per character size.
  */
-void Init_Font(VALUE rb_mSFML) {
-    rb_cFont = rb_define_class_under(rb_mSFML, "Font", rb_cObject);
+void Init_Font(VALUE rb_mGraphics) {
+    rb_cFont = rb_define_class_under(rb_mGraphics, "Font", rb_cObject);
     rb_define_alloc_func(rb_cFont, Font_alloc);
 
     rb_define_singleton_method(rb_cFont, "from_file", Font_from_file, 1);

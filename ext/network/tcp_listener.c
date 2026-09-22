@@ -25,7 +25,7 @@ static void TcpListener_free(void* ptr) {
 }
 
 static const rb_data_type_t TcpListener_data_type = {
-    .wrap_struct_name = "SFML::TcpListener",
+    .wrap_struct_name = "SF::Network::TcpListener",
     .function = {.dmark = NULL, .dfree = TcpListener_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -149,12 +149,12 @@ static VALUE TcpListener_accept(VALUE self) {
     return rb_result;
 }
 
-/* Document-class: SFML::TcpListener
+/* Document-class: SF::Network::TcpListener
  * Listens for and accepts incoming TCP connections, producing connected
  * TcpSocket instances.
  */
-void Init_TcpListener(VALUE rb_mSFML) {
-    rb_cTcpListener = rb_define_class_under(rb_mSFML, "TcpListener", rb_cObject);
+void Init_TcpListener(VALUE rb_mNetwork) {
+    rb_cTcpListener = rb_define_class_under(rb_mNetwork, "TcpListener", rb_cObject);
     rb_define_alloc_func(rb_cTcpListener, TcpListener_alloc);
 
     rb_define_method(rb_cTcpListener, "initialize", TcpListener_initialize, 0);

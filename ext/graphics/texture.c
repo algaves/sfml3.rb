@@ -32,7 +32,7 @@ static void Texture_free(void* ptr) {
 }
 
 static const rb_data_type_t Texture_data_type = {
-    .wrap_struct_name = "SFML::Texture",
+    .wrap_struct_name = "SF::Graphics::Texture",
     .function = {.dmark = NULL, .dfree = Texture_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -616,15 +616,15 @@ static VALUE Texture_maximum_size(VALUE klass) {
     return UINT2NUM(sfTexture_getMaximumSize());
 }
 
-/* Document-class: SFML::Texture
+/* Document-class: SF::Graphics::Texture
  * An image living in GPU memory, usable for rendering (Sprite, Text,
  * Shape) or as a render target (RenderTexture#texture).
  *
  * #smooth?/#smooth=, #srgb?, and #repeated?/#repeated= control sampling;
  * see each method for details.
  */
-void Init_Texture(VALUE rb_mSFML) {
-    rb_cTexture = rb_define_class_under(rb_mSFML, "Texture", rb_cObject);
+void Init_Texture(VALUE rb_mGraphics) {
+    rb_cTexture = rb_define_class_under(rb_mGraphics, "Texture", rb_cObject);
 
     rb_define_alloc_func(rb_cTexture, Texture_alloc);
     rb_define_method(rb_cTexture, "initialize", Texture_initialize, 1);

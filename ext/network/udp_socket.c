@@ -25,7 +25,7 @@ static void UdpSocket_free(void* ptr) {
 }
 
 static const rb_data_type_t UdpSocket_data_type = {
-    .wrap_struct_name = "SFML::UdpSocket",
+    .wrap_struct_name = "SF::Network::UdpSocket",
     .function = {.dmark = NULL, .dfree = UdpSocket_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -213,11 +213,11 @@ static VALUE UdpSocket_receive(int argc, VALUE* argv, VALUE self) {
  * Sends +packet+ as a datagram to the given +address+ and +port+.
  *
  * @return [Symbol] a SocketStatus name, +:done+ on success
- * @raise [TypeError] if +packet+ is not an SFML::Packet
+ * @raise [TypeError] if +packet+ is not an SF::Network::Packet
  */
 static VALUE UdpSocket_send_packet(VALUE self, VALUE rb_packet, VALUE rb_address, VALUE rb_port) {
     if (!rb_obj_is_kind_of(rb_packet, Get_Klass_Packet())) {
-        rb_raise(rb_eTypeError, "expected an SFML::Packet");
+        rb_raise(rb_eTypeError, "expected an SF::Network::Packet");
     }
 
     return ID2SYM(rb_intern(socket_status_name(sfUdpSocket_sendPacket(
@@ -233,7 +233,7 @@ static VALUE UdpSocket_send_packet(VALUE self, VALUE rb_packet, VALUE rb_address
  * sender.
  *
  * @return [Array(IpAddress, Integer, Symbol)]
- * @raise [TypeError] if +packet+ is not an SFML::Packet
+ * @raise [TypeError] if +packet+ is not an SF::Network::Packet
  */
 static VALUE UdpSocket_receive_packet(VALUE self, VALUE rb_packet) {
     sfIpAddress remote_address = sfIpAddress_None;
@@ -242,7 +242,7 @@ static VALUE UdpSocket_receive_packet(VALUE self, VALUE rb_packet) {
     VALUE rb_result;
 
     if (!rb_obj_is_kind_of(rb_packet, Get_Klass_Packet())) {
-        rb_raise(rb_eTypeError, "expected an SFML::Packet");
+        rb_raise(rb_eTypeError, "expected an SF::Network::Packet");
     }
 
     status = sfUdpSocket_receivePacket(Get_UdpSocket_Struct(self), Get_Packet_Struct(rb_packet),
@@ -256,13 +256,13 @@ static VALUE UdpSocket_receive_packet(VALUE self, VALUE rb_packet) {
     return rb_result;
 }
 
-/* Document-class: SFML::UdpSocket
+/* Document-class: SF::Network::UdpSocket
  * A connectionless, unreliable, datagram-oriented socket for UDP
  * communication. Datagrams may be lost, duplicated or arrive out of order,
  * and are capped at .max_datagram_size bytes.
  */
-void Init_UdpSocket(VALUE rb_mSFML) {
-    rb_cUdpSocket = rb_define_class_under(rb_mSFML, "UdpSocket", rb_cObject);
+void Init_UdpSocket(VALUE rb_mNetwork) {
+    rb_cUdpSocket = rb_define_class_under(rb_mNetwork, "UdpSocket", rb_cObject);
     rb_define_alloc_func(rb_cUdpSocket, UdpSocket_alloc);
 
     rb_define_method(rb_cUdpSocket, "initialize", UdpSocket_initialize, 0);

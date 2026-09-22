@@ -60,11 +60,11 @@ static VALUE Touch_get_position(int argc, VALUE* argv, VALUE module) {
     return vec2f_to_rb((sfVector2f){(float)position.x, (float)position.y});
 }
 
-/* Document-module: SFML::Touch
+/* Document-module: SF::Window::Touch
  * Real-time touch-screen state.
  */
-void Init_Touch(VALUE rb_mSFML) {
-    VALUE rb_mTouch = rb_define_module_under(rb_mSFML, "Touch");
+void Init_Touch(VALUE rb_mWindow) {
+    VALUE rb_mTouch = rb_define_module_under(rb_mWindow, "Touch");
 
     rb_define_module_function(rb_mTouch, "down?", Touch_is_down, 1);
     rb_define_module_function(rb_mTouch, "position", Touch_get_position, -1);

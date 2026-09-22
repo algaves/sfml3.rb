@@ -18,7 +18,7 @@ static void IpAddress_free(void* ptr) {
 }
 
 static const rb_data_type_t IpAddress_data_type = {
-    .wrap_struct_name = "SFML::IpAddress",
+    .wrap_struct_name = "SF::Network::IpAddress",
     .function = {.dmark = NULL, .dfree = IpAddress_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -190,11 +190,11 @@ static VALUE IpAddress_hash(VALUE self) {
     return UINT2NUM(sfIpAddress_toInteger(((IpAddress*)Get_IpAddress_Struct(self))->address));
 }
 
-/* Document-class: SFML::IpAddress
+/* Document-class: SF::Network::IpAddress
  * An IPv4 network address.
  */
-void Init_IpAddress(VALUE rb_mSFML) {
-    rb_cIpAddress = rb_define_class_under(rb_mSFML, "IpAddress", rb_cObject);
+void Init_IpAddress(VALUE rb_mNetwork) {
+    rb_cIpAddress = rb_define_class_under(rb_mNetwork, "IpAddress", rb_cObject);
     rb_define_alloc_func(rb_cIpAddress, IpAddress_alloc);
 
     rb_define_method(rb_cIpAddress, "initialize", IpAddress_initialize, 1);

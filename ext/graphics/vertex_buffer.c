@@ -23,7 +23,7 @@ static void VertexBuffer_free(void* ptr) {
 }
 
 static const rb_data_type_t VertexBuffer_data_type = {
-    .wrap_struct_name = "SFML::VertexBuffer",
+    .wrap_struct_name = "SF::Graphics::VertexBuffer",
     .function = {.dmark = NULL, .dfree = VertexBuffer_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -316,7 +316,7 @@ static VALUE VertexBuffer_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
     return Qnil;
 }
 
-/* Document-class: SFML::VertexBuffer
+/* Document-class: SF::Graphics::VertexBuffer
  * Like VertexArray, but the vertex data lives in GPU memory rather than
  * being re-uploaded on every draw -- more efficient for large, static
  * or semi-static vertex sets.
@@ -330,8 +330,8 @@ static VALUE VertexBuffer_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
  *   The buffer's usage hint.
  *   @return [Symbol] one of :stream, :dynamic, :static
  */
-void Init_VertexBuffer(VALUE rb_mSFML) {
-    rb_cVertexBuffer = rb_define_class_under(rb_mSFML, "VertexBuffer", rb_cObject);
+void Init_VertexBuffer(VALUE rb_mGraphics) {
+    rb_cVertexBuffer = rb_define_class_under(rb_mGraphics, "VertexBuffer", rb_cObject);
 
     rb_define_alloc_func(rb_cVertexBuffer, VertexBuffer_alloc);
 

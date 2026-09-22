@@ -35,13 +35,13 @@ static VALUE Drawable_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
     return Qnil;
 }
 
-/* Document-module: SFML::Drawable
+/* Document-module: SF::Graphics::Drawable
  * A mixin for anything that can be drawn to a render target (RenderWindow,
  * RenderTexture -- both include RenderTarget -- or a legacy Target) via
  * #draw(target, state).
  */
-void Init_Drawable(VALUE rb_mSFML) {
-    rb_mDrawable = rb_define_module_under(rb_mSFML, "Drawable");
+void Init_Drawable(VALUE rb_mGraphics) {
+    rb_mDrawable = rb_define_module_under(rb_mGraphics, "Drawable");
 
     rb_define_method(rb_mDrawable, "draw", Drawable_draw, 2);
 }

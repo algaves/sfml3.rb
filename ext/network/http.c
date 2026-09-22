@@ -45,17 +45,17 @@ static void HttpResponse_free(void* ptr) {
 }
 
 static const rb_data_type_t Http_data_type = {
-    .wrap_struct_name = "SFML::Http",
+    .wrap_struct_name = "SF::Network::Http",
     .function = {.dmark = NULL, .dfree = Http_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
 static const rb_data_type_t HttpRequest_data_type = {
-    .wrap_struct_name = "SFML::HttpRequest",
+    .wrap_struct_name = "SF::Network::HttpRequest",
     .function = {.dmark = NULL, .dfree = HttpRequest_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
 static const rb_data_type_t HttpResponse_data_type = {
-    .wrap_struct_name = "SFML::HttpResponse",
+    .wrap_struct_name = "SF::Network::HttpResponse",
     .function = {.dmark = NULL, .dfree = HttpResponse_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -145,7 +145,7 @@ static VALUE Http_set_host(VALUE self, VALUE rb_host, VALUE rb_port) {
  * response arrives or +timeout+ elapses.
  *
  * @return [HttpResponse]
- * @raise [TypeError] if +request+ is not an SFML::HttpRequest
+ * @raise [TypeError] if +request+ is not an SF::Network::HttpRequest
  */
 static VALUE Http_send_request(int argc, VALUE* argv, VALUE self) {
     VALUE rb_request, rb_timeout;
@@ -154,7 +154,7 @@ static VALUE Http_send_request(int argc, VALUE* argv, VALUE self) {
     rb_scan_args(argc, argv, "11", &rb_request, &rb_timeout);
 
     if (!rb_obj_is_kind_of(rb_request, rb_cHttpRequest)) {
-        rb_raise(rb_eTypeError, "expected an SFML::HttpRequest");
+        rb_raise(rb_eTypeError, "expected an SF::Network::HttpRequest");
     }
 
     if (!NIL_P(rb_timeout)) {
@@ -309,22 +309,22 @@ static VALUE HttpResponse_body(VALUE self) {
     return rb_str_new_cstr(sfHttpResponse_getBody(Get_HttpResponse_Struct(self)));
 }
 
-/* Document-class: SFML::Http
+/* Document-class: SF::Network::Http
  * A basic HTTP client for performing requests against one host at a time
  * (set with #set_host).
  */
-void Init_Http(VALUE rb_mSFML) {
-    rb_cHttp = rb_define_class_under(rb_mSFML, "Http", rb_cObject);
+void Init_Http(VALUE rb_mNetwork) {
+    rb_cHttp = rb_define_class_under(rb_mNetwork, "Http", rb_cObject);
     rb_define_alloc_func(rb_cHttp, Http_alloc);
-    /* Document-class: SFML::HttpRequest
+    /* Document-class: SF::Network::HttpRequest
      * An HTTP request to send via Http#send_request.
      */
-    rb_cHttpRequest = rb_define_class_under(rb_mSFML, "HttpRequest", rb_cObject);
+    rb_cHttpRequest = rb_define_class_under(rb_mNetwork, "HttpRequest", rb_cObject);
     rb_define_alloc_func(rb_cHttpRequest, HttpRequest_alloc);
-    /* Document-class: SFML::HttpResponse
+    /* Document-class: SF::Network::HttpResponse
      * The status, headers and body returned by Http#send_request.
      */
-    rb_cHttpResponse = rb_define_class_under(rb_mSFML, "HttpResponse", rb_cObject);
+    rb_cHttpResponse = rb_define_class_under(rb_mNetwork, "HttpResponse", rb_cObject);
     rb_define_alloc_func(rb_cHttpResponse, HttpResponse_alloc);
 
     rb_define_method(rb_cHttp, "initialize", Http_initialize, 0);

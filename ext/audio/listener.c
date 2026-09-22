@@ -143,13 +143,13 @@ static VALUE Listener_set_cone(VALUE module, VALUE rb_value) {
     return rb_value;
 }
 
-/* Document-module: SFML::Listener
+/* Document-module: SF::Audio::Listener
  * Module functions controlling the single global audio listener: its
  * position, orientation and volume, against which every SoundSource's
  * spatialization is computed.
  */
-void Init_Listener(VALUE rb_mSFML) {
-    VALUE rb_mListener = rb_define_module_under(rb_mSFML, "Listener");
+void Init_Listener(VALUE rb_mAudio) {
+    VALUE rb_mListener = rb_define_module_under(rb_mAudio, "Listener");
 
     rb_define_module_function(rb_mListener, "global_volume", Listener_global_volume, 0);
     rb_define_module_function(rb_mListener, "global_volume=", Listener_set_global_volume, 1);

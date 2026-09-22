@@ -99,22 +99,22 @@ sfSoundChannel sound_channel_from_rb(VALUE rb_channel) {
     return (sfSoundChannel)index;
 }
 
-/* Document-module: SFML::SoundStatus
+/* Document-module: SF::Audio::SoundStatus
  * Playback state constants returned by SoundSource#status (Sound, Music,
  * SoundStream). Mirrored as symbols (+:stopped+, +:paused+, +:playing+) by
  * that method rather than these Integer constants, but both refer to the
  * same underlying values.
  */
 
-/* Document-module: SFML::SoundChannel
+/* Document-module: SF::Audio::SoundChannel
  * Speaker position constants used in a channel map (SoundBuffer#channel_map,
  * Music#channel_map, SoundStream#channel_map, SoundRecorder#channel_map),
  * mirrored as symbols (e.g. +:front_left+) rather than these Integer
  * constants in those methods.
  */
-void Init_AudioEnums(VALUE rb_mSFML) {
-    VALUE rb_mSoundStatus = rb_define_module_under(rb_mSFML, "SoundStatus");
-    VALUE rb_mSoundChannel = rb_define_module_under(rb_mSFML, "SoundChannel");
+void Init_AudioEnums(VALUE rb_mAudio) {
+    VALUE rb_mSoundStatus = rb_define_module_under(rb_mAudio, "SoundStatus");
+    VALUE rb_mSoundChannel = rb_define_module_under(rb_mAudio, "SoundChannel");
 
     /* The source is not playing. */
     rb_define_const(rb_mSoundStatus, "STOPPED", INT2NUM(sfStopped));
