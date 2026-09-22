@@ -111,7 +111,11 @@ gem install sfml3-rb -- --enable-system-libraries
 
 ```ruby
 require 'sfml'
-include SFML
+include SF::Window
+include SF::Graphics
+include SF::System
+include SF::Audio
+include SF::Network
 
 window = Window.new VideoMode[640, 480, 32], 'SFML'
 
@@ -262,7 +266,7 @@ Clipboard.clear!
 
 ```ruby
 elapsed = Clock.measure do
-  SFML::Sleep.sleep!(Time.seconds(0.5))
+  SF::System::Sleep.sleep!(Time.seconds(0.5))
 end
 
 puts "Executed in #{elapsed.as_seconds}s"
@@ -295,7 +299,7 @@ called it. The primary names are the right-hand column.
 | `Keyboard.pressed?`             | `Keyboard.key_pressed?`                       |
 | `Joystick.has_axis?`            | `Joystick.axis?`                              |
 | `Clipboard.string` / `string=`  | `Clipboard.content` / `content=`              |
-| `SFML.sleep`                    | `SFML.sleep!` (or `SFML::Sleep.sleep!`)       |
+| `SF.sleep`                    | `SF.sleep!` (or `SF::System::Sleep.sleep!`)       |
 
 The Rubyesque layer also fills gaps the native surface leaves: `WindowBase.open` and `window.render!`,
 `SoundBufferRecorder.record!`, `Clock.measure`, `Sensor.enable!`/`disable!`,
@@ -370,16 +374,16 @@ devices), `graphics/` (shapes, Color, Transform, View, Texture, Text, Shader, th
 Three `.inc` files hold method bodies shared by several classes and are included once per class
 with a different macro prefix: `audio/sound_source.inc` (Sound, Music, SoundStream),
 `window/window_base.inc` (WindowBase, Window) and `graphics/render_target.inc` (Window,
-RenderTexture). `SFML::RenderWindow < SFML::Window < SFML::WindowBase` and includes the
-`SFML::RenderTarget` module, so a drawable's `#draw` accepts a `RenderWindow` or a
-`RenderTexture` directly; `SFML::Target` remains as the legacy generic wrapper.
+RenderTexture). `SF::Graphics::RenderWindow < SF::Window::Window < SF::Window::WindowBase` and includes the
+`SF::Graphics::RenderTarget` module, so a drawable's `#draw` accepts a `RenderWindow` or a
+`RenderTexture` directly; `SF::Graphics::Target` remains as the legacy generic wrapper.
 
-The class hierarchy mirrors SFML's own. `SFML::Drawable` is a mixin included by every drawable;
-`SFML::Transformable` is a mixin included by `Sprite`, `Text` and `Shape`, whose position/rotation/
+The class hierarchy mirrors SFML's own. `SF::Graphics::Drawable` is a mixin included by every drawable;
+`SF::Graphics::Transformable` is a mixin included by `Sprite`, `Text` and `Shape`, whose position/rotation/
 scale/origin surface is implemented once and dispatched to each class's CSFML entry point. `Shape`
 is the base of `CircleShape` (also available as `Circle`), `RectangleShape` and `ConvexShape`. On
-the audio side `SFML::SoundSource` is the base of `Sound`, `SoundStream` and `Music`, and
-`SFML::Music < SFML::SoundStream`, with `SFML::SoundBufferRecorder < SFML::SoundRecorder`.
+the audio side `SF::Audio::SoundSource` is the base of `Sound`, `SoundStream` and `Music`, and
+`SF::Audio::Music < SF::Audio::SoundStream`, with `SF::Audio::SoundBufferRecorder < SF::Audio::SoundRecorder`.
 
 Note that mkmf flattens object files to their basenames, so every `.c` filename has to stay
 unique across the whole tree — and that `$srcs` is baked into the generated Makefile, so after

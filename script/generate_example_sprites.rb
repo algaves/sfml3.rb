@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Regenerates examples/assets/sprites.png, the only image the examples bundle.
-# It draws each cell with SFML::Image so the art is reproducible from the
+# It draws each cell with SF::Graphics::Image so the art is reproducible from the
 # binding itself (no ImageMagick dependency):
 #
 #   bundle exec ruby -Ilib script/generate_example_sprites.rb
@@ -25,7 +25,7 @@ class Cell
   end
 
   def color(r, g, b, a = 255)
-    SFML::Color.new(r, g, b, a)
+    SF::Graphics::Color.new(r, g, b, a)
   end
 
   def pixel(x, y, tint)
@@ -158,7 +158,7 @@ def draw_tetromino(name, cell)
   cell.rect(2, 4, 2, 8, tint.map { |v| (v * 0.8).round })
 end
 
-image = SFML::Image.from_color([SIZE, SIZE], SFML::Color.new(0, 0, 0, 0))
+image = SF::Graphics::Image.from_color([SIZE, SIZE], SF::Graphics::Color.new(0, 0, 0, 0))
 
 (0...COLUMNS).each do |column|
   (0...ROWS).each do |row|

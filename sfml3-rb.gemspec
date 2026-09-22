@@ -10,7 +10,7 @@ require_relative 'lib/sfml/version'
 # rakelib/package.rake for the platform list and the ABI assertion.
 Gem::Specification.new do |s|
   s.name = 'sfml3-rb'
-  s.version = SFML::VERSION
+  s.version = SF::VERSION
   s.summary = 'Ruby bindings for SFML 3, with precompiled binaries'
   s.description = 'Ruby bindings for SFML 3 via CSFML. Precompiled binaries are published for ' \
                   'common platforms; elsewhere SFML and CSFML are downloaded and built from ' \
