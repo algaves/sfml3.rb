@@ -395,111 +395,111 @@ module SFML
   # where the native initializer has no such argument -- so the `.new` forms
   # keep working unchanged.
 
-  # Builds a VideoMode from a width, a height and an optional bit depth.
-  #
-  # @return [VideoMode]
-  #
-  # @example
-  #   VideoMode[640, 480, 32]
   class VideoMode
+    # Builds a VideoMode from a width, a height and an optional bit depth.
+    #
+    # @return [VideoMode]
+    #
+    # @example
+    #   VideoMode[640, 480, 32]
     def self.[](width, height, bits = 32)
       new(width, height, bits)
     end
   end
 
-  # Builds a Vector2 from components, an array or another Vector2.
-  #
-  # @return [Vector2]
-  #
-  # @example
-  #   Vector2[10, 20]
   class Vector2
+    # Builds a Vector2 from components, an array or another Vector2.
+    #
+    # @return [Vector2]
+    #
+    # @example
+    #   Vector2[10, 20]
     def self.[](*args)
       new(*args) # steep:ignore
     end
   end
 
-  # Builds a Vector3 from components, an array or another Vector3.
-  #
-  # @return [Vector3]
-  #
-  # @example
-  #   Vector3[1, 2, 3]
   class Vector3
+    # Builds a Vector3 from components, an array or another Vector3.
+    #
+    # @return [Vector3]
+    #
+    # @example
+    #   Vector3[1, 2, 3]
     def self.[](*args)
       new(*args) # steep:ignore
     end
   end
 
-  # Builds a Color from components, an array or a packed Integer.
-  #
-  # @return [Color]
-  #
-  # @example
-  #   Color[235, 90, 90]
   class Color
+    # Builds a Color from components, an array or a packed Integer.
+    #
+    # @return [Color]
+    #
+    # @example
+    #   Color[235, 90, 90]
     def self.[](*args)
       new(*args) # steep:ignore
     end
   end
 
-  # Builds a Rect from a position and a size, or an array.
-  #
-  # @return [Rect]
-  #
-  # @example
-  #   Rect[0, 0, 100, 60]
   class Rect
+    # Builds a Rect from a position and a size, or an array.
+    #
+    # @return [Rect]
+    #
+    # @example
+    #   Rect[0, 0, 100, 60]
     def self.[](*args)
       new(*args) # steep:ignore
     end
   end
 
-  # Builds a Time from a number of seconds.
-  #
-  # @return [Time]
-  #
-  # @example
-  #   Time[0.5]
   class Time
+    # Builds a Time from a number of seconds.
+    #
+    # @return [Time]
+    #
+    # @example
+    #   Time[0.5]
     def self.[](seconds)
       new(Float(seconds))
     end
   end
 
-  # Builds a Text, optionally with a font, a string and a character size.
-  #
-  # @return [Text]
-  #
-  # @example
-  #   Text[font, 'Hello', 24]
   class Text
+    # Builds a Text, optionally with a font, a string and a character size.
+    #
+    # @return [Text]
+    #
+    # @example
+    #   Text[font, 'Hello', 24]
     def self.[](*args)
       new(*args) # steep:ignore
     end
   end
 
-  # Builds a Vertex, optionally with a position, colour and texture coordinates.
-  #
-  # @return [Vertex]
-  #
-  # @example
-  #   Vertex[Vector2[10, 20], Color[255, 0, 0]]
   class Vertex
+    # Builds a Vertex, optionally with a position, colour and texture coordinates.
+    #
+    # @return [Vertex]
+    #
+    # @example
+    #   Vertex[Vector2[10, 20], Color[255, 0, 0]]
     def self.[](*args)
       new(*args) # steep:ignore
     end
   end
 
-  # Builds a View from a Rect (or [left, top, width, height]) or a centre and a
-  # size.
-  #
-  # @return [View]
-  #
-  # @example
-  #   View[Rect[0, 0, 640, 480]]
-  #   View[Vector2[320, 240], Vector2[640, 480]]
   class View
+    # Builds a View from a Rect (or [left, top, width, height]) or a centre and a
+    # size.
+    #
+    # @return [View]
+    #
+    # @example
+    #   View[Rect[0, 0, 640, 480]]
+    #   View[Vector2[320, 240], Vector2[640, 480]]
     def self.[](*args)
       case args.size
       when 1
@@ -519,77 +519,77 @@ module SFML
     end
   end
 
-  # Builds a Sprite, optionally with a texture.
-  #
-  # @return [Sprite]
   class Sprite
+    # Builds a Sprite, optionally with a texture.
+    #
+    # @return [Sprite]
     def self.[](texture)
       new(texture)
     end
   end
 
-  # Builds a Texture from a size ([width, height] or a Vector2).
-  #
-  # @return [Texture]
-  #
-  # @example
-  #   Texture[[128, 128]]
   class Texture
+    # Builds a Texture from a size ([width, height] or a Vector2).
+    #
+    # @return [Texture]
+    #
+    # @example
+    #   Texture[[128, 128]]
     def self.[](size)
       new(Vector2[size])
     end
   end
 
-  # Builds an Image from a size ([width, height] or a Vector2).
-  #
-  # @return [Image]
   class Image
+    # Builds an Image from a size ([width, height] or a Vector2).
+    #
+    # @return [Image]
     def self.[](size)
       new(size)
     end
   end
 
-  # Builds a RenderTexture from a size ([width, height] or a Vector2) and
-  # optional context settings.
-  #
-  # @return [RenderTexture]
   class RenderTexture
+    # Builds a RenderTexture from a size ([width, height] or a Vector2) and
+    # optional context settings.
+    #
+    # @return [RenderTexture]
     def self.[](size, settings = nil)
       new(Vector2[size], settings)
     end
   end
 
-  # Builds a CircleShape from a radius and an optional position.
-  #
-  # @return [CircleShape]
-  #
-  # @example
-  #   CircleShape[30, [100, 100]]
   class CircleShape
+    # Builds a CircleShape from a radius and an optional position.
+    #
+    # @return [CircleShape]
+    #
+    # @example
+    #   CircleShape[30, [100, 100]]
     def self.[](radius, position = [0, 0])
       new(radius).tap { |shape| shape.position = position }
     end
   end
 
-  # Builds a RectangleShape from a position and a size.
-  #
-  # @return [RectangleShape]
-  #
-  # @example
-  #   RectangleShape[10, 20, 100, 40]
   class RectangleShape
+    # Builds a RectangleShape from a position and a size.
+    #
+    # @return [RectangleShape]
+    #
+    # @example
+    #   RectangleShape[10, 20, 100, 40]
     def self.[](left, top, width, height)
       new([width, height]).tap { |shape| shape.position = [left, top] }
     end
   end
 
-  # Builds a ConvexShape from its points (each an array or a Vector2).
-  #
-  # @return [ConvexShape]
-  #
-  # @example
-  #   ConvexShape[[0, 0], [100, 0], [50, 80]]
   class ConvexShape
+    # Builds a ConvexShape from its points (each an array or a Vector2).
+    #
+    # @return [ConvexShape]
+    #
+    # @example
+    #   ConvexShape[[0, 0], [100, 0], [50, 80]]
     def self.[](*points)
       new(points.size).tap do |shape|
         points.each_with_index { |point, index| shape.set_point(index, point) }

@@ -41,6 +41,7 @@ Style/MixinUsage:
 
 Style/Documentation:
   Exclude:
+    - 'lib/sfml/rubyesque.rb'
     - 'examples/**/*'
     - 'script/**/*'
 
