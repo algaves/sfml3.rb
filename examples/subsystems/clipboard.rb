@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# SFML::Clipboard: read and write the system clipboard. C copies a sample that
+# SF::Window::Clipboard: read and write the system clipboard. C copies a sample that
 # includes non-ASCII text through `Clipboard.content=` and `unicode_string=`;
 # V reads it back with `Clipboard.content` and renders it. The two entry points
 # round-trip Unicode exactly, so emoji and CJK survive the trip. Escape quits.
@@ -11,7 +11,11 @@
 
 require 'sfml'
 require_relative '../support'
-include SFML
+include SF::Window
+include SF::Graphics
+include SF::System
+include SF::Audio
+include SF::Network
 
 SAMPLE = "SFML clipboard \u2014 caf\u00e9, \u4e16\u754c, \u2728"
 

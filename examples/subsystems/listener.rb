@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# SFML::Listener: the point in the scene from which all sounds are heard. The
+# SF::Audio::Listener: the point in the scene from which all sounds are heard. The
 # listener has a position, a direction, an up-vector and a global volume; a
 # spatialized Sound carries its own position, cone and attenuation, and its
 # loudness is computed from the distance between the two. Here the source is
@@ -14,7 +14,11 @@
 
 require 'sfml'
 require_relative '../support'
-include SFML
+include SF::Window
+include SF::Graphics
+include SF::System
+include SF::Audio
+include SF::Network
 
 SOURCE = Vector3.new(520, 240, 0)
 
@@ -80,7 +84,7 @@ loop do
       window.close! if key == :escape
       sound.play! if key == :Space && sound.stopped?
       sound.pause! if key == :Space && sound.playing?
-      sound.playing_offset = SFML::Time.zero if key == :r
+      sound.playing_offset = SF::System::Time.zero if key == :r
     end
   end
 

@@ -12,7 +12,11 @@
 
 require 'sfml'
 require_relative '../support'
-include SFML
+include SF::Window
+include SF::Graphics
+include SF::System
+include SF::Audio
+include SF::Network
 
 beep = ExampleSupport.sound('beep')
 beep.looping = true
@@ -28,7 +32,7 @@ captured =
   begin
     if SoundRecorder.available? && SoundRecorder.default_device
       buffer = SoundBufferRecorder.record!(sample_rate: 44_100, channel_count: 1) do
-        SFML.sleep!(SFML::Time.seconds(0.3))
+        SF.sleep!(SF::System::Time.seconds(0.3))
       end
       recording_note = format('captured %.2fs with record! -- R replays it', buffer.duration.as_seconds)
       Sound.new(buffer)

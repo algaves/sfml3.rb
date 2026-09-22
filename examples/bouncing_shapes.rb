@@ -10,7 +10,11 @@
 # (headless: prefix `xvfb-run -a`).
 
 require 'sfml'
-include SFML
+include SF::Window
+include SF::Graphics
+include SF::System
+include SF::Audio
+include SF::Network
 
 Bouncer = Struct.new(:shape, :vx, :vy)
 MARGIN = 20

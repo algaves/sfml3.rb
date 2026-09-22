@@ -84,7 +84,7 @@ has the full old-to-new cheat sheet.
 | `rubyesque/events.rb` | The `event.*?` predicates and `event.code`, including focus/mouse/text/touch/joystick kinds |
 | `rubyesque/audio.rb` | `play!`/`pause!`/`stop!` with `playing?`/`paused?`/`stopped?`, and the scoped `SoundBufferRecorder.record!` |
 | `rubyesque/input.rb` | `Keyboard.key_pressed?`, `Joystick.axis?`, `Sensor.enable!`/`disable!`, `Touch.position(relative_to:)` |
-| `rubyesque/system.rb` | `Clock.measure`, `Clock#restart!`/`running?`, `SFML.sleep!`, the `Clipboard.content` pair |
+| `rubyesque/system.rb` | `Clock.measure`, `Clock#restart!`/`running?`, `SF.sleep!`, the `Clipboard.content` pair |
 | `rubyesque/styles.rb` | The positional constructors (`VideoMode[...]`, `Style::DEFAULT`, `Vector2[...]`, `Color[...]`, the shape forms) and the `open!` loop |
 | `rubyesque/deprecations.rb` | The pre-Rubyesque names, still working and printing their deprecation warning |
 
@@ -94,7 +94,7 @@ exit on their own.
 
 ## Subsystems
 
-| File | SFML module | What it shows |
+| File | SF module | What it shows |
 | --- | --- | --- |
 | `subsystems/listener.rb` | `Listener` | Position/direction/up-vector/volume and a spatialized looping `Sound` with a cone, moved with the arrow keys |
 | `subsystems/audio_devices.rb` | `SoundRecorder` | Audio devices: `available_devices`/`default_device`/`device=`, plus a 3-second `SoundBufferRecorder` capture played back through a `Sound` |

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# SFML::Touch: multitouch fingers. `Touch.down?(finger)` and
+# SF::Window::Touch: multitouch fingers. `Touch.down?(finger)` and
 # `Touch.position(finger, window)` read the ten tracked fingers in real time;
 # touch-began/moved/ended events carry the same data. Desktops without a
 # touchscreen (and touchpads that do not synthesise touch) report nothing, so
@@ -13,7 +13,11 @@
 
 require 'sfml'
 require_relative '../support'
-include SFML
+include SF::Window
+include SF::Graphics
+include SF::System
+include SF::Audio
+include SF::Network
 
 FINGERS = (0...10)
 COLORS = [[230, 90, 90], [90, 200, 130], [90, 170, 230], [235, 200, 90], [180, 110, 235],

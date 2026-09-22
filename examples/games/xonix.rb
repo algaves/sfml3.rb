@@ -11,7 +11,11 @@
 
 require 'sfml'
 require_relative '../support'
-include SFML
+include SF::Window
+include SF::Graphics
+include SF::System
+include SF::Audio
+include SF::Network
 
 CELL = 8
 COLS = 90
@@ -27,9 +31,9 @@ class XonixGame
   attr_reader :score_percent, :lives, :state
 
   def initialize
-    @triangles = SFML::VertexArray.new
+    @triangles = SF::Graphics::VertexArray.new
     @triangles.primitive = :triangles
-    @trail_triangles = SFML::VertexArray.new
+    @trail_triangles = SF::Graphics::VertexArray.new
     @trail_triangles.primitive = :triangles
     reset
   end
@@ -208,7 +212,7 @@ def append_cell(array, x, y, color)
   left = x * CELL
   top = (y * CELL) + HUD
   [[0, 0], [1, 0], [0, 1], [1, 0], [1, 1], [0, 1]].each do |dx, dy|
-    array.append(SFML::Vertex.new([left + (dx * CELL), top + (dy * CELL)], color))
+    array.append(SF::Graphics::Vertex.new([left + (dx * CELL), top + (dy * CELL)], color))
   end
 end
 

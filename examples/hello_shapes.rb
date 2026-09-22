@@ -10,7 +10,11 @@
 # (headless: prefix `xvfb-run -a`). Close the window or press Escape to quit.
 
 require 'sfml'
-include SFML
+include SF::Window
+include SF::Graphics
+include SF::System
+include SF::Audio
+include SF::Network
 
 window = Window.new(VideoMode.new(640, 480, 32), 'SFML hello shapes')
 window.frame_rate = 60

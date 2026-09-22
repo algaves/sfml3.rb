@@ -12,7 +12,11 @@
 
 require 'sfml'
 require_relative '../support'
-include SFML
+include SF::Window
+include SF::Graphics
+include SF::System
+include SF::Audio
+include SF::Network
 
 color_a = Color.new([230, 90, 90, 255])          # [r, g, b, a] array
 color_b = Color.new(90, 170, 230)                # r, g, b (alpha defaults to 255)
@@ -37,10 +41,10 @@ lines = [
   "Vector3.new([1.0, 2.0, 3.0])    -> to_a #{point.to_a.inspect}",
   "Vector2.new([10, 20]) + [5, 5]  -> #{sum}",
   '',
-  "SFML::Time.seconds(1.5)         -> #{SFML::Time.seconds(1.5)}  " \
-  "(#{SFML::Time.seconds(1.5).as_milliseconds} ms)",
-  "SFML::Time.milliseconds(250)    -> #{SFML::Time.milliseconds(250)}  " \
-  "(#{SFML::Time.milliseconds(250).to_f} s)"
+  "SF::System::Time.seconds(1.5)         -> #{SF::System::Time.seconds(1.5)}  " \
+  "(#{SF::System::Time.seconds(1.5).as_milliseconds} ms)",
+  "SF::System::Time.milliseconds(250)    -> #{SF::System::Time.milliseconds(250)}  " \
+  "(#{SF::System::Time.milliseconds(250).to_f} s)"
 ]
 
 window = Window.new(VideoMode.new(720, 520, 32), 'SFML literals')

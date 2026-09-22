@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# SFML::Sensor: the device's hardware sensors. `available?` reports whether a
+# SF::Window::Sensor: the device's hardware sensors. `available?` reports whether a
 # type exists here, `set_enabled` turns it on (some sensors, notably the
 # gyroscope, report nothing until enabled) and `value` returns a Vector3.
 # Desktops usually expose none of these, so the example renders an
@@ -12,7 +12,11 @@
 
 require 'sfml'
 require_relative '../support'
-include SFML
+include SF::Window
+include SF::Graphics
+include SF::System
+include SF::Audio
+include SF::Network
 
 TYPES = %i[accelerometer gyroscope magnetometer gravity user_acceleration orientation].freeze
 
@@ -67,7 +71,7 @@ loop do
 
   window.clear!([22, 26, 34, 255])
   window.draw(ExampleSupport.text(
-                "SFML::Sensor -- availability and values (#{last_event})\n" \
+                "SF::Window::Sensor -- availability and values (#{last_event})\n" \
                 'sensors are enabled on entry; escape quits',
                 size: 16, position: [24, 16]
               ))

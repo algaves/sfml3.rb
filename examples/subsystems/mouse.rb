@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# SFML::Mouse: the real-time state of the pointer, independent of the event
+# SF::Window::Mouse: the real-time state of the pointer, independent of the event
 # queue. `Mouse.position(window)` is relative to the window; `Mouse.position`
 # with no argument is relative to the desktop. `Mouse.button_pressed?` and
 # `Mouse.pressed?` are synonyms. Click to leave a ripple, C recentres the
@@ -12,7 +12,11 @@
 
 require 'sfml'
 require_relative '../support'
-include SFML
+include SF::Window
+include SF::Graphics
+include SF::System
+include SF::Audio
+include SF::Network
 
 Ripple = Struct.new(:position, :radius, :life)
 

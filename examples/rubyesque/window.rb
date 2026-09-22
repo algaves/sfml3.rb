@@ -11,7 +11,11 @@
 
 require 'sfml'
 require_relative '../support'
-include SFML
+include SF::Window
+include SF::Graphics
+include SF::System
+include SF::Audio
+include SF::Network
 
 # `WindowBase.open` / `Window.open` / `RenderWindow.open` create the window,
 # yield it and close it when the block returns -- normally or by raising -- so

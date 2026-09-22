@@ -10,7 +10,11 @@
 
 require 'sfml'
 require_relative '../support'
-include SFML
+include SF::Window
+include SF::Graphics
+include SF::System
+include SF::Audio
+include SF::Network
 
 beep = ExampleSupport.sound('beep')
 window = Window.new(VideoMode.new(480, 300, 32), 'SFML rubyesque: deprecations')
@@ -28,7 +32,7 @@ beep.stop                   # -> stop!
 Keyboard.pressed?(:escape)  # -> key_pressed?
 Joystick.has_axis?(0, :x)   # -> axis?
 Clipboard.string            # -> content
-SFML.sleep(SFML::Time.zero) # -> sleep!
+SF.sleep(SF::System::Time.zero) # -> sleep!
 
 window.close!
 puts 'All of them still work. Use the banged/predicate names in new code.'

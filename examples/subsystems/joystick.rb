@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# SFML::Joystick: the real-time state of every gamepad. `Joystick.update!`
+# SF::Window::Joystick: the real-time state of every gamepad. `Joystick.update!`
 # refreshes the cached state; `connected?`/`button_count`/`axis?` describe
 # what is plugged in, `axis_position` and `button_pressed?` read it, and
 # `identification` returns the name and vendor/product ids. R rescans (for
@@ -12,7 +12,11 @@
 
 require 'sfml'
 require_relative '../support'
-include SFML
+include SF::Window
+include SF::Graphics
+include SF::System
+include SF::Audio
+include SF::Network
 
 AXES = %i[x y z r u v pov_x pov_y].freeze
 

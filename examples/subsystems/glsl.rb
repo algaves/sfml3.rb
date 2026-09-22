@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# SFML::Shader: GLSL vertex and fragment programs, loaded from source with
+# SF::Graphics::Shader: GLSL vertex and fragment programs, loaded from source with
 # `Shader.from_memory`. A full-screen rectangle is drawn through a RenderState
 # whose shader is set, and the shader's uniforms are updated each frame with
 # `set_float` / `set_vec2`. The fragment shader here is a moving cosine palette
@@ -14,7 +14,11 @@
 
 require 'sfml'
 require_relative '../support'
-include SFML
+include SF::Window
+include SF::Graphics
+include SF::System
+include SF::Audio
+include SF::Network
 
 VERTEX = <<~GLSL
   void main()

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Rubyesque (Matz-like): the system and window-adjacent odds and ends that need no window --
-# `Clock.measure` times a block, `SFML.sleep!` and `SFML::Sleep.sleep!` pause,
+# `Clock.measure` times a block, `SF.sleep!` and `SF::System::Sleep.sleep!` pause,
 # and the `Clipboard.content` pair gained `has_text?` and `clear!`. Prints to
 # the console and exits; the clipboard needs a display, so run it under
 # `xvfb-run -a` on a headless machine.
@@ -10,17 +10,21 @@
 #   bundle exec ruby -Ilib examples/rubyesque/system.rb
 
 require 'sfml'
-include SFML
+include SF::Window
+include SF::Graphics
+include SF::System
+include SF::Audio
+include SF::Network
 
 # `Clock.measure` makes a throwaway Clock, runs the block and returns the
 # elapsed Time. Nothing to construct, restart or read afterwards.
 elapsed = Clock.measure do
-  SFML.sleep!(SFML::Time.seconds(0.1))
+  SF.sleep!(SF::System::Time.seconds(0.1))
 end
-puts format('Clock.measure { SFML.sleep!(0.1) } -> %.3fs', elapsed.as_seconds)
+puts format('Clock.measure { SF.sleep!(0.1) } -> %.3fs', elapsed.as_seconds)
 
-# `SFML::Sleep.sleep!` is the namespace-style spelling of the same call.
-SFML::Sleep.sleep!(SFML::Time.milliseconds(50))
+# `SF::System::Sleep.sleep!` is the namespace-style spelling of the same call.
+SF::System::Sleep.sleep!(SF::System::Time.milliseconds(50))
 
 clock = Clock.new
 puts "clock.running?  #{clock.running?}"
