@@ -33,6 +33,7 @@ SFML_EXAMPLE_FRAMES=120 xvfb-run -a bundle exec ruby -Ilib examples/rubyesque/ev
 | `audio.rb` | `play!`/`pause!`/`stop!` with `playing?`/`paused?`/`stopped?` on `Sound` and `Music`, and the scoped `SoundBufferRecorder.record!` |
 | `input.rb` | `Keyboard.key_pressed?`, `Joystick.axis?`, `Sensor.enable!`/`disable!`/`value`, `Touch.down?`/`Touch.position(relative_to:)` |
 | `system.rb` | `Clock.measure`, `Clock#restart!`/`running?`, `SFML.sleep!`/`SFML::Sleep.sleep!`, the `Clipboard.content` pair with `has_text?`/`clear!` |
+| `styles.rb` | The positional constructors (`VideoMode[...]`, `Style::DEFAULT`, `Vector2[...]`, `Color[...]`, the shape forms) and the `open!` loop |
 | `deprecations.rb` | The pre-Rubyesque names, still working and printing their deprecation warning |
 
 ## Name cheat sheet
@@ -59,3 +60,7 @@ New in the Rubyesque layer, with no pre-Rubyesque equivalent: `WindowBase.open` 
 `Window.open`, `window.render!`, `SoundBufferRecorder.record!`, `Clock.measure`,
 `Sensor.enable!` / `disable!`, `Clipboard.has_text?` / `clear!`,
 `Touch.position(finger, relative_to: window)` and every `event.*?` predicate.
+
+It also adds `window.open!`, the `poll_event!` / `wait_event!` block forms, the positional
+`Class[...]` constructors (`VideoMode[...]`, `Vector2[...]`, `CircleShape[...]`, ...) and the
+`SFML::Style` / `SFML::State` flag namespaces -- see [`styles.rb`](styles.rb).

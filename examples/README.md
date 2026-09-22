@@ -85,6 +85,7 @@ has the full old-to-new cheat sheet.
 | `rubyesque/audio.rb` | `play!`/`pause!`/`stop!` with `playing?`/`paused?`/`stopped?`, and the scoped `SoundBufferRecorder.record!` |
 | `rubyesque/input.rb` | `Keyboard.key_pressed?`, `Joystick.axis?`, `Sensor.enable!`/`disable!`, `Touch.position(relative_to:)` |
 | `rubyesque/system.rb` | `Clock.measure`, `Clock#restart!`/`running?`, `SFML.sleep!`, the `Clipboard.content` pair |
+| `rubyesque/styles.rb` | The positional constructors (`VideoMode[...]`, `Style::DEFAULT`, `Vector2[...]`, `Color[...]`, the shape forms) and the `open!` loop |
 | `rubyesque/deprecations.rb` | The pre-Rubyesque names, still working and printing their deprecation warning |
 
 `window.rb`, `events.rb`, `audio.rb` and `input.rb` take `SFML_EXAMPLE_FRAMES`
