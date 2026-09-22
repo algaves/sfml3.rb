@@ -14,7 +14,13 @@ RSpec.describe SFML::Event do
 
   it 'aliases code to the key code' do
     event = SFML::Event.new
+    key = event.key
 
-    expect(event.code).to eq(event.key[:code])
+    expect(event.code).to eq(key[:code])
+    expect(key[:code]).to be_a(Symbol)
+    expect(key[:scancode]).to be_a(String)
+    expect(key.values_at(:alt, :control, :shift, :system)).to all(be(false))
+
+    100.times { expect(event.key).to eq(key) }
   end
 end
