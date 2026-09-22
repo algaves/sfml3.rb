@@ -2,9 +2,9 @@
 
 require_relative '../spec_helper'
 
-RSpec.describe SFML::SoundStream do
+RSpec.describe SF::Audio::SoundStream do
   it 'drives a SoundStream subclass' do
-    klass = Class.new(SFML::SoundStream) do
+    klass = Class.new(SF::Audio::SoundStream) do
       def on_get_data
         [0, 0]
       end
@@ -18,6 +18,6 @@ RSpec.describe SFML::SoundStream do
   end
 
   it 'requires on_get_data on a SoundStream' do
-    expect { SFML::SoundStream.new(1, 44_100, [:mono]) }.to raise_error(NotImplementedError)
+    expect { SF::Audio::SoundStream.new(1, 44_100, [:mono]) }.to raise_error(NotImplementedError)
   end
 end

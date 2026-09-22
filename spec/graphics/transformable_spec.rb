@@ -5,42 +5,42 @@ require_relative '../spec_helper'
 # The Transformable mixin shared by every steerable drawable, plus the
 # standalone Transformable::Instance. The instance needs no display, so its
 # behavior is exercised; the concrete shapes are only inspected structurally.
-RSpec.describe SFML::Transformable do
+RSpec.describe SF::Graphics::Transformable do
   describe 'Transformable mixin' do
     it 'is a module with the full surface' do
-      expect(SFML::Transformable).to be_a(Module)
-      expect(SFML::Transformable).not_to be_a(Class)
+      expect(SF::Graphics::Transformable).to be_a(Module)
+      expect(SF::Graphics::Transformable).not_to be_a(Class)
       %i[position position= rotation rotation= scale scale= origin origin=
          move rotate scale! transform matrix inverse_transform].each do |name|
-        expect(SFML::Transformable.instance_methods(false)).to include(name)
+        expect(SF::Graphics::Transformable.instance_methods(false)).to include(name)
       end
     end
 
     it 'returns the standalone instance from Transformable.new' do
-      instance = SFML::Transformable.new
-      expect(instance).to be_instance_of(SFML::Transformable::Instance)
-      expect(SFML::Transformable::Instance).to be < Object
-      expect(SFML::Transformable::Instance.ancestors).to include(SFML::Transformable)
-      expect(SFML::Transformable::Instance).not_to be < SFML::Shape
+      instance = SF::Graphics::Transformable.new
+      expect(instance).to be_instance_of(SF::Graphics::Transformable::Instance)
+      expect(SF::Graphics::Transformable::Instance).to be < Object
+      expect(SF::Graphics::Transformable::Instance.ancestors).to include(SF::Graphics::Transformable)
+      expect(SF::Graphics::Transformable::Instance).not_to be < SF::Graphics::Shape
     end
 
     it 'is included by every steerable drawable' do
-      [SFML::CircleShape, SFML::RectangleShape, SFML::ConvexShape, SFML::Shape,
-       SFML::Sprite, SFML::Text].each do |klass|
-        expect(klass.ancestors).to include(SFML::Transformable)
+      [SF::Graphics::CircleShape, SF::Graphics::RectangleShape, SF::Graphics::ConvexShape, SF::Graphics::Shape,
+       SF::Graphics::Sprite, SF::Graphics::Text].each do |klass|
+        expect(klass.ancestors).to include(SF::Graphics::Transformable)
       end
     end
 
     it 'owns the transform methods' do
-      expect(SFML::Shape.instance_method(:position).owner).to eq(SFML::Transformable)
-      expect(SFML::Sprite.instance_method(:move).owner).to eq(SFML::Transformable)
-      expect(SFML::Text.instance_method(:rotate).owner).to eq(SFML::Transformable)
+      expect(SF::Graphics::Shape.instance_method(:position).owner).to eq(SF::Graphics::Transformable)
+      expect(SF::Graphics::Sprite.instance_method(:move).owner).to eq(SF::Graphics::Transformable)
+      expect(SF::Graphics::Text.instance_method(:rotate).owner).to eq(SF::Graphics::Transformable)
     end
   end
 
   describe 'Transformable::Instance behavior' do
     it 'defaults to identity' do
-      t = SFML::Transformable.new
+      t = SF::Graphics::Transformable.new
       expect(t.position).to be_vec_in_epsilon([0, 0])
       expect(t.rotation).to be_within(0.01).of(0)
       expect(t.scale).to be_vec_in_epsilon([1, 1])
@@ -48,7 +48,7 @@ RSpec.describe SFML::Transformable do
     end
 
     it 'round-trips the setters and getters' do
-      t = SFML::Transformable.new
+      t = SF::Graphics::Transformable.new
       t.position = [5, 10]
       expect(t.position).to be_vec_in_epsilon([5, 10])
 
@@ -63,7 +63,7 @@ RSpec.describe SFML::Transformable do
     end
 
     it 'accumulates via move' do
-      t = SFML::Transformable.new
+      t = SF::Graphics::Transformable.new
       t.move [10, 20]
       expect(t.position).to be_vec_in_epsilon([10, 20])
       t.move [5, 5]
@@ -71,7 +71,7 @@ RSpec.describe SFML::Transformable do
     end
 
     it 'accumulates via rotate' do
-      t = SFML::Transformable.new
+      t = SF::Graphics::Transformable.new
       t.rotate 30
       expect(t.rotation).to be_within(0.01).of(30)
       t.rotate 20
@@ -79,7 +79,7 @@ RSpec.describe SFML::Transformable do
     end
 
     it 'accumulates via scale!' do
-      t = SFML::Transformable.new
+      t = SF::Graphics::Transformable.new
       t.scale! [2, 2]
       expect(t.scale).to be_vec_in_epsilon([2, 2])
       t.scale! [3, 3]
@@ -87,7 +87,7 @@ RSpec.describe SFML::Transformable do
     end
 
     it 'exposes a 9-element transform matrix' do
-      t = SFML::Transformable.new
+      t = SF::Graphics::Transformable.new
       matrix = t.transform
       expect(matrix).to be_a(Array)
       expect(matrix.length).to eq(9)
@@ -95,19 +95,19 @@ RSpec.describe SFML::Transformable do
     end
 
     it 'inverts its transform' do
-      t = SFML::Transformable.new
+      t = SF::Graphics::Transformable.new
       t.position = [10, 20]
 
       inverse = t.inverse_transform
       expect(inverse.length).to eq(9)
       # The inverse must undo the transform, which is what makes it usable for
       # turning a world point back into local space.
-      expect((SFML::Transform.from_a(t.transform) * SFML::Transform.from_a(inverse)).to_a)
-        .to be_matrix_in_delta(SFML::Transform.identity.to_a)
+      expect((SF::Graphics::Transform.from_a(t.transform) * SF::Graphics::Transform.from_a(inverse)).to_a)
+        .to be_matrix_in_delta(SF::Graphics::Transform.identity.to_a)
     end
 
     it 'copies independently' do
-      t = SFML::Transformable.new
+      t = SF::Graphics::Transformable.new
       t.position = [3, 4]
 
       copy = t.copy
@@ -120,7 +120,7 @@ RSpec.describe SFML::Transformable do
 
   describe 'Transformable dispatch to concrete shapes' do
     it 'routes the transform methods to each shape' do
-      shapes = [SFML::CircleShape.new(10), SFML::RectangleShape.new, SFML::ConvexShape.new(4)]
+      shapes = [SF::Graphics::CircleShape.new(10), SF::Graphics::RectangleShape.new, SF::Graphics::ConvexShape.new(4)]
 
       shapes.each do |shape|
         shape.position = [3.5, 7.2]
@@ -135,8 +135,8 @@ RSpec.describe SFML::Transformable do
     end
 
     it 'keeps per-shape transform state independent' do
-      a = SFML::CircleShape.new(1)
-      b = SFML::RectangleShape.new
+      a = SF::Graphics::CircleShape.new(1)
+      b = SF::Graphics::RectangleShape.new
       a.position = [1, 1]
       b.position = [9, 9]
       expect(a.position).to be_vec_in_epsilon([1, 1])

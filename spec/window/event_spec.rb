@@ -2,9 +2,9 @@
 
 require_relative '../spec_helper'
 
-RSpec.describe SFML::Event do
+RSpec.describe SF::Window::Event do
   it 'reflects its type through the predicates' do
-    event = SFML::Event.new
+    event = SF::Window::Event.new
 
     expect(event).to be_closed
     expect(event).not_to be_key_pressed
@@ -13,7 +13,7 @@ RSpec.describe SFML::Event do
   end
 
   it 'aliases code to the key code' do
-    event = SFML::Event.new
+    event = SF::Window::Event.new
     key = event.key
 
     expect(event.code).to eq(key[:code])

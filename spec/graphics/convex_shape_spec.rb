@@ -2,9 +2,9 @@
 
 require_relative '../spec_helper'
 
-RSpec.describe SFML::ConvexShape do
+RSpec.describe SF::Graphics::ConvexShape do
   it 'sets points on a convex shape' do
-    shape = SFML::ConvexShape.new(3)
+    shape = SF::Graphics::ConvexShape.new(3)
     shape.set_point 0, [0, 0]
     shape.set_point 1, [10, 0]
     shape.set_point 2, [0, 10]

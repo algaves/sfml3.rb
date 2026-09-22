@@ -2,8 +2,8 @@
 
 require_relative '../spec_helper'
 
-RSpec.describe SFML::Vulkan do
+RSpec.describe SF::Window::Vulkan do
   it 'reports availability as a boolean' do
-    expect([true, false]).to include(SFML::Vulkan.available?)
+    expect([true, false]).to include(SF::Window::Vulkan.available?)
   end
 end

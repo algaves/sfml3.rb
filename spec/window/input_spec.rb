@@ -6,16 +6,16 @@ require_relative '../spec_helper'
 # device-free, so their predicate spellings are asserted here together.
 RSpec.describe 'Rubyesque input devices' do
   it 'exposes the Rubyesque names' do
-    expect(SFML::Sensor).to respond_to(:enable!)
-    expect(SFML::Sensor).to respond_to(:disable!)
-    expect(SFML::Joystick).to respond_to(:axis?)
-    expect(SFML::Keyboard).to respond_to(:key_pressed?)
-    expect(SFML::Sensor).to respond_to(:available?)
-    expect(SFML::Touch).to respond_to(:down?)
+    expect(SF::Window::Sensor).to respond_to(:enable!)
+    expect(SF::Window::Sensor).to respond_to(:disable!)
+    expect(SF::Window::Joystick).to respond_to(:axis?)
+    expect(SF::Window::Keyboard).to respond_to(:key_pressed?)
+    expect(SF::Window::Sensor).to respond_to(:available?)
+    expect(SF::Window::Touch).to respond_to(:down?)
   end
 
   it 'has Touch.position take the relative_to keyword' do
-    parameters = SFML::Touch.method(:position).parameters
+    parameters = SF::Window::Touch.method(:position).parameters
 
     expect(parameters).to include(%i[key relative_to])
     expect(parameters).to include(%i[opt window])
