@@ -18,9 +18,11 @@ Latest release: **0.3.1**, bound against **CSFML 3**.
   and the system layer, with every `sf*` entry point tracked in [ROADMAP.md](ROADMAP.md).
 * **A Rubyesque (Matz-like) layer** over that raw binding, in
   [`lib/sfml/rubyesque.rb`](lib/sfml/rubyesque.rb): `?` predicates, `!` mutators, block iterators
-  (`poll_events!`, `render!`) and scoped resources (`WindowBase.open`,
-  `SoundBufferRecorder.record!`, `Clock.measure`). The pre-Rubyesque names remain as deprecated
-  aliases, so nothing breaks. See [below](#rubyesque-matz-like-layer).
+  (`poll_events!`, `render!`, `open!`), scoped resources (`WindowBase.open`,
+  `SoundBufferRecorder.record!`, `Clock.measure`), positional `Class[...]` constructors
+  (`VideoMode[...]`, `Vector2[...]`, `CircleShape[...]`, ...) and the `Style`/`State` flag
+  namespaces. The pre-Rubyesque names remain as deprecated aliases, so nothing breaks. See
+  [below](#rubyesque-matz-like-layer).
 * **Precompiled binary gems** for common platforms, with FreeType, SFML 3 and CSFML 3 statically
   linked in — no toolchain and nothing to install system-wide.
 * **A source fallback everywhere else**, which downloads and builds the pinned, checksum-verified
@@ -111,7 +113,7 @@ gem install sfml3-rb -- --enable-system-libraries
 require 'sfml'
 include SFML
 
-window = Window.new VideoMode.new(640, 480, 32), 'SFML'
+window = Window.new VideoMode[640, 480, 32], 'SFML'
 
 while window.open?
   window.poll_events! do |event|
@@ -155,6 +157,59 @@ then presents. `window.open?`, `window.focused?` and `window.visible?` are the p
 `request_focus!` asks the window manager for focus, and `close!` closes the window. The scoped
 constructor lives on `WindowBase`, so `WindowBase.open`, `Window.open` and `RenderWindow.open`
 all behave the same way and return the open window when called without a block.
+
+A window also takes a block-oriented loop. `window.open!` yields it repeatedly while it is open
+and closes it afterwards, `window.poll_event! { |event| ... }` drains the pending events (the
+block form of `poll_events!`), and `window.wait_event! { |event| ... }` blocks for one. Without a
+block, `poll_event!`/`wait_event!` keep their native `poll_event!(event) -> bool` form.
+
+```ruby
+window = Window.new(VideoMode[640, 480, 32], 'Game Title', Style::DEFAULT)
+
+window.open! do
+  window.poll_event! do |event|
+    window.close! if event.closed? || (event.key_pressed? && event.code == :escape)
+  end
+
+  window.render! do |target|
+    target.draw sprite
+  end
+end
+```
+
+### Construction: `VideoMode`, `Style`/`State` and `Class[...]`
+
+```ruby
+window = RenderWindow.new(
+  VideoMode[640, 480, 32],   # VideoMode[width, height, bits = 32]
+  'Hello world!',
+  Style::DEFAULT,            # or Style::TITLEBAR | Style::RESIZE
+  State::WINDOWED            # or State::FULLSCREEN
+)
+```
+
+`Style` and `State` are Integer flag namespaces mirroring CSFML (`sfStyle`/`sfWindowState`), so
+they combine with `|` and slot into the constructor where the `:default` / `:windowed` symbols did.
+
+The value and resource classes also take a positional `Class[...]` constructor; every `.new` form
+keeps working.
+
+```ruby
+Vector2[x, y]                  # also Vector2[[x, y]]
+Vector3[x, y, z]
+Color[r, g, b]                 # Color[r, g, b, a] or Color[packed]
+Rect[left, top, width, height]
+Time[seconds]                  # always seconds
+View[Rect[left, top, width, height]]   # or View[center, size]
+Text[font, 'Hello', 24]
+Vertex[Vector2[x, y], Color[r, g, b]]
+Texture[[width, height]]       # Texture / Image / RenderTexture take a size
+Sprite[texture]
+
+CircleShape[radius, [x, y]]            # position defaults to [0, 0]
+RectangleShape[x, y, width, height]
+ConvexShape[[x0, y0], [x1, y1], ...]   # points as arrays or Vector2s
+```
 
 ### Audio: predicates, banged playback, scoped recording
 
