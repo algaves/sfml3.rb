@@ -1,4 +1,4 @@
-module SFML
+module SF::Network
   module SocketStatus
     DONE: Integer
     NOT_READY: Integer

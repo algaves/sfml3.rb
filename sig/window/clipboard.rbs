@@ -1,4 +1,4 @@
-module SFML
+module SF::Window
   module Clipboard
     def self.string: () -> String
     def self.string=: (String value) -> String

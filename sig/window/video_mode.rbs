@@ -1,4 +1,4 @@
-module SFML
+module SF::Window
   class VideoMode
     def initialize: (Integer width, Integer height, Integer bits_per_pixel) -> void
     def self.desktop_mode: () -> VideoMode
@@ -7,7 +7,7 @@ module SFML
 
     def valid?: () -> bool
     def available?: () -> bool
-    def size: () -> Vector2
+    def size: () -> SF::System::Vector2
     def ==: (untyped other) -> bool
 
     attr_reader width: Integer

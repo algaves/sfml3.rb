@@ -1,4 +1,4 @@
-module SFML
+module SF::Graphics
   class Color
     def initialize: () -> void
                  | (Integer r, Integer g, Integer b, ?Integer a) -> void

@@ -1,4 +1,4 @@
-module SFML
+module SF::System
   class Clock
     def initialize: () -> void
     def self.measure: () { () -> untyped } -> Time

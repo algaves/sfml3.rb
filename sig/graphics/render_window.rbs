@@ -1,5 +1,5 @@
-module SFML
-  class RenderWindow < Window
+module SF::Graphics
+  class RenderWindow < SF::Window::Window
     include RenderTarget
 
     def draw: (untyped drawable, ?untyped state) -> self

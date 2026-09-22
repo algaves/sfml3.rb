@@ -1,8 +1,8 @@
-module SFML
+module SF::Graphics
   class Texture
-    def initialize: (Vector2 size) -> void
-    def self.[]: (Vector2 | Array[Integer] size) -> Texture
-    def self.srgb: (Vector2 size) -> Texture
+    def initialize: (SF::System::Vector2 size) -> void
+    def self.[]: (SF::System::Vector2 | Array[Integer] size) -> Texture
+    def self.srgb: (SF::System::Vector2 size) -> Texture
     def self.from_file: (String path, ?untyped area) -> Texture
     def self.srgb_from_file: (String path, ?untyped area) -> Texture
     def self.from_memory: (String data, ?untyped area) -> Texture
@@ -14,15 +14,15 @@ module SFML
     def self.maximum_size: () -> Integer
 
     def copy: () -> Texture
-    def size: () -> Vector2
-    def resize: (Vector2 size) -> bool
-    def resize_srgb: (Vector2 size) -> bool
+    def size: () -> SF::System::Vector2
+    def resize: (SF::System::Vector2 size) -> bool
+    def resize_srgb: (SF::System::Vector2 size) -> bool
     def swap: (Texture other) -> self
     def copy_to_image: () -> untyped
-    def update_from_pixels: (String pixels, Vector2 size, Vector2 offset) -> self
-    def update_from_image: (untyped image, Vector2 offset) -> self
-    def update_from_texture: (Texture source, Vector2 offset) -> self
-    def update_from_window: (untyped window, Vector2 offset) -> self
+    def update_from_pixels: (String pixels, SF::System::Vector2 size, SF::System::Vector2 offset) -> self
+    def update_from_image: (untyped image, SF::System::Vector2 offset) -> self
+    def update_from_texture: (Texture source, SF::System::Vector2 offset) -> self
+    def update_from_window: (untyped window, SF::System::Vector2 offset) -> self
     def smooth=: (bool value) -> bool
     def smooth?: () -> bool
     def srgb?: () -> bool

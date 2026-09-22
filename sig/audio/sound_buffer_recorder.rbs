@@ -1,4 +1,4 @@
-module SFML
+module SF::Audio
   class SoundBufferRecorder < SoundRecorder
     def initialize: () -> void
     def self.record!: (?sample_rate: Integer, ?device: String?, ?channel_count: Integer?) ?{ (SoundBufferRecorder) -> untyped } -> SoundBuffer

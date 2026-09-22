@@ -1,15 +1,15 @@
-module SFML
+module SF::Audio
   class Music < SoundStream
     def self.from_file: (String path) -> Music
     def self.from_memory: (String data) -> Music
     def self.from_stream: (untyped stream) -> Music
 
-    def duration: () -> Time
+    def duration: () -> SF::System::Time
     def channel_count: () -> Integer
     def sample_rate: () -> Integer
     def channel_map: () -> Array[Symbol]
-    def loop_points: () -> [Time, Time]
-    def loop_points=: ([Time, Time] value) -> [Time, Time]
+    def loop_points: () -> [SF::System::Time, SF::System::Time]
+    def loop_points=: ([SF::System::Time, SF::System::Time] value) -> [SF::System::Time, SF::System::Time]
 
     def play: () -> self
     def play!: () -> self
@@ -28,12 +28,12 @@ module SFML
     def volume=: (Float value) -> Float
     def spatialization_enabled?: () -> bool
     def spatialization_enabled=: (bool value) -> bool
-    def position: () -> Vector3
-    def position=: (Vector3 value) -> Vector3
-    def direction: () -> Vector3
-    def direction=: (Vector3 value) -> Vector3
-    def velocity: () -> Vector3
-    def velocity=: (Vector3 value) -> Vector3
+    def position: () -> SF::System::Vector3
+    def position=: (SF::System::Vector3 value) -> SF::System::Vector3
+    def direction: () -> SF::System::Vector3
+    def direction=: (SF::System::Vector3 value) -> SF::System::Vector3
+    def velocity: () -> SF::System::Vector3
+    def velocity=: (SF::System::Vector3 value) -> SF::System::Vector3
     def cone: () -> SoundSourceCone
     def cone=: (SoundSourceCone value) -> SoundSourceCone
     def doppler_factor: () -> Float
@@ -52,8 +52,8 @@ module SFML
     def max_gain=: (Float value) -> Float
     def attenuation: () -> Float
     def attenuation=: (Float value) -> Float
-    def playing_offset: () -> Time
-    def playing_offset=: (Time value) -> Time
+    def playing_offset: () -> SF::System::Time
+    def playing_offset=: (SF::System::Time value) -> SF::System::Time
     def effect_processor=: (Proc proc) -> Proc
   end
 end

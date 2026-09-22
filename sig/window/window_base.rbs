@@ -1,4 +1,4 @@
-module SFML
+module SF::Window
   class WindowBase
     def initialize: (VideoMode video_mode, String title, ?Symbol | Array[Symbol] | Integer style, ?Symbol state) -> void
     def self.from_handle: (Integer handle) -> WindowBase
@@ -18,18 +18,18 @@ module SFML
     def poll_events!: () -> Enumerator[Event, untyped]
                    | () { (Event) -> untyped } -> self
 
-    def position: () -> Vector2
-    def size: () -> Vector2
+    def position: () -> SF::System::Vector2
+    def size: () -> SF::System::Vector2
     def focus?: () -> bool
     def focused?: () -> bool
     def native_handle: () -> Integer
 
-    def position=: (Vector2 | Array[Float] value) -> (Vector2 | Array[Float])
-    def size=: (Vector2 | Array[Float] value) -> self
-    def minimum_size=: (Vector2 | Array[Float] value) -> (Vector2 | Array[Float])
-    def maximum_size=: (Vector2 | Array[Float] value) -> (Vector2 | Array[Float])
+    def position=: (SF::System::Vector2 | Array[Float] value) -> (SF::System::Vector2 | Array[Float])
+    def size=: (SF::System::Vector2 | Array[Float] value) -> self
+    def minimum_size=: (SF::System::Vector2 | Array[Float] value) -> (SF::System::Vector2 | Array[Float])
+    def maximum_size=: (SF::System::Vector2 | Array[Float] value) -> (SF::System::Vector2 | Array[Float])
     def title=: (String value) -> self
-    def set_icon: (Vector2 | Array[Float] size, String pixels) -> String
+    def set_icon: (SF::System::Vector2 | Array[Float] size, String pixels) -> String
     def visible=: (bool value) -> self
     def visible?: () -> bool
     def cursor_visible=: (bool value) -> self

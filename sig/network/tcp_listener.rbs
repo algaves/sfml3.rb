@@ -1,4 +1,4 @@
-module SFML
+module SF::Network
   class TcpListener
     def initialize: () -> void
     def self.any_port: () -> Integer

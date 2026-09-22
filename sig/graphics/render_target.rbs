@@ -1,4 +1,4 @@
-module SFML
+module SF::Graphics
   # Included by RenderWindow and RenderTexture. The method bodies are generated
   # per class from ext/graphics/render_target.inc.
   module RenderTarget

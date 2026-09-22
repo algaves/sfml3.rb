@@ -1,4 +1,4 @@
-module SFML
+module SF::Audio
   module SoundStatus
     STOPPED: Integer
     PAUSED: Integer

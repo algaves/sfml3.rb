@@ -1,4 +1,4 @@
-module SFML
+module SF::Window
   class ContextSettings
     def initialize: (?Integer depth_bits, ?Integer stencil_bits, ?Integer antialiasing_level, ?Integer major_version, ?Integer minor_version, ?(Symbol | Array[Symbol] | Integer) flags, ?bool srgb_capable) -> void
 

@@ -1,8 +1,8 @@
-module SFML
+module SF::Network
   class Ftp
     def initialize: () -> void
 
-    def connect: (IpAddress | String | Integer address, ?Integer port, ?Time timeout) -> FtpResponse
+    def connect: (IpAddress | String | Integer address, ?Integer port, ?SF::System::Time timeout) -> FtpResponse
     def login_anonymous: () -> FtpResponse
     def login: (String name, String password) -> FtpResponse
     def disconnect: () -> FtpResponse

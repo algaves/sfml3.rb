@@ -1,9 +1,9 @@
-module SFML
+module SF::Network
   class Http
     def initialize: () -> void
 
     def set_host: (String host, ?Integer port) -> self
-    def send_request: (HttpRequest request, ?Time timeout) -> HttpResponse
+    def send_request: (HttpRequest request, ?SF::System::Time timeout) -> HttpResponse
   end
 
   class HttpRequest

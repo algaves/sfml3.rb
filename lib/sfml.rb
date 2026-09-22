@@ -13,3 +13,8 @@ end
 # The pure-Ruby Rubyesque (Matz-like) layer over the native API. Loaded after
 # the extension so it can reopen the classes it defines.
 require 'sfml/rubyesque'
+
+# Deprecated namespace alias. The canonical root is `SF` (its subsystem modules
+# mirror SFML's C++ namespaces); legacy code that opened with `SFML::` keeps
+# resolving, e.g. `SFML::Audio::Sound`.
+SFML = SF unless defined?(SFML)

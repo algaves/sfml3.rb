@@ -1,4 +1,4 @@
-module SFML
+module SF::Graphics
   class StencilMode
     def initialize: () -> void
                  | (Symbol | Integer comparison, Symbol | Integer update_operation, Integer reference, Integer mask, bool stencil_only) -> void

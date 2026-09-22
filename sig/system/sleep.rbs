@@ -1,4 +1,9 @@
-module SFML
+module SF
+  def self.sleep!: (::SF::System::Time | Numeric duration) -> (::SF::System::Time | Numeric)
+  def self.sleep: (::SF::System::Time | Numeric duration) -> (::SF::System::Time | Numeric)
+end
+
+module SF::System
   def self.sleep: (Time | Numeric duration) -> (Time | Numeric)
   def self.sleep!: (Time | Numeric duration) -> (Time | Numeric)
 
