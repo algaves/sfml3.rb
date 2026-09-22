@@ -1,6 +1,7 @@
 module SFML
   class RectangleShape < Shape
     def initialize: (?(Vector2 | Array[Float]) size) -> void
+    def self.[]: (Float left, Float top, Float width, Float height) -> RectangleShape
 
     def copy: () -> RectangleShape
     def move: (Vector2 | Array[Float] offset) -> self

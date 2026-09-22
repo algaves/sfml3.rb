@@ -3,6 +3,7 @@ module SFML
     def initialize: (Integer width, Integer height, Integer bits_per_pixel) -> void
     def self.desktop_mode: () -> VideoMode
     def self.fullscreen_modes: () -> Array[VideoMode]
+    def self.[]: (Integer width, Integer height, ?Integer bits_per_pixel) -> VideoMode
 
     def valid?: () -> bool
     def available?: () -> bool

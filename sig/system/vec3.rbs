@@ -6,6 +6,7 @@ module SFML
                  | (Float x, Float y, Float z) -> void
                  | (Array[Float] xyz) -> void
                  | (Vector3 other) -> void
+    def self.[]: (*untyped args) -> Vector3
 
     def x: () -> Float
     def x=: (Float value) -> Float

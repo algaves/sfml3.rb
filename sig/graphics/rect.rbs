@@ -7,6 +7,7 @@ module SFML
                  | (Float left, Float top, Float width, Float height) -> void
                  | (Array[Float] left_top_width_height) -> void
                  | (Rect other) -> void
+    def self.[]: (*untyped args) -> Rect
 
     def left: () -> Float
     def left=: (Float value) -> Float

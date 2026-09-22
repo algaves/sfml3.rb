@@ -8,6 +8,7 @@ module SFML
     def self.from_rgb: (Integer rgb) -> Color
     def self.from_rgba: (Integer rgba) -> Color
     def self.from_integer: (Integer rgba) -> Color
+    def self.[]: (*untyped args) -> Color
 
     def r: () -> Integer
     def r=: (Integer value) -> Integer

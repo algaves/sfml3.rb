@@ -1,6 +1,7 @@
 module SFML
   class Texture
     def initialize: (Vector2 size) -> void
+    def self.[]: (Vector2 | Array[Integer] size) -> Texture
     def self.srgb: (Vector2 size) -> Texture
     def self.from_file: (String path, ?untyped area) -> Texture
     def self.srgb_from_file: (String path, ?untyped area) -> Texture

@@ -76,6 +76,7 @@ Metrics/BlockLength:
 
 Metrics/CyclomaticComplexity:
   Exclude:
+    - 'lib/sfml/rubyesque.rb'
     - 'examples/**/*'
     - 'script/**/*'
 

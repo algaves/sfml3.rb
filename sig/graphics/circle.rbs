@@ -1,6 +1,7 @@
 module SFML
   class CircleShape < Shape
     def initialize: (?Float radius) -> void
+    def self.[]: (Float radius, ?untyped position) -> CircleShape
 
     def copy: () -> CircleShape
     def move: (Vector2 | Array[Float] offset) -> self

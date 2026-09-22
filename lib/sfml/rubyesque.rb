@@ -73,6 +73,31 @@ module SFML
     end
   end
 
+  # Window style flags, mirroring the CSFML `sfStyle` values. OR them together
+  # to combine flags; the result is an Integer the window constructors accept in
+  # place of the `:default`/`:titlebar` symbols.
+  #
+  # @example
+  #   Window.new(VideoMode[640, 480, 32], 'Title', Style::DEFAULT)
+  #   Window.new(VideoMode[640, 480, 32], 'Title', Style::TITLEBAR | Style::RESIZE)
+  module Style
+    NONE = 0
+    TITLEBAR = 1
+    RESIZE = 2
+    CLOSE = 4
+    DEFAULT = TITLEBAR | RESIZE | CLOSE
+  end
+
+  # Window state, mirroring the CSFML `sfWindowState` values, for the fourth
+  # window-constructor argument.
+  #
+  # @example
+  #   Window.new(VideoMode[640, 480, 32], 'Title', Style::DEFAULT, State::FULLSCREEN)
+  module State
+    WINDOWED = 0
+    FULLSCREEN = 1
+  end
+
   # Rubyesque window methods shared by every window class: the predicate/mutator aliases, the
   # `poll_events!` block iterator and the scoped `open` constructor.
   #
@@ -143,6 +168,68 @@ module SFML
 
       event = Event.new
       yield event while poll_event!(event)
+
+      self
+    end
+
+    alias poll_event_without_block! poll_event!
+    private :poll_event_without_block!
+    alias wait_event_without_block! wait_event!
+    private :wait_event_without_block!
+
+    # Runs the block repeatedly while the window is open, then closes it.
+    #
+    # @yield [window] the window, once per frame
+    # @return [self] when given a block
+    # @return [Enumerator] without a block
+    #
+    # @example
+    #   window.open! do
+    #     window.poll_event! { |event| window.close! if event.closed? }
+    #     window.clear!
+    #     window.display!
+    #   end
+    def open!(&block)
+      return enum_for(:open!) unless block
+
+      begin
+        yield self while open?
+      ensure
+        close!
+      end
+
+      self
+    end
+
+    # With a block, drains every pending event and yields each, returning self.
+    # Without a block, behaves like the native `poll_event!(event) -> bool`.
+    #
+    # @yield [event] each pending event
+    # @return [self] when given a block
+    # @return [Boolean] without a block
+    def poll_event!(event = nil, &block)
+      return poll_event_without_block!(event) if event && !block
+      raise ArgumentError, 'poll_event! expects an event or a block' unless block
+
+      buffer = Event.new
+      yield buffer while poll_event_without_block!(buffer)
+
+      self
+    end
+
+    # With a block, blocks until one event arrives and yields it, returning
+    # self. Without a block, behaves like the native `wait_event!(event) -> bool`.
+    #
+    # @yield [event] the event that arrived
+    # @return [self] when given a block
+    # @return [Boolean] without a block
+    def wait_event!(event = nil, &block)
+      return wait_event_without_block!(event) if event && !block
+      raise ArgumentError, 'wait_event! expects an event or a block' unless block
+
+      buffer = Event.new
+      wait_event_without_block!(buffer)
+      yield buffer
 
       self
     end
@@ -242,6 +329,44 @@ module SFML
       display!
     end
 
+    alias poll_event_without_block! poll_event!
+    private :poll_event_without_block!
+    alias wait_event_without_block! wait_event!
+    private :wait_event_without_block!
+
+    # With a block, drains every pending event and yields each, returning self.
+    # Without a block, behaves like the native `poll_event!(event) -> bool`.
+    #
+    # @yield [event] each pending event
+    # @return [self] when given a block
+    # @return [Boolean] without a block
+    def poll_event!(event = nil, &block)
+      return poll_event_without_block!(event) if event && !block
+      raise ArgumentError, 'poll_event! expects an event or a block' unless block
+
+      buffer = Event.new
+      yield buffer while poll_event_without_block!(buffer)
+
+      self
+    end
+
+    # With a block, blocks until one event arrives and yields it, returning
+    # self. Without a block, behaves like the native `wait_event!(event) -> bool`.
+    #
+    # @yield [event] the event that arrived
+    # @return [self] when given a block
+    # @return [Boolean] without a block
+    def wait_event!(event = nil, &block)
+      return wait_event_without_block!(event) if event && !block
+      raise ArgumentError, 'wait_event! expects an event or a block' unless block
+
+      buffer = Event.new
+      wait_event_without_block!(buffer)
+      yield buffer
+
+      self
+    end
+
     # Clears, yields self for drawing, then presents: the whole frame in one
     # call. Returns self.
     #
@@ -264,6 +389,213 @@ module SFML
 
   WindowBase.prepend(VisibilityTracking)
   Window.prepend(VisibilityTracking)
+
+  # `Class[...]` constructors: the positional spelling the issue proposes. Each
+  # delegates to the existing `new` -- setting the position or size afterwards
+  # where the native initializer has no such argument -- so the `.new` forms
+  # keep working unchanged.
+
+  # Builds a VideoMode from a width, a height and an optional bit depth.
+  #
+  # @return [VideoMode]
+  #
+  # @example
+  #   VideoMode[640, 480, 32]
+  class VideoMode
+    def self.[](width, height, bits = 32)
+      new(width, height, bits)
+    end
+  end
+
+  # Builds a Vector2 from components, an array or another Vector2.
+  #
+  # @return [Vector2]
+  #
+  # @example
+  #   Vector2[10, 20]
+  class Vector2
+    def self.[](*args)
+      new(*args) # steep:ignore
+    end
+  end
+
+  # Builds a Vector3 from components, an array or another Vector3.
+  #
+  # @return [Vector3]
+  #
+  # @example
+  #   Vector3[1, 2, 3]
+  class Vector3
+    def self.[](*args)
+      new(*args) # steep:ignore
+    end
+  end
+
+  # Builds a Color from components, an array or a packed Integer.
+  #
+  # @return [Color]
+  #
+  # @example
+  #   Color[235, 90, 90]
+  class Color
+    def self.[](*args)
+      new(*args) # steep:ignore
+    end
+  end
+
+  # Builds a Rect from a position and a size, or an array.
+  #
+  # @return [Rect]
+  #
+  # @example
+  #   Rect[0, 0, 100, 60]
+  class Rect
+    def self.[](*args)
+      new(*args) # steep:ignore
+    end
+  end
+
+  # Builds a Time from a number of seconds.
+  #
+  # @return [Time]
+  #
+  # @example
+  #   Time[0.5]
+  class Time
+    def self.[](seconds)
+      new(Float(seconds))
+    end
+  end
+
+  # Builds a Text, optionally with a font, a string and a character size.
+  #
+  # @return [Text]
+  #
+  # @example
+  #   Text[font, 'Hello', 24]
+  class Text
+    def self.[](*args)
+      new(*args) # steep:ignore
+    end
+  end
+
+  # Builds a Vertex, optionally with a position, colour and texture coordinates.
+  #
+  # @return [Vertex]
+  #
+  # @example
+  #   Vertex[Vector2[10, 20], Color[255, 0, 0]]
+  class Vertex
+    def self.[](*args)
+      new(*args) # steep:ignore
+    end
+  end
+
+  # Builds a View from a Rect (or [left, top, width, height]) or a centre and a
+  # size.
+  #
+  # @return [View]
+  #
+  # @example
+  #   View[Rect[0, 0, 640, 480]]
+  #   View[Vector2[320, 240], Vector2[640, 480]]
+  class View
+    def self.[](*args)
+      case args.size
+      when 1
+        rect = args.first
+        rect = Rect[*rect] if rect.is_a?(Array) && rect.size == 4
+        raise ArgumentError, 'expected a Rect or [left, top, width, height]' unless rect.is_a?(Rect)
+
+        from_rect(rect)
+      when 2
+        new.tap do |view|
+          view.center = args[0].is_a?(Array) ? Vector2[*args[0]] : args[0]
+          view.size = args[1].is_a?(Array) ? Vector2[*args[1]] : args[1]
+        end
+      else
+        raise ArgumentError, "wrong number of arguments (given #{args.size}, expected 1..2)"
+      end
+    end
+  end
+
+  # Builds a Sprite, optionally with a texture.
+  #
+  # @return [Sprite]
+  class Sprite
+    def self.[](texture)
+      new(texture)
+    end
+  end
+
+  # Builds a Texture from a size ([width, height] or a Vector2).
+  #
+  # @return [Texture]
+  #
+  # @example
+  #   Texture[[128, 128]]
+  class Texture
+    def self.[](size)
+      new(Vector2[size])
+    end
+  end
+
+  # Builds an Image from a size ([width, height] or a Vector2).
+  #
+  # @return [Image]
+  class Image
+    def self.[](size)
+      new(size)
+    end
+  end
+
+  # Builds a RenderTexture from a size ([width, height] or a Vector2) and
+  # optional context settings.
+  #
+  # @return [RenderTexture]
+  class RenderTexture
+    def self.[](size, settings = nil)
+      new(Vector2[size], settings)
+    end
+  end
+
+  # Builds a CircleShape from a radius and an optional position.
+  #
+  # @return [CircleShape]
+  #
+  # @example
+  #   CircleShape[30, [100, 100]]
+  class CircleShape
+    def self.[](radius, position = [0, 0])
+      new(radius).tap { |shape| shape.position = position }
+    end
+  end
+
+  # Builds a RectangleShape from a position and a size.
+  #
+  # @return [RectangleShape]
+  #
+  # @example
+  #   RectangleShape[10, 20, 100, 40]
+  class RectangleShape
+    def self.[](left, top, width, height)
+      new([width, height]).tap { |shape| shape.position = [left, top] }
+    end
+  end
+
+  # Builds a ConvexShape from its points (each an array or a Vector2).
+  #
+  # @return [ConvexShape]
+  #
+  # @example
+  #   ConvexShape[[0, 0], [100, 0], [50, 80]]
+  class ConvexShape
+    def self.[](*points)
+      new(points.size).tap do |shape|
+        points.each_with_index { |point, index| shape.set_point(index, point) }
+      end
+    end
+  end
 
   # Rubyesque predicates shared by every playable source. `status` dispatches to the
   # concrete class's native entry point, so these work for Sound, SoundStream

@@ -7,8 +7,14 @@ module SFML
     def is_open?: () -> bool
     def open?: () -> bool
     def close!: () -> self
+    def open!: () -> Enumerator[WindowBase, untyped]
+             | () { (WindowBase) -> untyped } -> self
     def poll_event!: (Event event) -> bool
+                   | () { (Event) -> untyped } -> self
     def wait_event!: (Event event) -> bool
+                   | () { (Event) -> untyped } -> self
+    private def poll_event_without_block!: (Event event) -> bool
+    private def wait_event_without_block!: (Event event) -> bool
     def poll_events!: () -> Enumerator[Event, untyped]
                    | () { (Event) -> untyped } -> self
 
