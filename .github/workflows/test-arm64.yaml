@@ -9,7 +9,7 @@ on:
       # first surfaced here lived in ext/audio), so this is not narrowed to
       # packaging files the way it used to be.
       - 'ext/**'
-      - 'test/**'
+      - 'spec/**'
       - 'script/provision.sh'
       - '.github/workflows/test-arm64.yaml'
       - '.github/workflows/_test-reusable.yaml'

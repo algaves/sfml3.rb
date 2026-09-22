@@ -9,9 +9,7 @@ gem 'rake'
 gem 'rake-compiler'
 
 group :test do
-  # minitest 6 requires Ruby >= 3.2, which is still above the 3.1 floor the
-  # gemspec promises -- and that floor is only meaningful if CI can test it.
-  gem 'minitest', '~> 5.0'
+  gem 'rspec', '~> 3.13'
 end
 
 # Host-only: neither building nor testing the extension needs these, so the

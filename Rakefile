@@ -2,7 +2,7 @@
 
 require 'rake/clean'
 require 'rake/extensiontask'
-require 'rake/testtask'
+require 'rspec/core/rake_task'
 require 'rubygems/package_task'
 
 require_relative 'ext/ports'
@@ -33,9 +33,9 @@ end
 
 Gem::PackageTask.new(GEMSPEC).define
 
-Rake::TestTask.new(:test) do |t|
-  t.libs << 'lib'
-  t.test_files = FileList['test/**/*_test.rb']
+RSpec::Core::RakeTask.new(:test) do |t|
+  t.pattern = 'spec/**/*_spec.rb'
+  t.rspec_opts = %w[-Ilib]
 end
 task test: :compile
 

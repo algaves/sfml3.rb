@@ -3,6 +3,7 @@
 #include <ruby.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "window/event_name.h"
 #include "window/keyboard.h"
@@ -30,7 +31,7 @@ static VALUE Event_alloc(VALUE klass) {
         rb_raise(rb_eNoMemError, "failed to allocate event");
     }
 
-    *event = (sfEvent){0};
+    memset(event, 0, sizeof(sfEvent));
 
     return TypedData_Wrap_Struct(klass, &Event_data_type, event);
 }
@@ -90,8 +91,9 @@ static VALUE Event_get_key(VALUE self) {
     VALUE hash = rb_hash_new();
 
     rb_hash_aset(hash, ID2SYM(rb_intern("code")), ID2SYM(rb_intern(get_key_event(event->code))));
-    rb_hash_aset(hash, ID2SYM(rb_intern("scancode")),
-                 rb_str_new2(sfKeyboard_getDescription(event->scancode)));
+    const char* scancode = sfKeyboard_getDescription(event->scancode);
+    rb_hash_aset(hash, ID2SYM(rb_intern("scancode")), rb_str_new2(scancode));
+    free((void*)scancode);
     rb_hash_aset(hash, ID2SYM(rb_intern("alt")), BOOL2RB(event->alt));
     rb_hash_aset(hash, ID2SYM(rb_intern("control")), BOOL2RB(event->control));
     rb_hash_aset(hash, ID2SYM(rb_intern("shift")), BOOL2RB(event->shift));

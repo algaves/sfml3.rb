@@ -40,6 +40,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   `SFML::SoundBufferRecorder < SFML::SoundRecorder`.
 
 ### Changed
+* **The test suite moved from Minitest to RSpec.** Every `test/**/*_test.rb` became a
+  `spec/**/*_spec.rb` under the same per-subsystem split, Minitest's `assert_*` helpers became RSpec
+  expectations (with `assert_vec_in_epsilon`/`assert_matrix_in_delta` as `be_vec_in_epsilon`/
+  `be_matrix_in_delta` custom matchers), and `rake test` now drives `RSpec::Core::RakeTask`. The old
+  `test/` directory is gone; `spec/spec_helper.rb` replaces `test/test_helper.rb`.
+* **The specs were reorganized into per-class files under category folders.** The monolithic
+  `spec/{sfml,window,graphics,audio}_spec.rb` files and the over-stuffed `spec/rubyesque_spec.rb`
+  were split into one file per class under `spec/{system,window,graphics,audio,network}/` (e.g.
+  `spec/graphics/transform_spec.rb`, `spec/network/packet_spec.rb`), the display-free allocator
+  regression sits in `spec/binding_spec.rb`, and `spec/rubyesque_spec.rb` now only keeps the
+  cross-cutting deprecated-alias smoke tests. The `Rakefile`'s `spec/**/*_spec.rb` pattern already
+  picked up the subfolders; the 150-example/0-failure result is unchanged.
 * **The Rubyesque names are now primary**, with the pre-Rubyesque spellings kept as deprecated
   aliases that warn: `is_open?`, `focus?`, `request_focus`, `clear`, `display`,
   `play`/`pause`/`stop`, `Keyboard.pressed?`, `Joystick.has_axis?`, `Clipboard.string`/`string=`
@@ -55,6 +67,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Deprecated
 * The pre-Rubyesque method names listed under **Changed**. They behave exactly as before and print a
   one-line warning pointing at the replacement; they will be removed in a future major release.
+
+### Fixed
+* **`SFML::Event#key` (and `Event#code`) could segfault.** `Event_alloc` zeroed a freshly allocated
+  `sfEvent` with `*event = (sfEvent){0}`, which the compiler rewrote into a 4-byte store, leaving the
+  key/scancode union members as malloc garbage; `event.key` then indexed CSFML's key table with that
+  garbage, crashing intermittently (heap-layout dependent) inside
+  `sfKeyboard_getDescription`. The allocation now uses `memset` (compiles to `calloc`), and the
+  leaked `strdup` from `sfKeyboard_getDescription` is freed.
 
 ## [0.3.1] - 2026-09-19
 

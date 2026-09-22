@@ -72,6 +72,7 @@ Metrics/BlockNesting:
 
 Metrics/BlockLength:
   Exclude:
+    - 'spec/**/*'
     - 'examples/**/*'
     - 'script/**/*'
 
@@ -87,15 +88,15 @@ Metrics/PerceivedComplexity:
     - 'script/**/*'
 
 # Test methods legitimately run long: a round-trip check is a linear sequence of
-# assertions, and splitting one into helpers to satisfy a line count makes the
-# failure harder to read, not the test better. The single test class is the
-# minitest convention.
+# expectations, and splitting one into helpers to satisfy a line count makes the
+# failure harder to read, not the test better. The single describe block per
+# subsystem is the RSpec convention.
 #
 # ext/extconf.rb is mkmf glue and ext/ports.rb is the vendored-dependency
 # recipe; both are long by nature and none of it is runtime API.
 Metrics/AbcSize:
   Exclude:
-    - 'test/**/*'
+    - 'spec/**/*'
     - 'ext/extconf.rb'
     - 'ext/ports.rb'
     - 'lib/sfml/rubyesque.rb'
@@ -104,7 +105,7 @@ Metrics/AbcSize:
 
 Metrics/MethodLength:
   Exclude:
-    - 'test/**/*'
+    - 'spec/**/*'
     - 'ext/extconf.rb'
     - 'ext/ports.rb'
     - 'lib/sfml/rubyesque.rb'
@@ -113,7 +114,7 @@ Metrics/MethodLength:
 
 Metrics/ClassLength:
   Exclude:
-    - 'test/**/*'
+    - 'spec/**/*'
     - 'examples/**/*'
     - 'script/**/*'
 
