@@ -63,6 +63,13 @@ static VALUE Sprite_wrap(VALUE klass, sfSprite* sprite) {
     return TypedData_Wrap_Struct(klass, &Sprite_data_type, ptr);
 }
 
+/* call-seq: initialize_copy(other) -> self
+ *
+ * Copy construction is not supported: a Sprite wraps a native resource that
+ * cannot be duplicated, so this always raises.
+ *
+ * @raise [TypeError] always
+ */
 static VALUE Sprite_initialize_copy(VALUE self, VALUE other) {
     (void)other;
     rb_raise(rb_eTypeError, "can't copy a %s", rb_obj_classname(self));

@@ -61,17 +61,16 @@ end
 
 held = nil
 grab_offset = [0, 0]
-event = Event.new
 
-while window.is_open?
-  while window.poll_event!(event)
+while window.open?
+  window.poll_events! do |event|
     case event.type
     when 'closed'
       window.close!
     when 'key-pressed'
-      if event.key[:code] == :escape
+      if event.code == :escape
         window.close!
-      elsif event.key[:code] == :space
+      elsif event.code == :space
         spawn(bouncers, window.size)
       end
     when 'mouse-button-pressed'
@@ -109,7 +108,7 @@ while window.is_open?
     shape.rotate(1)
   end
 
-  window.clear([24, 24, 34, 255])
+  window.clear!([24, 24, 34, 255])
   bouncers.each { |bouncer| window.draw(bouncer.shape) }
-  window.display
+  window.display!
 end

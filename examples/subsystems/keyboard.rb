@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # SFML::Keyboard: real-time key state and the mapping between physical
-# scancodes and logical key codes. `pressed?` takes a key Symbol (or String
+# scancodes and logical key codes. `key_pressed?` takes a key Symbol (or String
 # name, or Integer code); `scancode_pressed?` takes a raw scancode. The HUD
 # shows the last key event, `localize` (scancode -> key), `delocalize`
 # (key -> scancode) and `description`. T toggles the on-screen virtual keyboard
@@ -40,7 +40,7 @@ def draw_keyboard(window)
     row.each_with_index do |key, column|
       position = [20 + offset + (column * (KEY_SIZE + KEY_GAP)), 70 + (row_index * (KEY_SIZE + KEY_GAP))]
       box = key_box(key, position)
-      box.fill_color = Keyboard.pressed?(key) ? [90, 180, 255, 255] : [40, 44, 56, 255]
+      box.fill_color = Keyboard.key_pressed?(key) ? [90, 180, 255, 255] : [40, 44, 56, 255]
       window.draw(box)
       window.draw(ExampleSupport.text(key.to_s, size: 13, position: [position[0] + 4, position[1] + 12]))
     end
@@ -49,13 +49,12 @@ end
 
 window = Window.new(VideoMode.new(520, 380, 32), 'SFML keyboard')
 window.frame_rate = 60
-event = Event.new
 frame = 0
 last = 'press any key'
 virtual_keyboard = false
 
 loop do
-  while window.poll_event!(event)
+  window.poll_events! do |event|
     case event.type
     when 'closed'
       window.close!
@@ -74,16 +73,16 @@ loop do
     end
   end
 
-  held = ROWS.flatten.select { |key| Keyboard.pressed?(key) }
+  held = ROWS.flatten.select { |key| Keyboard.key_pressed?(key) }
 
-  window.clear([22, 26, 34, 255])
+  window.clear!([22, 26, 34, 255])
   draw_keyboard(window)
   window.draw(ExampleSupport.text(
                 "#{last}\npressed now: #{held.empty? ? '(none)' : held.join(' ')}\n" \
                 "virtual keyboard: #{virtual_keyboard ? 'on' : 'off'} (T toggles), escape quits",
                 size: 15, position: [20, 290]
               ))
-  window.display
+  window.display!
 
   frame += 1
   break if ExampleSupport.auto_close?(frame)

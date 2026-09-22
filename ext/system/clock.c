@@ -135,6 +135,13 @@ static VALUE Clock_copy(VALUE self) {
 
 /* Document-class: SFML::Clock
  * A stopwatch for measuring elapsed time.
+ *
+ * @!method self.measure { ... }
+ *   Runs the block with a throwaway clock and returns the time it took.
+ *   Rubyesque (Matz-like) over creating a Clock, yielding and reading
+ *   #elapsed_time.
+ *   @yield the work to time
+ *   @return [Time] the elapsed time
  */
 void Init_Clock(VALUE rb_mSFML) {
     rb_cClock = rb_define_class_under(rb_mSFML, "Clock", rb_cObject);

@@ -1,0 +1,19 @@
+module SFML
+  # Window style flags, mirroring the CSFML +sfStyle+ values. OR them together
+  # to combine flags; the result is the Integer the window constructors accept
+  # in place of the +:default+/+:titlebar+ symbols.
+  module Style
+    NONE: Integer
+    TITLEBAR: Integer
+    RESIZE: Integer
+    CLOSE: Integer
+    DEFAULT: Integer
+  end
+
+  # Window state, mirroring the CSFML +sfWindowState+ values, for the fourth
+  # window-constructor argument.
+  module State
+    WINDOWED: Integer
+    FULLSCREEN: Integer
+  end
+end

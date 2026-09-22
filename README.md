@@ -16,6 +16,13 @@ Latest release: **0.3.1**, bound against **CSFML 3**.
 
 * **Broad coverage of SFML 3**, bound through CSFML: windows and events, graphics, audio, network,
   and the system layer, with every `sf*` entry point tracked in [ROADMAP.md](ROADMAP.md).
+* **A Rubyesque (Matz-like) layer** over that raw binding, in
+  [`lib/sfml/rubyesque.rb`](lib/sfml/rubyesque.rb): `?` predicates, `!` mutators, block iterators
+  (`poll_events!`, `render!`, `open!`), scoped resources (`WindowBase.open`,
+  `SoundBufferRecorder.record!`, `Clock.measure`), positional `Class[...]` constructors
+  (`VideoMode[...]`, `Vector2[...]`, `CircleShape[...]`, ...) and the `Style`/`State` flag
+  namespaces. The pre-Rubyesque names remain as deprecated aliases, so nothing breaks. See
+  [below](#rubyesque-matz-like-layer).
 * **Precompiled binary gems** for common platforms, with FreeType, SFML 3 and CSFML 3 statically
   linked in — no toolchain and nothing to install system-wide.
 * **A source fallback everywhere else**, which downloads and builds the pinned, checksum-verified
@@ -31,6 +38,7 @@ Latest release: **0.3.1**, bound against **CSFML 3**.
 
 * [Installation](#installation)
 * [Quick Start](#quick-start)
+* [Rubyesque (Matz-like) layer](#rubyesque-matz-like-layer)
 * [Documentation](#documentation)
 * [Development](#development)
 * [Contributing](#contributing)
@@ -105,25 +113,201 @@ gem install sfml3-rb -- --enable-system-libraries
 require 'sfml'
 include SFML
 
-window = Window.new VideoMode.new(640, 480, 32), 'SFML'
-event  = Event.new
+window = Window.new VideoMode[640, 480, 32], 'SFML'
 
-while window.is_open?
-  while window.poll_event! event
-    window.close! if event.type == 'closed'
+while window.open?
+  window.poll_events! do |event|
+    window.close! if event.closed?
   end
 
-  window.clear [51, 76, 102, 255] # [r, g, b, a], 0-255
-  window.display
+  window.clear! [51, 76, 102, 255] # [r, g, b, a], 0-255
+  window.display!
 end
 ```
 
-Event types are strings (`'closed'`, `'resized'`, `'key-pressed'`, ...); keys and buttons are enums.
+The primary spellings (`open?`, `clear!`, `display!`, ...) are pure-Ruby Rubyesque (Matz-like)
+over the native API. The names that shipped before them (`is_open?`, `clear`, `display`, ...) still
+work but warn that they are deprecated.
+
+## Rubyesque (Matz-like) layer
+
+`lib/sfml/rubyesque.rb` layers the Rubyesque (Matz-like) API on top of the raw CSFML binding:
+predicate methods end in `?`, methods that change state end in `!`, and block-scoped helpers handle
+setup and teardown. Nothing is lost — the native surface is still there, unchanged.
+
+### Windows: scoped setup, block events, scoped frames
+
+```ruby
+# The window is closed automatically when the block returns or raises.
+RenderWindow.open(VideoMode.new(640, 480, 32), 'Game Title') do |window|
+  window.poll_events! do |event|          # yields every pending event
+    window.close! if event.closed?
+    puts "Key pressed: #{event.code}" if event.key_pressed?
+  end
+
+  window.render!(clear_color: Color::BLACK) do |target|
+    target.draw sprite
+    target.draw text
+  end
+end
+```
+
+`poll_events!` returns an `Enumerator` without a block; `render!` clears, yields the window,
+then presents. `window.open?`, `window.focused?` and `window.visible?` are the predicates;
+`request_focus!` asks the window manager for focus, and `close!` closes the window. The scoped
+constructor lives on `WindowBase`, so `WindowBase.open`, `Window.open` and `RenderWindow.open`
+all behave the same way and return the open window when called without a block.
+
+A window also takes a block-oriented loop. `window.open!` yields it repeatedly while it is open
+and closes it afterwards, `window.poll_event! { |event| ... }` drains the pending events (the
+block form of `poll_events!`), and `window.wait_event! { |event| ... }` blocks for one. Without a
+block, `poll_event!`/`wait_event!` keep their native `poll_event!(event) -> bool` form.
+
+```ruby
+window = Window.new(VideoMode[640, 480, 32], 'Game Title', Style::DEFAULT)
+
+window.open! do
+  window.poll_event! do |event|
+    window.close! if event.closed? || (event.key_pressed? && event.code == :escape)
+  end
+
+  window.render! do |target|
+    target.draw sprite
+  end
+end
+```
+
+### Construction: `VideoMode`, `Style`/`State` and `Class[...]`
+
+```ruby
+window = RenderWindow.new(
+  VideoMode[640, 480, 32],   # VideoMode[width, height, bits = 32]
+  'Hello world!',
+  Style::DEFAULT,            # or Style::TITLEBAR | Style::RESIZE
+  State::WINDOWED            # or State::FULLSCREEN
+)
+```
+
+`Style` and `State` are Integer flag namespaces mirroring CSFML (`sfStyle`/`sfWindowState`), so
+they combine with `|` and slot into the constructor where the `:default` / `:windowed` symbols did.
+
+The value and resource classes also take a positional `Class[...]` constructor; every `.new` form
+keeps working.
+
+```ruby
+Vector2[x, y]                  # also Vector2[[x, y]]
+Vector3[x, y, z]
+Color[r, g, b]                 # Color[r, g, b, a] or Color[packed]
+Rect[left, top, width, height]
+Time[seconds]                  # always seconds
+View[Rect[left, top, width, height]]   # or View[center, size]
+Text[font, 'Hello', 24]
+Vertex[Vector2[x, y], Color[r, g, b]]
+Texture[[width, height]]       # Texture / Image / RenderTexture take a size
+Sprite[texture]
+
+CircleShape[radius, [x, y]]            # position defaults to [0, 0]
+RectangleShape[x, y, width, height]
+ConvexShape[[x0, y0], [x1, y1], ...]   # points as arrays or Vector2s
+```
+
+### Audio: predicates, banged playback, scoped recording
+
+```ruby
+music.play! if music.stopped?
+music.pause! if music.playing? && pause_condition
+
+if sound.playing? || sound.paused?
+  sound.stop!
+end
+
+# Records until the block returns and returns the resulting SoundBuffer.
+buffer = SoundBufferRecorder.record!(sample_rate: 44_100, device: nil) do |recorder|
+  # capture happens while the block runs
+end
+Sound.new(buffer)
+```
+
+`SoundSource#playing?`, `#paused?` and `#stopped?` are shared by `Sound`, `SoundStream` and
+`Music`; `play!`, `pause!` and `stop!` are their mutating counterparts.
+
+### Sensors and input devices
+
+```ruby
+if Sensor.available?(:gyroscope)
+  Sensor.enable!(:gyroscope)
+  rotation = Sensor.value(:gyroscope)
+  Sensor.disable!(:gyroscope)
+end
+
+Joystick.connected?(0)                # => true/false
+Joystick.button_count(0)
+Joystick.button_pressed?(0, 0)
+Joystick.axis?(0, :z)
+
+Keyboard.key_pressed?(:space)
+Touch.down?(0)
+Touch.position(0, relative_to: window)
+```
+
+### Clipboard
+
+```ruby
+Clipboard.content = 'Copy this text'
+puts Clipboard.content if Clipboard.has_text?
+Clipboard.clear!
+```
+
+### System: clocks and sleep
+
+```ruby
+elapsed = Clock.measure do
+  SFML::Sleep.sleep!(Time.seconds(0.5))
+end
+
+puts "Executed in #{elapsed.as_seconds}s"
+```
+
+`clock.restart!` and `clock.running?` are on every `Clock`.
+
+### Events
+
+Event types are strings (`'closed'`, `'resized'`, `'key-pressed'`, ...) and every payload is a
+Hash (`event.key[:code]`, `event.mouse_button[:button]`, ...), as before. On top of that every
+kind has a predicate — `event.closed?`, `event.key_pressed?`, `event.mouse_moved?`,
+`event.touch_began?`, ... — and `event.code` is the `event.key[:code]` shortcut.
+
+### Name changes at a glance
+
+Nothing is removed: the pre-Rubyesque spelling keeps working and warns once with the line that
+called it. The primary names are the right-hand column.
+
+| Before (deprecated)             | Now (primary)                                 |
+| ------------------------------- | --------------------------------------------- |
+| `window.is_open?`               | `window.open?`                                |
+| `window.focus?`                 | `window.focused?`                             |
+| `window.request_focus`          | `window.request_focus!`                       |
+| `window.clear`                  | `window.clear!`                               |
+| `window.display`                | `window.display!`                             |
+| `window.poll_event!(event)`     | `window.poll_events! { \|event\| }`           |
+| `sound.play` / `pause` / `stop` | `sound.play!` / `pause!` / `stop!`            |
+| `sound.status == :playing`      | `sound.playing?` (also `paused?`, `stopped?`) |
+| `Keyboard.pressed?`             | `Keyboard.key_pressed?`                       |
+| `Joystick.has_axis?`            | `Joystick.axis?`                              |
+| `Clipboard.string` / `string=`  | `Clipboard.content` / `content=`              |
+| `SFML.sleep`                    | `SFML.sleep!` (or `SFML::Sleep.sleep!`)       |
+
+The Rubyesque layer also fills gaps the native surface leaves: `WindowBase.open` and `window.render!`,
+`SoundBufferRecorder.record!`, `Clock.measure`, `Sensor.enable!`/`disable!`,
+`Clipboard.has_text?`/`clear!`, `Touch.position(finger, relative_to: window)` and every
+`event.*?` predicate are new, with no pre-Rubyesque equivalent.
 
 See [`examples/hello_shapes.rb`](examples/hello_shapes.rb) for a minimal walkthrough of the five
 building blocks (window, events, transformables, drawables, primitive shapes), and
 [`examples/bouncing_shapes.rb`](examples/bouncing_shapes.rb) for an interactive take on the same
-components. [`examples/subsystems/`](examples/subsystems) has one demo per module (Listener, GLSL,
+components. [`examples/rubyesque/`](examples/rubyesque) is one small teaching script per slice of
+the Rubyesque layer -- window, events, audio, input, system and the deprecation path -- with the
+same cheat sheet as above. [`examples/subsystems/`](examples/subsystems) has one demo per module (Listener, GLSL,
 Clipboard, Joystick, Keyboard, Mouse, Sensor, Touch, Vulkan, window styles, DNS, audio devices, and
 sprites/textures/images), and [`examples/games/`](examples/games) has eleven playable games --
 Snake, Breakout, Asteroids, Platformer, Tron, Flappy Bird, Doodle Jump, Xonix, Tetris, Racing and

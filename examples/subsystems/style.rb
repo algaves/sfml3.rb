@@ -34,18 +34,17 @@ end
 
 index = 0
 window = build_window(*STYLES[index])
-event = Event.new
 frame = 0
 
 loop do
   rebuild = nil
 
-  while window.poll_event!(event)
+  window.poll_events! do |event|
     case event.type
     when 'closed'
       window.close!
     when 'key-pressed'
-      code = event.key[:code]
+      code = event.code
       window.close! if code == :escape
       number = code.to_s[/\Anum([1-6])\z/, 1]
       rebuild = number.to_i - 1 if number
@@ -68,9 +67,9 @@ loop do
     size: 17
   )
 
-  window.clear(STYLES[index][1] == :fullscreen ? [40, 30, 60, 255] : [26, 30, 40, 255])
+  window.clear!(STYLES[index][1] == :fullscreen ? [40, 30, 60, 255] : [26, 30, 40, 255])
   window.draw(info)
-  window.display
+  window.display!
 
   frame += 1
   break if ExampleSupport.auto_close?(frame)

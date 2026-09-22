@@ -23,7 +23,6 @@ PALETTE = [[96, 170, 240], [240, 140, 120], [120, 220, 150],
 
 window = Window.new(VideoMode.new(WIDTH, HEIGHT, 32), 'SFML GUI')
 window.frame_rate = 60
-event = Event.new
 input = ExampleSupport::Gui::Input.new(window)
 
 background = ExampleSupport.procedural_texture(4, 220) do |_x, y|
@@ -53,12 +52,12 @@ balls = Array.new(ball_count) { new_ball }
 frame = 0
 
 loop do
-  while window.poll_event!(event)
+  window.poll_events! do |event|
     case event.type
     when 'closed'
       window.close!
     when 'key-pressed'
-      window.close! if event.key[:code] == :escape
+      window.close! if event.code == :escape
     end
   end
 
@@ -81,7 +80,7 @@ loop do
     ball[:vy] = -ball[:vy].abs if ball[:y] > PREVIEW[1] + PREVIEW[3] - radius
   end
 
-  window.clear([16, 18, 26, 255])
+  window.clear!([16, 18, 26, 255])
   backdrop = RectangleShape.new([WIDTH, HEIGHT])
   backdrop.texture = background
   backdrop.texture_rect = [0, 0, WIDTH, HEIGHT]
@@ -131,7 +130,7 @@ loop do
 
   window.draw(ExampleSupport.text(status, size: 15, position: [40, HEIGHT - 30], color: [200, 208, 230, 255]))
 
-  window.display
+  window.display!
   frame += 1
   break if ExampleSupport.auto_close?(frame)
 end

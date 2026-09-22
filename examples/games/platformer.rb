@@ -102,7 +102,6 @@ end
 
 window = Window.new(VideoMode.new(SCREEN[0], SCREEN[1], 32), 'SFML platformer')
 window.frame_rate = 60
-event = Event.new
 hud = ExampleSupport.text('', size: 16, position: [10, 8])
 coin_sound = ExampleSupport.sound('beep')
 jump_sound = ExampleSupport.sound('jump')
@@ -123,12 +122,12 @@ reset.call
 loop do
   restart = false
   jump = false
-  while window.poll_event!(event)
+  window.poll_events! do |event|
     case event.type
     when 'closed'
       window.close!
     when 'key-pressed'
-      key = event.key[:code]
+      key = event.code
       window.close! if key == :escape
       restart = true if key == :r
       jump = true if %i[Up Space].include?(key)
@@ -139,8 +138,8 @@ loop do
   player = game[:player]
 
   if game[:state] == :playing
-    player[:vx] += RUN if Keyboard.pressed?(:Left) || Keyboard.pressed?(:a)
-    player[:vx] -= RUN if Keyboard.pressed?(:Right) || Keyboard.pressed?(:d)
+    player[:vx] += RUN if Keyboard.key_pressed?(:Left) || Keyboard.key_pressed?(:a)
+    player[:vx] -= RUN if Keyboard.key_pressed?(:Right) || Keyboard.key_pressed?(:d)
     player[:vx] = player[:vx].clamp(-MAX_RUN, MAX_RUN)
     player[:vx] *= player[:grounded] ? 0.82 : 0.94
     player[:vy] = [player[:vy] + GRAVITY, 18.0].min
@@ -148,7 +147,7 @@ loop do
     if jump && player[:grounded]
       player[:vy] = JUMP
       player[:grounded] = false
-      jump_sound.play
+      jump_sound.play!
     end
 
     move_player(player)
@@ -158,7 +157,7 @@ loop do
       player = game[:player]
     elsif player[:x] + player[:w] >= GOAL[0] && game[:coins].all? { |coin| coin[:taken] }
       game[:state] = :won
-      win_sound.play
+      win_sound.play!
     end
 
     player[:x] = player[:x].clamp(0, LEVEL_WIDTH - player[:w])
@@ -171,14 +170,14 @@ loop do
 
     coin[:taken] = true
     game[:score] += 1
-    coin_sound.play
+    coin_sound.play!
   end
 
   camera.center = [(player[:x] + (player[:w] / 2)).clamp(SCREEN[0] / 2, LEVEL_WIDTH - (SCREEN[0] / 2)),
                    SCREEN[1] / 2]
   window.view = camera
 
-  window.clear([30, 40, 60, 255])
+  window.clear!([30, 40, 60, 255])
   draw_level(window)
   game[:coins].each { |coin| draw_coin(window, coin) unless coin[:taken] }
   draw_player(window, player)
@@ -187,7 +186,7 @@ loop do
   hud.string = "coins #{game[:score]}/#{COINS.size}   " \
                "#{game[:state] == :won ? 'YOU WIN! R restarts' : 'Left/Right move, Up/Space jump, R restarts'}"
   window.draw(hud)
-  window.display
+  window.display!
 
   frame += 1
   break if ExampleSupport.auto_close?(frame)

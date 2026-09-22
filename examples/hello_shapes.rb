@@ -35,13 +35,12 @@ triangle.outline_thickness = 4
 triangle.outline_color = [255, 255, 255, 255]
 
 shapes = [circle, square, triangle]
-event = Event.new
 
-while window.is_open?
-  while window.poll_event!(event)
+while window.open?
+  window.poll_events! do |event|
     case event.type
     when 'closed' then window.close!
-    when 'key-pressed' then window.close! if event.key[:code] == :escape
+    when 'key-pressed' then window.close! if event.code == :escape
     end
   end
 
@@ -49,7 +48,7 @@ while window.is_open?
   square.rotate(-1)
   triangle.position = [circle.position.x + 260, circle.position.y]
 
-  window.clear([28, 28, 38, 255])
+  window.clear!([28, 28, 38, 255])
   shapes.each { |shape| window.draw(shape) }
-  window.display
+  window.display!
 end

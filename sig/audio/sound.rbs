@@ -7,8 +7,11 @@ module SFML
     def buffer=: (SoundBuffer value) -> SoundBuffer
 
     def play: () -> self
+    def play!: () -> self
     def pause: () -> self
+    def pause!: () -> self
     def stop: () -> self
+    def stop!: () -> self
     def status: () -> (:stopped | :paused | :playing)
     def looping?: () -> bool
     def looping=: (bool value) -> bool

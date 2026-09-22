@@ -293,6 +293,15 @@ static VALUE Event_get_sensor(VALUE self) {
  *
  * #type tells which of the accessors below is meaningful for this
  * particular event; the others return stale or default data.
+ *
+ * On top of #type, the Rubyesque (Matz-like) layer in lib/sfml/rubyesque.rb adds
+ * #code -- the key-event shortcut for +key[:code]+ -- and one predicate per kind
+ * (#closed?, #key_pressed?, #mouse_moved?, #touch_began?, ...), so dispatch
+ * reads as plain Ruby rather than a +case+ over strings.
+ *
+ * @!method code
+ *   Returns the key code of a key event. Rubyesque (Matz-like) for +key[:code]+.
+ *   @return [Symbol]
  */
 void Init_Event(VALUE rb_mSFML) {
     rb_cEvent = rb_define_class_under(rb_mSFML, "Event", rb_cObject);

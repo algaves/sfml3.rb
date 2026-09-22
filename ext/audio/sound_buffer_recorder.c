@@ -152,6 +152,13 @@ static VALUE SoundBufferRecorder_set_channel_count(VALUE self, VALUE rb_count) {
  * Records audio from a capture device directly into a SoundBuffer. Derives
  * from SoundRecorder. For custom processing of captured samples as they
  * arrive, subclass SoundRecorder instead.
+ *
+ * @!method self.record!(sample_rate: 44_100, device: nil, channel_count: nil) { |recorder| ... }
+ *   Starts the recorder, yields it, stops it when the block returns -- normally
+ *   or by raising -- and returns what was captured. Rubyesque (Matz-like) over
+ *   +new+, +start+ and +stop+.
+ *   @yield [recorder] the recording recorder
+ *   @return [SoundBuffer] the audio captured while the block ran
  */
 void Init_SoundBufferRecorder(VALUE rb_mSFML) {
     rb_cSoundBufferRecorder =

@@ -82,12 +82,13 @@ static VALUE Window_initialize(int argc, VALUE* argv, VALUE self) {
     return self;
 }
 
-/* Adopts an existing OS window by its native handle -- the Integer that
-   Window#native_handle returns, or one obtained from a GUI toolkit. The window
-   is not owned by the toolkit afterwards: destroying it stays the toolkit's
-   job, and closing the Ruby object only tears down the render context. */
 /* call-seq:
  *   Window.from_handle(handle, settings = nil) -> Window
+ *
+ * Adopts an existing OS window by its native handle -- the Integer that
+ * Window#native_handle returns, or one obtained from a GUI toolkit. The window
+ * is not owned by the toolkit afterwards: destroying it stays the toolkit's
+ * job, and closing the Ruby object only tears down the render context.
  *
  * @return [Window]
  * @raise [RuntimeError] if window creation fails
@@ -270,8 +271,8 @@ static VALUE Window_get_default_view(VALUE self) {
  * SFML::WindowBase; SFML::RenderWindow is the same object under the name that
  * includes SFML::RenderTarget.
  *
- * @!method is_open?
- *   Returns +true+ while the window is open.
+ * @!method open?
+ *   Returns +true+ while the window is open. +is_open?+ is a deprecated alias.
  *   @return [Boolean]
  * @!method close!
  *   Closes the window.
@@ -279,6 +280,9 @@ static VALUE Window_get_default_view(VALUE self) {
  * @!method poll_event!(event)
  *   Pops the next pending event into +event+, if any, without blocking.
  *   @return [Boolean] whether an event was popped
+ * @!method poll_events! { |event| ... }
+ *   Pops every pending event and yields it; returns an Enumerator without a block.
+ *   @return [self, Enumerator]
  * @!method wait_event!(event)
  *   Blocks until an event is available and pops it into +event+.
  *   @return [Boolean] whether an event was popped
@@ -309,6 +313,19 @@ static VALUE Window_get_default_view(VALUE self) {
  * @!method visible=(value)
  *   Shows or hides the window.
  *   @return [self]
+ * @!method visible?
+ *   Returns the last value passed to #visible=, since CSFML 3 has no window
+ *   visibility getter.
+ *   @return [Boolean]
+ * @!method clear!(color = Color::BLACK)
+ *   Clears the window to +color+. +clear+ is a deprecated alias.
+ *   @return [self]
+ * @!method display!
+ *   Presents everything drawn since the last clear. +display+ is a deprecated alias.
+ *   @return [self]
+ * @!method render!(clear_color: Color::BLACK) { |window| ... }
+ *   Clears, yields the window for drawing, then presents.
+ *   @return [self]
  * @!method cursor_visible=(value)
  *   Shows or hides the mouse cursor over the window.
  *   @return [self]
@@ -327,11 +344,11 @@ static VALUE Window_get_default_view(VALUE self) {
  * @!method joystick_threshold=(value)
  *   Sets the minimum joystick axis change that generates a move event.
  *   @return [Float] +value+
- * @!method request_focus
- *   Requests focus for this window.
+ * @!method request_focus!
+ *   Requests focus for this window. +request_focus+ is a deprecated alias.
  *   @return [self]
- * @!method focus?
- *   Returns +true+ if the window currently has focus.
+ * @!method focused?
+ *   Returns +true+ if the window currently has focus. +focus?+ is a deprecated alias.
  *   @return [Boolean]
  * @!method native_handle
  *   Returns the OS-specific window handle.

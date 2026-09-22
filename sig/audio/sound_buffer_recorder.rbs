@@ -1,6 +1,7 @@
 module SFML
   class SoundBufferRecorder < SoundRecorder
     def initialize: () -> void
+    def self.record!: (?sample_rate: Integer, ?device: String?, ?channel_count: Integer?) ?{ (SoundBufferRecorder) -> untyped } -> SoundBuffer
 
     def start: (Integer sample_rate) -> bool
     def stop: () -> self

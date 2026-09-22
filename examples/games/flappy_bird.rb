@@ -29,7 +29,6 @@ end
 
 window = Window.new(VideoMode.new(WIDTH, HEIGHT, 32), 'SFML flappy bird')
 window.frame_rate = 60
-event = Event.new
 flap_sound = ExampleSupport.sound('jump', volume: 45)
 score_sound = ExampleSupport.sound('beep', volume: 50)
 hit_sound = ExampleSupport.sound('explode', volume: 55)
@@ -82,18 +81,18 @@ end
 flap = lambda do
   bird_vy = FLAP
   bird_angle = -28
-  flap_sound.play if state == :playing
+  flap_sound.play! if state == :playing
 end
 
 start.call
 
 loop do
-  while window.poll_event!(event)
+  window.poll_events! do |event|
     case event.type
     when 'closed'
       window.close!
     when 'key-pressed'
-      key = event.key[:code]
+      key = event.code
       if key == :escape
         window.close!
       elsif state == :playing && %i[Space Up].include?(key)
@@ -123,7 +122,7 @@ loop do
 
       pipe[:scored] = true
       score += 1
-      score_sound.play
+      score_sound.play!
     end
     pipes.reject! { |pipe| pipe[:x] < -PIPE_WIDTH }
 
@@ -135,7 +134,7 @@ loop do
             overlap?(bird_rect, top) || overlap?(bird_rect, bottom)
           end
     if hit
-      hit_sound.play
+      hit_sound.play!
       best = [best, score].max
       state = :game_over
     end
@@ -151,7 +150,7 @@ loop do
   column, row = ExampleSupport::SPRITES.fetch(BIRD_FRAMES[frame_index])
   bird.texture_rect = [column * 16, row * 16, 16, 16]
 
-  window.clear([110, 180, 220, 255])
+  window.clear!([110, 180, 220, 255])
   window.draw(sky)
   pipes.each do |pipe|
     top = ExampleSupport.sprite(:pipe, scale: 4)
@@ -180,7 +179,7 @@ loop do
                                     size: 24, position: [80, 220]))
   end
 
-  window.display
+  window.display!
   frame += 1
   break if ExampleSupport.auto_close?(frame)
 end

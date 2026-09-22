@@ -10,6 +10,7 @@ module SFML
     def self.milliseconds: (Integer value) -> Time
     def self.microseconds: (Integer value) -> Time
     def self.zero: () -> Time
+    def self.[]: (Integer | Float seconds) -> Time
 
     def as_seconds: () -> Float
     def as_milliseconds: () -> Integer

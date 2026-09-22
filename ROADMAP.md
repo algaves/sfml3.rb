@@ -248,6 +248,35 @@ without re-deriving the reasoning each time.
 | `sfFree` | CSFML's allocator hook; nothing in a Ruby binding should call it. |
 | `sfGlslVec4_fromsfColor`, `sfGlslIvec4_fromsfColor` | Documentation-only helpers; `Shader#set_color` does the conversion. |
 
+## Rubyesque (Matz-like) layer
+
+The coverage above is the native, 1:1 CSFML surface. `lib/sfml/rubyesque.rb` adds a Rubyesque
+(Matz-like) pure-Ruby layer on top of it — predicates (`?`), mutators (`!`), block iterators
+(`poll_events!`, `render!`, `open!`), scoped resources (`WindowBase.open`,
+`SoundBufferRecorder.record!`, `Clock.measure`), positional `Class[...]` constructors and the
+`Style`/`State` flag namespaces — without changing or removing any binding. The names that shipped
+before it stay as deprecated aliases that warn and delegate. The README's "Rubyesque (Matz-like)
+layer" section is the narrative and `examples/rubyesque/` teaches each area.
+
+| Class / module | Rubyesque additions on top of the native surface |
+| --- | --- |
+| `WindowBase` | `open?`, `focused?`, `visible?`, `request_focus!`, `poll_events!` (block or Enumerator), scoped `.open`, the `open!` loop and the `poll_event!`/`wait_event!` block forms |
+| `Window`, `RenderWindow` | the above plus `clear!`, `display!` and the one-call `render!` |
+| `Style`, `State` | Integer flag namespaces for the window style and state arguments |
+| `VideoMode`, `Vector2`, `Vector3`, `Color`, `Rect`, `Time`, `Text`, `Vertex`, `View`, `Sprite`, `Texture`, `Image`, `RenderTexture`, `CircleShape`, `RectangleShape`, `ConvexShape` | the positional `Class[...]` constructor |
+| `Event` | `code` (the `key[:code]` shortcut) and a `?` predicate per kind (`closed?`, `key_pressed?`, `mouse_moved?`, `touch_began?`, ...) |
+| `SoundSource` | `playing?`, `paused?`, `stopped?`, shared by Sound, SoundStream and Music |
+| `Sound`, `SoundStream`, `Music` | `play!`, `pause!`, `stop!` |
+| `SoundBufferRecorder` | scoped `.record!`, returning the captured SoundBuffer |
+| `Clock` | `.measure`, timing a block with a throwaway clock |
+| `Clipboard` | `content`/`content=`, `has_text?`, `clear!` |
+| `Keyboard` | `key_pressed?` |
+| `Joystick` | `axis?` |
+| `Sensor` | `enable!`, `disable!` |
+| `Touch` | `position(finger, relative_to:)` |
+| `SFML`, `SFML::Sleep` | `SFML.sleep!` and the namespace-style `SFML::Sleep.sleep!` |
+
+
 ## References
 
 - [SFML 3.1.0 module topics](https://www.sfml-dev.org/documentation/3.1.0/topics.html)

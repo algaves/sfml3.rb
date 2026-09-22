@@ -51,20 +51,19 @@ state = RenderState.new
 state.shader = shader if shader
 clock = Clock.new
 canvas = RectangleShape.new(window.size)
-event = Event.new
 frame = 0
 
 loop do
-  while window.poll_event!(event)
+  window.poll_events! do |event|
     case event.type
     when 'closed'
       window.close!
     when 'key-pressed'
-      window.close! if event.key[:code] == :escape
+      window.close! if event.code == :escape
     end
   end
 
-  window.clear([12, 12, 18, 255])
+  window.clear!([12, 12, 18, 255])
 
   if shader
     shader.set_float('u_time', clock.elapsed_time.as_seconds)
@@ -81,7 +80,7 @@ loop do
                 ))
   end
 
-  window.display
+  window.display!
   frame += 1
   break if ExampleSupport.auto_close?(frame)
 end

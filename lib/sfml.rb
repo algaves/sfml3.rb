@@ -9,3 +9,7 @@ begin
 rescue LoadError
   require 'sfml/sfml_ext'
 end
+
+# The pure-Ruby Rubyesque (Matz-like) layer over the native API. Loaded after
+# the extension so it can reopen the classes it defines.
+require 'sfml/rubyesque'

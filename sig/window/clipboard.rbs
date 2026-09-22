@@ -2,6 +2,10 @@ module SFML
   module Clipboard
     def self.string: () -> String
     def self.string=: (String value) -> String
+    def self.content: () -> String
+    def self.content=: (String value) -> String
+    def self.has_text?: () -> bool
+    def self.clear!: () -> String
     def self.unicode_string: () -> String
     def self.unicode_string=: (String value) -> String
   end

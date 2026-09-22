@@ -7,6 +7,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ## [Unreleased]
 
 ### Added
+* **A pure-Ruby Rubyesque (Matz-like) layer** (`lib/sfml/rubyesque.rb`), loaded by
+  `require 'sfml'`.
+  Predicate methods end in `?` (`window.open?`, `window.focused?`, `window.visible?`,
+  `sound.playing?`, `Keyboard.key_pressed?`, `Joystick.axis?`, `Clipboard.has_text?`),
+  state-changing methods end in `!` (`window.close!`, `clear!`, `display!`, `play!`, `pause!`,
+  `stop!`, `Sensor.enable!`/`disable!`, `Clipboard.clear!`, `SFML.sleep!`), and block-scoped
+  helpers manage resources: `WindowBase.open` (`Window.open`/`RenderWindow.open`),
+  `window.poll_events!`, `window.render!`, `SoundBufferRecorder.record!` and `Clock.measure`.
+  Event kinds gain predicates (`event.closed?`, `event.key_pressed?`, ...) and `event.code` is
+  the `event.key[:code]` shortcut. `SFML::Sleep.sleep!` mirrors the namespace spelling, and
+  `Touch.position` accepts `relative_to:`.
+* **`SFML::Style` and `SFML::State`**, Integer flag namespaces mirroring the CSFML `sfStyle` and
+  `sfWindowState` values, so `Style::DEFAULT` / `State::FULLSCREEN` and `Style::TITLEBAR |
+  Style::RESIZE` slot into the window constructors where the `:default`/`:windowed` symbols did.
+* **Positional `Class[...]` constructors**: `VideoMode[w, h, bits = 32]`, `Vector2[x, y]`,
+  `Vector3[x, y, z]`, `Color[r, g, b]`, `Rect[left, top, width, height]`, `Time[seconds]`,
+  `View[rect]`/`View[center, size]`, `Text[font, ...]`, `Vertex[...]`, `Sprite[texture]`,
+  `Texture[size]`, `Image[size]`, `RenderTexture[size]`, `CircleShape[r, [x, y]]`,
+  `RectangleShape[x, y, w, h]` and `ConvexShape[[x0, y0], ...]`. Every `.new` form is unchanged.
+* **`Window#open!` and block forms of `poll_event!`/`wait_event!`**: `open!` runs a block while the
+  window is open and closes it, `poll_event! { |event| ... }` drains the pending events, and
+  `wait_event! { |event| ... }` waits for one. Without a block both keep their native
+  one-argument form.
+* **`examples/rubyesque/`**, one small teaching script per slice of the layer (window, events,
+  audio, input, system, deprecations) with an old-to-new cheat sheet in its README, plus the
+  Rubyesque section of `README.md` and a per-module table in `ROADMAP.md`.
 * **The graphics and audio class hierarchies now mirror SFML 3's own.** `SFML::Shape` is the base
   of `SFML::CircleShape`, `SFML::RectangleShape` and `SFML::ConvexShape`; `SFML::Sprite` and
   `SFML::Text` are `SFML::Transformable`; and `SFML::Sound`, `SFML::SoundStream` and `SFML::Music`
@@ -14,6 +40,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   `SFML::SoundBufferRecorder < SFML::SoundRecorder`.
 
 ### Changed
+* **The Rubyesque names are now primary**, with the pre-Rubyesque spellings kept as deprecated
+  aliases that warn: `is_open?`, `focus?`, `request_focus`, `clear`, `display`,
+  `play`/`pause`/`stop`, `Keyboard.pressed?`, `Joystick.has_axis?`, `Clipboard.string`/`string=`
+  and `SFML.sleep`. Code written against the old names keeps working unchanged.
 * **`SFML::Transformable` is now a module**, mixed into `Sprite`, `Text` and `Shape`, rather than a
   class. The position/rotation/scale/origin surface is implemented once and dispatched to each
   class's concrete CSFML entry point, replacing thirteen duplicated copies. `Transformable.new`
@@ -21,6 +51,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   preserved.
 * **`SFML::Circle` is now `SFML::CircleShape`**, matching SFML's class name and its siblings. The
   old `SFML::Circle` name remains as a constant alias.
+
+### Deprecated
+* The pre-Rubyesque method names listed under **Changed**. They behave exactly as before and print a
+  one-line warning pointing at the replacement; they will be removed in a future major release.
 
 ## [0.3.1] - 2026-09-19
 

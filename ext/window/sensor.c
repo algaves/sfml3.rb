@@ -45,6 +45,13 @@ static VALUE Sensor_get_value(VALUE module, VALUE rb_type) {
 /* Document-module: SFML::Sensor
  * Access to hardware sensors (accelerometer, gyroscope, etc.), mainly
  * relevant on mobile platforms.
+ *
+ * @!method enable!(type)
+ *   Enables sensor +type+. Rubyesque (Matz-like) over +set_enabled(type, true)+.
+ *   @return [Boolean] +true+
+ * @!method disable!(type)
+ *   Disables sensor +type+. Rubyesque (Matz-like) over +set_enabled(type, false)+.
+ *   @return [Boolean] +false+
  */
 void Init_Sensor(VALUE rb_mSFML) {
     VALUE rb_mSensor = rb_define_module_under(rb_mSFML, "Sensor");

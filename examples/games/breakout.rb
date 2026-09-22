@@ -35,7 +35,6 @@ end
 
 window = Window.new(VideoMode.new(WIDTH, HEIGHT, 32), 'SFML breakout')
 window.frame_rate = 60
-event = Event.new
 hud = ExampleSupport.text('', size: 16, position: [10, 8])
 bounce_sound = ExampleSupport.sound('bounce')
 break_sound = ExampleSupport.sound('shoot')
@@ -58,12 +57,12 @@ reset.call
 
 loop do
   restart = false
-  while window.poll_event!(event)
+  window.poll_events! do |event|
     case event.type
     when 'closed'
       window.close!
     when 'key-pressed'
-      key = event.key[:code]
+      key = event.code
       window.close! if key == :escape
       restart = true if key == :r
       game[:state] = :playing if key == :Space && game[:state] == :serve
@@ -84,16 +83,16 @@ loop do
     if (ball[:x] - BALL_RADIUS).negative?
       ball[:x] = BALL_RADIUS
       ball[:vx] = ball[:vx].abs
-      bounce_sound.play
+      bounce_sound.play!
     elsif ball[:x] + BALL_RADIUS > WIDTH
       ball[:x] = WIDTH - BALL_RADIUS
       ball[:vx] = -ball[:vx].abs
-      bounce_sound.play
+      bounce_sound.play!
     end
     if (ball[:y] - BALL_RADIUS).negative?
       ball[:y] = BALL_RADIUS
       ball[:vy] = ball[:vy].abs
-      bounce_sound.play
+      bounce_sound.play!
     end
 
     # Paddle: only bounce while the ball is heading down, using the hit offset
@@ -106,7 +105,7 @@ loop do
       ball[:vy] = -ball[:vy].abs
       ball[:vx] = (offset * 5.0) + (ball[:vx].negative? ? -0.5 : 0.5)
       ball[:x] += ball[:vx]
-      bounce_sound.play
+      bounce_sound.play!
     end
 
     # Bricks: AABB overlap, reflect on the shallower axis.
@@ -119,7 +118,7 @@ loop do
 
       brick.alive = false
       game[:score] += 10
-      break_sound.play
+      break_sound.play!
       if overlap_x < overlap_y
         ball[:vx] = -ball[:vx]
         ball[:x] += ball[:vx]
@@ -132,17 +131,17 @@ loop do
 
     if ball[:y] - BALL_RADIUS > HEIGHT
       game[:lives] -= 1
-      lose_sound.play
+      lose_sound.play!
       game[:state] = game[:lives].zero? ? :game_over : :serve
     end
   end
 
   paddle_x = Mouse.position(window).x
-  paddle_x = paddle.position.x - 7 if Keyboard.pressed?(:Left)
-  paddle_x = paddle.position.x + 7 if Keyboard.pressed?(:Right)
+  paddle_x = paddle.position.x - 7 if Keyboard.key_pressed?(:Left)
+  paddle_x = paddle.position.x + 7 if Keyboard.key_pressed?(:Right)
   paddle.position = [paddle_x.clamp(46, WIDTH - 46), HEIGHT - 40]
 
-  window.clear([18, 22, 30, 255])
+  window.clear!([18, 22, 30, 255])
 
   game[:bricks].each do |brick|
     next unless brick.alive
@@ -171,7 +170,7 @@ loop do
            end
   hud.string = "score #{game[:score]}   lives #{game[:lives]}   bricks #{remaining}   #{status}"
   window.draw(hud)
-  window.display
+  window.display!
 
   frame += 1
   break if ExampleSupport.auto_close?(frame)

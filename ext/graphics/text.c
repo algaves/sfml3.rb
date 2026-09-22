@@ -65,6 +65,13 @@ static VALUE Text_wrap(VALUE klass, sfText* text) {
     return TypedData_Wrap_Struct(klass, &Text_data_type, ptr);
 }
 
+/* call-seq: initialize_copy(other) -> self
+ *
+ * Copy construction is not supported: a Text wraps a native resource that
+ * cannot be duplicated, so this always raises.
+ *
+ * @raise [TypeError] always
+ */
 static VALUE Text_initialize_copy(VALUE self, VALUE other) {
     (void)other;
     rb_raise(rb_eTypeError, "can't copy a %s", rb_obj_classname(self));

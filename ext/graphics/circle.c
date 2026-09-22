@@ -405,6 +405,7 @@ static VALUE Circle_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
  */
 void Init_Circle(VALUE rb_mSFML) {
     rb_cCircle = rb_define_class_under(rb_mSFML, "CircleShape", Get_Klass_Shape());
+    /* Legacy alias for SFML::CircleShape, kept so pre-rename code keeps working. */
     rb_define_const(rb_mSFML, "Circle", rb_cCircle);
 
     rb_define_alloc_func(rb_cCircle, Circle_alloc);

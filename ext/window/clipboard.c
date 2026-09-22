@@ -27,9 +27,10 @@ static void unicode_char_to_utf8(sfChar32 code, char buffer[4], int* length) {
     }
 }
 
-/* call-seq: string -> String
+/* call-seq: content -> String
  *
- * Returns the current system clipboard contents as a plain String.
+ * Returns the current system clipboard contents as a plain String. +string+ is
+ * a deprecated alias.
  *
  * @return [String] the current system clipboard contents
  */
@@ -40,9 +41,9 @@ static VALUE Clipboard_get_string(VALUE module) {
 }
 
 /* call-seq:
- *   string=(value) -> String
+ *   content=(value) -> String
  *
- * Sets the system clipboard to +value+.
+ * Sets the system clipboard to +value+. +string=+ is a deprecated alias.
  *
  * @return [String] +value+
  */
@@ -108,6 +109,13 @@ static VALUE Clipboard_set_unicode_string(VALUE module, VALUE rb_text) {
 
 /* Document-module: SFML::Clipboard
  * Access to the system clipboard, as plain text or Unicode text.
+ *
+ * @!method has_text?
+ *   Returns +true+ if the clipboard holds any text.
+ *   @return [Boolean]
+ * @!method clear!
+ *   Empties the clipboard.
+ *   @return [String] the empty string
  */
 void Init_Clipboard(VALUE rb_mSFML) {
     VALUE rb_mClipboard = rb_define_module_under(rb_mSFML, "Clipboard");

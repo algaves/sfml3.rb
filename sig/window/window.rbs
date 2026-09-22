@@ -2,9 +2,14 @@ module SFML
   class Window < WindowBase
     def initialize: (VideoMode video_mode, String title, ?Symbol | Array[Symbol] | Integer style, ?Symbol state, ?ContextSettings? settings) -> void
     def self.from_handle: (Integer handle, ?ContextSettings? settings) -> Window
+    private def poll_event_without_block!: (Event event) -> bool
+    private def wait_event_without_block!: (Event event) -> bool
 
     def clear: (?untyped color) -> self
+    def clear!: (*untyped color) -> self
     def display: () -> self
+    def display!: () -> self
+    def render!: (?clear_color: untyped) ?{ (self) -> untyped } -> self
 
     def frame_rate=: (Integer value) -> self
     def framerate_limit=: (Integer value) -> self

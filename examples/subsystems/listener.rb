@@ -61,26 +61,25 @@ sound.cone = SoundSourceCone.new(90, 240, 0.4)
 sound.attenuation = 1.0
 sound.min_distance = 60
 sound.max_distance = 600
-sound.play
+sound.play!
 
 Listener.position = [150, 240, 0]
 Listener.direction = [0, 0, -1]
 Listener.up_vector = [0, 1, 0]
 Listener.global_volume = 80
 
-event = Event.new
 frame = 0
 
 loop do
-  while window.poll_event!(event)
+  window.poll_events! do |event|
     case event.type
     when 'closed'
       window.close!
     when 'key-pressed'
-      key = event.key[:code]
+      key = event.code
       window.close! if key == :escape
-      sound.play if key == :Space && sound.status == :stopped
-      sound.pause if key == :Space && sound.status == :playing
+      sound.play! if key == :Space && sound.stopped?
+      sound.pause! if key == :Space && sound.playing?
       sound.playing_offset = SFML::Time.zero if key == :r
     end
   end
@@ -90,21 +89,21 @@ loop do
   x = position.x
   y = position.y
   z = position.z
-  x -= 8 if Keyboard.pressed?(:Left)
-  x += 8 if Keyboard.pressed?(:Right)
-  y -= 8 if Keyboard.pressed?(:Up)
-  y += 8 if Keyboard.pressed?(:Down)
-  z -= 8 if Keyboard.pressed?(:PageDown)
-  z += 8 if Keyboard.pressed?(:PageUp)
+  x -= 8 if Keyboard.key_pressed?(:Left)
+  x += 8 if Keyboard.key_pressed?(:Right)
+  y -= 8 if Keyboard.key_pressed?(:Up)
+  y += 8 if Keyboard.key_pressed?(:Down)
+  z -= 8 if Keyboard.key_pressed?(:PageDown)
+  z += 8 if Keyboard.key_pressed?(:PageUp)
   volume = Listener.global_volume
-  volume += 4 if Keyboard.pressed?(:Add)
-  volume -= 4 if Keyboard.pressed?(:Subtract)
+  volume += 4 if Keyboard.key_pressed?(:Add)
+  volume -= 4 if Keyboard.key_pressed?(:Subtract)
   Listener.global_volume = volume.clamp(0, 100)
   Listener.position = [x.clamp(0, 640), y.clamp(0, 480), z]
 
   listener = Listener.position
-  window.clear([22, 26, 34, 255])
-  draw_scene(window, listener, sound.status != :stopped)
+  window.clear!([22, 26, 34, 255])
+  draw_scene(window, listener, !sound.stopped?)
   window.draw(ExampleSupport.text(
                 "listener  #{listener.x.to_i}, #{listener.y.to_i}, #{listener.z.to_i}\n" \
                 "distance  #{distance(listener, SOURCE).round} units\n" \
@@ -113,7 +112,7 @@ loop do
                 'arrows move, PageUp/Down change height, escape quits',
                 size: 15
               ))
-  window.display
+  window.display!
 
   frame += 1
   break if ExampleSupport.auto_close?(frame)

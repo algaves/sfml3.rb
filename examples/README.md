@@ -8,6 +8,10 @@ of the test suite.
   Drawable objects, primitive shapes -- used once, then reinterpreted as an
   interactive app.
 * `subsystems/` has one example per window/audio/graphics/network surface.
+* `rubyesque/` is one script per slice of the Rubyesque (Matz-like) layer in
+  `lib/sfml/rubyesque.rb` (`?` predicates, `!` mutators, block iterators and
+  scoped resources), written to teach it rather than to use it. See
+  [`rubyesque/README.md`](rubyesque/README.md) for the cheat sheet.
 * `games/` has eleven small, complete games built from the same components,
   plus the `menu_demo.rb` walkthrough of the shared menu (`examples/menu.rb`).
 
@@ -25,6 +29,35 @@ bundle exec ruby -Ilib examples/subsystems/mouse.rb
 bundle exec ruby -Ilib examples/games/snake.rb
 ```
 
+| Component          | What it does                          | Key API (see `sig/`)                                                                  |
+| ------------------ | ------------------------------------- | ------------------------------------------------------------------------------------- |
+| Window             | Owns the OS window and render loop    | `Window.new(VideoMode.new(w, h, bpp), title)`, `frame_rate=`, `clear!`, `display!`, `open?`, `close!`, `render!` |
+| Events             | Input and window notifications        | `Event.new`, `poll_events! { \|event\| }`, `event.type`, `event.closed?`, `event.key_pressed?`, `event.code`, `event.mouse_button`, `event.mouse_move` |
+| Transformable      | Position, rotation, scale, origin     | `position=`, `move`, `rotate`, `scale=`, `origin=` (a mixin included by every drawable) |
+| Drawable objects   | Anything `window.draw` accepts        | `Drawable` mixin; `Shape`/`Sprite`/`Text`/`VertexArray` include it                    |
+| Primitive shapes   | The built-in filled shapes            | `CircleShape`, `RectangleShape`, `ConvexShape#set_point`, `fill_color=`, `outline_*`    |
+
+A new example built on these components only needs to fill in the loop between
+`clear!` and `display!`:
+
+```ruby
+window = Window.new(VideoMode.new(640, 480, 32), 'title')
+
+while window.open?
+  window.poll_events! do |event|
+    case event.type
+    when 'closed' then window.close!
+    when 'key-pressed' then window.close! if event.code == :escape
+    end
+  end
+
+  # move / rotate / scale the transformables...
+  window.clear!([24, 24, 34, 255]) # [r, g, b, a], 0-255
+  # window.draw(shape)...
+  window.display!
+end
+```
+
 Every interactive example reads `SFML_EXAMPLE_FRAMES`: set it to close the
 window after that many frames instead of waiting for a human. Useful for smoke
 tests:
@@ -36,6 +69,29 @@ SFML_EXAMPLE_FRAMES=120 xvfb-run -a bundle exec ruby -Ilib examples/games/snake.
 The console-only examples (`dns.rb`; `vulkan.rb` when there is no driver)
 ignore the variable and exit on their own.
 
+## Rubyesque (Matz-like)
+
+The Rubyesque (Matz-like) layer in `lib/sfml/rubyesque.rb` -- `?` predicates,
+`!` mutators, block iterators (`poll_events!`, `render!`) and scoped resources
+(`Window.open`, `SoundBufferRecorder.record!`, `Clock.measure`) -- has its own
+group so it can be read one feature at a time. These are teaching scripts: the
+comments name the methods they exercise. [`rubyesque/README.md`](rubyesque/README.md)
+has the full old-to-new cheat sheet.
+
+| File | What it teaches |
+| --- | --- |
+| `rubyesque/window.rb` | Scoped `Window.open`, block and enumerator `poll_events!`, the one-call `render!`, `open?`/`focused?`/`visible?`, `request_focus!` |
+| `rubyesque/events.rb` | The `event.*?` predicates and `event.code`, including focus/mouse/text/touch/joystick kinds |
+| `rubyesque/audio.rb` | `play!`/`pause!`/`stop!` with `playing?`/`paused?`/`stopped?`, and the scoped `SoundBufferRecorder.record!` |
+| `rubyesque/input.rb` | `Keyboard.key_pressed?`, `Joystick.axis?`, `Sensor.enable!`/`disable!`, `Touch.position(relative_to:)` |
+| `rubyesque/system.rb` | `Clock.measure`, `Clock#restart!`/`running?`, `SFML.sleep!`, the `Clipboard.content` pair |
+| `rubyesque/styles.rb` | The positional constructors (`VideoMode[...]`, `Style::DEFAULT`, `Vector2[...]`, `Color[...]`, the shape forms) and the `open!` loop |
+| `rubyesque/deprecations.rb` | The pre-Rubyesque names, still working and printing their deprecation warning |
+
+`window.rb`, `events.rb`, `audio.rb` and `input.rb` take `SFML_EXAMPLE_FRAMES`
+and need a display; `system.rb` and `deprecations.rb` print to the console and
+exit on their own.
+
 ## Subsystems
 
 | File | SFML module | What it shows |
@@ -45,12 +101,12 @@ ignore the variable and exit on their own.
 | `subsystems/glsl.rb` | `Shader` | `Shader.from_memory` on a full-screen rectangle, with `u_time`/`u_resolution`/`u_mouse` uniforms updated per frame |
 | `subsystems/dns.rb` | `IpAddress` | Local/public address lookup, parsing round-trips, and hostname resolution through `TcpSocket#connect` |
 | `subsystems/literals.rb` | `Color`/`Vector2`/`Vector3`/`Rect`/`Time` | The Ruby literal forms the API accepts (`[r,g,b,a]`, `[x,y]`, `[l,t,w,h]`, ...) and their round-trips |
-| `subsystems/clipboard.rb` | `Clipboard` | Copy/paste via `string`/`unicode_string`, including non-ASCII round-trips |
+| `subsystems/clipboard.rb` | `Clipboard` | Copy/paste via `content`/`unicode_string`, including non-ASCII round-trips, plus `has_text?`/`clear!` |
 | `subsystems/joystick.rb` | `Joystick` | Connected pads, identification, live axes and buttons; R rescans |
 | `subsystems/keyboard.rb` | `Keyboard` | Live key state plus `localize`/`delocalize`/`description` and the virtual-keyboard toggle |
 | `subsystems/mouse.rb` | `Mouse` | Window-relative and desktop position, per-button state, `set_position` |
-| `subsystems/sensor.rb` | `Sensor` | Availability, enable and value for every sensor type, with an "unavailable" panel |
-| `subsystems/touch.rb` | `Touch` | Real-time multitouch fingers and the touch events |
+| `subsystems/sensor.rb` | `Sensor` | Availability, `enable!`/`disable!` and value for every sensor type, with an "unavailable" panel |
+| `subsystems/touch.rb` | `Touch` | Real-time multitouch fingers (`Touch.position(finger, relative_to: window)`) and the touch events |
 | `subsystems/vulkan.rb` | `Vulkan` | Loader availability, required instance extensions, entry-point lookup, and (where a driver exists) a real VkInstance + `create_vulkan_surface` |
 | `subsystems/style.rb` | `Window` | Every window style/state combination, rebuilt live, plus min/max size |
 | `subsystems/graphics_assets.rb` | `Image`/`Texture`/`Sprite`/`RenderTexture` | A sheet loaded from disk and animated through `Sprite#texture_rect`, a `Texture` built from `Image.from_pixels`, pixel edits, and a live `RenderTexture` drawn back through its texture |

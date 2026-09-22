@@ -63,6 +63,13 @@ VALUE Window_wrap_handle(VALUE klass, void* handle, WindowKind kind) {
     return TypedData_Wrap_Struct(klass, &Window_data_type, window);
 }
 
+/* call-seq: initialize_copy(other) -> self
+ *
+ * Copy construction is not supported: a WindowBase wraps a native window that
+ * cannot be duplicated, so this always raises.
+ *
+ * @raise [TypeError] always
+ */
 static VALUE Window_initialize_copy(VALUE self, VALUE other) {
     (void)other;
     rb_raise(rb_eTypeError, "can't copy a %s", rb_obj_classname(self));
@@ -111,12 +118,13 @@ static VALUE WindowBase_initialize(int argc, VALUE* argv, VALUE self) {
     return self;
 }
 
-/* Adopts an existing OS window by its native handle -- the Integer that
-   WindowBase#native_handle returns, or one obtained from a GUI toolkit. The
-   window is not owned by the toolkit afterwards: destroying it stays the
-   toolkit's job, and closing the Ruby object only tears down this wrapper. */
 /* call-seq:
  *   WindowBase.from_handle(handle) -> WindowBase
+ *
+ * Adopts an existing OS window by its native handle -- the Integer that
+ * WindowBase#native_handle returns, or one obtained from a GUI toolkit. The
+ * window is not owned by the toolkit afterwards: destroying it stays the
+ * toolkit's job, and closing the Ruby object only tears down this wrapper.
  *
  * @return [WindowBase]
  * @raise [RuntimeError] if window creation fails
@@ -149,8 +157,14 @@ static VALUE WindowBase_s_from_handle(int argc, VALUE* argv, VALUE klass) {
  * of SFML::Window and SFML::RenderWindow, and every method below is also
  * available -- backed by the matching sfRenderWindow entry point -- on both.
  *
- * @!method is_open?
- *   Returns +true+ while the window is open.
+ * @!method self.open(video_mode, title, style = :default, state = :windowed)
+ *   Creates a window, yields it and closes it when the block returns -- normally
+ *   or by raising. Without a block, returns the open window for the caller to
+ *   close. Rubyesque (Matz-like) over +new+ plus +close!+.
+ *   @yield [window] the freshly created, open window
+ *   @return [WindowBase]
+ * @!method open?
+ *   Returns +true+ while the window is open. +is_open?+ is a deprecated alias.
  *   @return [Boolean]
  * @!method close!
  *   Closes the window.
@@ -158,6 +172,11 @@ static VALUE WindowBase_s_from_handle(int argc, VALUE* argv, VALUE klass) {
  * @!method poll_event!(event)
  *   Pops the next pending event into +event+, if any, without blocking.
  *   @return [Boolean] whether an event was popped
+ * @!method poll_events! { |event| ... }
+ *   Pops every pending event and yields each one, then returns self. Without a
+ *   block it returns an Enumerator. Rubyesque (Matz-like) over a +poll_event!+ loop.
+ *   @yield [event] each pending event
+ *   @return [self, Enumerator]
  * @!method wait_event!(event)
  *   Blocks until an event is available and pops it into +event+.
  *   @return [Boolean] whether an event was popped
@@ -188,6 +207,10 @@ static VALUE WindowBase_s_from_handle(int argc, VALUE* argv, VALUE klass) {
  * @!method visible=(value)
  *   Shows or hides the window.
  *   @return [self]
+ * @!method visible?
+ *   Returns the last value passed to #visible=, since CSFML 3 exposes no window
+ *   visibility getter.
+ *   @return [Boolean]
  * @!method cursor_visible=(value)
  *   Shows or hides the mouse cursor over the window.
  *   @return [self]
@@ -206,11 +229,12 @@ static VALUE WindowBase_s_from_handle(int argc, VALUE* argv, VALUE klass) {
  * @!method joystick_threshold=(value)
  *   Sets the minimum joystick axis change that generates a move event.
  *   @return [Float] +value+
- * @!method request_focus
- *   Requests focus for this window.
+ * @!method request_focus!
+ *   Requests focus for this window. +request_focus+ is a deprecated alias.
  *   @return [self]
- * @!method focus?
- *   Returns +true+ if the window currently has focus.
+ * @!method focused?
+ *   Returns +true+ if the window currently has focus. +focus?+ is a deprecated
+ *   alias.
  *   @return [Boolean]
  * @!method native_handle
  *   Returns the OS-specific window handle.

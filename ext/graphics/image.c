@@ -33,6 +33,13 @@ static VALUE Image_wrap(VALUE klass, sfImage* image) {
     return TypedData_Wrap_Struct(klass, &Image_data_type, image);
 }
 
+/* call-seq: initialize_copy(other) -> self
+ *
+ * Copy construction is not supported: an Image wraps a native resource that
+ * cannot be duplicated, so this always raises.
+ *
+ * @raise [TypeError] always
+ */
 static VALUE Image_initialize_copy(VALUE self, VALUE other) {
     (void)other;
     rb_raise(rb_eTypeError, "can't copy a %s", rb_obj_classname(self));

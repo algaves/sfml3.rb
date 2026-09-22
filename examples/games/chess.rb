@@ -355,7 +355,6 @@ end
 
 window = Window.new(VideoMode.new(WINDOW_W, WINDOW_H, 32), 'SFML chess')
 window.frame_rate = 60
-event = Event.new
 move_sound = ExampleSupport.sound('beep', volume: 35)
 capture_sound = ExampleSupport.sound('eat', volume: 40)
 end_sound = ExampleSupport.sound('explode', volume: 45)
@@ -378,7 +377,7 @@ end
 play_apply = lambda do |move|
   before = game.captured.values.sum(&:length)
   game.apply(move)
-  game.captured.values.sum(&:length) > before ? capture_sound.play : move_sound.play
+  game.captured.values.sum(&:length) > before ? capture_sound.play! : move_sound.play!
   selected = nil
   pending = nil
 end
@@ -413,12 +412,12 @@ end
 
 loop do
   click = nil
-  while window.poll_event!(event)
+  window.poll_events! do |event|
     case event.type
     when 'closed'
       window.close!
     when 'key-pressed'
-      case event.key[:code]
+      case event.code
       when :escape then window.close!
       when :r then start_game.call
       when :u
@@ -453,10 +452,10 @@ loop do
     end
   end
 
-  end_sound.play if game && game.state != last_game_state && %i[checkmate stalemate draw].include?(game.state)
+  end_sound.play! if game && game.state != last_game_state && %i[checkmate stalemate draw].include?(game.state)
   last_game_state = game&.state
 
-  window.clear([26, 28, 38, 255])
+  window.clear!([26, 28, 38, 255])
 
   last = game.last_move
   8.times do |y|
@@ -529,7 +528,7 @@ loop do
   window.draw(status)
   window.draw(help)
 
-  window.display
+  window.display!
   frame += 1
   break if ExampleSupport.auto_close?(frame)
 end

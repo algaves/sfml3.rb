@@ -168,10 +168,10 @@ static int Keyboard_key_code(VALUE rb_key) {
 }
 
 /* call-seq:
- *   pressed?(key) -> true or false
+ *   key_pressed?(key) -> true or false
  *
  * +key+ may be a key Symbol (e.g. +:a+, +:Enter+, +:LShift+), a String key
- * name, or an Integer key code.
+ * name, or an Integer key code. +pressed?+ is a deprecated alias.
  *
  * @return [Boolean]
  * @raise [ArgumentError] if +key+ is a Symbol/String naming an unknown key
@@ -183,7 +183,7 @@ static VALUE Keyboard_pressed_p(VALUE module, VALUE rb_key) {
 /* call-seq:
  *   scancode_pressed?(scancode) -> true or false
  *
- * Unlike #pressed?, +scancode+ identifies a physical key position rather
+ * Unlike #key_pressed?, +scancode+ identifies a physical key position rather
  * than the character it currently produces.
  *
  * @return [Boolean]

@@ -6,14 +6,14 @@
 #
 #   input = ExampleSupport::Gui::Input.new(window)
 #
-#   while window.is_open?
+#   while window.open?
 #     input.update
 #     ExampleSupport::Gui.begin_frame(window)
 #     ExampleSupport::Gui.panel(window, 'Controls', 40, 40, 300, 220)
 #     show_grid = ExampleSupport::Gui.checkbox(window, input, 'Grid', 56, 90, 200, 26, show_grid)
 #     volume = ExampleSupport::Gui.slider(window, input, 'Volume', 56, 150, 200, 18, volume, 0, 100)
 #     window.close! if ExampleSupport::Gui.button(window, input, 'Quit', 56, 200, 100, 32)
-#     window.display
+#     window.display!
 #   end
 #
 # `examples/games/menu_demo.rb` is the worked example: a draggable control panel

@@ -6,6 +6,7 @@ module SFML
                  | (untyped font) -> void
                  | (untyped font, String string) -> void
                  | (untyped font, String string, Integer character_size) -> void
+    def self.[]: (*untyped args) -> Text
 
     def copy: () -> Text
     def font: () -> untyped

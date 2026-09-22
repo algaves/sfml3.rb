@@ -1,6 +1,7 @@
 module SFML
   class ConvexShape < Shape
     def initialize: (?Integer point_count) -> void
+    def self.[]: (*untyped points) -> ConvexShape
 
     def copy: () -> ConvexShape
     def move: (Vector2 | Array[Float] offset) -> self

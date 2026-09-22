@@ -1,6 +1,7 @@
 module SFML
   class View
     def self.from_rect: (untyped rect) -> View
+    def self.[]: (*untyped args) -> View
 
     def initialize: () -> void
     def move: (Vector2 offset) -> self
