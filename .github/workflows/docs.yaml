@@ -3,6 +3,9 @@ name: Docs
 on:
   push:
     branches: [main]
+    paths:
+      - 'docs/**'
+      - '.github/workflows/docs.yaml'
   workflow_dispatch:
 
 # GitHub Pages deploys through the Actions artifact pipeline; `id-token` is
@@ -22,19 +25,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # No `rake ports`/`rake compile`: YARD parses the C sources statically,
-      # so this needs none of the SFML toolchain.
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.3'
           bundler-cache: true
+          working-directory: './docs'
 
-      - name: Build API docs
-        run: bundle exec rake doc:site
+      - name: Build Jekyll site with Just the Docs
+        run: |
+          cd docs
+          bundle exec jekyll build
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: doc
+          path: docs/_site
 
   deploy:
     needs: build
