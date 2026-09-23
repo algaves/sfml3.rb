@@ -1,0 +1,21 @@
+title: "sfml3-rb"
+tagline: "Idiomatic CSFML 3 bindings for Ruby"
+description: "Documentation, tutorials, and API references for sfml3-rb."
+url: "https://algaves.github.io"
+baseurl: "/sfml3.rb"
+
+theme: "just-the-docs"
+
+search_enabled: true
+search:
+  tokenizer_separator: /[\s\-/]+/
+  rel_url: true
+
+nav_sort: nav_order
+
+color_scheme: dark
+
+github_repo: "https://github.com/algaves/sfml3.rb"
+heading_anchors: true
+
+footer_content: "sfml3-rb is licensed under the 0BSD License. Built with Just the Docs."

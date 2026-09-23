@@ -1,0 +1,7 @@
+/* Minimal Just-the-Docs adjustments for sfml3-rb */
+:root {
+  --sfml-primary: #4c9a2a;
+}
+.main-content a {
+  color: var(--sfml-primary);
+}
