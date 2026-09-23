@@ -9,7 +9,7 @@ void Init_IpAddress(VALUE rb_module);
 
 VALUE Get_Klass_IpAddress(void);
 
-void *Get_IpAddress_Struct(VALUE self);
+void* Get_IpAddress_Struct(VALUE self);
 
 VALUE ip_address_to_rb(sfIpAddress address);
 
@@ -17,4 +17,4 @@ VALUE ip_address_to_rb(sfIpAddress address);
    `fallback`, so callers can implement optional address arguments). */
 sfIpAddress ip_address_from_rb(VALUE rb_address, sfIpAddress fallback);
 
-#endif //SFML_RB_NETWORK_IP_ADDRESS_H
+#endif // SFML_RB_NETWORK_IP_ADDRESS_H
