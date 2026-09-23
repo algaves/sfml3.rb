@@ -12,7 +12,7 @@ static void Buffer_free(void* ptr) {
 }
 
 static const rb_data_type_t Buffer_data_type = {
-    .wrap_struct_name = "SFML::Buffer",
+    .wrap_struct_name = "SF::System::Buffer",
     .function = {.dmark = NULL, .dfree = Buffer_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -80,12 +80,12 @@ static VALUE Buffer_is_empty(VALUE self) {
     return BOOL2RB(sfBuffer_getSize(Get_Buffer_Struct(self)) == 0);
 }
 
-/* Document-class: SFML::Buffer
+/* Document-class: SF::System::Buffer
  * A raw byte buffer, as used for encoded/decoded audio and image data
  * elsewhere in the library.
  */
-void Init_Buffer(VALUE rb_mSFML) {
-    rb_cBuffer = rb_define_class_under(rb_mSFML, "Buffer", rb_cObject);
+void Init_Buffer(VALUE rb_mSystem) {
+    rb_cBuffer = rb_define_class_under(rb_mSystem, "Buffer", rb_cObject);
 
     rb_define_alloc_func(rb_cBuffer, Buffer_alloc);
     rb_define_method(rb_cBuffer, "initialize", Buffer_initialize, 0);

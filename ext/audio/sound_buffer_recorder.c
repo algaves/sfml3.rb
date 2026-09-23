@@ -25,7 +25,7 @@ static void SoundBufferRecorder_free(void* ptr) {
 }
 
 static const rb_data_type_t SoundBufferRecorder_data_type = {
-    .wrap_struct_name = "SFML::SoundBufferRecorder",
+    .wrap_struct_name = "SF::Audio::SoundBufferRecorder",
     .function = {.dmark = NULL, .dfree = SoundBufferRecorder_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -148,7 +148,7 @@ static VALUE SoundBufferRecorder_set_channel_count(VALUE self, VALUE rb_count) {
     return rb_count;
 }
 
-/* Document-class: SFML::SoundBufferRecorder
+/* Document-class: SF::Audio::SoundBufferRecorder
  * Records audio from a capture device directly into a SoundBuffer. Derives
  * from SoundRecorder. For custom processing of captured samples as they
  * arrive, subclass SoundRecorder instead.
@@ -160,9 +160,9 @@ static VALUE SoundBufferRecorder_set_channel_count(VALUE self, VALUE rb_count) {
  *   @yield [recorder] the recording recorder
  *   @return [SoundBuffer] the audio captured while the block ran
  */
-void Init_SoundBufferRecorder(VALUE rb_mSFML) {
+void Init_SoundBufferRecorder(VALUE rb_mAudio) {
     rb_cSoundBufferRecorder =
-        rb_define_class_under(rb_mSFML, "SoundBufferRecorder", Get_Klass_SoundRecorder());
+        rb_define_class_under(rb_mAudio, "SoundBufferRecorder", Get_Klass_SoundRecorder());
 
     rb_define_alloc_func(rb_cSoundBufferRecorder, SoundBufferRecorder_alloc);
     rb_define_method(rb_cSoundBufferRecorder, "initialize", SoundBufferRecorder_initialize, 0);

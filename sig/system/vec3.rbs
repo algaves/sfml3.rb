@@ -1,4 +1,4 @@
-module SFML
+module SF::System
   class Vector3
     include Enumerable[Float]
 

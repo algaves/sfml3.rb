@@ -2,7 +2,7 @@
 
 # Audio devices, through the closest surface CSFML exposes. SFML has no
 # `PlaybackDevice` class (there is nothing to bind for it in CSFML 3.0.0), but
-# SFML::SoundRecorder enumerates the capture devices and lets you pick one:
+# SF::Audio::SoundRecorder enumerates the capture devices and lets you pick one:
 # `SoundRecorder.available_devices` and `default_device` list them,
 # `SoundRecorder#device=` selects one, and a SoundBufferRecorder captures a few
 # seconds that are then played back through a Sound. Playback itself lives on
@@ -15,7 +15,11 @@
 
 require 'sfml'
 require_relative '../support'
-include SFML
+include SF::Window
+include SF::Graphics
+include SF::System
+include SF::Audio
+include SF::Network
 
 RECORD_SECONDS = 3
 
@@ -52,7 +56,7 @@ loop do
     end
   end
 
-  if state == 'recording' && clock.elapsed_time >= SFML::Time.seconds(RECORD_SECONDS)
+  if state == 'recording' && clock.elapsed_time >= SF::System::Time.seconds(RECORD_SECONDS)
     recorder.stop
     recorded = recorder.buffer
     playback = Sound.new(recorded)

@@ -34,7 +34,7 @@ static void Circle_free(void* ptr) {
 }
 
 static const rb_data_type_t Circle_data_type = {
-    .wrap_struct_name = "SFML::CircleShape",
+    .wrap_struct_name = "SF::Graphics::CircleShape",
     .function = {.dmark = Circle_mark, .dfree = Circle_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -353,10 +353,10 @@ static VALUE Circle_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
     return Qnil;
 }
 
-/* Document-class: SFML::CircleShape
+/* Document-class: SF::Graphics::CircleShape
  * A circle shape, drawable, transformable and stylable like the other
  * SFML shapes. Derives from Shape, and so includes Transformable and Drawable;
- * also available under the SFML::Circle alias.
+ * also available under the SF::Graphics::Circle alias.
  *
  * @!attribute radius
  *   The circle's radius.
@@ -403,16 +403,16 @@ static VALUE Circle_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
  *
  *   @return [Integer] the number of segments the circle is approximated with
  */
-void Init_Circle(VALUE rb_mSFML) {
-    rb_cCircle = rb_define_class_under(rb_mSFML, "CircleShape", Get_Klass_Shape());
-    /* Legacy alias for SFML::CircleShape, kept so pre-rename code keeps working. */
-    rb_define_const(rb_mSFML, "Circle", rb_cCircle);
+void Init_Circle(VALUE rb_mGraphics) {
+    rb_cCircle = rb_define_class_under(rb_mGraphics, "CircleShape", Get_Klass_Shape());
+    /* Legacy alias for SF::Graphics::CircleShape, kept so pre-rename code keeps working. */
+    rb_define_const(rb_mGraphics, "Circle", rb_cCircle);
 
     rb_define_alloc_func(rb_cCircle, Circle_alloc);
 
     rb_include_module(rb_cCircle, Get_Module_Drawable());
 
-    /* CircleShape is not an SFML::Shape subclass in the callback sense: its
+    /* CircleShape is not an SF::Graphics::Shape subclass in the callback sense: its
        geometry comes from sfCircleShape, not #point_count/#point, so the
        inherited custom-shape callback would read the wrong data type. */
     rb_undef_method(rb_cCircle, "update!");

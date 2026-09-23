@@ -26,7 +26,7 @@ static void BlendMode_free(void* ptr) {
 }
 
 static const rb_data_type_t BlendMode_data_type = {
-    .wrap_struct_name = "SFML::BlendMode",
+    .wrap_struct_name = "SF::Graphics::BlendMode",
     .function = {.dmark = NULL, .dfree = BlendMode_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -289,7 +289,7 @@ static VALUE BlendMode_eql(VALUE self, VALUE rb_other) {
                    a.alphaDstFactor == b.alphaDstFactor && a.alphaEquation == b.alphaEquation);
 }
 
-/* Document-class: SFML::BlendMode
+/* Document-class: SF::Graphics::BlendMode
  * Describes how the colors of a drawn object are combined with the colors
  * already in the render target, via two triples of (source factor,
  * destination factor, equation) -- one for the color/RGB channels, one for
@@ -314,8 +314,8 @@ static VALUE BlendMode_eql(VALUE self, VALUE rb_other) {
  *   The blend equation for alpha.
  *   @return [Symbol] the blending equation for the alpha channel
  */
-void Init_BlendMode(VALUE rb_mSFML) {
-    rb_cBlendMode = rb_define_class_under(rb_mSFML, "BlendMode", rb_cObject);
+void Init_BlendMode(VALUE rb_mGraphics) {
+    rb_cBlendMode = rb_define_class_under(rb_mGraphics, "BlendMode", rb_cObject);
 
     rb_define_alloc_func(rb_cBlendMode, BlendMode_alloc);
     rb_define_method(rb_cBlendMode, "initialize", BlendMode_initialize, -1);

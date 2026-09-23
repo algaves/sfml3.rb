@@ -1,4 +1,4 @@
-module SFML
+module SF::Audio
   class Sound < SoundSource
     def initialize: (SoundBuffer buffer) -> void
 
@@ -23,12 +23,12 @@ module SFML
     def volume=: (Float value) -> Float
     def spatialization_enabled?: () -> bool
     def spatialization_enabled=: (bool value) -> bool
-    def position: () -> Vector3
-    def position=: (Vector3 value) -> Vector3
-    def direction: () -> Vector3
-    def direction=: (Vector3 value) -> Vector3
-    def velocity: () -> Vector3
-    def velocity=: (Vector3 value) -> Vector3
+    def position: () -> SF::System::Vector3
+    def position=: (SF::System::Vector3 value) -> SF::System::Vector3
+    def direction: () -> SF::System::Vector3
+    def direction=: (SF::System::Vector3 value) -> SF::System::Vector3
+    def velocity: () -> SF::System::Vector3
+    def velocity=: (SF::System::Vector3 value) -> SF::System::Vector3
     def cone: () -> SoundSourceCone
     def cone=: (SoundSourceCone value) -> SoundSourceCone
     def doppler_factor: () -> Float
@@ -47,8 +47,8 @@ module SFML
     def max_gain=: (Float value) -> Float
     def attenuation: () -> Float
     def attenuation=: (Float value) -> Float
-    def playing_offset: () -> Time
-    def playing_offset=: (Time value) -> Time
+    def playing_offset: () -> SF::System::Time
+    def playing_offset=: (SF::System::Time value) -> SF::System::Time
     def effect_processor=: (Proc proc) -> Proc
   end
 end

@@ -52,7 +52,7 @@ static void SoundRecorder_free(void* ptr) {
 }
 
 static const rb_data_type_t SoundRecorder_data_type = {
-    .wrap_struct_name = "SFML::SoundRecorder",
+    .wrap_struct_name = "SF::Audio::SoundRecorder",
     .function = {.dmark = SoundRecorder_mark, .dfree = SoundRecorder_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -359,15 +359,15 @@ static VALUE SoundRecorder_channel_map(VALUE self) {
     return rb_array;
 }
 
-/* Document-class: SFML::SoundRecorder
+/* Document-class: SF::Audio::SoundRecorder
  * Base class for a custom audio capture consumer. Subclasses must implement
  * +#on_process(samples)+, called from the audio thread whenever a chunk of
  * captured samples is ready, and may implement +#on_start+/+#on_stop+ to
  * react to recording starting/stopping. For simply capturing into a
  * SoundBuffer without custom processing, use SoundBufferRecorder instead.
  */
-void Init_SoundRecorder(VALUE rb_mSFML) {
-    rb_cSoundRecorder = rb_define_class_under(rb_mSFML, "SoundRecorder", rb_cObject);
+void Init_SoundRecorder(VALUE rb_mAudio) {
+    rb_cSoundRecorder = rb_define_class_under(rb_mAudio, "SoundRecorder", rb_cObject);
 
     rb_define_alloc_func(rb_cSoundRecorder, SoundRecorder_alloc);
     rb_define_method(rb_cSoundRecorder, "initialize", SoundRecorder_initialize, 0);

@@ -35,7 +35,7 @@ static void RenderStates_free(void* ptr) {
 }
 
 static const rb_data_type_t RenderStates_data_type = {
-    .wrap_struct_name = "SFML::RenderState",
+    .wrap_struct_name = "SF::Graphics::RenderState",
     .function = {.dmark = RenderStates_mark, .dfree = RenderStates_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -252,7 +252,7 @@ static VALUE RenderStates_set_shader(VALUE self, VALUE rb_shader) {
     return rb_shader;
 }
 
-/* Document-class: SFML::RenderState
+/* Document-class: SF::Graphics::RenderState
  * The set of render states (transform, blend mode, stencil mode,
  * coordinate type, texture, shader) applied when drawing a Drawable to a
  * render target.
@@ -276,8 +276,8 @@ static VALUE RenderStates_set_shader(VALUE self, VALUE rb_shader) {
  *   The shader applied to the draw, or +nil+ if none.
  *   @return [Shader, nil]
  */
-void Init_RenderState(VALUE rb_mSFML) {
-    rb_cRenderState = rb_define_class_under(rb_mSFML, "RenderState", rb_cObject);
+void Init_RenderState(VALUE rb_mGraphics) {
+    rb_cRenderState = rb_define_class_under(rb_mGraphics, "RenderState", rb_cObject);
 
     rb_define_alloc_func(rb_cRenderState, RenderStates_alloc);
     rb_define_method(rb_cRenderState, "initialize", RenderStates_initialize, -1);

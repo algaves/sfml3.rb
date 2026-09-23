@@ -1,4 +1,4 @@
-module SFML
+module SF::Network
   class TcpSocket
     def initialize: () -> void
 
@@ -7,7 +7,7 @@ module SFML
     def local_port: () -> Integer
     def remote_address: () -> IpAddress
     def remote_port: () -> Integer
-    def connect: (IpAddress | String | Integer address, Integer port, ?Time timeout) -> Symbol
+    def connect: (IpAddress | String | Integer address, Integer port, ?SF::System::Time timeout) -> Symbol
     def disconnect: () -> self
     def send: (String data) -> Symbol
     def send_partial: (String data) -> [Integer, Symbol]

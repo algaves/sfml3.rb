@@ -2,7 +2,7 @@
 
 # Name resolution without a window. SFML 3.1 added a `Dns` class for MX/SRV
 # lookups, but this gem vendors CSFML 3.0.0 (which predates it), so the bound
-# DNS surface is SFML::IpAddress: `local_address` and `public_address(timeout)`
+# DNS surface is SF::Network::IpAddress: `local_address` and `public_address(timeout)`
 # resolve through the OS resolver, `from_string` / `from_bytes` /
 # `from_integer` build addresses locally, and a TcpSocket connect resolves a
 # hostname as a side effect. Network lookups are best-effort and time out
@@ -12,7 +12,11 @@
 #   bundle exec ruby -Ilib examples/subsystems/dns.rb
 
 require 'sfml'
-include SFML
+include SF::Window
+include SF::Graphics
+include SF::System
+include SF::Audio
+include SF::Network
 
 def rule(title)
   puts "\n== #{title}"
@@ -37,7 +41,7 @@ puts 'all equal?                    -> ' \
 
 rule 'Public address (needs the network)'
 begin
-  public = IpAddress.public_address(SFML::Time.seconds(3))
+  public = IpAddress.public_address(SF::System::Time.seconds(3))
   if public == IpAddress::NONE
     puts 'public_address timed out or is unavailable'
   else
@@ -50,7 +54,7 @@ end
 rule 'Hostname resolution through TcpSocket'
 %w[example.com].each do |host|
   socket = TcpSocket.new
-  status = socket.connect(host, 80, SFML::Time.seconds(3))
+  status = socket.connect(host, 80, SF::System::Time.seconds(3))
   line = "#{host}:80 -> #{status}"
   line += "  resolved to #{socket.remote_address}" if status == :done
   puts line

@@ -50,11 +50,11 @@ module ExampleSupport
       end
 
       def update
-        position = SFML::Mouse.position(@window)
+        position = SF::Window::Mouse.position(@window)
         @x = position.x
         @y = position.y
         @was_down = @down
-        @down = SFML::Mouse.button_pressed?(:left)
+        @down = SF::Window::Mouse.button_pressed?(:left)
       end
 
       def down?
@@ -83,7 +83,7 @@ module ExampleSupport
     end
 
     def rectangle(window, x, y, width, height, fill, border = nil)
-      box = SFML::RectangleShape.new([width, height])
+      box = SF::Graphics::RectangleShape.new([width, height])
       box.position = [x, y]
       box.fill_color = fill
       if border
@@ -176,7 +176,7 @@ module ExampleSupport
       end
 
       fraction = (value - min) / (max - min).to_f
-      handle = SFML::CircleShape.new(height / 2.0)
+      handle = SF::Graphics::CircleShape.new(height / 2.0)
       handle.origin = [height / 2.0, height / 2.0]
       handle.position = [x + (fraction * width), y + (height / 2.0)]
       handle.fill_color = if active
@@ -196,7 +196,7 @@ module ExampleSupport
         top = y + (index * row)
         hovered = input.over?(x, top, width, row)
         window.mouse_cursor = hand_cursor if hovered
-        marker = SFML::CircleShape.new((row / 2.0) - 3)
+        marker = SF::Graphics::CircleShape.new((row / 2.0) - 3)
         marker.origin = [(row / 2.0) - 3, (row / 2.0) - 3]
         marker.position = [x + (row / 2.0), top + (row / 2.0)]
         marker.fill_color = if index == selected
@@ -219,11 +219,11 @@ module ExampleSupport
     end
 
     def arrow_cursor
-      @arrow_cursor ||= SFML::Cursor.from_system(:arrow)
+      @arrow_cursor ||= SF::Window::Cursor.from_system(:arrow)
     end
 
     def hand_cursor
-      @hand_cursor ||= SFML::Cursor.from_system(:hand)
+      @hand_cursor ||= SF::Window::Cursor.from_system(:hand)
     end
 
     def format_value(value, step)

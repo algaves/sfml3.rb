@@ -10,7 +10,11 @@
 
 require 'sfml'
 require_relative '../support'
-include SFML
+include SF::Window
+include SF::Graphics
+include SF::System
+include SF::Audio
+include SF::Network
 
 CELL = 8
 COLS = 100
@@ -27,7 +31,7 @@ def append_cell(array, cell, color)
   x = cell[0] * CELL
   y = (cell[1] * CELL) + HUD
   [[0, 0], [1, 0], [0, 1], [1, 0], [1, 1], [0, 1]].each do |dx, dy|
-    array.append(SFML::Vertex.new([x + (dx * CELL), y + (dy * CELL)], color))
+    array.append(SF::Graphics::Vertex.new([x + (dx * CELL), y + (dy * CELL)], color))
   end
 end
 
@@ -36,7 +40,7 @@ class TronGame
 
   def initialize(ai:)
     @ai = ai
-    @trails = [SFML::VertexArray.new, SFML::VertexArray.new]
+    @trails = [SF::Graphics::VertexArray.new, SF::Graphics::VertexArray.new]
     @trails.each { |t| t.primitive = :triangles }
     reset_match
   end

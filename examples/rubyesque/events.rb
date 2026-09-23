@@ -12,7 +12,11 @@
 
 require 'sfml'
 require_relative '../support'
-include SFML
+include SF::Window
+include SF::Graphics
+include SF::System
+include SF::Audio
+include SF::Network
 
 # Predicates are plain methods, so they compose in any control flow. This one
 # turns an event into a sentence; the payload hashes (`event.key`,

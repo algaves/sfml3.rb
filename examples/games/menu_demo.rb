@@ -12,7 +12,11 @@
 require 'sfml'
 require_relative '../support'
 require_relative '../menu'
-include SFML
+include SF::Window
+include SF::Graphics
+include SF::System
+include SF::Audio
+include SF::Network
 
 WIDTH = 780
 HEIGHT = 580

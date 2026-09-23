@@ -2,8 +2,8 @@
 
 require_relative '../spec_helper'
 
-RSpec.describe SFML::Cursor do
+RSpec.describe SF::Window::Cursor do
   it 'creates a system cursor' do
-    expect(SFML::Cursor.from_system(:hand)).to be_a(SFML::Cursor)
+    expect(SF::Window::Cursor.from_system(:hand)).to be_a(SF::Window::Cursor)
   end
 end

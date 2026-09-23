@@ -1,9 +1,9 @@
-module SFML
+module SF::Window
   module Mouse
     def self.button_pressed?: (Symbol | Integer button) -> bool
     def self.pressed?: (Symbol | Integer button) -> bool
-    def self.position: (?WindowBase? window) -> Vector2
-    def self.set_position: (Vector2 | Array[Float] position, ?WindowBase? window) -> Vector2
-    def self.position=: (Vector2 | Array[Float] value) -> Vector2
+    def self.position: (?WindowBase? window) -> SF::System::Vector2
+    def self.set_position: (SF::System::Vector2 | Array[Float] position, ?WindowBase? window) -> SF::System::Vector2
+    def self.position=: (SF::System::Vector2 | Array[Float] value) -> SF::System::Vector2
   end
 end

@@ -1,3 +1,6 @@
-module SFML
+module SF
   VERSION: String
 end
+
+# Deprecated alias of the canonical `SF` root.
+SFML: singleton(::SF)

@@ -266,10 +266,10 @@ static VALUE Window_get_default_view(VALUE self) {
 #undef RT_METHOD
 #undef RT_HANDLE
 
-/* Document-class: SFML::Window
+/* Document-class: SF::Window::Window
  * A renderable OS window with an OpenGL context attached. It derives from
- * SFML::WindowBase; SFML::RenderWindow is the same object under the name that
- * includes SFML::RenderTarget.
+ * SF::Window::WindowBase; SF::Graphics::RenderWindow is the same object under the name that
+ * includes SF::Graphics::RenderTarget.
  *
  * @!method open?
  *   Returns +true+ while the window is open. +is_open?+ is a deprecated alias.
@@ -394,8 +394,8 @@ static VALUE Window_get_default_view(VALUE self) {
  *   Draws a range of vertices from a vertex buffer.
  *   @return [self]
  */
-void Init_Window(VALUE rb_mSFML) {
-    rb_cWindow = rb_define_class_under(rb_mSFML, "Window", Get_Klass_WindowBase());
+void Init_Window(VALUE rb_mWindow) {
+    rb_cWindow = rb_define_class_under(rb_mWindow, "Window", Get_Klass_WindowBase());
 
     rb_define_alloc_func(rb_cWindow, Window_alloc);
 

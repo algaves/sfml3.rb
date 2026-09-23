@@ -2,19 +2,19 @@
 
 require_relative '../spec_helper'
 
-RSpec.describe SFML::SoundBufferRecorder do
+RSpec.describe SF::Audio::SoundBufferRecorder do
   it 'makes SoundBufferRecorder a SoundRecorder' do
-    expect(SFML::SoundBufferRecorder).to be < SFML::SoundRecorder
-    expect(SFML::SoundBufferRecorder.superclass).to eq(SFML::SoundRecorder)
-    expect(SFML::SoundRecorder.superclass).to eq(Object)
+    expect(SF::Audio::SoundBufferRecorder).to be < SF::Audio::SoundRecorder
+    expect(SF::Audio::SoundBufferRecorder.superclass).to eq(SF::Audio::SoundRecorder)
+    expect(SF::Audio::SoundRecorder.superclass).to eq(Object)
   end
 
   it 'drops channel_map from SoundBufferRecorder' do
-    expect(SFML::SoundRecorder.instance_methods).to include(:channel_map)
-    expect(SFML::SoundBufferRecorder.instance_methods).not_to include(:channel_map)
+    expect(SF::Audio::SoundRecorder.instance_methods).to include(:channel_map)
+    expect(SF::Audio::SoundBufferRecorder.instance_methods).not_to include(:channel_map)
   end
 
   it 'exposes the record block helper' do
-    expect(SFML::SoundBufferRecorder).to respond_to(:record!)
+    expect(SF::Audio::SoundBufferRecorder).to respond_to(:record!)
   end
 end

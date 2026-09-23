@@ -32,7 +32,7 @@ static void ConvexShape_free(void* ptr) {
 }
 
 static const rb_data_type_t ConvexShape_data_type = {
-    .wrap_struct_name = "SFML::ConvexShape",
+    .wrap_struct_name = "SF::Graphics::ConvexShape",
     .function = {.dmark = ConvexShape_mark, .dfree = ConvexShape_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -354,7 +354,7 @@ static VALUE ConvexShape_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
     return Qnil;
 }
 
-/* Document-class: SFML::ConvexShape
+/* Document-class: SF::Graphics::ConvexShape
  * A convex polygon shape defined by an arbitrary set of points, drawable,
  * transformable and stylable like the other SFML shapes. Includes
  * Drawable.
@@ -393,8 +393,8 @@ static VALUE ConvexShape_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
  *   The sub-rectangle of the texture displayed on the object.
  *   @return [Rect]
  */
-void Init_ConvexShape(VALUE rb_mSFML) {
-    rb_cConvexShape = rb_define_class_under(rb_mSFML, "ConvexShape", Get_Klass_Shape());
+void Init_ConvexShape(VALUE rb_mGraphics) {
+    rb_cConvexShape = rb_define_class_under(rb_mGraphics, "ConvexShape", Get_Klass_Shape());
 
     rb_define_alloc_func(rb_cConvexShape, ConvexShape_alloc);
 

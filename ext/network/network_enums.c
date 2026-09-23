@@ -201,35 +201,35 @@ const char* ftp_status_name(sfFtpStatus status) {
     return name != NULL ? name : "unknown";
 }
 
-void Init_NetworkEnums(VALUE rb_mSFML) {
-    /* Document-module: SFML::SocketStatus
+void Init_NetworkEnums(VALUE rb_mNetwork) {
+    /* Document-module: SF::Network::SocketStatus
      * Status codes returned by socket send/receive/connect operations.
      */
-    VALUE rb_mSocketStatus = rb_define_module_under(rb_mSFML, "SocketStatus");
+    VALUE rb_mSocketStatus = rb_define_module_under(rb_mNetwork, "SocketStatus");
 
-    /* Document-module: SFML::HttpMethod
+    /* Document-module: SF::Network::HttpMethod
      * The method (verb) of an HttpRequest.
      */
-    VALUE rb_mHttpMethod = rb_define_module_under(rb_mSFML, "HttpMethod");
+    VALUE rb_mHttpMethod = rb_define_module_under(rb_mNetwork, "HttpMethod");
 
-    /* Document-module: SFML::HttpStatus
+    /* Document-module: SF::Network::HttpStatus
      * Status codes returned by an HttpResponse, mirroring standard HTTP
      * status codes with a few SFML-specific additions (1000+) for local
      * connection failures.
      */
-    VALUE rb_mHttpStatus = rb_define_module_under(rb_mSFML, "HttpStatus");
+    VALUE rb_mHttpStatus = rb_define_module_under(rb_mNetwork, "HttpStatus");
 
-    /* Document-module: SFML::FtpTransferMode
+    /* Document-module: SF::Network::FtpTransferMode
      * The data transfer mode used by Ftp#download and Ftp#upload.
      */
-    VALUE rb_mFtpTransferMode = rb_define_module_under(rb_mSFML, "FtpTransferMode");
+    VALUE rb_mFtpTransferMode = rb_define_module_under(rb_mNetwork, "FtpTransferMode");
 
-    /* Document-module: SFML::FtpStatus
+    /* Document-module: SF::Network::FtpStatus
      * Status codes returned by an FtpResponse, mirroring standard FTP
      * reply codes with a few SFML-specific additions (1000+) for local
      * connection failures.
      */
-    VALUE rb_mFtpStatus = rb_define_module_under(rb_mSFML, "FtpStatus");
+    VALUE rb_mFtpStatus = rb_define_module_under(rb_mNetwork, "FtpStatus");
 
     /* The socket has sent or received the data. */
     rb_define_const(rb_mSocketStatus, "DONE", INT2NUM(sfSocketDone));

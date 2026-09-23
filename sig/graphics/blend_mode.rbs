@@ -1,4 +1,4 @@
-module SFML
+module SF::Graphics
   class BlendMode
     def initialize: () -> void
                  | (Symbol | Integer color_src_factor, Symbol | Integer color_dst_factor,

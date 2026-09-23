@@ -4,9 +4,9 @@
 
 static VALUE rb_cSoundSource;
 
-/* Document-class: SFML::SoundSource
- * The common base of every class that plays audio -- SFML::Sound,
- * SFML::SoundStream and SFML::Music. It carries no state of its own; the
+/* Document-class: SF::Audio::SoundSource
+ * The common base of every class that plays audio -- SF::Audio::Sound,
+ * SF::Audio::SoundStream and SF::Audio::Music. It carries no state of its own; the
  * playback, pitch/pan/volume, spatialization and effect-processor surface is
  * generated per concrete class from ext/audio/sound_source.inc, because each
  * one dispatches to a different CSFML entry point.
@@ -21,8 +21,8 @@ static VALUE rb_cSoundSource;
  *   Returns +true+ when the source is stopped. Rubyesque (Matz-like) over #status.
  *   @return [Boolean]
  */
-void Init_SoundSource(VALUE rb_mSFML) {
-    rb_cSoundSource = rb_define_class_under(rb_mSFML, "SoundSource", rb_cObject);
+void Init_SoundSource(VALUE rb_mAudio) {
+    rb_cSoundSource = rb_define_class_under(rb_mAudio, "SoundSource", rb_cObject);
 }
 
 VALUE Get_Klass_SoundSource(void) {

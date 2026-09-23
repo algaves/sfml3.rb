@@ -1,4 +1,4 @@
-module SFML
+module SF::Graphics
   class Target
     def initialize: (untyped window) -> void
     def draw: (untyped drawable, untyped state) -> nil

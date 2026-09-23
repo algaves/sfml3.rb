@@ -21,7 +21,7 @@ static void Image_free(void* ptr) {
 }
 
 static const rb_data_type_t Image_data_type = {
-    .wrap_struct_name = "SFML::Image",
+    .wrap_struct_name = "SF::Graphics::Image",
     .function = {.dmark = NULL, .dfree = Image_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -332,12 +332,12 @@ static VALUE Image_flip_vertically(VALUE self) {
     return self;
 }
 
-/* Document-class: SFML::Image
+/* Document-class: SF::Graphics::Image
  * A 2D array of RGBA pixels, held in RAM (as opposed to Texture, which is
  * GPU-side). Used for loading, editing and saving raw pixel data.
  */
-void Init_Image(VALUE rb_mSFML) {
-    rb_cImage = rb_define_class_under(rb_mSFML, "Image", rb_cObject);
+void Init_Image(VALUE rb_mGraphics) {
+    rb_cImage = rb_define_class_under(rb_mGraphics, "Image", rb_cObject);
 
     rb_define_alloc_func(rb_cImage, Image_alloc);
     rb_define_method(rb_cImage, "initialize", Image_initialize, 1);

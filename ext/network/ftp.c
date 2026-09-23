@@ -59,22 +59,22 @@ static void FtpListingResponse_free(void* ptr) {
 }
 
 static const rb_data_type_t Ftp_data_type = {
-    .wrap_struct_name = "SFML::Ftp",
+    .wrap_struct_name = "SF::Network::Ftp",
     .function = {.dmark = NULL, .dfree = Ftp_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
 static const rb_data_type_t FtpResponse_data_type = {
-    .wrap_struct_name = "SFML::FtpResponse",
+    .wrap_struct_name = "SF::Network::FtpResponse",
     .function = {.dmark = NULL, .dfree = FtpResponse_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
 static const rb_data_type_t FtpDirectoryResponse_data_type = {
-    .wrap_struct_name = "SFML::FtpDirectoryResponse",
+    .wrap_struct_name = "SF::Network::FtpDirectoryResponse",
     .function = {.dmark = NULL, .dfree = FtpDirectoryResponse_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
 static const rb_data_type_t FtpListingResponse_data_type = {
-    .wrap_struct_name = "SFML::FtpListingResponse",
+    .wrap_struct_name = "SF::Network::FtpListingResponse",
     .function = {.dmark = NULL, .dfree = FtpListingResponse_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -567,29 +567,30 @@ static VALUE FtpListingResponse_name(VALUE self, VALUE rb_index) {
     return rb_str_new_cstr(sfFtpListingResponse_getName(response, index));
 }
 
-/* Document-class: SFML::Ftp
+/* Document-class: SF::Network::Ftp
  * A basic FTP client. Every command method blocks until the server replies
  * and returns an FtpResponse (or a more specific subtype).
  */
-void Init_Ftp(VALUE rb_mSFML) {
-    rb_cFtp = rb_define_class_under(rb_mSFML, "Ftp", rb_cObject);
+void Init_Ftp(VALUE rb_mNetwork) {
+    rb_cFtp = rb_define_class_under(rb_mNetwork, "Ftp", rb_cObject);
     rb_define_alloc_func(rb_cFtp, Ftp_alloc);
-    /* Document-class: SFML::FtpResponse
+    /* Document-class: SF::Network::FtpResponse
      * The status and message returned by most Ftp commands.
      */
-    rb_cFtpResponse = rb_define_class_under(rb_mSFML, "FtpResponse", rb_cObject);
+    rb_cFtpResponse = rb_define_class_under(rb_mNetwork, "FtpResponse", rb_cObject);
     rb_define_alloc_func(rb_cFtpResponse, FtpResponse_alloc);
-    /* Document-class: SFML::FtpDirectoryResponse
+    /* Document-class: SF::Network::FtpDirectoryResponse
      * An FtpResponse specialization returned by Ftp#working_directory,
      * additionally carrying the directory path.
      */
-    rb_cFtpDirectoryResponse = rb_define_class_under(rb_mSFML, "FtpDirectoryResponse", rb_cObject);
+    rb_cFtpDirectoryResponse =
+        rb_define_class_under(rb_mNetwork, "FtpDirectoryResponse", rb_cObject);
     rb_define_alloc_func(rb_cFtpDirectoryResponse, FtpDirectoryResponse_alloc);
-    /* Document-class: SFML::FtpListingResponse
+    /* Document-class: SF::Network::FtpListingResponse
      * An FtpResponse specialization returned by Ftp#directory_listing,
      * additionally carrying the list of filenames.
      */
-    rb_cFtpListingResponse = rb_define_class_under(rb_mSFML, "FtpListingResponse", rb_cObject);
+    rb_cFtpListingResponse = rb_define_class_under(rb_mNetwork, "FtpListingResponse", rb_cObject);
     rb_define_alloc_func(rb_cFtpListingResponse, FtpListingResponse_alloc);
 
     rb_define_method(rb_cFtp, "initialize", Ftp_initialize, 0);

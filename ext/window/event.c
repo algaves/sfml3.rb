@@ -20,7 +20,7 @@ static void Event_free(void* ptr) {
 }
 
 static const rb_data_type_t Event_data_type = {
-    .wrap_struct_name = "SFML::Event",
+    .wrap_struct_name = "SF::Window::Event",
     .function = {.dmark = NULL, .dfree = Event_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -61,7 +61,7 @@ static VALUE Event_initialize(VALUE self) {
  * Returns the event's kind as a String, such as +"closed"+ or +"key-pressed"+.
  *
  * @return [String] the event's kind, e.g. +"closed"+, +"key-pressed"+,
- *   +"mouse-moved"+ (see SFML::Window#poll_event!)
+ *   +"mouse-moved"+ (see SF::Window::Window#poll_event!)
  */
 static VALUE Event_type(VALUE self) {
     return rb_str_new2(get_event_name(Get_Event_Struct(self)->type));
@@ -290,7 +290,7 @@ static VALUE Event_get_sensor(VALUE self) {
     return hash;
 }
 
-/* Document-class: SFML::Event
+/* Document-class: SF::Window::Event
  * A window or input event, polled from Window#poll_event!/#wait_event!.
  *
  * #type tells which of the accessors below is meaningful for this
@@ -305,8 +305,8 @@ static VALUE Event_get_sensor(VALUE self) {
  *   Returns the key code of a key event. Rubyesque (Matz-like) for +key[:code]+.
  *   @return [Symbol]
  */
-void Init_Event(VALUE rb_mSFML) {
-    rb_cEvent = rb_define_class_under(rb_mSFML, "Event", rb_cObject);
+void Init_Event(VALUE rb_mWindow) {
+    rb_cEvent = rb_define_class_under(rb_mWindow, "Event", rb_cObject);
 
     rb_define_alloc_func(rb_cEvent, Event_alloc);
     rb_define_method(rb_cEvent, "initialize", Event_initialize, 0);

@@ -4,7 +4,7 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.4] - 2026-09-23
 
 ### Added
 * **A pure-Ruby Rubyesque (Matz-like) layer** (`lib/sfml/rubyesque.rb`), loaded by
@@ -12,13 +12,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   Predicate methods end in `?` (`window.open?`, `window.focused?`, `window.visible?`,
   `sound.playing?`, `Keyboard.key_pressed?`, `Joystick.axis?`, `Clipboard.has_text?`),
   state-changing methods end in `!` (`window.close!`, `clear!`, `display!`, `play!`, `pause!`,
-  `stop!`, `Sensor.enable!`/`disable!`, `Clipboard.clear!`, `SFML.sleep!`), and block-scoped
+  `stop!`, `Sensor.enable!`/`disable!`, `Clipboard.clear!`, `SF.sleep!`), and block-scoped
   helpers manage resources: `WindowBase.open` (`Window.open`/`RenderWindow.open`),
   `window.poll_events!`, `window.render!`, `SoundBufferRecorder.record!` and `Clock.measure`.
   Event kinds gain predicates (`event.closed?`, `event.key_pressed?`, ...) and `event.code` is
-  the `event.key[:code]` shortcut. `SFML::Sleep.sleep!` mirrors the namespace spelling, and
+  the `event.key[:code]` shortcut. `SF::System::Sleep.sleep!` mirrors the namespace spelling, and
   `Touch.position` accepts `relative_to:`.
-* **`SFML::Style` and `SFML::State`**, Integer flag namespaces mirroring the CSFML `sfStyle` and
+* **`SF::Window::Style` and `SF::Window::State`**, Integer flag namespaces mirroring the CSFML `sfStyle` and
   `sfWindowState` values, so `Style::DEFAULT` / `State::FULLSCREEN` and `Style::TITLEBAR |
   Style::RESIZE` slot into the window constructors where the `:default`/`:windowed` symbols did.
 * **Positional `Class[...]` constructors**: `VideoMode[w, h, bits = 32]`, `Vector2[x, y]`,
@@ -33,13 +33,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 * **`examples/rubyesque/`**, one small teaching script per slice of the layer (window, events,
   audio, input, system, deprecations) with an old-to-new cheat sheet in its README, plus the
   Rubyesque section of `README.md` and a per-module table in `ROADMAP.md`.
-* **The graphics and audio class hierarchies now mirror SFML 3's own.** `SFML::Shape` is the base
-  of `SFML::CircleShape`, `SFML::RectangleShape` and `SFML::ConvexShape`; `SFML::Sprite` and
-  `SFML::Text` are `SFML::Transformable`; and `SFML::Sound`, `SFML::SoundStream` and `SFML::Music`
-  derive from the new `SFML::SoundSource`, with `SFML::Music < SFML::SoundStream` and
-  `SFML::SoundBufferRecorder < SFML::SoundRecorder`.
+* **The graphics and audio class hierarchies now mirror SFML 3's own.** `SF::Graphics::Shape` is the base
+  of `SF::Graphics::CircleShape`, `SF::Graphics::RectangleShape` and `SF::Graphics::ConvexShape`; `SF::Graphics::Sprite` and
+  `SF::Graphics::Text` are `SF::Graphics::Transformable`; and `SF::Audio::Sound`, `SF::Audio::SoundStream` and `SF::Audio::Music`
+  derive from the new `SF::Audio::SoundSource`, with `SF::Audio::Music < SF::Audio::SoundStream` and
+  `SF::Audio::SoundBufferRecorder < SF::Audio::SoundRecorder`.
 
 ### Changed
+* **The module hierarchy moved from flat `SFML::*` to the canonical `SF::*` namespace.** The root
+  module is now `SF`, split into subsystem modules mirroring SFML 3's own C++ namespaces:
+  `SF::System` (`Time`, `Clock`, `Vector2`, `Vector3`, `Sleep`, ...), `SF::Graphics` (`Sprite`,
+  `Color`, `Texture`, `RenderTexture`, `Shape`, ...), `SF::Window` (`Window`, `WindowBase`,
+  `Event`, `VideoMode`, `Style`, ...), `SF::Audio` (`Sound`, `Music`, `SoundBuffer`, ...) and
+  `SF::Network` (`Http`, `Ftp`, `Packet`, `TcpSocket`, ...). `SFML` remains a deprecated alias of
+  the `SF` root, so `SFML::Graphics::Sprite` keeps resolving; the old *flat* spellings
+  (`SFML::Sprite`, `SFML::Time`, ...) no longer exist and must gain their subsystem module.
 * **The test suite moved from Minitest to RSpec.** Every `test/**/*_test.rb` became a
   `spec/**/*_spec.rb` under the same per-subsystem split, Minitest's `assert_*` helpers became RSpec
   expectations (with `assert_vec_in_epsilon`/`assert_matrix_in_delta` as `be_vec_in_epsilon`/
@@ -55,21 +63,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 * **The Rubyesque names are now primary**, with the pre-Rubyesque spellings kept as deprecated
   aliases that warn: `is_open?`, `focus?`, `request_focus`, `clear`, `display`,
   `play`/`pause`/`stop`, `Keyboard.pressed?`, `Joystick.has_axis?`, `Clipboard.string`/`string=`
-  and `SFML.sleep`. Code written against the old names keeps working unchanged.
-* **`SFML::Transformable` is now a module**, mixed into `Sprite`, `Text` and `Shape`, rather than a
+  and `SF.sleep`. Code written against the old names keeps working unchanged.
+* **`SF::Graphics::Transformable` is now a module**, mixed into `Sprite`, `Text` and `Shape`, rather than a
   class. The position/rotation/scale/origin surface is implemented once and dispatched to each
   class's concrete CSFML entry point, replacing thirteen duplicated copies. `Transformable.new`
-  still works and returns a `SFML::Transformable::Instance`, so standalone use and subclassing are
+  still works and returns a `SF::Graphics::Transformable::Instance`, so standalone use and subclassing are
   preserved.
-* **`SFML::Circle` is now `SFML::CircleShape`**, matching SFML's class name and its siblings. The
-  old `SFML::Circle` name remains as a constant alias.
+* **`SF::Graphics::Circle` is now `SF::Graphics::CircleShape`**, matching SFML's class name and its siblings. The
+  old `SF::Graphics::Circle` name remains as a constant alias.
 
 ### Deprecated
 * The pre-Rubyesque method names listed under **Changed**. They behave exactly as before and print a
   one-line warning pointing at the replacement; they will be removed in a future major release.
 
 ### Fixed
-* **`SFML::Event#key` (and `Event#code`) could segfault.** `Event_alloc` zeroed a freshly allocated
+* **`SF::Window::Event#key` (and `Event#code`) could segfault.** `Event_alloc` zeroed a freshly allocated
   `sfEvent` with `*event = (sfEvent){0}`, which the compiler rewrote into a 4-byte store, leaving the
   key/scancode union members as malloc garbage; `event.key` then indexed CSFML's key table with that
   garbage, crashing intermittently (heap-layout dependent) inside
@@ -79,7 +87,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ## [0.3.1] - 2026-09-19
 
 ### Added
-* **`SFML::WindowBase`, `SFML::RenderWindow` and the `SFML::RenderTarget` module**, mirroring
+* **`SF::Window::WindowBase`, `SF::Graphics::RenderWindow` and the `SF::Graphics::RenderTarget` module**, mirroring
   SFML 3's own hierarchy. `WindowBase` wraps `sfWindowBase` -- an OS window and event queue with
   no OpenGL context -- and is constructible, with `Window` and `RenderWindow` derived from it.
   `Window` keeps its existing `sfRenderWindow` behaviour; `RenderWindow` is the same renderable
@@ -87,7 +95,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   `RenderTarget` too, so a drawable's `#draw` now accepts a `RenderWindow` or a `RenderTexture`
   directly (the legacy `Target` still works). The shared window surface is generated once, in
   `ext/window/window_base.inc`.
-* **RBS signatures are now checked against the code.** `sig/**/*.rbs` declares `SFML::VERSION`, and
+* **RBS signatures are now checked against the code.** `sig/**/*.rbs` declares `SF::VERSION`, and
   a `Steepfile` plus the `steep` development gem add `rake steep` to type-check `lib/` against the
   signatures. `check.yaml` runs both `rake rbs` and `rake steep`, on `main` and on `release/**`
   PRs, which previously ran no workflow at all.
@@ -151,7 +159,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ## [0.2.1]
 
 ### Added
-* **`SFML::Transform` is now a class**, wrapping `sfTransform` by value. It previously exposed
+* **`SF::Graphics::Transform` is now a class**, wrapping `sfTransform` by value. It previously exposed
   only `combine` and `inverse` as module functions over plain 9-element Arrays, leaving 11 of
   CSFML's 13 transform functions unbound: you could read a matrix out of a `Sprite` but not build
   one, apply one to a point, or compose one. It now has `Transform.identity` / `IDENTITY`,
@@ -161,21 +169,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 * **`map_pixel_to_coords` and `map_coords_to_pixel` on both render targets.** The screen-to-world
   conversion behind every click-to-select interaction; without it a zoomed, rotated or
   viewport-shifted `View` could not be hit-tested from Ruby at all.
-* **`SFML::Window` gained the render-target methods only `RenderTexture` had**: `clear_stencil`,
+* **`SF::Window::Window` gained the render-target methods only `RenderTexture` had**: `clear_stencil`,
   `clear_color_and_stencil`, `viewport`, `scissor` and `srgb?`. Both classes also gained
   `push_gl_states`, `pop_gl_states`, `reset_gl_states`, `draw_primitives` and
   `draw_vertex_buffer_range`. The shared surface is generated once from
   `ext/graphics/render_target.inc`, the same way `ext/audio/sound_source.inc` already serves the
   three sound sources.
-* `SFML::View.from_rect`, `View#scissor` and `View#scissor=`.
-* `SFML::Transformable#inverse_transform` and `#copy` — every subclass (`Sprite`, `Text`,
+* `SF::Graphics::View.from_rect`, `View#scissor` and `View#scissor=`.
+* `SF::Graphics::Transformable#inverse_transform` and `#copy` — every subclass (`Sprite`, `Text`,
   `Circle`, `RectangleShape`, `ConvexShape`, `Shape`) already had both.
-* `SFML::Texture.srgb`, `.srgb_from_stream`, `.srgb_from_image`, `Texture#resize_srgb` and
+* `SF::Graphics::Texture.srgb`, `.srgb_from_stream`, `.srgb_from_image`, `Texture#resize_srgb` and
   `Texture#swap`.
-* `SFML::Shader#set_vec4_array`, `#set_mat3_array` and `#set_mat4_array`, completing the array
+* `SF::Graphics::Shader#set_vec4_array`, `#set_mat3_array` and `#set_mat4_array`, completing the array
   uniforms alongside the existing float/vec2/vec3 forms.
-* `SFML::Circle#point_count=`, `SFML::VertexBuffer#swap`, `SFML::Window.from_handle` and
-  `SFML::Window#create_vulkan_surface`.
+* `SF::Graphics::Circle#point_count=`, `SF::Graphics::VertexBuffer#swap`, `SF::Window::Window.from_handle` and
+  `SF::Window::Window#create_vulkan_surface`.
 
 ### Fixed
 * **Non-ASCII text and window titles were mangled.** `Text#string=`, `Window#title=`, window
@@ -211,22 +219,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ## [0.2.0]
 
 ### Added
-* **Full Audio binding.** `SFML::Listener`, `SFML::SoundSourceCone`, `SFML::SoundBuffer`,
-  `SFML::Sound`, `SFML::Music`, `SFML::SoundStream`, `SFML::SoundRecorder` and
-  `SFML::SoundBufferRecorder`, plus the `SFML::SoundStatus` and `SFML::SoundChannel` enums. The
+* **Full Audio binding.** `SF::Audio::Listener`, `SF::Audio::SoundSourceCone`, `SF::Audio::SoundBuffer`,
+  `SF::Audio::Sound`, `SF::Audio::Music`, `SF::Audio::SoundStream`, `SF::Audio::SoundRecorder` and
+  `SF::Audio::SoundBufferRecorder`, plus the `SF::Audio::SoundStatus` and `SF::Audio::SoundChannel` enums. The
   shared sound-source surface (play/pause/stop/status, pitch, pan, volume, spatialization,
   position/direction/velocity, cone, doppler and attenuation factors, distance/gain bounds and
   playing offset) is generated once from `ext/audio/sound_source.inc` for all three source classes.
   `SoundStream` and `SoundRecorder` are subclassable through `#on_get_data`/`#on_seek` and
   `#on_process`/`#on_start`/`#on_stop`; their callbacks re-enter Ruby under the GVL and treat an
   exception as "stop", since they run on SFML's audio thread.
-* **Full Network binding.** `SFML::IpAddress` (string/bytes/integer constructors, `NONE`, `ANY`,
-  `LOCAL_HOST`, `BROADCAST`, local/public lookup), `SFML::Packet` (raw data plus every typed
-  reader/writer), `SFML::SocketSelector`, `SFML::TcpSocket`, `SFML::TcpListener`,
-  `SFML::UdpSocket`, `SFML::Http`/`HttpRequest`/`HttpResponse`, `SFML::Ftp` with its response,
+* **Full Network binding.** `SF::Network::IpAddress` (string/bytes/integer constructors, `NONE`, `ANY`,
+  `LOCAL_HOST`, `BROADCAST`, local/public lookup), `SF::Network::Packet` (raw data plus every typed
+  reader/writer), `SF::Network::SocketSelector`, `SF::Network::TcpSocket`, `SF::Network::TcpListener`,
+  `SF::Network::UdpSocket`, `SF::Network::Http`/`HttpRequest`/`HttpResponse`, `SF::Network::Ftp` with its response,
   directory-response and listing-response classes, and the `SocketStatus`, `HttpMethod`,
   `HttpStatus`, `FtpStatus` and `FtpTransferMode` enums.
-* `SFML::SoundSource#effect_processor=` accepts a Ruby proc. Because `sfEffectProcessor` carries
+* `SF::Audio::SoundSource#effect_processor=` accepts a Ruby proc. Because `sfEffectProcessor` carries
   no `userData` (so one C callback cannot tell which source invoked it), the binding dispatches
   through a bounded pool of C thunks, one per active source; exceeding the pool raises.
 
@@ -266,8 +274,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   `Clipboard`, `Cursor`, `Context`, `ContextSettings` and `Vulkan` modules/classes. `Event` now
   exposes every payload (text, mouse move/raw/button/wheel, joystick move/button/connect, touch,
   sensor).
-* **System completeness.** `SFML::Time` (arithmetic, comparison, unit conversions), `SFML.sleep`,
-  `SFML::Buffer`, and `SFML::InputStream` (wraps any `#read`-able object so `Font`/`Texture`/`Image`/
+* **System completeness.** `SF::System::Time` (arithmetic, comparison, unit conversions), `SF.sleep`,
+  `SF::System::Buffer`, and `SF::System::InputStream` (wraps any `#read`-able object so `Font`/`Texture`/`Image`/
   `Shader` can load from streams).
 * **Value classes.** `Vector2`, `Vector3`, `Color`, `Rect` are now real Ruby classes; every setter
   still accepts a plain array, and getters return the class (which behaves like an array via
@@ -297,7 +305,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   `escalate` → `scale!` (the mutating operation; `scale` remains the getter); `matrix` → `transform`
   (`matrix` kept as an alias). `View#position`/`position=` were removed: the old setter wrote the
   viewport rather than the center — use `center`/`viewport`.
-* `Clock#elapsed_time`/`#restart!` now return `SFML::Time` rather than bare `Float` seconds.
+* `Clock#elapsed_time`/`#restart!` now return `SF::System::Time` rather than bare `Float` seconds.
 * `Window.new` accepts `(video_mode, title, style = :default, state = :windowed, settings = nil)`
   instead of hardcoding `sfDefaultStyle`/`sfWindowed`/no settings.
 * **The C extension is now organised by SFML subsystem.** The 24 sources no longer sit flat in `ext/`

@@ -1,18 +1,18 @@
-module SFML
+module SF::Graphics
   class Vertex
     def initialize: () -> void
-                 | (Vector2 position) -> void
-                 | (Vector2 position, untyped color) -> void
-                 | (Vector2 position, untyped color, Vector2 tex_coords) -> void
+                 | (SF::System::Vector2 position) -> void
+                 | (SF::System::Vector2 position, untyped color) -> void
+                 | (SF::System::Vector2 position, untyped color, SF::System::Vector2 tex_coords) -> void
     def self.[]: (*untyped args) -> Vertex
 
-    def position: () -> Vector2
-    def position=: (Vector2 value) -> Vector2
+    def position: () -> SF::System::Vector2
+    def position=: (SF::System::Vector2 value) -> SF::System::Vector2
     def color: () -> untyped
     def color=: (untyped value) -> untyped
-    def tex_coords: () -> Vector2
-    def tex_coords=: (Vector2 value) -> Vector2
-    def to_a: () -> [Vector2, untyped]
+    def tex_coords: () -> SF::System::Vector2
+    def tex_coords=: (SF::System::Vector2 value) -> SF::System::Vector2
+    def to_a: () -> [SF::System::Vector2, untyped]
     def ==: (untyped other) -> bool
   end
 end

@@ -24,7 +24,7 @@ static void StencilMode_free(void* ptr) {
 }
 
 static const rb_data_type_t StencilMode_data_type = {
-    .wrap_struct_name = "SFML::StencilMode",
+    .wrap_struct_name = "SF::Graphics::StencilMode",
     .function = {.dmark = NULL, .dfree = StencilMode_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -262,7 +262,7 @@ static VALUE StencilMode_eql(VALUE self, VALUE rb_other) {
                    a.stencilMask.value == b.stencilMask.value && a.stencilOnly == b.stencilOnly);
 }
 
-/* Document-class: SFML::StencilMode
+/* Document-class: SF::Graphics::StencilMode
  * Configures how the stencil buffer is used and updated when drawing,
  * carried on RenderState#stencil_mode.
  *
@@ -284,8 +284,8 @@ static VALUE StencilMode_eql(VALUE self, VALUE rb_other) {
  *   Whether only the stencil buffer is written to.
  *   @return [Boolean]
  */
-void Init_StencilMode(VALUE rb_mSFML) {
-    rb_cStencilMode = rb_define_class_under(rb_mSFML, "StencilMode", rb_cObject);
+void Init_StencilMode(VALUE rb_mGraphics) {
+    rb_cStencilMode = rb_define_class_under(rb_mGraphics, "StencilMode", rb_cObject);
 
     rb_define_alloc_func(rb_cStencilMode, StencilMode_alloc);
     rb_define_method(rb_cStencilMode, "initialize", StencilMode_initialize, -1);

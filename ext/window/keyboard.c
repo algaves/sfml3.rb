@@ -243,11 +243,11 @@ static VALUE Keyboard_set_virtual_keyboard_visible(VALUE module, VALUE rb_visibl
     return rb_visible;
 }
 
-/* Document-module: SFML::Keyboard
+/* Document-module: SF::Window::Keyboard
  * Real-time keyboard state and key/scancode lookups.
  */
-void Init_Keyboard(VALUE rb_mSFML) {
-    VALUE rb_mKeyboard = rb_define_module_under(rb_mSFML, "Keyboard");
+void Init_Keyboard(VALUE rb_mWindow) {
+    VALUE rb_mKeyboard = rb_define_module_under(rb_mWindow, "Keyboard");
 
     rb_define_module_function(rb_mKeyboard, "pressed?", Keyboard_pressed_p, 1);
     rb_define_module_function(rb_mKeyboard, "scancode_pressed?", Keyboard_scancode_pressed_p, 1);

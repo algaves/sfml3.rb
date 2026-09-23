@@ -6,12 +6,12 @@ require_relative 'spec_helper'
 # classes in the category folders; only the cross-cutting deprecated aliases
 # that span the layer stay here.
 RSpec.describe 'Rubyesque deprecated aliases' do
-  it 'warns and works through the deprecated SFML.sleep spelling' do
-    expect { SFML.sleep(0) }.to output(/SFML\.sleep is deprecated/).to_stderr
+  it 'warns and works through the deprecated SF.sleep spelling' do
+    expect { SF.sleep(0) }.to output(/SF\.sleep is deprecated/).to_stderr
   end
 
   it 'warns and works through the deprecated Clipboard.string= spelling' do
-    expect { SFML::Clipboard.string = 'old spelling' }.to output(/Clipboard\.string=/i).to_stderr
-    expect(SFML::Clipboard.content).to eq('old spelling')
+    expect { SF::Window::Clipboard.string = 'old spelling' }.to output(/Clipboard\.string=/i).to_stderr
+    expect(SF::Window::Clipboard.content).to eq('old spelling')
   end
 end

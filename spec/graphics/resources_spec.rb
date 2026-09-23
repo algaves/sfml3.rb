@@ -7,10 +7,11 @@ require_relative '../spec_helper'
 # underlying sf*_create/load-from-disk path).
 RSpec.describe 'resource bracket constructors' do
   it 'declares the resource bracket constructors' do
-    [SFML::Sprite, SFML::Texture, SFML::Image, SFML::RenderTexture, SFML::Text].each do |klass|
+    [SF::Graphics::Sprite, SF::Graphics::Texture, SF::Graphics::Image, SF::Graphics::RenderTexture,
+     SF::Graphics::Text].each do |klass|
       expect(klass).to respond_to(:[])
     end
 
-    expect(SFML::Image[[4, 4]].size.to_a).to be_vec_in_epsilon([4, 4])
+    expect(SF::Graphics::Image[[4, 4]].size.to_a).to be_vec_in_epsilon([4, 4])
   end
 end

@@ -31,7 +31,7 @@ static void Window_free(void* ptr) {
 }
 
 static const rb_data_type_t Window_data_type = {
-    .wrap_struct_name = "SFML::Window",
+    .wrap_struct_name = "SF::Window::Window",
     .function = {.dmark = Window_mark, .dfree = Window_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -152,9 +152,9 @@ static VALUE WindowBase_s_from_handle(int argc, VALUE* argv, VALUE klass) {
 #undef WB_METHOD
 #undef WB_HANDLE
 
-/* Document-class: SFML::WindowBase
+/* Document-class: SF::Window::WindowBase
  * An OS window and its event queue, without an OpenGL context. It is the base
- * of SFML::Window and SFML::RenderWindow, and every method below is also
+ * of SF::Window::Window and SF::Graphics::RenderWindow, and every method below is also
  * available -- backed by the matching sfRenderWindow entry point -- on both.
  *
  * @!method self.open(video_mode, title, style = :default, state = :windowed)
@@ -243,8 +243,8 @@ static VALUE WindowBase_s_from_handle(int argc, VALUE* argv, VALUE klass) {
  *   Creates a Vulkan surface for this window.
  *   @return [Integer, nil] the new +VkSurfaceKHR+, or +nil+ if creation failed
  */
-void Init_WindowBase(VALUE rb_mSFML) {
-    rb_cWindowBase = rb_define_class_under(rb_mSFML, "WindowBase", rb_cObject);
+void Init_WindowBase(VALUE rb_mWindow) {
+    rb_cWindowBase = rb_define_class_under(rb_mWindow, "WindowBase", rb_cObject);
 
     rb_define_alloc_func(rb_cWindowBase, Window_alloc);
 

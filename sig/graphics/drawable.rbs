@@ -1,4 +1,4 @@
-module SFML
+module SF::Graphics
   module Drawable
     def draw: (untyped target, RenderState state) -> nil
   end

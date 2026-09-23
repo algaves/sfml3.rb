@@ -1,11 +1,11 @@
-module SFML
+module SF::Network
   class IpAddress
     def initialize: (Integer | String | IpAddress address) -> void
     def self.from_string: (String address) -> IpAddress
     def self.from_bytes: (Integer byte0, Integer byte1, Integer byte2, Integer byte3) -> IpAddress
     def self.from_integer: (Integer value) -> IpAddress
     def self.local_address: () -> IpAddress
-    def self.public_address: (?Time timeout) -> IpAddress
+    def self.public_address: (?SF::System::Time timeout) -> IpAddress
 
     def to_s: () -> String
     def to_str: () -> String

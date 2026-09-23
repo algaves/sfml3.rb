@@ -182,7 +182,7 @@ static VALUE WB_METHOD(get_native_handle)(VALUE self) {
 }
 
 /* Vulkan handles cross this binding as Integers, the same way
-   SFML::Vulkan.function already returns one -- there is no Vulkan object model
+   SF::Window::Vulkan.function already returns one -- there is no Vulkan object model
    here to wrap them in. Returns the new VkSurfaceKHR, or nil on failure. */
 /* call-seq: create_vulkan_surface(instance, allocator = nil) -> Integer or nil */
 static VALUE WB_METHOD(create_vulkan_surface)(int argc, VALUE* argv, VALUE self) {

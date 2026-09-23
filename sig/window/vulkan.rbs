@@ -1,4 +1,4 @@
-module SFML
+module SF::Window
   module Vulkan
     def self.available?: (?bool require_graphics) -> bool
     def self.function: (String name) -> Integer

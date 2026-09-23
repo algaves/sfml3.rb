@@ -1,12 +1,12 @@
-module SFML
+module SF::Graphics
   class RenderTexture
     include RenderTarget
 
-    def initialize: (Vector2 size, ?untyped settings) -> void
-    def self.[]: (Vector2 | Array[Integer] size, ?untyped settings) -> RenderTexture
+    def initialize: (SF::System::Vector2 size, ?untyped settings) -> void
+    def self.[]: (SF::System::Vector2 | Array[Integer] size, ?untyped settings) -> RenderTexture
     def self.maximum_antialiasing_level: () -> Integer
 
-    def size: () -> Vector2
+    def size: () -> SF::System::Vector2
     def display: () -> self
     def clear: (?untyped color) -> self
     def view: () -> View

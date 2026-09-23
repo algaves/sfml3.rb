@@ -1,4 +1,4 @@
-module SFML
+module SF::Window
   class Window < WindowBase
     def initialize: (VideoMode video_mode, String title, ?Symbol | Array[Symbol] | Integer style, ?Symbol state, ?ContextSettings? settings) -> void
     def self.from_handle: (Integer handle, ?ContextSettings? settings) -> Window
@@ -22,7 +22,7 @@ module SFML
     def default_view: () -> untyped
     def settings: () -> ContextSettings
 
-    # Shared with RenderTexture, via ext/graphics/render_target.inc.
+    # Shared with SF::Graphics::RenderTexture, via ext/graphics/render_target.inc.
     def srgb?: () -> bool
     def clear_stencil: (Integer value) -> self
     def clear_color_and_stencil: (untyped color, Integer stencil) -> self

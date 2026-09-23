@@ -1,4 +1,4 @@
-module SFML
+module SF::Graphics
   class Rect
     include Enumerable[Float]
 
@@ -17,11 +17,11 @@ module SFML
     def width=: (Float value) -> Float
     def height: () -> Float
     def height=: (Float value) -> Float
-    def position: () -> Vector2
-    def position=: (Vector2 | Array[Float] value) -> Vector2
-    def size: () -> Vector2
-    def size=: (Vector2 | Array[Float] value) -> Vector2
-    def contains?: (Vector2 | Array[Float] point) -> bool
+    def position: () -> SF::System::Vector2
+    def position=: (SF::System::Vector2 | Array[Float] value) -> SF::System::Vector2
+    def size: () -> SF::System::Vector2
+    def size=: (SF::System::Vector2 | Array[Float] value) -> SF::System::Vector2
+    def contains?: (SF::System::Vector2 | Array[Float] point) -> bool
                   | (Float x, Float y) -> bool
     def intersects?: (Rect other) -> bool
     def intersection: (Rect other) -> (Rect | nil)

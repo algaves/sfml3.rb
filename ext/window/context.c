@@ -13,7 +13,7 @@ static void Context_free(void* ptr) {
 }
 
 static const rb_data_type_t Context_data_type = {
-    .wrap_struct_name = "SFML::Context",
+    .wrap_struct_name = "SF::Window::Context",
     .function = {.dmark = NULL, .dfree = Context_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -105,11 +105,11 @@ static VALUE Context_active_context_id(VALUE klass) {
     return ULL2NUM(sfContext_getActiveContextId());
 }
 
-/* Document-class: SFML::Context
+/* Document-class: SF::Window::Context
  * A raw OpenGL context, usable off-screen or on a thread without a Window.
  */
-void Init_Context(VALUE rb_mSFML) {
-    rb_cContext = rb_define_class_under(rb_mSFML, "Context", rb_cObject);
+void Init_Context(VALUE rb_mWindow) {
+    rb_cContext = rb_define_class_under(rb_mWindow, "Context", rb_cObject);
 
     rb_define_alloc_func(rb_cContext, Context_alloc);
     rb_define_method(rb_cContext, "initialize", Context_initialize, 0);

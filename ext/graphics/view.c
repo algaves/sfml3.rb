@@ -21,7 +21,7 @@ static void View_free(void* ptr) {
 }
 
 static const rb_data_type_t View_data_type = {
-    .wrap_struct_name = "SFML::View",
+    .wrap_struct_name = "SF::Graphics::View",
     .function = {.dmark = NULL, .dfree = View_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -240,7 +240,7 @@ static VALUE View_copy(VALUE self) {
     return Get_Casting_View(sfView_copy(Get_View_Struct(self)));
 }
 
-/* Document-class: SFML::View
+/* Document-class: SF::Graphics::View
  * A 2D camera: the region of the scene visible on a render target, and
  * where on that target it is shown.
  *
@@ -260,8 +260,8 @@ static VALUE View_copy(VALUE self) {
  *   The view's scissor rectangle.
  *   @return [Rect]
  */
-void Init_View(VALUE rb_mSFML) {
-    rb_cView = rb_define_class_under(rb_mSFML, "View", rb_cObject);
+void Init_View(VALUE rb_mGraphics) {
+    rb_cView = rb_define_class_under(rb_mGraphics, "View", rb_cObject);
 
     rb_define_alloc_func(rb_cView, View_alloc);
     rb_define_singleton_method(rb_cView, "from_rect", View_s_from_rect, 1);

@@ -27,7 +27,7 @@ static void InputStream_free(void* ptr) {
 }
 
 static const rb_data_type_t InputStream_data_type = {
-    .wrap_struct_name = "SFML::InputStream",
+    .wrap_struct_name = "SF::System::InputStream",
     .function = {.dmark = InputStream_mark, .dfree = InputStream_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -241,13 +241,13 @@ static VALUE InputStream_get_io(VALUE self) {
     return ((InputStream*)Get_InputStream_Struct(self))->rb_io;
 }
 
-/* Document-class: SFML::InputStream
+/* Document-class: SF::System::InputStream
  * Adapts any Ruby object that responds to +#read+ into the stream interface
  * SFML's loaders expect, so resources can be loaded from something other
  * than a filesystem path (e.g. an in-memory StringIO, or a custom source).
  */
-void Init_InputStream(VALUE rb_mSFML) {
-    rb_cInputStream = rb_define_class_under(rb_mSFML, "InputStream", rb_cObject);
+void Init_InputStream(VALUE rb_mSystem) {
+    rb_cInputStream = rb_define_class_under(rb_mSystem, "InputStream", rb_cObject);
 
     rb_define_alloc_func(rb_cInputStream, InputStream_alloc);
     rb_define_method(rb_cInputStream, "initialize", InputStream_initialize, 1);
@@ -286,6 +286,6 @@ sfInputStream* input_stream_from_rb(VALUE rb_stream, VALUE* holder) {
         return Get_InputStream_Struct(wrapper);
     }
 
-    rb_raise(rb_eArgError, "expected an SFML::InputStream or an object responding to #read");
+    rb_raise(rb_eArgError, "expected an SF::System::InputStream or an object responding to #read");
     return NULL;
 }

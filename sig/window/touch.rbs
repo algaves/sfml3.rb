@@ -1,7 +1,7 @@
-module SFML
+module SF::Window
   module Touch
     def self.down?: (Integer finger) -> bool
-    def self.position: (Integer finger, ?WindowBase? window, ?relative_to: WindowBase?) -> Vector2
-    private def self.position_without_relative_to: (Integer finger, ?WindowBase? window) -> Vector2
+    def self.position: (Integer finger, ?WindowBase? window, ?relative_to: WindowBase?) -> SF::System::Vector2
+    private def self.position_without_relative_to: (Integer finger, ?WindowBase? window) -> SF::System::Vector2
   end
 end

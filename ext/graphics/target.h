@@ -14,7 +14,7 @@ typedef struct {
     void* handle;
 } TargetView;
 
-/* The legacy generic wrapper behind SFML::Target. It owns only the borrow, so
+/* The legacy generic wrapper behind SF::Graphics::Target. It owns only the borrow, so
    it keeps its source alive for as long as it references it. */
 typedef struct {
     TargetType type;
@@ -44,7 +44,7 @@ Target* Get_Target_Struct(VALUE self);
 
 VALUE Get_New_Target(VALUE rb_window);
 
-/* The SFML::RenderTarget module, included by RenderWindow and RenderTexture. */
+/* The SF::Graphics::RenderTarget module, included by RenderWindow and RenderTexture. */
 VALUE Get_Module_RenderTarget(void);
 
 /* Resolves any accepted draw target -- a legacy Target, a RenderWindow or a

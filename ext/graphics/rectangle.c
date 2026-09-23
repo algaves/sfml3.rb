@@ -33,7 +33,7 @@ static void RectangleShape_free(void* ptr) {
 }
 
 static const rb_data_type_t RectangleShape_data_type = {
-    .wrap_struct_name = "SFML::RectangleShape",
+    .wrap_struct_name = "SF::Graphics::RectangleShape",
     .function = {.dmark = RectangleShape_mark, .dfree = RectangleShape_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -340,7 +340,7 @@ static VALUE RectangleShape_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
     return Qnil;
 }
 
-/* Document-class: SFML::RectangleShape
+/* Document-class: SF::Graphics::RectangleShape
  * A rectangle shape, drawable, transformable and stylable like the other
  * SFML shapes. Includes Drawable.
  *
@@ -375,8 +375,8 @@ static VALUE RectangleShape_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
  *   The sub-rectangle of the texture displayed on the object.
  *   @return [Rect]
  */
-void Init_RectangleShape(VALUE rb_mSFML) {
-    rb_cRectangleShape = rb_define_class_under(rb_mSFML, "RectangleShape", Get_Klass_Shape());
+void Init_RectangleShape(VALUE rb_mGraphics) {
+    rb_cRectangleShape = rb_define_class_under(rb_mGraphics, "RectangleShape", Get_Klass_Shape());
 
     rb_define_alloc_func(rb_cRectangleShape, RectangleShape_alloc);
 

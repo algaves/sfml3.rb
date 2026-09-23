@@ -103,12 +103,12 @@ static VALUE Joystick_update(VALUE module) {
     return Qnil;
 }
 
-/* Document-module: SFML::Joystick
+/* Document-module: SF::Window::Joystick
  * Access to raw joystick/gamepad state, addressed by joystick number
  * (0 up to Joystick::COUNT - 1).
  */
-void Init_Joystick(VALUE rb_mSFML) {
-    VALUE rb_mJoystick = rb_define_module_under(rb_mSFML, "Joystick");
+void Init_Joystick(VALUE rb_mWindow) {
+    VALUE rb_mJoystick = rb_define_module_under(rb_mWindow, "Joystick");
 
     /* Maximum number of joysticks supported. */
     rb_define_const(rb_mJoystick, "COUNT", INT2NUM(sfJoystickCount));

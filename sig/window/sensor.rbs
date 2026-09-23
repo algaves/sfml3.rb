@@ -1,10 +1,10 @@
-module SFML
+module SF::Window
   module Sensor
     def self.available?: (Symbol | Integer type) -> bool
     def self.set_enabled: (Symbol | Integer type, bool value) -> bool
     def self.enable!: (Symbol | Integer type) -> bool
     def self.disable!: (Symbol | Integer type) -> bool
     def self.enabled=: (Symbol | Integer type, bool value) -> bool
-    def self.value: (Symbol | Integer type) -> Vector3
+    def self.value: (Symbol | Integer type) -> SF::System::Vector3
   end
 end

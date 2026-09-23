@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# SFML::Keyboard: real-time key state and the mapping between physical
+# SF::Window::Keyboard: real-time key state and the mapping between physical
 # scancodes and logical key codes. `key_pressed?` takes a key Symbol (or String
 # name, or Integer code); `scancode_pressed?` takes a raw scancode. The HUD
 # shows the last key event, `localize` (scancode -> key), `delocalize`
@@ -13,7 +13,11 @@
 
 require 'sfml'
 require_relative '../support'
-include SFML
+include SF::Window
+include SF::Graphics
+include SF::System
+include SF::Audio
+include SF::Network
 
 ROWS = [
   %i[num1 num2 num3 num4 num5 num6 num7 num8 num9 num0],

@@ -1,4 +1,4 @@
-module SFML
+module SF::Graphics
   class Transform
     def initialize: () -> void
                    | (Array[Float] array_of_9) -> void

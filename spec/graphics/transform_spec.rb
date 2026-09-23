@@ -2,74 +2,74 @@
 
 require_relative '../spec_helper'
 
-RSpec.describe SFML::Transform do
+RSpec.describe SF::Graphics::Transform do
   it 'exposes an identity' do
-    expect(SFML::Transform.identity.to_a).to eq([1, 0, 0, 0, 1, 0, 0, 0, 1])
-    expect(SFML::Transform::IDENTITY).to eq(SFML::Transform.identity)
+    expect(SF::Graphics::Transform.identity.to_a).to eq([1, 0, 0, 0, 1, 0, 0, 0, 1])
+    expect(SF::Graphics::Transform::IDENTITY).to eq(SF::Graphics::Transform.identity)
   end
 
   it 'freezes the shared IDENTITY constant' do
     # A shared constant that mutators could edit would silently corrupt every
     # later use of it.
-    expect(SFML::Transform::IDENTITY).to be_frozen
-    expect { SFML::Transform::IDENTITY.translate!([1, 1]) }.to raise_error(FrozenError)
-    expect(SFML::Transform::IDENTITY.to_a).to eq([1, 0, 0, 0, 1, 0, 0, 0, 1])
+    expect(SF::Graphics::Transform::IDENTITY).to be_frozen
+    expect { SF::Graphics::Transform::IDENTITY.translate!([1, 1]) }.to raise_error(FrozenError)
+    expect(SF::Graphics::Transform::IDENTITY.to_a).to eq([1, 0, 0, 0, 1, 0, 0, 0, 1])
   end
 
   it 'round-trips through from_a and new' do
-    t = SFML::Transform.identity.translate!([4, 9]).rotate!(30)
-    expect(SFML::Transform.from_a(t.to_a)).to eq(t)
-    expect(SFML::Transform.new(*t.to_a).to_a).to eq(t.to_a)
+    t = SF::Graphics::Transform.identity.translate!([4, 9]).rotate!(30)
+    expect(SF::Graphics::Transform.from_a(t.to_a)).to eq(t)
+    expect(SF::Graphics::Transform.new(*t.to_a).to_a).to eq(t.to_a)
   end
 
   it 'translates points' do
-    t = SFML::Transform.identity.translate!([10, 20])
+    t = SF::Graphics::Transform.identity.translate!([10, 20])
     expect(t.to_a).to be_matrix_in_delta([1, 0, 10, 0, 1, 20, 0, 0, 1])
     expect(t.transform_point([1, 2])).to be_vec_in_epsilon([11, 22])
   end
 
   it 'scales about a center point' do
     # Scaling about (1, 1) leaves that point where it is.
-    t = SFML::Transform.identity.scale!([2, 3], [1, 1])
+    t = SF::Graphics::Transform.identity.scale!([2, 3], [1, 1])
     expect(t.transform_point([1, 1])).to be_vec_in_epsilon([1, 1])
     expect(t.transform_point([2, 2])).to be_vec_in_epsilon([3, 4])
   end
 
   it 'rotates a point a quarter turn' do
-    point = SFML::Transform.identity.rotate!(90).transform_point([1, 0])
+    point = SF::Graphics::Transform.identity.rotate!(90).transform_point([1, 0])
     expect(point.x).to be_within(0.0001).of(0)
     expect(point.y).to be_within(0.0001).of(1)
   end
 
   it 'chains mutators returning self' do
-    t = SFML::Transform.identity
+    t = SF::Graphics::Transform.identity
     expect(t.translate!([1, 1])).to be(t)
     expect(t.rotate!(10)).to be(t)
     expect(t.scale!([2, 2])).to be(t)
   end
 
   it 'leaves the receiver unmutated on the non-bang forms' do
-    t = SFML::Transform.identity
+    t = SF::Graphics::Transform.identity
     moved = t.translate([5, 5])
-    expect(t).to eq(SFML::Transform.identity)
+    expect(t).to eq(SF::Graphics::Transform.identity)
     expect(moved).not_to eq(t)
   end
 
   it 'cancels itself against its inverse' do
-    t = SFML::Transform.identity.translate!([7, -3]).rotate!(25).scale!([2, 4])
-    expect((t * t.inverse).to_a).to be_matrix_in_delta(SFML::Transform.identity.to_a)
+    t = SF::Graphics::Transform.identity.translate!([7, -3]).rotate!(25).scale!([2, 4])
+    expect((t * t.inverse).to_a).to be_matrix_in_delta(SF::Graphics::Transform.identity.to_a)
   end
 
   it 'transforms a rect' do
-    rect = SFML::Transform.identity.translate!([10, 10]).transform_rect([0, 0, 4, 6])
+    rect = SF::Graphics::Transform.identity.translate!([10, 10]).transform_rect([0, 0, 4, 6])
     expect(rect.to_a).to be_matrix_in_delta([10, 10, 4, 6])
   end
 
   it 'exposes a 4x4 GL matrix distinct from to_a' do
     # Distinct from #to_a: sfTransform_getMatrix fills the 16-float OpenGL form.
-    matrix = SFML::Transform.identity.gl_matrix
+    matrix = SF::Graphics::Transform.identity.gl_matrix
     expect(matrix.length).to eq(16)
-    expect(SFML::Transform.identity.to_a.length).to eq(9)
+    expect(SF::Graphics::Transform.identity.to_a.length).to eq(9)
   end
 
   it 'keeps the module functions Array-in / Array-out' do
@@ -78,9 +78,9 @@ RSpec.describe SFML::Transform do
     identity = [1, 0, 0, 0, 1, 0, 0, 0, 1]
     moved = [1, 0, 5, 0, 1, 0, 0, 0, 1]
 
-    combined = SFML::Transform.combine(identity, moved)
+    combined = SF::Graphics::Transform.combine(identity, moved)
     expect(combined).to be_a(Array)
     expect(combined).to be_matrix_in_delta(moved)
-    expect(SFML::Transform.inverse(identity)).to be_matrix_in_delta(identity)
+    expect(SF::Graphics::Transform.inverse(identity)).to be_matrix_in_delta(identity)
   end
 end

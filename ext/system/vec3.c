@@ -17,7 +17,7 @@ static void Vector3_free(void* ptr) {
 }
 
 static const rb_data_type_t Vector3_data_type = {
-    .wrap_struct_name = "SFML::Vector3",
+    .wrap_struct_name = "SF::System::Vector3",
     .function = {.dmark = NULL, .dfree = Vector3_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -266,7 +266,7 @@ static VALUE Vector3_to_s(VALUE self) {
     return rb_str_new2(buffer);
 }
 
-/* Document-class: SFML::Vector3
+/* Document-class: SF::System::Vector3
  * A 3D vector of floats, used for positions, sizes and directions in 3D
  * space (e.g. Listener and SoundSource position/direction/velocity).
  *
@@ -287,8 +287,8 @@ static VALUE Vector3_to_s(VALUE self) {
  *
  *   @return [Float] the Z component
  */
-void Init_Vector3(VALUE rb_mSFML) {
-    rb_cVector3 = rb_define_class_under(rb_mSFML, "Vector3", rb_cObject);
+void Init_Vector3(VALUE rb_mSystem) {
+    rb_cVector3 = rb_define_class_under(rb_mSystem, "Vector3", rb_cObject);
 
     rb_include_module(rb_cVector3, rb_mEnumerable);
 

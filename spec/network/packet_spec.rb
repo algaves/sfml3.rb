@@ -2,9 +2,9 @@
 
 require_relative '../spec_helper'
 
-RSpec.describe SFML::Packet do
+RSpec.describe SF::Network::Packet do
   it 'round-trips every packet field type' do
-    packet = SFML::Packet.new
+    packet = SF::Network::Packet.new
     packet.write_bool(true)
     packet.write_int8(-8)
     packet.write_uint8(200)
@@ -35,7 +35,7 @@ RSpec.describe SFML::Packet do
   end
 
   it 'exposes raw data and supports append' do
-    packet = SFML::Packet.new
+    packet = SF::Network::Packet.new
     packet.append('abcd')
     packet.append("\x00\x01")
 

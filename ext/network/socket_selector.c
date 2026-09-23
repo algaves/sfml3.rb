@@ -24,7 +24,7 @@ static void SocketSelector_free(void* ptr) {
 }
 
 static const rb_data_type_t SocketSelector_data_type = {
-    .wrap_struct_name = "SFML::SocketSelector",
+    .wrap_struct_name = "SF::Network::SocketSelector",
     .function = {.dmark = NULL, .dfree = SocketSelector_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -85,7 +85,7 @@ static VALUE SocketSelector_add(VALUE self, VALUE rb_socket) {
     } else if (rb_obj_is_kind_of(rb_socket, Get_Klass_UdpSocket())) {
         sfSocketSelector_addUdpSocket(selector, Get_UdpSocket_Struct(rb_socket));
     } else {
-        rb_raise(rb_eTypeError, "expected an SFML::TcpListener, TcpSocket or UdpSocket");
+        rb_raise(rb_eTypeError, "expected an SF::Network::TcpListener, TcpSocket or UdpSocket");
     }
 
     return self;
@@ -109,7 +109,7 @@ static VALUE SocketSelector_remove(VALUE self, VALUE rb_socket) {
     } else if (rb_obj_is_kind_of(rb_socket, Get_Klass_UdpSocket())) {
         sfSocketSelector_removeUdpSocket(selector, Get_UdpSocket_Struct(rb_socket));
     } else {
-        rb_raise(rb_eTypeError, "expected an SFML::TcpListener, TcpSocket or UdpSocket");
+        rb_raise(rb_eTypeError, "expected an SF::Network::TcpListener, TcpSocket or UdpSocket");
     }
 
     return self;
@@ -186,13 +186,13 @@ static VALUE SocketSelector_udp_socket_ready(VALUE self, VALUE rb_socket) {
                                                      Get_UdpSocket_Struct(rb_socket)));
 }
 
-/* Document-class: SFML::SocketSelector
+/* Document-class: SF::Network::SocketSelector
  * Watches a set of TcpListener, TcpSocket and UdpSocket instances and blocks
  * until at least one of them is ready to read, so a single thread can
  * multiplex several sockets without polling.
  */
-void Init_SocketSelector(VALUE rb_mSFML) {
-    rb_cSocketSelector = rb_define_class_under(rb_mSFML, "SocketSelector", rb_cObject);
+void Init_SocketSelector(VALUE rb_mNetwork) {
+    rb_cSocketSelector = rb_define_class_under(rb_mNetwork, "SocketSelector", rb_cObject);
     rb_define_alloc_func(rb_cSocketSelector, SocketSelector_alloc);
 
     rb_define_method(rb_cSocketSelector, "initialize", SocketSelector_initialize, 0);

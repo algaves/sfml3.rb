@@ -1,4 +1,4 @@
-module SFML
+module SF::Window
   class Context
     def initialize: () -> void
     def self.extension_available?: (String name) -> bool

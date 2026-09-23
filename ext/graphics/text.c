@@ -37,7 +37,7 @@ static void Text_free(void* ptr) {
 }
 
 static const rb_data_type_t Text_data_type = {
-    .wrap_struct_name = "SFML::Text",
+    .wrap_struct_name = "SF::Graphics::Text",
     .function = {.dmark = Text_mark, .dfree = Text_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -426,7 +426,7 @@ static VALUE Text_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
     return Qnil;
 }
 
-/* Document-class: SFML::Text
+/* Document-class: SF::Graphics::Text
  * A drawable string of characters, rendered using a Font, positioned,
  * rotated, scaled and tinted like any other Transformable object.
  *
@@ -472,8 +472,8 @@ static VALUE Text_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
  *   The object's origin.
  *   @return [Vector2]
  */
-void Init_Text(VALUE rb_mSFML) {
-    rb_cText = rb_define_class_under(rb_mSFML, "Text", rb_cObject);
+void Init_Text(VALUE rb_mGraphics) {
+    rb_cText = rb_define_class_under(rb_mGraphics, "Text", rb_cObject);
 
     rb_define_alloc_func(rb_cText, Text_alloc);
 

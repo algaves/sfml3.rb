@@ -1,23 +1,23 @@
-module SFML
+module SF::Graphics
   class View
     def self.from_rect: (untyped rect) -> View
     def self.[]: (*untyped args) -> View
 
     def initialize: () -> void
-    def move: (Vector2 offset) -> self
+    def move: (SF::System::Vector2 offset) -> self
     def rotate: (Float angle) -> self
     def zoom: (Float factor) -> self
     def copy: () -> View
 
     def rotation=: (Float value) -> self
-    def size=: (Vector2 value) -> self
-    def center=: (Vector2 value) -> self
+    def size=: (SF::System::Vector2 value) -> self
+    def center=: (SF::System::Vector2 value) -> self
     def viewport=: (untyped value) -> self
     def scissor=: (untyped value) -> self
 
     def rotation: () -> Float
-    def size: () -> Vector2
-    def center: () -> Vector2
+    def size: () -> SF::System::Vector2
+    def center: () -> SF::System::Vector2
     def viewport: () -> untyped
     def scissor: () -> untyped
   end

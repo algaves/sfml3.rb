@@ -17,7 +17,7 @@ static void SoundSourceCone_free(void* ptr) {
 }
 
 static const rb_data_type_t SoundSourceCone_data_type = {
-    .wrap_struct_name = "SFML::SoundSourceCone",
+    .wrap_struct_name = "SF::Audio::SoundSourceCone",
     .function = {.dmark = NULL, .dfree = SoundSourceCone_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -162,7 +162,7 @@ static VALUE SoundSourceCone_eql(VALUE self, VALUE rb_other) {
                    a.outerGain == b.outerGain);
 }
 
-/* Document-class: SFML::SoundSourceCone
+/* Document-class: SF::Audio::SoundSourceCone
  * A directional attenuation cone for a SoundSource (SoundSource#cone) or the
  * Listener (Listener.cone): within +inner_angle+ degrees of the facing
  * direction the source is heard at full volume; beyond +outer_angle+
@@ -183,8 +183,8 @@ static VALUE SoundSourceCone_eql(VALUE self, VALUE rb_other) {
  *   Volume factor applied outside the outer cone.
  *   @return [Float] volume factor applied outside the outer cone
  */
-void Init_SoundSourceCone(VALUE rb_mSFML) {
-    rb_cSoundSourceCone = rb_define_class_under(rb_mSFML, "SoundSourceCone", rb_cObject);
+void Init_SoundSourceCone(VALUE rb_mAudio) {
+    rb_cSoundSourceCone = rb_define_class_under(rb_mAudio, "SoundSourceCone", rb_cObject);
 
     rb_define_alloc_func(rb_cSoundSourceCone, SoundSourceCone_alloc);
     rb_define_method(rb_cSoundSourceCone, "initialize", SoundSourceCone_initialize, 3);

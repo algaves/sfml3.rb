@@ -2,9 +2,9 @@
 
 require_relative '../spec_helper'
 
-RSpec.describe SFML::StencilMode do
+RSpec.describe SF::Graphics::StencilMode do
   it 'constructs a stencil mode' do
-    mode = SFML::StencilMode.new(:equal, :replace, 3, 0xFF, true)
+    mode = SF::Graphics::StencilMode.new(:equal, :replace, 3, 0xFF, true)
     expect(mode.comparison).to eq(:equal)
     expect(mode.update_operation).to eq(:replace)
     expect(mode.reference).to eq(3)

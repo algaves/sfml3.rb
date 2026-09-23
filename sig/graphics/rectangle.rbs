@@ -1,24 +1,24 @@
-module SFML
+module SF::Graphics
   class RectangleShape < Shape
-    def initialize: (?(Vector2 | Array[Float]) size) -> void
+    def initialize: (?(SF::System::Vector2 | Array[Float]) size) -> void
     def self.[]: (Float left, Float top, Float width, Float height) -> RectangleShape
 
     def copy: () -> RectangleShape
-    def move: (Vector2 | Array[Float] offset) -> self
+    def move: (SF::System::Vector2 | Array[Float] offset) -> self
     def rotate: (Float angle) -> self
-    def scale!: (Vector2 | Array[Float] factors) -> self
+    def scale!: (SF::System::Vector2 | Array[Float] factors) -> self
     def draw: (untyped target, RenderState state) -> nil
 
-    def size: () -> Vector2
-    def size=: (Vector2 | Array[Float] value) -> Vector2
-    def position: () -> Vector2
-    def position=: (Vector2 | Array[Float] value) -> Vector2
+    def size: () -> SF::System::Vector2
+    def size=: (SF::System::Vector2 | Array[Float] value) -> SF::System::Vector2
+    def position: () -> SF::System::Vector2
+    def position=: (SF::System::Vector2 | Array[Float] value) -> SF::System::Vector2
     def rotation: () -> Float
     def rotation=: (Float value) -> Float
-    def scale: () -> Vector2
-    def scale=: (Vector2 | Array[Float] value) -> Vector2
-    def origin: () -> Vector2
-    def origin=: (Vector2 | Array[Float] value) -> Vector2
+    def scale: () -> SF::System::Vector2
+    def scale=: (SF::System::Vector2 | Array[Float] value) -> SF::System::Vector2
+    def origin: () -> SF::System::Vector2
+    def origin=: (SF::System::Vector2 | Array[Float] value) -> SF::System::Vector2
     def fill_color: () -> Color
     def fill_color=: (Color value) -> Color
     def outline_color: () -> Color
@@ -30,8 +30,8 @@ module SFML
     def texture_rect: () -> Rect
     def texture_rect=: (Rect value) -> Rect
     def point_count: () -> Integer
-    def point: (Integer index) -> Vector2
-    def geometric_center: () -> Vector2
+    def point: (Integer index) -> SF::System::Vector2
+    def geometric_center: () -> SF::System::Vector2
     def local_bounds: () -> Rect
     def global_bounds: () -> Rect
     def transform: () -> Array[untyped]

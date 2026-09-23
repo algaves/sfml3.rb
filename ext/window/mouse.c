@@ -107,11 +107,11 @@ static VALUE Mouse_position_eq(VALUE module, VALUE rb_position) {
     return Mouse_set_position(1, &rb_position, module);
 }
 
-/* Document-module: SFML::Mouse
+/* Document-module: SF::Window::Mouse
  * Real-time mouse state and cursor positioning.
  */
-void Init_Mouse(VALUE rb_mSFML) {
-    VALUE rb_mMouse = rb_define_module_under(rb_mSFML, "Mouse");
+void Init_Mouse(VALUE rb_mWindow) {
+    VALUE rb_mMouse = rb_define_module_under(rb_mWindow, "Mouse");
 
     rb_define_module_function(rb_mMouse, "button_pressed?", Mouse_is_button_pressed, 1);
     rb_define_module_function(rb_mMouse, "pressed?", Mouse_is_button_pressed, 1);

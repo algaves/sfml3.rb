@@ -18,7 +18,7 @@ static void Clock_free(void* ptr) {
 }
 
 static const rb_data_type_t Clock_data_type = {
-    .wrap_struct_name = "SFML::Clock",
+    .wrap_struct_name = "SF::System::Clock",
     .function = {.dmark = NULL, .dfree = Clock_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -133,7 +133,7 @@ static VALUE Clock_copy(VALUE self) {
     return Clock_new_from(Get_Klass_Clock(), sfClock_copy(Get_Clock_Struct(self)));
 }
 
-/* Document-class: SFML::Clock
+/* Document-class: SF::System::Clock
  * A stopwatch for measuring elapsed time.
  *
  * @!method self.measure { ... }
@@ -143,8 +143,8 @@ static VALUE Clock_copy(VALUE self) {
  *   @yield the work to time
  *   @return [Time] the elapsed time
  */
-void Init_Clock(VALUE rb_mSFML) {
-    rb_cClock = rb_define_class_under(rb_mSFML, "Clock", rb_cObject);
+void Init_Clock(VALUE rb_mSystem) {
+    rb_cClock = rb_define_class_under(rb_mSystem, "Clock", rb_cObject);
 
     rb_define_alloc_func(rb_cClock, Clock_alloc);
 

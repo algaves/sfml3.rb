@@ -12,7 +12,11 @@
 
 require 'sfml'
 require_relative '../support'
-include SFML
+include SF::Window
+include SF::Graphics
+include SF::System
+include SF::Audio
+include SF::Network
 
 circle = CircleShape[44, [170, 220]]
 circle.origin = Vector2[44, 44]

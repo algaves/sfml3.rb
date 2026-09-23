@@ -18,7 +18,7 @@ static void Rect_free(void* ptr) {
 }
 
 static const rb_data_type_t Rect_data_type = {
-    .wrap_struct_name = "SFML::Rect",
+    .wrap_struct_name = "SF::Graphics::Rect",
     .function = {.dmark = NULL, .dfree = Rect_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -338,7 +338,7 @@ static VALUE Rect_to_s(VALUE self) {
     return rb_str_new2(buffer);
 }
 
-/* Document-class: SFML::Rect
+/* Document-class: SF::Graphics::Rect
  * An axis-aligned rectangle, stored as a position +(left, top)+ and a size
  * +(width, height)+. Used both for float rects (bounds, viewports) and int
  * rects (texture sub-regions) -- the underlying storage is always Float.
@@ -364,8 +364,8 @@ static VALUE Rect_to_s(VALUE self) {
  *   The object's size.
  *   @return [Vector2] the +(width, height)+ dimensions
  */
-void Init_Rect(VALUE rb_mSFML) {
-    rb_cRect = rb_define_class_under(rb_mSFML, "Rect", rb_cObject);
+void Init_Rect(VALUE rb_mGraphics) {
+    rb_cRect = rb_define_class_under(rb_mGraphics, "Rect", rb_cObject);
 
     rb_include_module(rb_cRect, rb_mEnumerable);
 

@@ -21,7 +21,7 @@ static void Packet_free(void* ptr) {
 }
 
 static const rb_data_type_t Packet_data_type = {
-    .wrap_struct_name = "SFML::Packet",
+    .wrap_struct_name = "SF::Network::Packet",
     .function = {.dmark = NULL, .dfree = Packet_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -179,7 +179,7 @@ PACKET_WRITER(uint64, Uint64, (uint64_t)NUM2ULL)
 PACKET_WRITER(float, Float, (float)NUM2DBL)
 PACKET_WRITER(double, Double, NUM2DBL)
 
-/* Document-method: SFML::Packet#read_string
+/* Document-method: SF::Network::Packet#read_string
  * call-seq: read_string -> String
  *
  * Reads a NUL-terminated string previously written with #write_string.
@@ -226,14 +226,14 @@ static VALUE Packet_write_string(VALUE self, VALUE rb_value) {
     return rb_value;
 }
 
-/* Document-class: SFML::Packet
+/* Document-class: SF::Network::Packet
  * A structured byte buffer for use with TcpSocket/UdpSocket, with typed
  * sequential read/write access. Reads and writes must happen in the same
  * order the data was written, since the packet keeps no type tags on the
  * wire.
  */
-void Init_Packet(VALUE rb_mSFML) {
-    rb_cPacket = rb_define_class_under(rb_mSFML, "Packet", rb_cObject);
+void Init_Packet(VALUE rb_mNetwork) {
+    rb_cPacket = rb_define_class_under(rb_mNetwork, "Packet", rb_cObject);
     rb_define_alloc_func(rb_cPacket, Packet_alloc);
 
     rb_define_method(rb_cPacket, "initialize", Packet_initialize, 0);

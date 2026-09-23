@@ -37,7 +37,7 @@ static void RenderTarget_free(void* ptr) {
 }
 
 static const rb_data_type_t RenderTarget_data_type = {
-    .wrap_struct_name = "SFML::Target",
+    .wrap_struct_name = "SF::Graphics::Target",
     .function = {.dmark = RenderTarget_mark, .dfree = RenderTarget_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -158,27 +158,27 @@ TargetView Get_RenderTarget_View(VALUE self) {
     rb_raise(rb_eArgError, "expected a RenderTarget (RenderWindow or RenderTexture)");
 }
 
-/* Document-module: SFML::RenderTarget
+/* Document-module: SF::Graphics::RenderTarget
  * Marker module included by both objects a Drawable#draw accepts:
- * SFML::RenderWindow and SFML::RenderTexture. It has no methods of its own; the
+ * SF::Graphics::RenderWindow and SF::Graphics::RenderTexture. It has no methods of its own; the
  * draw surface is generated per class from ext/graphics/render_target.inc, so
  * include this module to duck-type "something you can draw onto".
  */
-/* Document-class: SFML::Target
+/* Document-class: SF::Graphics::Target
  * A legacy generic handle onto whatever can be drawn to -- a Window or a
  * RenderTexture -- used by Drawable#draw so drawable objects don't need to
  * know which concrete kind of target they're being drawn onto.
  *
- * New code should pass a SFML::RenderWindow or SFML::RenderTexture (both
- * include SFML::RenderTarget) straight to a drawable's #draw.
+ * New code should pass a SF::Graphics::RenderWindow or SF::Graphics::RenderTexture (both
+ * include SF::Graphics::RenderTarget) straight to a drawable's #draw.
  *
  * @!attribute view
  *   The target's current view.
  *   @return [View]
  */
-void Init_Target(VALUE rb_mSFML) {
-    rb_cTarget = rb_define_class_under(rb_mSFML, "Target", rb_cObject);
-    rb_mRenderTarget = rb_define_module_under(rb_mSFML, "RenderTarget");
+void Init_Target(VALUE rb_mGraphics) {
+    rb_cTarget = rb_define_class_under(rb_mGraphics, "Target", rb_cObject);
+    rb_mRenderTarget = rb_define_module_under(rb_mGraphics, "RenderTarget");
 
     rb_define_alloc_func(rb_cTarget, RenderTarget_alloc);
 

@@ -21,7 +21,7 @@ static size_t Transform_size(const void* ptr) {
 }
 
 static const rb_data_type_t Transform_data_type = {
-    .wrap_struct_name = "SFML::Transform",
+    .wrap_struct_name = "SF::Graphics::Transform",
     .function = {.dmark = NULL, .dfree = Transform_free, .dsize = Transform_size},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -195,8 +195,8 @@ static VALUE Transform_eql(VALUE self, VALUE rb_other) {
 static VALUE Transform_to_s(VALUE self) {
     const float* m = Get_Transform_Struct(self)->matrix;
 
-    return rb_sprintf("#<SFML::Transform [%g, %g, %g] [%g, %g, %g] [%g, %g, %g]>", m[0], m[1], m[2],
-                      m[3], m[4], m[5], m[6], m[7], m[8]);
+    return rb_sprintf("#<SF::Graphics::Transform [%g, %g, %g] [%g, %g, %g] [%g, %g, %g]>", m[0],
+                      m[1], m[2], m[3], m[4], m[5], m[6], m[7], m[8]);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -434,7 +434,7 @@ static VALUE Transform_s_inverse(VALUE klass, VALUE rb_matrix) {
     return Transform_MatrixToArray(sfTransform_getInverse(&transform).matrix);
 }
 
-/* Document-class: SFML::Transform
+/* Document-class: SF::Graphics::Transform
  * A 3x3 matrix describing a 2D transformation (translation, rotation,
  * scaling, or any combination). Used to build up and query the
  * transformations applied by Sprite, Text and Transformable.
@@ -443,8 +443,8 @@ static VALUE Transform_s_inverse(VALUE klass, VALUE rb_matrix) {
  *   The object's 3x3 transform matrix.
  *   @return [Array<Float>] the 9 matrix elements, row-major (alias for #to_a)
  */
-void Init_Transform(VALUE rb_mSFML) {
-    rb_cTransform = rb_define_class_under(rb_mSFML, "Transform", rb_cObject);
+void Init_Transform(VALUE rb_mGraphics) {
+    rb_cTransform = rb_define_class_under(rb_mGraphics, "Transform", rb_cObject);
 
     rb_define_alloc_func(rb_cTransform, Transform_alloc);
     rb_define_method(rb_cTransform, "initialize", Transform_init, -1);

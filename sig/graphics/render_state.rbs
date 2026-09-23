@@ -1,4 +1,4 @@
-module SFML
+module SF::Graphics
   class RenderState
     def initialize: () -> void
                  | (Array[Array[Float]] | Array[Float] matrix) -> void

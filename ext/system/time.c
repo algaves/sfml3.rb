@@ -17,7 +17,7 @@ static void Time_free(void* ptr) {
 }
 
 static const rb_data_type_t Time_data_type = {
-    .wrap_struct_name = "SFML::Time",
+    .wrap_struct_name = "SF::System::Time",
     .function = {.dmark = NULL, .dfree = Time_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -292,15 +292,15 @@ static VALUE Time_to_s(VALUE self) {
     return rb_str_new2(buffer);
 }
 
-/* Document-class: SFML::Time
+/* Document-class: SF::System::Time
  * A time duration, with microsecond precision internally. Used throughout
  * the library wherever a duration or timestamp is needed (Clock#elapsed_time,
  * SoundSource#playing_offset, sleep, animation timers, ...).
  *
  * Includes +Comparable+.
  */
-void Init_Time(VALUE rb_mSFML) {
-    rb_cSFTime = rb_define_class_under(rb_mSFML, "Time", rb_cObject);
+void Init_Time(VALUE rb_mSystem) {
+    rb_cSFTime = rb_define_class_under(rb_mSystem, "Time", rb_cObject);
 
     rb_include_module(rb_cSFTime, rb_mComparable);
 

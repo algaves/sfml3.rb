@@ -26,7 +26,7 @@ static void TcpSocket_free(void* ptr) {
 }
 
 static const rb_data_type_t TcpSocket_data_type = {
-    .wrap_struct_name = "SFML::TcpSocket",
+    .wrap_struct_name = "SF::Network::TcpSocket",
     .function = {.dmark = NULL, .dfree = TcpSocket_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -242,11 +242,11 @@ static VALUE TcpSocket_receive(int argc, VALUE* argv, VALUE self) {
  * Sends +packet+ over the connection.
  *
  * @return [Symbol] a SocketStatus name, +:done+ on success
- * @raise [TypeError] if +packet+ is not an SFML::Packet
+ * @raise [TypeError] if +packet+ is not an SF::Network::Packet
  */
 static VALUE TcpSocket_send_packet(VALUE self, VALUE rb_packet) {
     if (!rb_obj_is_kind_of(rb_packet, Get_Klass_Packet())) {
-        rb_raise(rb_eTypeError, "expected an SFML::Packet");
+        rb_raise(rb_eTypeError, "expected an SF::Network::Packet");
     }
 
     return ID2SYM(rb_intern(socket_status_name(
@@ -260,24 +260,24 @@ static VALUE TcpSocket_send_packet(VALUE self, VALUE rb_packet) {
  * received.
  *
  * @return [Symbol] a SocketStatus name, +:done+ on success
- * @raise [TypeError] if +packet+ is not an SFML::Packet
+ * @raise [TypeError] if +packet+ is not an SF::Network::Packet
  */
 static VALUE TcpSocket_receive_packet(VALUE self, VALUE rb_packet) {
     if (!rb_obj_is_kind_of(rb_packet, Get_Klass_Packet())) {
-        rb_raise(rb_eTypeError, "expected an SFML::Packet");
+        rb_raise(rb_eTypeError, "expected an SF::Network::Packet");
     }
 
     return ID2SYM(rb_intern(socket_status_name(
         sfTcpSocket_receivePacket(Get_TcpSocket_Struct(self), Get_Packet_Struct(rb_packet)))));
 }
 
-/* Document-class: SFML::TcpSocket
+/* Document-class: SF::Network::TcpSocket
  * A connection-oriented, reliable, byte-stream socket for TCP communication.
  * Connect with #connect (or receive one already connected from
  * TcpListener#accept), then send/receive raw bytes or Packet instances.
  */
-void Init_TcpSocket(VALUE rb_mSFML) {
-    rb_cTcpSocket = rb_define_class_under(rb_mSFML, "TcpSocket", rb_cObject);
+void Init_TcpSocket(VALUE rb_mNetwork) {
+    rb_cTcpSocket = rb_define_class_under(rb_mNetwork, "TcpSocket", rb_cObject);
     rb_define_alloc_func(rb_cTcpSocket, TcpSocket_alloc);
 
     rb_define_method(rb_cTcpSocket, "initialize", TcpSocket_initialize, 0);

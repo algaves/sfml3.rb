@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# SFML::Vulkan: SFML's half of a Vulkan integration. `Vulkan.available?` says
+# SF::Window::Vulkan: SFML's half of a Vulkan integration. `Vulkan.available?` says
 # whether a loader is present, `graphics_required_instance_extensions` lists
 # the instance extensions a Vulkan-capable window needs, and `Vulkan.function`
 # resolves entry points.
@@ -19,7 +19,11 @@
 
 require 'sfml'
 require_relative '../support'
-include SFML
+include SF::Window
+include SF::Graphics
+include SF::System
+include SF::Audio
+include SF::Network
 
 HAVE_FIDDLE = begin
   require 'fiddle/import'
@@ -97,16 +101,16 @@ if HAVE_FIDDLE
     end
 
     def create_function
-      address = SFML::Vulkan.function('vkCreateInstance')
-      raise 'SFML::Vulkan.function(vkCreateInstance) returned 0' if address.zero?
+      address = SF::Window::Vulkan.function('vkCreateInstance')
+      raise 'SF::Window::Vulkan.function(vkCreateInstance) returned 0' if address.zero?
 
       Fiddle::Function.new(address, [Fiddle::TYPE_VOIDP, Fiddle::TYPE_VOIDP, Fiddle::TYPE_VOIDP],
                            Fiddle::TYPE_INT)
     end
 
     def destroy_function
-      address = SFML::Vulkan.function('vkDestroyInstance')
-      raise 'SFML::Vulkan.function(vkDestroyInstance) returned 0' if address.zero?
+      address = SF::Window::Vulkan.function('vkDestroyInstance')
+      raise 'SF::Window::Vulkan.function(vkDestroyInstance) returned 0' if address.zero?
 
       Fiddle::Function.new(address, [Fiddle::TYPE_VOIDP, Fiddle::TYPE_VOIDP], Fiddle::TYPE_VOID)
     end
@@ -158,7 +162,7 @@ loop do
 
   window.clear!([18, 20, 30, 255])
   window.draw(ExampleSupport.text(
-                "SFML::Vulkan probe complete -- see the console for details.\n" \
+                "SF::Window::Vulkan probe complete -- see the console for details.\n" \
                 "#{extensions.size} required instance extension(s). Escape quits.",
                 size: 16
               ))

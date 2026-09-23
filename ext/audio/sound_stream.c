@@ -66,7 +66,7 @@ static void SoundStream_free(void* ptr) {
    Deferred finalization runs the same free with the GVL held and no GC in
    progress. */
 static const rb_data_type_t SoundStream_data_type = {
-    .wrap_struct_name = "SFML::SoundStream",
+    .wrap_struct_name = "SF::Audio::SoundStream",
     .function = {.dmark = SoundStream_mark, .dfree = SoundStream_free, .dsize = NULL}};
 
 /* Expands the stream's sample buffer if needed, then copies either a packed
@@ -320,7 +320,7 @@ static VALUE SoundStream_channel_map(VALUE self) {
 #undef SS_FN
 #undef SS_METHOD
 
-/* Document-class: SFML::SoundStream
+/* Document-class: SF::Audio::SoundStream
  * Base class for a custom audio source that generates or decodes its own
  * samples on demand. Derives from SoundSource; Music derives from it.
  * Subclasses must implement +#on_get_data+, returning an
@@ -455,8 +455,8 @@ static VALUE SoundStream_channel_map(VALUE self) {
  *   Installs a Proc that post-processes this source's audio in real time.
  *   @return [Proc] +proc+
  */
-void Init_SoundStream(VALUE rb_mSFML) {
-    rb_cSoundStream = rb_define_class_under(rb_mSFML, "SoundStream", Get_Klass_SoundSource());
+void Init_SoundStream(VALUE rb_mAudio) {
+    rb_cSoundStream = rb_define_class_under(rb_mAudio, "SoundStream", Get_Klass_SoundSource());
 
     rb_define_alloc_func(rb_cSoundStream, SoundStream_alloc);
     rb_define_method(rb_cSoundStream, "initialize", SoundStream_initialize, -1);

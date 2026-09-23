@@ -30,11 +30,11 @@ module ExampleSupport
 
   # The bundled Liberation Sans (SIL OFL 1.1, see assets/LICENSE-LiberationSans.txt).
   def font
-    @font ||= SFML::Font.from_file(asset('LiberationSans-Regular.ttf'))
+    @font ||= SF::Graphics::Font.from_file(asset('LiberationSans-Regular.ttf'))
   end
 
   def text(string, size: 18, position: [12, 8], color: [235, 235, 245, 255])
-    label = SFML::Text.new(font, string, size)
+    label = SF::Graphics::Text.new(font, string, size)
     label.fill_color = color
     label.position = position
     label
@@ -42,15 +42,15 @@ module ExampleSupport
 
   # A Sound for examples/assets/<name>.wav, ready to `play`.
   def sound(name, volume: 60)
-    buffer = SFML::SoundBuffer.from_file(asset("#{name}.wav"))
-    SFML::Sound.new(buffer).tap { |sound| sound.volume = volume }
+    buffer = SF::Audio::SoundBuffer.from_file(asset("#{name}.wav"))
+    SF::Audio::Sound.new(buffer).tap { |sound| sound.volume = volume }
   end
 
   # A VertexArray of one or more disjoint two-point segments, drawn with
   # window.draw. Handy for crosshairs, grids and simple debug overlays.
   def line(points, color)
-    array = SFML::VertexArray.new
-    points.each { |pair| array.append(SFML::Vertex.new(pair, color)) }
+    array = SF::Graphics::VertexArray.new
+    points.each { |pair| array.append(SF::Graphics::Vertex.new(pair, color)) }
     array.primitive = :lines
     array
   end
@@ -78,7 +78,7 @@ module ExampleSupport
 
   # A cached Texture for a file under examples/assets/.
   def texture(name)
-    textures[name] ||= SFML::Texture.from_file(asset(name))
+    textures[name] ||= SF::Graphics::Texture.from_file(asset(name))
   end
 
   def sheet
@@ -96,18 +96,18 @@ module ExampleSupport
         pixels << color.pack('C4')
       end
     end
-    SFML::Image.from_pixels([width, height], pixels)
+    SF::Graphics::Image.from_pixels([width, height], pixels)
   end
 
   # A Texture generated at runtime instead of loaded from disk.
   def procedural_texture(width, height, &)
-    SFML::Texture.from_image(image(width, height, &))
+    SF::Graphics::Texture.from_image(image(width, height, &))
   end
 
   # A Sprite showing one cell of the vendored sheet, scaled by an integer.
   def sprite(name, scale: 1)
     column, row = SPRITES.fetch(name)
-    result = SFML::Sprite.new(sheet)
+    result = SF::Graphics::Sprite.new(sheet)
     result.texture_rect = [column * SHEET_CELL, row * SHEET_CELL, SHEET_CELL, SHEET_CELL]
     result.scale = [scale, scale] if scale != 1
     result

@@ -1,4 +1,4 @@
-module SFML
+module SF::Window
   module Keyboard
     def self.pressed?: (Symbol | String | Integer key) -> bool
     def self.key_pressed?: (Symbol | String | Integer key) -> bool

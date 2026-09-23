@@ -2,13 +2,13 @@
 
 require_relative '../spec_helper'
 
-RSpec.describe SFML::Sleep do
+RSpec.describe SF::System::Sleep do
   it 'accepts a Time or a number' do
-    expect(SFML.sleep(0)).to be_within(0.001).of(0.0)
-    expect(SFML.sleep(SFML::Time.zero)).to be_a(SFML::Time)
+    expect(SF.sleep(0)).to be_within(0.001).of(0.0)
+    expect(SF.sleep(SF::System::Time.zero)).to be_a(SF::System::Time)
   end
 
   it 'delegates the Sleep module to the top level' do
-    expect(SFML::Sleep.sleep!(0)).to be_within(0.001).of(0.0)
+    expect(SF::System::Sleep.sleep!(0)).to be_within(0.001).of(0.0)
   end
 end

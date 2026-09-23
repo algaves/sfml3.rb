@@ -32,7 +32,7 @@ SFML_EXAMPLE_FRAMES=120 xvfb-run -a bundle exec ruby -Ilib examples/rubyesque/ev
 | `events.rb` | The `event.*?` predicates and `event.code`, including the focus/mouse/text/touch/joystick kinds |
 | `audio.rb` | `play!`/`pause!`/`stop!` with `playing?`/`paused?`/`stopped?` on `Sound` and `Music`, and the scoped `SoundBufferRecorder.record!` |
 | `input.rb` | `Keyboard.key_pressed?`, `Joystick.axis?`, `Sensor.enable!`/`disable!`/`value`, `Touch.down?`/`Touch.position(relative_to:)` |
-| `system.rb` | `Clock.measure`, `Clock#restart!`/`running?`, `SFML.sleep!`/`SFML::Sleep.sleep!`, the `Clipboard.content` pair with `has_text?`/`clear!` |
+| `system.rb` | `Clock.measure`, `Clock#restart!`/`running?`, `SF.sleep!`/`SF::System::Sleep.sleep!`, the `Clipboard.content` pair with `has_text?`/`clear!` |
 | `styles.rb` | The positional constructors (`VideoMode[...]`, `Style::DEFAULT`, `Vector2[...]`, `Color[...]`, the shape forms) and the `open!` loop |
 | `deprecations.rb` | The pre-Rubyesque names, still working and printing their deprecation warning |
 
@@ -54,7 +54,7 @@ warns, so there is nothing to migrate in a hurry.
 | `Keyboard.pressed?`            | `Keyboard.key_pressed?`                |
 | `Joystick.has_axis?`           | `Joystick.axis?`                       |
 | `Clipboard.string` / `string=` | `Clipboard.content` / `content=`       |
-| `SFML.sleep`                   | `SFML.sleep!` (or `SFML::Sleep.sleep!`) |
+| `SF.sleep`                   | `SF.sleep!` (or `SF::System::Sleep.sleep!`) |
 
 New in the Rubyesque layer, with no pre-Rubyesque equivalent: `WindowBase.open` /
 `Window.open`, `window.render!`, `SoundBufferRecorder.record!`, `Clock.measure`,
@@ -63,4 +63,4 @@ New in the Rubyesque layer, with no pre-Rubyesque equivalent: `WindowBase.open` 
 
 It also adds `window.open!`, the `poll_event!` / `wait_event!` block forms, the positional
 `Class[...]` constructors (`VideoMode[...]`, `Vector2[...]`, `CircleShape[...]`, ...) and the
-`SFML::Style` / `SFML::State` flag namespaces -- see [`styles.rb`](styles.rb).
+`SF::Window::Style` / `SF::Window::State` flag namespaces -- see [`styles.rb`](styles.rb).

@@ -1,4 +1,4 @@
-module SFML
+module SF::System
   class Buffer
     def initialize: () -> void
 

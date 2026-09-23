@@ -35,7 +35,7 @@ static void Shader_free(void* ptr) {
 }
 
 static const rb_data_type_t Shader_data_type = {
-    .wrap_struct_name = "SFML::Shader",
+    .wrap_struct_name = "SF::Graphics::Shader",
     .function = {.dmark = Shader_mark, .dfree = Shader_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -612,7 +612,7 @@ SHADER_ARRAY_UNIFORM(mat4, sfGlslMat4, glsl_mat4_from_rb, sfShader_setMat4Unifor
 
 #undef SHADER_ARRAY_UNIFORM
 
-/* Document-method: SFML::Shader#set_texture
+/* Document-method: SF::Graphics::Shader#set_texture
  * call-seq:
  *   set_texture(name, texture) -> Texture
  *
@@ -733,7 +733,7 @@ static VALUE Shader_alloc(VALUE klass) {
     rb_raise(rb_eNotImpError, "use Shader.from_file, Shader.from_memory or Shader.from_stream");
 }
 
-/* Document-class: SFML::Shader
+/* Document-class: SF::Graphics::Shader
  * A GLSL vertex/geometry/fragment shader program, uploaded to the GPU and
  * carried on RenderState#shader.
  *
@@ -760,8 +760,8 @@ static VALUE Shader_alloc(VALUE klass) {
  *   values is an Array of 16-element Arrays.
  *   @return [self]
  */
-void Init_Shader(VALUE rb_mSFML) {
-    rb_cShader = rb_define_class_under(rb_mSFML, "Shader", rb_cObject);
+void Init_Shader(VALUE rb_mGraphics) {
+    rb_cShader = rb_define_class_under(rb_mGraphics, "Shader", rb_cObject);
     rb_define_alloc_func(rb_cShader, Shader_alloc);
 
     rb_define_singleton_method(rb_cShader, "from_file", Shader_from_file, -1);

@@ -4,7 +4,7 @@ require_relative '../spec_helper'
 
 # Text needs a real font file and CI images do not all ship one, so every
 # font-dependent example skips rather than fails when none is found.
-RSpec.describe SFML::Text do
+RSpec.describe SF::Graphics::Text do
   def system_font_path
     candidates = [
       '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
@@ -22,7 +22,7 @@ RSpec.describe SFML::Text do
     path = system_font_path
     skip 'no system font available' unless path
 
-    text = SFML::Text.new SFML::Font.from_file(path)
+    text = SF::Graphics::Text.new SF::Graphics::Font.from_file(path)
 
     # Goes through sfText_setUnicodeString: the plain char* entry point decodes
     # the bytes with the C locale and turns each non-ASCII byte into U+FFFFFFFF.

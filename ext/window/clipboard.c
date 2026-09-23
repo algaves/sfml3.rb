@@ -107,7 +107,7 @@ static VALUE Clipboard_set_unicode_string(VALUE module, VALUE rb_text) {
     return rb_text;
 }
 
-/* Document-module: SFML::Clipboard
+/* Document-module: SF::Window::Clipboard
  * Access to the system clipboard, as plain text or Unicode text.
  *
  * @!method has_text?
@@ -117,8 +117,8 @@ static VALUE Clipboard_set_unicode_string(VALUE module, VALUE rb_text) {
  *   Empties the clipboard.
  *   @return [String] the empty string
  */
-void Init_Clipboard(VALUE rb_mSFML) {
-    VALUE rb_mClipboard = rb_define_module_under(rb_mSFML, "Clipboard");
+void Init_Clipboard(VALUE rb_mWindow) {
+    VALUE rb_mClipboard = rb_define_module_under(rb_mWindow, "Clipboard");
 
     rb_define_module_function(rb_mClipboard, "string", Clipboard_get_string, 0);
     rb_define_module_function(rb_mClipboard, "string=", Clipboard_set_string, 1);

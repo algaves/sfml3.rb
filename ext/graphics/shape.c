@@ -36,7 +36,7 @@ static void CustomShape_free(void* ptr) {
 }
 
 static const rb_data_type_t CustomShape_data_type = {
-    .wrap_struct_name = "SFML::Shape",
+    .wrap_struct_name = "SF::Graphics::Shape",
     .function = {.dmark = CustomShape_mark, .dfree = CustomShape_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -320,7 +320,7 @@ static VALUE CustomShape_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
     return Qnil;
 }
 
-/* Document-class: SFML::Shape
+/* Document-class: SF::Graphics::Shape
  * A base class for user-defined shapes. Subclass it and implement
  * #point_count and #point(index) in Ruby to describe the shape's geometry,
  * then call #update! after construction and whenever the points change.
@@ -356,8 +356,8 @@ static VALUE CustomShape_draw(VALUE self, VALUE rb_target, VALUE rb_state) {
  *   The sub-rectangle of the texture displayed on the object.
  *   @return [Rect]
  */
-void Init_Shape(VALUE rb_mSFML) {
-    rb_cCustomShape = rb_define_class_under(rb_mSFML, "Shape", rb_cObject);
+void Init_Shape(VALUE rb_mGraphics) {
+    rb_cCustomShape = rb_define_class_under(rb_mGraphics, "Shape", rb_cObject);
 
     rb_define_alloc_func(rb_cCustomShape, CustomShape_alloc);
 

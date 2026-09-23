@@ -3,9 +3,9 @@
 require_relative '../spec_helper'
 require 'timeout'
 
-RSpec.describe SFML::UdpSocket do
+RSpec.describe SF::Network::UdpSocket do
   it 'talks UDP over loopback' do
-    socket = SFML::UdpSocket.new
+    socket = SF::Network::UdpSocket.new
     expect(socket.bind(0)).to eq(:done)
 
     port = socket.local_port

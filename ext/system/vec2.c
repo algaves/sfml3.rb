@@ -18,7 +18,7 @@ static void Vector2_free(void* ptr) {
 }
 
 static const rb_data_type_t Vector2_data_type = {
-    .wrap_struct_name = "SFML::Vector2",
+    .wrap_struct_name = "SF::System::Vector2",
     .function = {.dmark = NULL, .dfree = Vector2_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -249,7 +249,7 @@ static VALUE Vector2_to_s(VALUE self) {
     return rb_str_new2(buffer);
 }
 
-/* Document-class: SFML::Vector2
+/* Document-class: SF::System::Vector2
  * A 2D vector of floats, used throughout the library for positions, sizes,
  * scale factors and directions.
  *
@@ -266,8 +266,8 @@ static VALUE Vector2_to_s(VALUE self) {
  *
  *   @return [Float] the Y component
  */
-void Init_Vector2(VALUE rb_mSFML) {
-    rb_cVector2 = rb_define_class_under(rb_mSFML, "Vector2", rb_cObject);
+void Init_Vector2(VALUE rb_mSystem) {
+    rb_cVector2 = rb_define_class_under(rb_mSystem, "Vector2", rb_cObject);
 
     rb_include_module(rb_cVector2, rb_mEnumerable);
 

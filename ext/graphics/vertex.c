@@ -19,7 +19,7 @@ static void Vertex_free(void* ptr) {
 }
 
 static const rb_data_type_t Vertex_data_type = {
-    .wrap_struct_name = "SFML::Vertex",
+    .wrap_struct_name = "SF::Graphics::Vertex",
     .function = {.dmark = NULL, .dfree = Vertex_free, .dsize = NULL},
     .flags = RUBY_TYPED_FREE_IMMEDIATELY};
 
@@ -178,7 +178,7 @@ static VALUE Vertex_eql(VALUE self, VALUE rb_other) {
                    a.texCoords.y == b.texCoords.y);
 }
 
-/* Document-class: SFML::Vertex
+/* Document-class: SF::Graphics::Vertex
  * A single point used to build up VertexArray and VertexBuffer primitives:
  * a position, a color, and texture coordinates.
  *
@@ -192,8 +192,8 @@ static VALUE Vertex_eql(VALUE self, VALUE rb_other) {
  *   The vertex's texture coordinates.
  *   @return [Vector2]
  */
-void Init_Vertex(VALUE rb_mSFML) {
-    rb_cVertex = rb_define_class_under(rb_mSFML, "Vertex", rb_cObject);
+void Init_Vertex(VALUE rb_mGraphics) {
+    rb_cVertex = rb_define_class_under(rb_mGraphics, "Vertex", rb_cObject);
 
     rb_define_alloc_func(rb_cVertex, Vertex_alloc);
     rb_define_method(rb_cVertex, "initialize", Vertex_initialize, -1);
