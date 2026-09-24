@@ -1,0 +1,18 @@
+$color-scheme: light;
+$body-background-color: #f5f0e1;   // beige-light (main)
+$body-heading-color: #40392b;
+$body-text-color: #4a4436;
+$link-color: #3d7a1f;              // darker green for contrast on beige
+$nav-child-link-color: #eaf7e0;    // light text on green sidebar
+$sidebar-color: #4c9a2a;           // green navbar + sidebar
+$base-button-color: #e4efd8;
+$btn-primary-color: #4c9a2a;       // green buttons
+$feedback-color: #3f8422;          // active nav highlight
+$code-background-color: #fbf7ec;
+$code-linenumber-color: #6b6353;
+$table-background-color: #fbf7ec;
+$search-background-color: #fbf7ec;
+$search-result-preview-color: #4a4436;
+$border-color: #d9ceb6;
+
+@import "./vendor/accessible-pygments/github-light";

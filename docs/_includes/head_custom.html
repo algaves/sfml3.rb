@@ -1,0 +1,21 @@
+<script>
+(function () {
+  function initial() {
+    var s;
+    try { s = localStorage.getItem('jtd-scheme'); } catch (e) {}
+    if (s === 'light' || s === 'dark') return s;
+    return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+  }
+  function apply(t) {
+    if (window.jtd && jtd.setTheme) jtd.setTheme(t);
+    document.documentElement.setAttribute('data-theme', t);
+    try { localStorage.setItem('jtd-scheme', t); } catch (e) {}
+  }
+  window.SiteTheme = {
+    get: initial,
+    apply: apply,
+    toggle: function () { apply(initial() === 'dark' ? 'light' : 'dark'); }
+  };
+  apply(initial());
+})();
+</script>

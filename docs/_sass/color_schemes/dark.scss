@@ -1,0 +1,18 @@
+$color-scheme: dark;
+$body-background-color: #23211a;   // warm dark (dark beige)
+$body-heading-color: #f0ead8;
+$body-text-color: #d8d3c3;
+$link-color: #9dd46f;              // light green readable on dark
+$nav-child-link-color: #d5e8c9;
+$sidebar-color: #4c9a2a;           // keep SFML green in both themes
+$base-button-color: #2c3026;
+$btn-primary-color: #4c9a2a;
+$feedback-color: #3f8422;
+$code-background-color: #2a2c24;
+$code-linenumber-color: #9c9686;
+$table-background-color: #262820;
+$search-background-color: #262820;
+$search-result-preview-color: #d8d3c3;
+$border-color: #3b3a30;
+
+@import "./vendor/accessible-pygments/github-dark";
