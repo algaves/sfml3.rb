@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - 'docs/**'
+      - 'examples/**'
+      - 'script/generate_example_sprites.rb'
       - '.github/workflows/docs.yaml'
   workflow_dispatch:
 
