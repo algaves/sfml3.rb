@@ -1,20 +1,40 @@
 # frozen_string_literal: true
 
-# Regenerates examples/assets/sprites.png, the only image the examples bundle.
-# It draws each cell with SF::Graphics::Image so the art is reproducible from the
-# binding itself (no ImageMagick dependency):
+# Regenerates the sprites.png sheets bundled with the examples. It draws each
+# cell with SF::Graphics::Image so the art is reproducible from the binding
+# itself (no ImageMagick dependency):
 #
 #   bundle exec ruby -Ilib script/generate_example_sprites.rb
 #
-# The cell layout is mirrored in ExampleSupport::SPRITES (examples/support.rb);
-# keep the two in sync.
+# The sheet is written into every example folder whose script loads sprites
+# from its own assets/. The cell coordinates are mirrored in each script's
+# local SPRITES map (see below); keep the two in sync.
 
-require_relative '../examples/support'
+require 'sfml'
 
-CELL = ExampleSupport::SHEET_CELL
-COLUMNS = ExampleSupport::SHEET_COLUMNS
+CELL = 16
+COLUMNS = 8
 ROWS = 8
 SIZE = CELL * COLUMNS
+
+TARGET_DIRS = %w[
+  examples/games/doodle_jump/assets
+  examples/games/flappy_bird/assets
+  examples/games/racing_car/assets
+  examples/games/tetris/assets
+  examples/games/xonix/assets
+  examples/subsystems/graphics_assets/assets
+].freeze
+
+# Cell coordinates, mirrored per-script in the individual SPRITES maps.
+SPRITES = {
+  bird_up: [0, 0], bird_mid: [1, 0], bird_down: [2, 0],
+  pipe: [3, 0], platform: [4, 0], gem: [5, 0], car: [6, 0], doodler: [7, 0],
+  tetro_i: [0, 1], tetro_o: [1, 1], tetro_t: [2, 1], tetro_s: [3, 1],
+  tetro_z: [4, 1], tetro_j: [5, 1], tetro_l: [6, 1], spring: [7, 1],
+  coin: [0, 2], brick_red: [1, 2], brick_blue: [2, 2], grass: [3, 2],
+  enemy: [4, 2], star: [5, 2], block: [6, 2], arrow: [7, 2]
+}.freeze
 
 # A 16x16 drawing surface offset to one cell of the sheet.
 class Cell
@@ -158,22 +178,24 @@ def draw_tetromino(name, cell)
   cell.rect(2, 4, 2, 8, tint.map { |v| (v * 0.8).round })
 end
 
-image = SF::Graphics::Image.from_color([SIZE, SIZE], SF::Graphics::Color.new(0, 0, 0, 0))
+TARGET_DIRS.each do |dir|
+  image = SF::Graphics::Image.from_color([SIZE, SIZE], SF::Graphics::Color.new(0, 0, 0, 0))
 
-(0...COLUMNS).each do |column|
-  (0...ROWS).each do |row|
-    cell = Cell.new(image, column * CELL, row * CELL)
-    name = ExampleSupport::SPRITES.key([column, row])
-    next unless name
+  (0...COLUMNS).each do |column|
+    (0...ROWS).each do |row|
+      cell = Cell.new(image, column * CELL, row * CELL)
+      name = SPRITES.key([column, row])
+      next unless name
 
-    if name.start_with?('tetro_')
-      draw_tetromino(name, cell)
-    else
-      draw(name, cell)
+      if name.start_with?('tetro_')
+        draw_tetromino(name, cell)
+      else
+        draw(name, cell)
+      end
     end
   end
-end
 
-path = ExampleSupport.asset(ExampleSupport::SHEET_NAME)
-image.save_to_file(path)
-puts "wrote #{path} (#{image.size.x.to_i}x#{image.size.y.to_i})"
+  path = File.join(dir, 'sprites.png')
+  image.save_to_file(path)
+  puts "wrote #{path} (#{image.size.x.to_i}x#{image.size.y.to_i})"
+end
